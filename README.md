@@ -29,6 +29,29 @@ During these months (from June 2021) I am committed to understanding how this ap
 Gekko-M4 [Buy/Sell]
 
 help to improve the universalbit blockchain project 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
 
 
@@ -51,10 +74,18 @@ nvm use 12
 Gekko-M4
 clone project and start learn
 
+```
 git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 
+```
+
+
 pre-install modules Node-Pre-Gyp
+```
 npm i @mapbox/node-pre-gyp -g
+
+```
+
 
 NPM
 ```
