@@ -68,11 +68,16 @@ added 1873 packages from 1324 contributors
 
 Gekko Exchanges
 exchange directory:
+```
 cd exchange
 
+```
+
 install available exchanges
+```
 npm i --build-from-source
 
+```
 Thanks developers:
 added 339 packages from 262 contributors
 
@@ -81,13 +86,19 @@ Start Application
 Configuring gekko on a server
 
 First Run:
+```
 node gekko -c config.js --ui
 
+```
 Start Application using Pm2
+
+```
 npm i pm2 -g
 pm2 start gekko-m4.js
-#####Pm2 Process Manager
 
+```
+[#####Pm2 Process Manager
+](https://pm2.keymetrics.io/)
 
 Pm2 Module System installation:
 it is also possible to manage modules with pm2.
