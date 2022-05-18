@@ -15,7 +15,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This Software unlike easy gains
-Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
 
 During these months (from June 2021) I am committed to understanding how this application could work and there is still a lot of work to be done. this application is not intended as a quick profit use.
 
@@ -24,6 +23,8 @@ During these months (from June 2021) I am committed to understanding how this ap
 Gekko-M4 [Buy/Sell]
 
 help to improve the blockchain project 
+Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
+
 
 Remove/Upgrade deprecated packages, fix some bug [ERROR:Exchange ECONNRESET].
 
