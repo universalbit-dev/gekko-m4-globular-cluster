@@ -15,11 +15,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This Software unlike easy gains
-#### targets:
+#### Targets:
 improve graphic and correct some errors, enhance the application by solving some vulnerabilities.
 
 
-#### it is not possible to obtain easy earnings
+##### it is not possible to obtain easy earnings
 
 
 
@@ -68,8 +68,9 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
 
 #####
-
+```
 nvm use 12
+```
 
 Gekko-M4
 clone project and start learn
@@ -80,11 +81,13 @@ git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 ```
 
 
-pre-install modules Node-Pre-Gyp
+pre-install modules Node-Pre-Gyp:
 ```
 npm i @mapbox/node-pre-gyp -g
 
 ```
+
+
 
 
 NPM
@@ -113,8 +116,10 @@ Thanks developers:
 added 339 packages from 262 contributors
 
 Gekko UI Gordon Edition
-Start Application
-Configuring gekko on a server
+[Quasar-UI](https://github.com/H256/gekko-quasar-ui)
+
+* Start Application
+* Configuring gekko on a webserver
 
 First Run:
 ```
@@ -145,49 +150,46 @@ There are no easy gains
 
 This strategy intended as "low freq trade", essentially do nothing in down trend. sells in the event of a sudden rise or an uptrend period.
 
-#Resources:
+### Resources:
+[Documentation](https://gekko.wizb.it/docs/installation/installing_gekko.html)	
+[Forum](https://forum.gekko.wizb.it/)
+[Strategies](https://github.com/xFFFFF/Gekko-Strategies)
+[Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 
-Doc	Forum	Strategies	Extra-Indicators
-Gekko	Gekko-Forum	Gekko-Strategies	Gekko-Extra Indicators
 
-Exchange API
-Gekko Support Multiple Exchange,Watchers and PaperTrader.
+Gekko Support Multiple Exchange,Watchers and PaperTrader mode.
+Backtest simulate and debug your strategy.
 
-Import Data:
-import data from exchange for backtest your strategy
-
-Exchange	Import Data
-BitFinex	 not ok
-Kraken	     ok
-Poloniex	 ok
-Exmo         not ok
+Exchange	
+BitFinex
+Kraken	     
+Poloniex	 
+Exmo         
 
 On the crypto road
+
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. ccxt
 
 Logs Folder
 Into this folder are stored all activities of application. watcher,papertrade and tradebot log files. display the last values of your logs with this command:
 
+```
 tail -f logs/log_filename.log
 
-Legal Context
+```
+
+[Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 cryptocurrency and blockchain each exchange requires registration, 2fa and verify identity.
 
-Documentation	
 
 Gekko Installation & Usage	
 Community & Support
 
 
-##### Custom Strategy INVERTER : strategy
+##### Custom Strategy INVERTER:
 This strategy is intended as "low frequency trade" and reduce possible analysis lag. Dema and Sma indicators.
 
-I have reused this codes. Strategies Extra Indicators
+[Strategies](https://github.com/xFFFFF/Gekko-Strategies)
+[Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 
-Community content: [Archive]
-Gordon Gekko -Gordon Gekko Gekko is a Bitcoin TA trading and backtesting platform that connects exchanges.
 
--Gabriel Araujo gekko-extra-indicators
-
-Documentation
-Some Note
