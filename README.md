@@ -155,10 +155,11 @@ There are no easy gains
 This strategy intended as "low freq trade", essentially do nothing in down trend. sells in the event of a sudden rise or an uptrend period.
 
 ### Resources:
-[Documentation](https://gekko.wizb.it/docs/installation/installing_gekko.html)	
-[Forum](https://forum.gekko.wizb.it/)
-[Strategies](https://github.com/xFFFFF/Gekko-Strategies)
-[Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
+* [Documentation](https://gekko.wizb.it/docs/installation/installing_gekko.html)
+* [Forum](https://forum.gekko.wizb.it/)
+* [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
+* [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
+
 
 
 Gekko Support Multiple Exchange,Watchers and PaperTrader mode.
