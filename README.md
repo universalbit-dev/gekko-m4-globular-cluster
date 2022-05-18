@@ -189,7 +189,3 @@ Community & Support
 ##### Custom Strategy INVERTER:
 This strategy is intended as "low frequency trade" and reduce possible analysis lag. Dema and Sma indicators.
 
-[Strategies](https://github.com/xFFFFF/Gekko-Strategies)
-[Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
-
-
