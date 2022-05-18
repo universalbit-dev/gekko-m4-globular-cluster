@@ -1,9 +1,8 @@
 # Gekko-M4
+#### unlike easy gains
 
-unlike easy gains
 
-
-Gekko-M4 is a framework for develop your own cryptocurrency trading strategy.
+#### Gekko is a framework for develop your own cryptocurrency trading strategy.
 
 
 Gekko The MIT License (MIT) Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
@@ -14,35 +13,19 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. #gekko
 
 
-Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This Software unlike easy gains
 
+Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This Software unlike easy gains
 Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
 
 During these months (from June 2021) I am committed to understanding how this application could work and there is still a lot of work to be done. this application is not intended as a quick profit use.
 
 
-Node	Mining	Buy/Sell
-Armadillium	Glomeris	Gekko-M4
 
-Armadillium Blockchain Node
+Gekko-M4 [Buy/Sell]
 
-Armadillium
+help to improve the blockchain project 
 
-Glomeris Mining Rig
-
-Glomeris
-
-Gekko-M4 Buy/Sell
-Gekko-M4
-
-help to improve the blockchain project
 Remove/Upgrade deprecated packages, fix some bug [ERROR:Exchange ECONNRESET].
-
-Boost Data exchange performance.
-
-User interface front-end redesign.
-
-One file configuration.
 
 Gekko-M4
 introduction
@@ -60,9 +43,7 @@ clone project and start learn
 
 git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 
-installation
-
-Node-Pre-Gyp
+pre-install modules Node-Pre-Gyp
 npm i @mapbox/node-pre-gyp -g
 
 NPM
@@ -70,6 +51,7 @@ npm i --build-from-source
 
 Thanks developers:
 added 1873 packages from 1324 contributors
+
 
 Gekko Exchanges
 exchange directory:
@@ -81,21 +63,18 @@ npm i --build-from-source
 Thanks developers:
 added 339 packages from 262 contributors
 
-Gekko UI v0.2.3
+Gekko UI Gordon Edition
 Start Application
 configuring gekko on a server
 
+First Run:
 node gekko -c config.js --ui
 
 Start Application using Pm2
 npm i pm2 -g
-
 pm2 start gekko-m4.js
-
-Pm2
-id	namespace	version	mode
-gekko-m4	default	0.6.8-m4	fork
 #####Pm2 Process Manager
+
 
 Pm2 Module System installation:
 it is also possible to manage modules with pm2.
@@ -104,12 +83,6 @@ pm2 i module_name@version
 
 Install additional Modules
 pm2 install module_name@version
-
-modules	version
-ccxt-js	1.15.38
-reconnecting-websocket	4.4.0
-Module System
-documentation
 
 Note:
 There are no easy gains
@@ -121,6 +94,7 @@ This strategy intended as "low freq trade", essentially do nothing in down trend
 
 Doc	Forum	Strategies	Extra-Indicators
 Gekko	Gekko-Forum	Gekko-Strategies	Gekko-Extra Indicators
+
 Exchange API
 Gekko Support Multiple Exchange,Watchers and PaperTrader. Allowed one live trading for one exchange.
 
@@ -128,14 +102,11 @@ Import Data and API:
 import data from exchange for backtest your strategy
 
 Exchange	Import Data	API
-BitFinex	NOT	OK
-Kraken	OK	OK
-Poloniex	OK	OK
-EXMO	NOT	OK
-Luno	N/A	OK
-Therock	N/A	OK
-CoinFalcon	N/A	N/A
-Binance	N/A	N/A
+BitFinex	 
+Kraken	 
+Poloniex	 
+Exmo
+
 On the crypto road
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. ccxt
 
