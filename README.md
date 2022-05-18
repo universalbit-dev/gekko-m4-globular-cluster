@@ -5,7 +5,8 @@
 #### Gekko is a framework for develop your own cryptocurrency trading strategy.
 
 
-Gekko The MIT License (MIT) Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
+Gekko 
+The MIT License (MIT) Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
@@ -70,10 +71,11 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 #####
 ```
 nvm use 12
+
 ```
 
 Gekko-M4
-clone project and start learn
+clone or download project and start learn
 
 ```
 git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
@@ -96,11 +98,16 @@ npm i --build-from-source
 
 ```
 
+difficult installation:
+consider using this modules : [node_modules](https://)
+
 Thanks developers:
 added 1873 packages from 1324 contributors
 
 
 Gekko Exchanges
+the exchange platform requests your personal data and carries out a security check of your identity
+
 exchange directory:
 ```
 cd exchange
@@ -161,16 +168,18 @@ Gekko Support Multiple Exchange,Watchers and PaperTrader mode.
 Backtest simulate and debug your strategy.
 
 Exchange	
+
 BitFinex
 Kraken	     
 Poloniex	 
 Exmo         
 
-On the crypto road
+On the crypto road : probably not necessary but the project looks interesting
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. ccxt
 
 
 Logs Folder
+
 
 ```
 tail -f logs/log_filename.log
