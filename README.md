@@ -59,8 +59,9 @@ npm i @mapbox/node-pre-gyp -g
 
 NPM
 ```
+npm i --build-from-source
 
-```npm i --build-from-source
+```
 
 Thanks developers:
 added 1873 packages from 1324 contributors
