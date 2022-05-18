@@ -15,14 +15,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This Software unlike easy gains
+#### targets:
+improve graphic and correct some errors, enhance the application by solving some vulnerabilities.
+
+
+#### it is not possible to obtain easy earnings
+
+
 
 During these months (from June 2021) I am committed to understanding how this application could work and there is still a lot of work to be done. this application is not intended as a quick profit use.
 
 
 
+
+
+
 Gekko-M4 [Buy/Sell]
 
-help to improve the blockchain project 
+help to improve the universalbit blockchain project 
 Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
 
 
@@ -48,7 +58,9 @@ pre-install modules Node-Pre-Gyp
 npm i @mapbox/node-pre-gyp -g
 
 NPM
-npm i --build-from-source
+```
+
+```npm i --build-from-source
 
 Thanks developers:
 added 1873 packages from 1324 contributors
