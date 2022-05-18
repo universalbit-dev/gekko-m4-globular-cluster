@@ -105,9 +105,6 @@ Thanks developers:
 added 1873 packages from 1324 contributors
 
 
-Gekko Exchanges
-the exchange platform requests your personal data and carries out a security check of your identity
-
 exchange directory:
 ```
 cd exchange
@@ -187,7 +184,7 @@ tail -f logs/log_filename.log
 ```
 
 [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
-cryptocurrency and blockchain each exchange requires registration, 2fa and verify identity.
+Each exchange requires registration, 2fa and verify identity.
 
 
 [Installation & Usage]()	
