@@ -167,21 +167,20 @@ Backtest simulate and debug your strategy.
 
 Exchange	
 
-BitFinex
-Kraken	     
-Poloniex	 
-Exmo         
+* BitFinex
+* Kraken
+* Poloniex
+* Exmo         
 
 On the crypto road : probably not necessary but the project looks interesting
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. ccxt
 
 
-Logs Folder
-
+Logs Folder:
+the application log files are written to this folder
 
 ```
 tail -f logs/log_filename.log
-
 ```
 
 [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
