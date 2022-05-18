@@ -167,11 +167,10 @@ Poloniex
 Exmo         
 
 On the crypto road
-
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. ccxt
 
+
 Logs Folder
-Into this folder are stored all activities of application. watcher,papertrade and tradebot log files. display the last values of your logs with this command:
 
 ```
 tail -f logs/log_filename.log
@@ -182,10 +181,6 @@ tail -f logs/log_filename.log
 cryptocurrency and blockchain each exchange requires registration, 2fa and verify identity.
 
 
-Gekko Installation & Usage	
-Community & Support
-
-
-##### Custom Strategy INVERTER:
-This strategy is intended as "low frequency trade" and reduce possible analysis lag. Dema and Sma indicators.
+[Installation & Usage]()	
+[Community & Support]()
 
