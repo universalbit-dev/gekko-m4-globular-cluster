@@ -71,11 +71,12 @@ SOFTWARE.
   
   
 
-### node_modules license
+
+##### node_modules 
+
 [why?](https://)
 to understand the huge work behind a simple install command
-
-
+to report license incompatibility visit the [web](https://) page and send a message
 
 -----
 
@@ -432,3 +433,5 @@ to understand the huge work behind a simple install command
 
 [License]: Gekko-M4/node_modules/buffer-from/LICENSE "buffer-from Module License"
 [buffer-from](https://www.npmjs.com/package/buffer-from)
+
+the list goes on ... in the node_modules directory you will find all the modules
