@@ -66,7 +66,7 @@ added 339 packages from 262 contributors
 
 Gekko UI Gordon Edition
 Start Application
-configuring gekko on a server
+Configuring gekko on a server
 
 First Run:
 node gekko -c config.js --ui
@@ -97,16 +97,16 @@ Doc	Forum	Strategies	Extra-Indicators
 Gekko	Gekko-Forum	Gekko-Strategies	Gekko-Extra Indicators
 
 Exchange API
-Gekko Support Multiple Exchange,Watchers and PaperTrader. Allowed one live trading for one exchange.
+Gekko Support Multiple Exchange,Watchers and PaperTrader.
 
-Import Data and API:
+Import Data:
 import data from exchange for backtest your strategy
 
-Exchange	Import Data	API
-BitFinex	 
-Kraken	 
-Poloniex	 
-Exmo
+Exchange	Import Data
+BitFinex	 not ok
+Kraken	     ok
+Poloniex	 ok
+Exmo         not ok
 
 On the crypto road
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. ccxt
@@ -119,11 +119,14 @@ tail -f logs/log_filename.log
 Legal Context
 cryptocurrency and blockchain each exchange requires registration, 2fa and verify identity.
 
-Documentation	Gekko Installation & Usage	Community & Support
-documentation website	installing Gekko doc	forum
-#####Custom Strategy INVERTER : strategy
+Documentation	
 
-This strategy is intended as "low frequency trade" and reduce possible analysis lag. Dema and Sma indicators are reversed.
+Gekko Installation & Usage	
+Community & Support
+
+
+##### Custom Strategy INVERTER : strategy
+This strategy is intended as "low frequency trade" and reduce possible analysis lag. Dema and Sma indicators.
 
 I have reused this codes. Strategies Extra Indicators
 
@@ -133,10 +136,4 @@ Gordon Gekko -Gordon Gekko Gekko is a Bitcoin TA trading and backtesting platfor
 -Gabriel Araujo gekko-extra-indicators
 
 Documentation
-See documentation.
-
-Installation & Usage
-See installing Gekko doc.
-
-Community & Support
-Gekko has forum that is the place for discussions on using Gekko.
+Some Note
