@@ -4,28 +4,32 @@ unlike easy gains
 
 
 Gekko-M4 is a framework for develop your own cryptocurrency trading strategy.
-Gekko The MIT License (MIT) Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 
+
+Gekko The MIT License (MIT) Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. #gekko
 
+
 Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This Software unlike easy gains
 
 Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
-During these months (from June 2021) I am committed to understanding how this program could work and there is still a lot of work to be done. this application is not intended as a quick profit use.
 
-Description:
-this application was written for cryptocurrencies trading and is one part of blockchain structure. Don't forget cryptocurrency mining and blockchain network node.
+During these months (from June 2021) I am committed to understanding how this application could work and there is still a lot of work to be done. this application is not intended as a quick profit use.
+
 
 Node	Mining	Buy/Sell
 Armadillium	Glomeris	Gekko-M4
+
 Armadillium Blockchain Node
+
 Armadillium
 
 Glomeris Mining Rig
+
 Glomeris
 
 Gekko-M4 Buy/Sell
