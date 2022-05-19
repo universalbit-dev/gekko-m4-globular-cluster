@@ -1,0 +1,8 @@
+enabled=false
+muteSoft = true
+# your email, change it unless you are Azor Ahai
+email = ""
+# your pushbullet API key
+key = "xxx"
+# will make Gekko messages start with [GEKKO]
+tag = "[GEKKO]"
