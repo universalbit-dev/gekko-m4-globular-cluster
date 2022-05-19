@@ -1,0 +1,6 @@
+enabled =  true
+batchSize = 50
+daterange = "scan"
+[[daterange]]
+from = 2021-11-08T10:30:00
+to = 2021-12-08T10:30:00
