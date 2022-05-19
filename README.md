@@ -175,7 +175,7 @@ Exchange
 * Exmo         
 
 On the crypto road : probably not necessary but the project looks interesting
-ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. [ccxt](https://https://readthedocs.org/projects/ccxt/)
+ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. [ccxt](https://readthedocs.org/projects/ccxt/)
 
 
 Logs Folder:
