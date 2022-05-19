@@ -161,7 +161,7 @@ This strategy intended as "low freq trade", essentially do nothing in down trend
 * [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
 * [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 
-### Offline Documentation:
+##### Offline Documentation:
 [doc](https://universalbit.it/blockchain/shared-files/1093/docs.tar.gz)
 
 
