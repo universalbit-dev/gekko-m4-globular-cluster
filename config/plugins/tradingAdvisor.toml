@@ -1,0 +1,8 @@
+enabled=true
+candleSize = 15
+historySize = 1
+[talib]
+enabled=false
+[tulind]
+enabled=true
+
