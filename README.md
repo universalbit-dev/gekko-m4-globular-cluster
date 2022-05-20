@@ -126,8 +126,8 @@ added 339 packages from 262 contributors
 Gekko UI Gordon Edition
 [Quasar-UI](https://github.com/H256/gekko-quasar-ui)
 
-* Start Application
-* Configuring gekko on a webserver
+* Start Application [start]()
+* Configuring gekko on a webserver [nginx]()
 
 First Run:
 ```
@@ -141,21 +141,20 @@ npm i pm2 -g
 pm2 start gekko-m4.js
 
 ```
-[#####Pm2 Process Manager
-](https://pm2.keymetrics.io/)
+[#####Pm2 Process Manager](https://pm2.keymetrics.io/)
 
 Pm2 Module System installation:
-it is also possible to manage modules with pm2.
+it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-module-system/) modules with pm2.
 
+```
 pm2 i module_name@version
 
-Install additional Modules
-pm2 install module_name@version
+```
 
 Note:
 There are no easy gains
-#Custom Strategy: INVERTER
 
+#Custom Strategy: INVERTER
 This strategy intended as "low freq trade", essentially do nothing in down trend. sells in the event of a sudden rise or an uptrend period.
 
 ### Resources:
@@ -182,7 +181,7 @@ ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading 
 
 
 Logs Folder:
-the application log files are written to this folder
+log files are written to this folder
 
 ```
 tail -f logs/log_filename.log
