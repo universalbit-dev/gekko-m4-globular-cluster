@@ -1,4 +1,3 @@
-Upload Work in Progress
 # Gekko-M4
 #### unlike easy gains
 
