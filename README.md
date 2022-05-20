@@ -123,11 +123,24 @@ consider using this modules:[exchange node modules](https://universalbit.it:3000
 Thanks developers:
 added 339 packages from 262 contributors
 
-Gekko UI Gordon Edition
+##### Gekko UI Gordon Edition
 [Quasar-UI](https://github.com/H256/gekko-quasar-ui)
 
 * Start Application [start]()
 * Configuring gekko on a webserver [nginx]()
+
+##### Crypto Icons
+
+To extract archive file [Crypto Icons](http://cryptoicons.co/) 
+
+directory: web/vue/statics
+
+```
+tar –xvzf crypto_icons.tar.gz
+
+```
+
+
 
 First Run:
 ```
