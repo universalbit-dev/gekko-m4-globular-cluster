@@ -77,8 +77,7 @@ SOFTWARE.
 
 ##### node_modules 
 
-[why?](https://)
-to understand the huge work behind a simple install command
+huge work behind a simple install command
 to report license incompatibility visit the [web](https://) page and send a message
 
 -----
