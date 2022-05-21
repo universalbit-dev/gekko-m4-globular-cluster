@@ -99,7 +99,7 @@ npm i --build-from-source
 ```
 
 difficult installation:
-consider using this modules : [node_modules]()
+consider using this modules : [node_modules](https://universalbit.it/blockchain/shared-files/1098/node_modules.tar-1.gz)
 
 Thanks developers:
 added 1873 packages from 1324 contributors
