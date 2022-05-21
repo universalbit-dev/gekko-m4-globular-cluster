@@ -130,7 +130,7 @@ added 339 packages from 262 contributors
 
 ##### Crypto Icons
 
-To extract archive file [Crypto Icons](http://cryptoicons.co/) 
+To extract archive file [Crypto Icons]() 
 
 directory: web/vue/statics
 
