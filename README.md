@@ -99,7 +99,7 @@ npm i --build-from-source
 ```
 
 difficult installation:
-consider using this modules : [node_modules](https://universalbit.it/blockchain/shared-files/1092/node_modules.tar.gz)
+consider using this modules : [node_modules]()
 
 Thanks developers:
 added 1873 packages from 1324 contributors
@@ -117,7 +117,7 @@ npm i --build-from-source
 
 ```
 difficult installation:
-consider using this modules:[exchange node modules](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/node_modules.tar.gz)
+consider using this modules:[exchange node modules](https://universalbit.it/blockchain/shared-files/1097/exchange_node_modules.tar.gz)
 
 Thanks developers:
 added 339 packages from 262 contributors
