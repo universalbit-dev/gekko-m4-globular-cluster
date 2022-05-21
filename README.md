@@ -122,9 +122,6 @@ consider using this modules:[exchange node modules](https://universalbit.it/bloc
 Thanks developers:
 added 339 packages from 262 contributors
 
-##### Gekko UI Gordon Edition
-[Quasar-UI](https://github.com/H256/gekko-quasar-ui)
-
 
 * Configuring gekko on a webserver [nginx]()
 
