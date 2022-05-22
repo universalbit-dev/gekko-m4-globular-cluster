@@ -1,8 +1,9 @@
-    server {
-    listen 80;
-    listen [::]:80;
-    server_name 192.168.1.146;
-    return 301 https://$server_name$request_uri;
+```
+server {
+listen 80;
+listen [::]:80;
+server_name 192.168.1.146;
+return 301 https://$server_name$request_uri;
 }
 
 upstream websocket {
@@ -33,9 +34,11 @@ server {
     }
 }
 
+```
 
 
 ### To create a self signed certificate:
-
+```
     sudo mkdir /etc/nginx/ssl
     sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
+```
