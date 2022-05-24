@@ -1,4 +1,5 @@
 #### to better understand how it works
+first attempts on android
 
 Termux android terminal
 Application Website: [Termux](https://termux.com/)
