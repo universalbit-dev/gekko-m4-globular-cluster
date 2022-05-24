@@ -49,7 +49,9 @@ pkg install nginx
 ```
 
 
-the papertrade realtime and backtest mode are to be tested, configuring the nginx webserver I don't see errors.
+the papertrade realtime and backtest mode are to be tested.
+
+[nginx webserver (Termux)]()
 
 
 
@@ -57,6 +59,19 @@ these two files are used to set the ip address:
 
 [baseUIconfig](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/web/baseUIconfig.js)
 [UiConfig](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/web/vue/statics/UiConfig.js)
+
+
+Start Application using Pm2 (nodejs-lts version 16)
+
+npm i pm2 -g
+pm2 start gekko-m4-nodejs_v12-ccxt.js
+
+[#####Pm2 Process Manager](https://pm2.keymetrics.io/)
+
+
+
+
+
 
 
 
