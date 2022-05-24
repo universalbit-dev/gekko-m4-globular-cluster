@@ -22,7 +22,7 @@ pkg install wget git
 gekko-m4 source code:
 
 ```
-wget https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
+wget https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/archive/master.tar.gz
 
 ```
 
