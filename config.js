@@ -21,6 +21,10 @@ var config = {};
 config.debug =true;
 //Watching a Market
 config.watch = {exchange: 'bitfinex',currency: 'BTC',asset: 'LTC'};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC'};
+config.watch = {exchange: 'poloniex',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: 'exmo',currency:'LTC',asset:'ETH'};
+
 //Trading Advisor
 config.tradingAdvisor = {enabled:true};
 config.tradingAdvisor.candleSize=15;
