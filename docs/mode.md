@@ -1,8 +1,6 @@
-it's just a few notes, the documentation can be found here : 
+it's just a few notes, the documentation can be found here : [doc](https://gekko.wizb.it/docs/introduction/about_gekko.html)
 
-[doc](https://gekko.wizb.it/docs/introduction/about_gekko.html)
-
-Offline [doc](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/docs.tar.gz)
+Offline[doc](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/docs.tar.gz)
 
 
 ##### Watch
