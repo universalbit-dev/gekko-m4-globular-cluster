@@ -125,22 +125,19 @@ added 339 packages from 262 contributors
 
 ##### Some note: a working example
 
-* Configuring Gekko-M4
-[IP]()[Mode]()
 
+*Webserver [nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
-* Webserver [nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
+*Configure[IP]()
 
-* Exchange:
-[API]()
-
-First Run:  [UI Mode]()
-
+* Exchange:[API]()
+* First Run:  [UI Mode]()
 
 ```
 node gekko -c config.js --ui
 
 ```
+
 ##### Start Application using Pm2
 
 ```
@@ -157,6 +154,7 @@ it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-modu
 pm2 i module_name@version
 
 ```
+
 ##### Crypto Icons
 
 To extract archive file [Crypto Icons]() 
@@ -167,8 +165,6 @@ directory: web/vue/statics
 tar –xvzf crypto_icons.tar.gz
 
 ```
-
-
 
 Note:
 There are no easy gains
