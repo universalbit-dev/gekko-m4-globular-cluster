@@ -78,7 +78,7 @@ SOFTWARE.
 ##### node_modules 
 
 huge work behind a simple install command
-to report license incompatibility visit the [web](https://) page and send a message
+to report license incompatibility [issue](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/issues) 
 
 -----
 
@@ -436,4 +436,4 @@ to report license incompatibility visit the [web](https://) page and send a mess
 [License]: Gekko-M4/node_modules/buffer-from/LICENSE "buffer-from Module License"
 [buffer-from](https://www.npmjs.com/package/buffer-from)
 
-the list goes on ... in the node_modules directory you will find all the modules
+the list goes on ... in the node_modules directory you will find all the modules listed
