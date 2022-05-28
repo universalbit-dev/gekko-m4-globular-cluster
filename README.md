@@ -86,19 +86,22 @@ git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 
 ```
 
-
-pre-install modules Node-Pre-Gyp:
+Install Node-Gyp :
 ```
-npm i @mapbox/node-pre-gyp -g
-
-```
+npm i node-gyp -g
 
 
-
-
-NPM
+Gekko-M4 node_modules:
 ```
 npm i --build-from-source
+
+```
+
+Indicators and Database:
+
+```
+npm i tulind --save
+npm i sqlite3 --save
 
 ```
 
@@ -112,15 +115,12 @@ Thanks developers:
 added 1873 packages from 1324 contributors
 
 
-exchange directory:
-```
-cd exchange
 
-```
+exchange directory: /exchange
 
-install available exchanges
 ```
 npm i --build-from-source
+npm i sqlite3 --save
 
 ```
 difficult installation:
@@ -128,6 +128,7 @@ consider using this modules:[exchange node modules](https://universalbit.it/bloc
 
 ```
 wget https://universalbit.it/blockchain/shared-files/1097/exchange_node_modules.tar.gz
+
 ```
 
 Thanks developers:
