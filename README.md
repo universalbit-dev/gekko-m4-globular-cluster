@@ -63,7 +63,6 @@ Gekko-M4
 
 
 
-NodeJs
 
 NVM Node Version Manager:
 ```
@@ -72,10 +71,10 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 ```
 
 
-##### Installation
+##### Installation NodeJs version 12
 
 ```
-nvm use 12
+nvm install 12
 
 ```
 
