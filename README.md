@@ -79,7 +79,7 @@ nvm use 12
 ```
 
 Gekko-M4
-clone or download project and start learn
+clone project and start learn
 
 ```
 git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
@@ -104,13 +104,6 @@ npm i tulind --save
 npm i sqlite3 --save
 
 ```
-
-difficult installation:
-consider using this modules : [node_modules](https://universalbit.it/blockchain/shared-files/1098/node_modules.tar-1.gz)
-```
-wget https://universalbit.it/blockchain/shared-files/1098/node_modules.tar-1.gz
-```
-
 Thanks developers:
 added 1873 packages from 1324 contributors
 
@@ -123,16 +116,9 @@ npm i --build-from-source
 npm i sqlite3 --save
 
 ```
-difficult installation:
-consider using this modules:[exchange node modules](https://universalbit.it/blockchain/shared-files/1097/exchange_node_modules.tar.gz)
-
-```
-wget https://universalbit.it/blockchain/shared-files/1097/exchange_node_modules.tar.gz
-
-```
-
 Thanks developers:
 added 339 packages from 262 contributors
+
 
 
 * Configuring Gekko-M4 
