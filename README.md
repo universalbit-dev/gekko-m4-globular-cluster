@@ -126,21 +126,13 @@ added 339 packages from 262 contributors
 ##### Some note: a working example
 
 * Configuring Gekko-M4
-[IP]()[Plugin]()
+[IP]()[Mode]()
 
 
 * Webserver [nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
 * Exchange:
-[API]()[Backtest]()[PaperTrade]()[RealTime]()
-
-
-
-* BitFinex
-* Kraken
-* Poloniex
-* Exmo  
-
+[API]()
 
 First Run:  [UI Mode]()
 
