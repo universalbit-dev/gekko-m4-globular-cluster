@@ -89,10 +89,12 @@ git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 Install Node-Gyp :
 ```
 npm i node-gyp -g
-
+```
 
 Gekko-M4 node_modules:
+
 ```
+
 npm i --build-from-source
 
 ```
