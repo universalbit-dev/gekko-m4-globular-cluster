@@ -26,21 +26,10 @@ wget https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/archive/maste
 
 ```
 
-unfortunately the installation with npm installer is not successful (nodejs 16) and trying to use the node_modules archives 
+unfortunately the installation  is not successful (nodejs 16) and trying to use the node_modules archives 
 
 
-```
-wget https://universalbit.it/blockchain/shared-files/1098/node_modules.tar-1.gz
-tar -xvzf node_modules.tar-1.gz
-```
 
-exchange directory: /exchange
-
-```
-wget https://universalbit.it/blockchain/shared-files/1097/exchange_node_modules.tar.gz
-tar -xvzf exchange_node_modules.tar.gz
-
-```
 
 #### Nginx Web Server 
 
@@ -49,7 +38,7 @@ pkg install nginx
 ```
 
 
-the papertrade realtime and backtest mode are to be tested.
+the papertrade realtime and backtest mode are not tested.
 
 [nginx webserver (Termux)]()
 
