@@ -72,7 +72,8 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 ```
 
 
-#####
+##### Installation
+
 ```
 nvm use 12
 
@@ -122,29 +123,33 @@ Thanks developers:
 added 339 packages from 262 contributors
 
 
+##### Some note: a working example
 
-* Configuring Gekko-M4 
-* webserver [nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
+* Configuring Gekko-M4
+[IP]()[Plugin]()
 
-##### Crypto Icons
 
-To extract archive file [Crypto Icons]() 
+* Webserver [nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
-directory: web/vue/statics
-
-```
-tar –xvzf crypto_icons.tar.gz
-
-```
+* Exchange:
+[API]()[Backtest]()[PaperTrade]()[RealTime]()
 
 
 
-First Run:
+* BitFinex
+* Kraken
+* Poloniex
+* Exmo  
+
+
+First Run:  [UI Mode]()
+
+
 ```
 node gekko -c config.js --ui
 
 ```
-Start Application using Pm2
+##### Start Application using Pm2
 
 ```
 npm i pm2 -g
@@ -160,6 +165,18 @@ it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-modu
 pm2 i module_name@version
 
 ```
+##### Crypto Icons
+
+To extract archive file [Crypto Icons]() 
+
+directory: web/vue/statics
+
+```
+tar –xvzf crypto_icons.tar.gz
+
+```
+
+
 
 Note:
 There are no easy gains
@@ -178,13 +195,7 @@ This strategy intended as "low freq trade", essentially do nothing in down trend
 
 Gekko Support Multiple Exchange,Watchers and PaperTrader mode.
 Backtest simulate and debug your strategy.
-
-Exchange	
-
-* BitFinex
-* Kraken
-* Poloniex
-* Exmo         
+      
 
 On the crypto road : probably not necessary but the project looks interesting
 ccxt-js library: a JavaScript / Python / PHP library for cryptocurrency trading and e-commerce with support for many bitcoin/ether/altcoin exchange markets and merchant APIs. [ccxt](https://readthedocs.org/projects/ccxt/)
