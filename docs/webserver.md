@@ -1,3 +1,7 @@
+WebServer Nginx[Install](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-debian-10)
+
+
+
 ```
 server {
 listen 80;
