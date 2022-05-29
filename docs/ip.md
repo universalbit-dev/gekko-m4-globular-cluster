@@ -90,7 +90,7 @@ The MIT License (MIT) Copyright (c) 2018 Klemens Wittig /*
 ```
 
 Documentation:
-see https://github.com/askmike/gekko/blob/stable/docs/installing_gekko_on_a_server.md
+see https://github.com/askmike/gekko/blob/develop/docs/installation/configuring_gekko_on_a_server.md
 
 
 
