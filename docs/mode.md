@@ -1,6 +1,6 @@
 it's just a few notes, the documentation can be found here : [doc](https://gekko.wizb.it/docs/introduction/about_gekko.html)
 
-Offline Doc
+Offline 
 [doc](https://universalbit.it/blockchain/shared-files/1093/docs.tar.gz)
 
 
