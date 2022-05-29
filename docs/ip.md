@@ -25,7 +25,8 @@ nano /web/baseUIconfig.js
 ```
 
 ```
-const CONFIG={headless:true,api:{host:'192.168.1.146',port:3006,timeout:12000},ui:{ssl:false,host:'192.168.1.146',port:3006,path:'/'}}
+const CONFIG={headless:true,api:{host:'192.168.1.146',port:3006,timeout:12000},
+ui:{ssl:false,host:'192.168.1.146',port:3006,path:'/'}}
 if(typeof window==='undefined')
 module.exports=CONFIG;
 else
@@ -92,8 +93,9 @@ The MIT License (MIT) Copyright (c) 2018 Klemens Wittig /*
 ```
 
 Documentation:
-see https://github.com/askmike/gekko/blob/develop/docs/installation/configuring_gekko_on_a_server.md
+[configuring_gekko_on_a_server](https://github.com/askmike/gekko/blob/develop/docs/installation/configuring_gekko_on_a_server.md)
 
+[webserver_nginx_reverse_proxy](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
 
 start the application via terminal commands:
