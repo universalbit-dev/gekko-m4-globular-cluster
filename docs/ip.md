@@ -25,8 +25,7 @@ nano /web/baseUIconfig.js
 ```
 
 ```
-const CONFIG={headless:true,api:{host:'192.168.1.146',port:3006,timeout:12000},
-ui:{ssl:false,host:'192.168.1.146',port:3006,path:'/'}}
+const CONFIG={headless:true,api:{host:'192.168.1.146',port:3006,timeout:12000},ui:{ssl:false,host:'192.168.1.146',port:3006,path:'/'}}
 if(typeof window==='undefined')
 module.exports=CONFIG;
 else
