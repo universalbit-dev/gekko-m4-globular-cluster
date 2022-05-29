@@ -1,7 +1,7 @@
 it's just a few notes, the documentation can be found here : [doc](https://gekko.wizb.it/docs/introduction/about_gekko.html)
 
-Offline
-[doc](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/docs.tar.gz)
+Offline Doc
+[doc](https://universalbit.it/blockchain/shared-files/1093/docs.tar.gz)
 
 
 
