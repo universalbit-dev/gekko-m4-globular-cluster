@@ -125,9 +125,9 @@ added 339 packages from 262 contributors
 ##### Some note: a working example
 
 
-* Webserver [nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
+* Webserver [Nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
-* Configure[IP]()
+* Configure[IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md)
 
 * Exchange:[API]()
 * First Run:  [UI Mode]()
