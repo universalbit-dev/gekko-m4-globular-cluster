@@ -87,10 +87,6 @@ Thanks developers,required node modules are ready.
 * Webserver lWS (lightweight Web Server (lWS))
 https://f-droid.org/packages/net.basov.lws.fdroidWebserver
 
-[lWS LighWeight Web Server](lWS (lightweight Web Server (lWS))
-httpsh
-
-[Setup]()
 
 * Configure [IP]() Address and Port
 
