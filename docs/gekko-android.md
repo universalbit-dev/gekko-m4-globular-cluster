@@ -5,14 +5,12 @@ first attempts on android
 
 ##### Install and Run Gekko-M4 on Android Device
 
-AnLinux    
-[website](https://github.com/EXALAB/AnLinux-App)
+AnLinux  :[website](https://github.com/EXALAB/AnLinux-App)
 Run Debian Gnu/Linux On Android Without Root Access, 
 thanks for the Awesome Termux and PRoot, which make this project possible.
 
 
-Termux Android terminal
-[website](https://termux.dev/)
+Termux Android terminal  :[website](https://termux.dev/)
 
 
 Follow AnLinux Wizard and setup your linux distro.
@@ -62,26 +60,26 @@ Install Node-Gyp :
 npm i node-gyp -g
 ```
 
-Gekko-M4 node_modules:
+##### Gekko-M4 node_modules:
 
 ```
 npm i --build-from-source
 ```
 
-Indicators and Database:
+##### Indicators and Database:
 
 ```
 npm i tulind --save
 npm i sqlite3 --save
 ```
 
-exchange directory: /exchange
+##### exchange directory: /exchange
 
 ```
 npm i --build-from-source
 npm i sqlite3 --save
 ```
-Thanks developers,all required node modules are ready.
+Thanks developers,required node modules are ready.
 
 ##### Some note: a working example
 
@@ -93,7 +91,7 @@ setup webserver on andoird []()
 * Configure Address:[IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md) and Port
 
 * Exchange: 
-Choose Register and Add Api Keys
+Register and Add Api Keys
 
 * First Run: [Backtest] [Papertrade] [Realtime] 
 
