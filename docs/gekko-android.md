@@ -8,11 +8,14 @@ first attempts on android
 
 Linux Debian on Android : Application
 
-AnLinux[website]()
-Run Linux On Android Without Root Access, thanks for the Awesome Termux and PRoot, which make this project possible.
+AnLinux    
+[website](https://github.com/EXALAB/AnLinux-App)
+Run Debian Gnu/Linux On Android Without Root Access, 
+thanks for the Awesome Termux and PRoot, which make this project possible.
 
 
-Termux Android terminal.[website]()
+Termux Android terminal
+[website](https://termux.dev/)
 
 
 Follow AnLinux Wizard and setup your linux distro.
@@ -28,7 +31,7 @@ Welcome to a linux debian distro for Android!
 
 ##### Update and Upgrade Packages:
 
-apt get update && apt get upgrade
+apt update && apt upgrade
 
 
 ##### Install Build Essential and Git:
@@ -80,7 +83,6 @@ exchange directory: /exchange
 ```
 npm i --build-from-source
 npm i sqlite3 --save
-
 ```
 Thanks developers,all required node modules are ready.
 
@@ -91,21 +93,21 @@ Thanks developers,all required node modules are ready.
 https://f-droid.org/packages/net.basov.lws.fdroid)
 setup webserver on andoird []()
 
-* Configure [IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md)
+* Configure Address:[IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md) and Port
+
 * Exchange: 
-Add Api Keys
+Choose Register and Add Api Keys
 
 * First Run: [Backtest] [Papertrade] [Realtime] 
 
 
-* * Configuration Files:
+* Setup Configuration Files and Plugins:
 
 
 ##### User Interface [UI Mode]
 
 ```
 node gekko -c config.js --ui
-
 ```
 
 ###### [Terminal Mode] Without User Interface
@@ -115,7 +117,6 @@ node gekko -c config.js
 
 
 ##### Start Application using Pm2
-
 ```
 npm i pm2 -g
 pm2 start gekko-m4-nodejs_v12-ccxt.js
@@ -145,95 +146,3 @@ Backtest simulate and debug your strategy.
 ```
 tail -f logs/log_filename.log
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Android Terminal
-Application Website: [Termux](https://termux.com/)
-
-
-Nodejs installation:
-
-```
-pkg install nodejs-lts
-
-```
-
-these programs are needed:
-
-```
-pkg install wget git 
-
-```
-
-gekko-m4 source code:
-
-```
-wget https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/archive/master.tar.gz
-
-```
-
-unfortunately the installation  is not successful (nodejs 16: required noddejs12) and trying to use the node_modules archives. 
-
-
-
-
-#### Nginx Web Server 
-
-```
-pkg install nginx
-```
-
-
-the papertrade realtime and backtest mode are not tested.
-
-[nginx webserver (Termux)]()
-
-
-
-these two files are used to set the ip address:
-
-[baseUIconfig](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/web/baseUIconfig.js)
-[UiConfig](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/web/vue/statics/UiConfig.js)
-
-
-#### Start Application using Pm2 (nodejs-lts version 16)
-
-npm i pm2 -g
-pm2 start gekko-m4-nodejs_v12-ccxt.js
-
-[#####Pm2 Process Manager](https://pm2.keymetrics.io/)
-
-
-
-
-
-
-
-
-
-
