@@ -139,7 +139,3 @@ pm2 i module_name@version
 
 Gekko Support Multiple Exchange,Watchers and PaperTrader mode.
 Backtest simulate and debug your strategy.   
-
-```
-tail -f logs/log_filename.log
-```
