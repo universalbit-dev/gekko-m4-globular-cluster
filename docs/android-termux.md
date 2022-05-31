@@ -23,7 +23,23 @@ Follow AnLinux Wizard and setup your linux distro.
 Welcome to a linux debian distro for Android!
 
 
-Use Nvm and run application UI Mode.
+
+##### Update and Upgrade Packages:
+
+apt get update && apt get upgrade
+
+
+##### Install Build Essential:
+
+```
+apt install build-essential
+```
+
+###### NVM Node Version Manager:
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+```
+
 
 
 
