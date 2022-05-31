@@ -17,7 +17,6 @@ Follow AnLinux Wizard and setup your linux distro.
 
 ```
 ./start-debian.sh
-
 ```
 
 Welcome to a linux debian distro for Android!
@@ -86,9 +85,10 @@ Thanks developers,required node modules are ready.
 
 * Webserver [lWS LighWeight Web Server](lWS (lightweight Web Server (lWS))
 https://f-droid.org/packages/net.basov.lws.fdroid)
-setup webserver on andoird []()
 
-* Configure Address:[IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md) and Port
+[Setup]()
+
+* Configure [IP]() Address and Port
 
 * Exchange: 
 Register and Add Api Keys
@@ -97,6 +97,8 @@ Register and Add Api Keys
 
 
 * Setup Configuration Files and Plugins:
+
+
 
 
 ##### User Interface [UI Mode]
