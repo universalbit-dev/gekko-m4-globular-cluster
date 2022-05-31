@@ -1,6 +1,58 @@
 #### to better understand how it works
 first attempts on android
 
+
+
+##### Install and Run Gekko-M4 on Android Device.
+
+
+Linux Debian on Android : Application
+
+AnLinux
+Run Linux On Android Without Root Access, thanks for the Awesome Termux and PRoot, which make this project possible.
+
+and Termux Android terminal.
+
+Follow AnLinux Wizard and setup your linux distro.
+
+```
+./start-debian.sh
+
+```
+
+Welcome to a linux debian distro for Android!
+
+
+Use Nvm and run application UI Mode.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Android Terminal
 Application Website: [Termux](https://termux.com/)
 
@@ -26,7 +78,7 @@ wget https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/archive/maste
 
 ```
 
-unfortunately the installation  is not successful (nodejs 16) and trying to use the node_modules archives 
+unfortunately the installation  is not successful (nodejs 16: required noddejs12) and trying to use the node_modules archives. 
 
 
 
