@@ -3,10 +3,7 @@ first attempts on android
 
 
 
-##### Install and Run Gekko-M4 on Android Device.
-
-
-Linux Debian on Android : Application
+##### Install and Run Gekko-M4 on Android Device
 
 AnLinux    
 [website](https://github.com/EXALAB/AnLinux-App)
