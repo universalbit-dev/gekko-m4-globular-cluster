@@ -62,12 +62,15 @@ Gekko-M4
 [introduction](https://universalbit.it/blockchain/gekko-m4/)
 
 
+Install Build Essential:
 
+```
+apt install build-essential
+```
 
 NVM Node Version Manager:
 ```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-
 ```
 
 
@@ -75,7 +78,6 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 
 ```
 nvm install 12
-
 ```
 
 Gekko-M4
@@ -83,10 +85,10 @@ clone project and start learn
 
 ```
 git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
-
 ```
 
 Install Node-Gyp :
+
 ```
 npm i node-gyp -g
 ```
