@@ -3,7 +3,7 @@ first attempts on android
 
 
 
-##### Install and Run Gekko-M4 on Android Device
+##### Install and Run Gekko-M4 on Android Device [NTP Server Sync ....working in progress]
 uses 4g or 5g network
 
 AnLinux  :[website](https://github.com/EXALAB/AnLinux-App)
