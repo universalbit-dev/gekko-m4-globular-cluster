@@ -84,9 +84,7 @@ Thanks developers,required node modules are ready.
 ##### Some note: a working example
 
 
-* Webserver lWS (lightweight Web Server (lWS))
-https://f-droid.org/packages/net.basov.lws.fdroidWebserver
-
+* Web Server Nginx
 
 * Configure [IP]() Address and Port
 
