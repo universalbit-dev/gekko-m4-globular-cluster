@@ -117,9 +117,11 @@ Thanks developers.
 
 * Webserver [Nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
+
 * Configure [IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md)
 
-* Exchange [API]()
+
+* Exchange [API](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/api.md)
  
 ##### File to edit for configure Exchange API
 
@@ -129,7 +131,7 @@ Thanks developers.
 
 MODE:
 
-| Watcher     | PaperTrade     | BackTest     | Realtime
+##### | Watcher     | PaperTrade     | BackTest     | Realtime
 
 
 *[First Run]()
