@@ -96,9 +96,7 @@ npm i node-gyp -g
 Gekko-M4 node_modules:
 
 ```
-
 npm i --build-from-source
-
 ```
 
 Indicators and Database:
@@ -106,37 +104,31 @@ Indicators and Database:
 ```
 npm i tulind --save
 npm i sqlite3 --save
-
 ```
-Thanks developers:
-added 1873 packages from 1324 contributors
-
-
-
 exchange directory: /exchange
 
 ```
 npm i --build-from-source
 npm i sqlite3 --save
-
 ```
-Thanks developers:
-added 339 packages from 262 contributors
-
+Thanks developers.
 
 ##### Some note: a working example
-
 
 * Webserver [Nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
 * Configure[IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md)
 
 * Exchange:[API]()
+File to edit for configure Exchange API
+
+SECRET-API.json (configurable by front-end)
+general.toml
+
 * First Run:  [UI Mode]()
 
 ```
 node gekko -c config.js --ui
-
 ```
 
 ##### Start Application using Pm2
@@ -144,8 +136,8 @@ node gekko -c config.js --ui
 ```
 npm i pm2 -g
 pm2 start gekko-m4-nodejs_v12-ccxt.js
-
 ```
+
 [#####Pm2 Process Manager](https://pm2.keymetrics.io/)
 
 Pm2 Module System installation:
@@ -153,18 +145,15 @@ it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-modu
 
 ```
 pm2 i module_name@version
-
 ```
 
 ##### Crypto Icons
 
 To extract archive file [Crypto Icons]() 
-
 directory: web/vue/statics
 
 ```
 tar –xvzf crypto_icons.tar.gz
-
 ```
 
 Note:
