@@ -4,3 +4,5 @@
 [Poloniex](https://docs.poloniex.com/#introduction)
 [Kraken](https://docs.kraken.com/rest/)
 [Exmo](https://info.exmo.com/en/api/exmo-rest-api/)
+
+each exchange follows a procedure of registration, authentication and security checks
