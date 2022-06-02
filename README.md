@@ -139,6 +139,11 @@ MODE:
 ```
 node gekko -c config.js --ui
 ```
+*[Terminal Mode with DEBUG Messages]()
+```
+node gekko -c config.js
+```
+
 
 ##### Start Application using Pm2
 
@@ -168,7 +173,7 @@ tar –xvzf crypto_icons.tar.gz
 Note:
 There are no easy gains
 
-#Custom Strategy: INVERTER
+###### Custom Strategy: INVERTER
 This strategy intended as "low freq trade", essentially do nothing in down trend. sells in the event of a sudden rise or an uptrend period.
 
 ### Resources:
