@@ -120,13 +120,16 @@ Thanks developers.
 * Configure[IP](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/ip.md)
 
 * Exchange:[API]()
-File to edit for configure Exchange API
-**[Secret Api Keys](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json)
+* 
+##### File to edit for configure Exchange API
 
-**[General](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
+*[Secret Api Keys](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json)
 
-MODE:[Watcher][PaperTrade][BackTest][Realtime]
+*[General](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
 
+MODE:
+
+| Watcher     | PaperTrade     | BackTest     | Realtime
 
 * First Run:  [UI Mode]()
 
