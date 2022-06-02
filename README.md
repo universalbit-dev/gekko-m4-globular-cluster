@@ -121,9 +121,12 @@ Thanks developers.
 
 * Exchange:[API]()
 File to edit for configure Exchange API
+**[Secret Api Keys](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json)
 
-[Secret Api Keys](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json)
-[General .Toml](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
+**[General](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
+
+MODE:[Watcher][PaperTrade][BackTest][Realtime]
+
 
 * First Run:  [UI Mode]()
 
