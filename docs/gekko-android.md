@@ -6,13 +6,15 @@ first attempts on android
 ##### Install and Run Gekko-M4 on Android Device [NTP Server Sync ....working in progress]
 uses 4g or 5g network
 
-AnLinux  :[website](https://github.com/EXALAB/AnLinux-App)
+AnLinux  :
+[website](https://github.com/EXALAB/AnLinux-App)
+
 Run Debian Gnu/Linux On Android Without Root Access, 
 thanks for the Awesome Termux and PRoot, which make this project possible.
 
 
-Termux Android terminal  :[website](https://termux.dev/)
-
+Termux Android terminal  :
+[website](https://termux.dev/)
 
 Follow AnLinux Wizard and setup your linux distro.
 
@@ -22,12 +24,9 @@ Follow AnLinux Wizard and setup your linux distro.
 
 Welcome to a linux debian distro for Android!
 
-
-
 ##### Update and Upgrade Packages:
 
 apt update && apt upgrade
-
 
 ##### Install Build Essential and Git:
 
@@ -36,6 +35,7 @@ apt install build-essential git
 ```
 
 ###### NVM Node Version Manager:
+
 ```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 ```
@@ -54,7 +54,7 @@ clone project and start learn
 git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 ```
 
-Install Node-Gyp :
+Install Node-Gyp 
 
 ```
 npm i node-gyp -g
@@ -79,6 +79,7 @@ npm i sqlite3 --save
 npm i --build-from-source
 npm i sqlite3 --save
 ```
+
 Thanks developers,required node modules are ready.
 
 ##### Some note: a working example
@@ -102,7 +103,7 @@ Register and Add Api Keys
 ##### User Interface [UI Mode]
 
 ```
-node gekko -c config.js --ui
+node gekko -c config.js --ui   
 ```
 
 ###### [Terminal Mode] Without User Interface
