@@ -123,7 +123,7 @@ Thanks developers.
 File to edit for configure Exchange API
 
 [Secret Api Keys](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json)
-[General .Toml](general.toml)
+[General .Toml](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
 
 * First Run:  [UI Mode]()
 
