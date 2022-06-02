@@ -131,7 +131,8 @@ MODE:
 
 | Watcher     | PaperTrade     | BackTest     | Realtime
 
-* First Run:  [UI Mode]()
+
+*[First Run]()
 
 ```
 node gekko -c config.js --ui
