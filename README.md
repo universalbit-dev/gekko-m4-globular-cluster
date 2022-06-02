@@ -122,8 +122,8 @@ Thanks developers.
 * Exchange:[API]()
 File to edit for configure Exchange API
 
-SECRET-API.json (configurable by front-end)
-general.toml
+[Secret Api Keys](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json)
+[General .Toml](general.toml)
 
 * First Run:  [UI Mode]()
 
