@@ -142,7 +142,7 @@ Thanks developers.
 
 MODE:
 
-##### | Watcher     | PaperTrade     | BackTest     | Realtime
+##### |  Watcher  |  PaperTrade  |  BackTest  |  Realtime  |  Importer  |
 
 
 *[First Run]()
