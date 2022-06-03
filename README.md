@@ -23,6 +23,12 @@ improve graphic and correct some errors, enhance the application by solving some
 ##### [Quasar](https://v0-16.quasar-framework.org/)
 * graphic components to be updated and improved.
 
+##### [Nodejs 12](https://nodejs.org/docs/latest-v12.x/api/)
+* update and bug fixes
+
+-----
+
+
 
 
 ##### it is not possible to obtain easy earnings
