@@ -20,8 +20,10 @@ Gekko-M4 The MIT License (MIT) Copyright (c) 2022 UniversalBit Blockchain This S
 improve graphic and correct some errors, enhance the application by solving some vulnerabilities.
 
 
-* [Quasar](https://quasar.dev/)graphic components to be updated and improved.
-* [Npm](https://www.npmjs.com/)update nodejs modules.
+##### [Quasar](https://quasar.dev/)
+* graphic components to be updated and improved.
+##### [Npm](https://www.npmjs.com/)
+* update nodejs modules.
 
 
 
