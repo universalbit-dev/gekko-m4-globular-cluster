@@ -35,7 +35,7 @@
         "ETH"
       ],
       "minimalOrder": {
-        "amount": "0.01",
+        "amount": "0.001",
         "unit": "asset"
       }
     }
