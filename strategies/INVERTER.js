@@ -202,7 +202,7 @@ switch (this.candle.close) {
 	{
 	this.resetTrend();
 	this.trend.direction = 'down';
-  this.trend.longPos = false;
+    this.trend.longPos = false;
 	this.advice('short');
 	if( this.debug ) log.info('Going short');
 	}
