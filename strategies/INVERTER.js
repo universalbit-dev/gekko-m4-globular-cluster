@@ -15,11 +15,12 @@ UPDATE:
 Add pingPong for sideways market(Rafael Martín)
 
 (CC-BY-SA 4.0) UniversalBit Blockchain
-RSI_BULL_BEAR_ADX_PINGPONG_INVERTER
+INVERTER
 https://creativecommons.org/licenses/by-sa/4.0/
 Update:
 - Switch
-- Inverter  DEMA && SMA
+- Inverter  
+- Indicators : DEMA && SMA
 */
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
@@ -68,26 +69,26 @@ this.Min_Loss_Percent = this.settings.Min_Loss_Percent;
 this.Min_Gain_Percent = this.settings.Min_Gain_Percent;
 //Debug
 this.startTime = new Date();
-		if( this.debug ){
-		this.stat = {
-	  adx: { min: 1000, max: 0 },
-		bear: { min: 1000, max: 0 },
-		bull: { min: 1000, max: 0 }};
-		}
+if( this.debug ){
+this.stat = {
+adx:{ min: 1000, max: 0 },
+	   bear: { min: 1000, max: 0 },
+	   bull: { min: 1000, max: 0 }};
+	}
 //Messages
-		log.info("==========================================");
-		log.info('Running', this.name);
-		log.info('==========================================');
+	log.info("==========================================");
+	log.info('Running', this.name);
+	log.info('==========================================');
 	},
 //Reset Trend
-	  resetTrend: function()
-	  {
-		  let trend = {
-			duration: 0,
-			direction: 'none',
-			longPos: 0,
-			pingPong : {gainsPercentage: this.settings.PINGPONG_GAINS_PERCENTAGE }
-		};
+resetTrend: function()
+	{
+    let trend = {
+	duration: 0,
+	direction: 'none',
+	longPos: 0,
+	pingPong : {gainsPercentage: this.settings.PINGPONG_GAINS_PERCENTAGE }
+	};
 	this.trend = trend;
 //Log Trend
 	console.log(this.trend);
@@ -197,7 +198,7 @@ switch (this.candle.close) {
  	if(this.debug) log.info('Going short');
  	}
 
-	else if ((this.trend.direction !== 'down') && (this.candle.close > this.lastLongPrice+(this.lastLongPrice * this.Min_Gain_Percent / 100) || (this.candle.close < this.lastLongPrice-(this.lastLongPrice * this.Min_Loss_Percent / 100))))
+	else if ((this.trend.direction !== 'down') || (this.candle.close > this.lastLongPrice+(this.lastLongPrice * this.Min_Gain_Percent / 100) && (this.candle.close < this.lastLongPrice-(this.lastLongPrice * this.Min_Loss_Percent / 100))))
 	{
 	this.resetTrend();
 	this.trend.direction = 'down';
