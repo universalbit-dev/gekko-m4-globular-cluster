@@ -32,11 +32,11 @@ config.tradingAdvisor.historySize=1;
 config.tradingAdvisor.method= 'INVERTER';
 //Plugin
 config.paperTrader ={enabled:true};
-config.paperTrader = {reportInCurrency: true,simulationBalance: {asset: 1,currency: 100},verbose: false,feeMaker: 0.5,feeTaker: 0.5,feeUsing: 'maker',slippage: 0.05};
+config.paperTrader ={reportInCurrency: true,simulationBalance: {asset: 1,currency: 100},verbose: false,feeMaker: 0.5,feeTaker: 0.5,feeUsing: 'maker',slippage: 0.05};
 //Adapter
 config.adapter='sqlite';
 //Api
-config.trader ={enabled:false,key:'API',secret:'SECRET'};
+config.trader ={enabled:false,exchange:'bitfinex',currency:'BTC',asset:'LTC',key:'API',secret:'SECRET'};
 config.candleWriter={enabled:false,adapter:'sqlite'};
 //BackTest
 config.backtest ={enabled:true};
@@ -44,7 +44,7 @@ config.backtest ={enabled:true};
 config.importer={enabled:true};
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,journalMode: require('./web/isWindows.js') ? 'DELETE' : 'WAL',dependencies:[{module: 'sqlite3'}]};
 //Child to Parent
-//config.childToParent = {enabled: true};
+config.childToParent = {enabled: false};
 //Strategy
 config.method='INVERTER';
 config.INVERTER = {
@@ -57,3 +57,4 @@ Stop_Loss_Percent:20,Stop_Gain_Percent:20,Min_Loss_Percent:20,Min_Gain_Percent:2
 PINGPONG_GAINS_PERCENTAGE:1};
 config['I understand that Gekko only automates MY OWN trading strategies']=false;
 module.exports = config;
+
