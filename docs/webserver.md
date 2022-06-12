@@ -19,7 +19,7 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
     server_name 192.168.1.146;
-    root /var/www/html;
+    root /usr/share/nginx/html;
     ssl_certificate /etc/nginx/ssl/nginx.crt;
     ssl_certificate_key /etc/nginx/ssl/nginx.key;    
 
