@@ -136,11 +136,11 @@ Thanks developers.
  
 ##### Edit this files for configure Exchange API
 
-*[SECRET_API_KEY.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json) ()
+*[SECRET-api-keys.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json) 
 
 *[general.toml](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
 
-*[config.js]()
+*[config.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config.js)
 
 MODE:
 
