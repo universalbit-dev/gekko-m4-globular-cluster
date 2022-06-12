@@ -138,7 +138,8 @@ Thanks developers.
 
 *[SECRET_API_KEY.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/SECRET-api-keys.json) ()
 
-*[general.tom](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
+*[general.toml](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config/general.toml)
+
 *[config.js]()
 
 MODE:
