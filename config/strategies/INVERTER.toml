@@ -1,4 +1,4 @@
-rsiSize = 14
+RSI = 14
 BULL_RSI = 9
 BULL_RSI_high = 82
 BULL_RSI_low = 60
@@ -9,7 +9,7 @@ BULL_MOD_high = 5
 BULL_MOD_low = -5
 BEAR_MOD_high = 5
 BEAR_MOD_low = -5
-ADX = 3
+ADX = 14
 ADX_high = 50
 ADX_low = 40
 PINGPONG_GAINS_PERCENTAGE = 1
