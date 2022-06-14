@@ -3,8 +3,8 @@
 
 Extra Indicators : https://github.com/Gab0/gekko-extra-indicators
 Gabriel Araujo (Gab0)
--Stop_Loss Stop_Gain
--Min_Loss  Min_Gain
+-Stop Loss Stop Gain
+-Short Spread
 
 RSI Bull and Bear + ADX modifier
 Use different RSI-strategies depending on a longer trend
@@ -119,7 +119,7 @@ let ind = this.tulipIndicators,rsi = ind.rsi.result.result,maSlow = ind.maSlow.r
 switch (this.candle.close) {
 	case ((this.stoplow != 0.0)&&(this.candle.close < this.stoplow)):
 	this.advice('short');
-    break;
+        break;
 	case ((this.stophigh != 0.0)&&(this.candle.close > this.stophigh)):
 	this.advice('short');
 	break;
@@ -134,7 +134,7 @@ if((longDEMA < shortDEMA) && (maFast < maSlow))
 	else if( adx < this.settings.ADX_low ) rsi_low = rsi_low + this.BEAR_MOD_low;
 
 	if( rsi > rsi_hi ) this.short();
-	else if( rsi < rsi_low ) this.long(this.candle);
+	else if( rsi < rsi_low ) this.long();
 	else this.pingPong();
 	this.lowHigh( rsi, 'bear' );
 }
@@ -149,7 +149,7 @@ let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
 	else if( adx < this.settings.ADX_low ) rsi_low = rsi_low + this.BULL_MOD_low;
 
 	if( rsi > rsi_hi ) this.short();
-	else if( rsi < rsi_low ) this.long(this.candle);
+	else if( rsi < rsi_low ) this.long();
 	else this.pingPong();
 
 	this.lowHigh( rsi, 'bull' );
