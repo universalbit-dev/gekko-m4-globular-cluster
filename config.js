@@ -52,7 +52,7 @@ SMA_long:15,SMA_short:55,DEMA_short:10,DEMA_long:21,RSI:14,
 BULL_RSI:9,BULL_RSI_high:82,BULL_RSI_low:60,
 BEAR_RSI:12.5,BEAR_RSI_high:60,BEAR_RSI_low:15,
 BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,
-ADX:14,ADX_high:70,ADX_low:50,
+ADX:3,ADX_high:70,ADX_low:50,
 Stop_Loss_Percent:3,Stop_Gain_Percent:3,Min_Loss_Percent:1.5,Min_Gain_Percent:1.5,
 PINGPONG_GAINS_PERCENTAGE:0.5};
 config['I understand that Gekko only automates MY OWN trading strategies']=false;
