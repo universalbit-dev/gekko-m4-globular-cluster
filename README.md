@@ -171,6 +171,7 @@ pm2 start gekko-m4-nodejs_v12-ccxt.js
 ```
 pm2 logs
 ```
+[Read](https://pm2.io/docs/runtime/guide/log-management/)
 
 Pm2 Module System installation:
 it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-module-system/) modules with pm2.
@@ -178,6 +179,10 @@ it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-modu
 ```
 pm2 i module_name@version
 ```
+
+
+-----
+
 
 ##### Crypto Icons
 
