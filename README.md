@@ -167,6 +167,11 @@ pm2 start gekko-m4-nodejs_v12-ccxt.js
 
 [#####Pm2 Process Manager](https://pm2.keymetrics.io/)
 
+#####PM2 Logs Application
+```
+pm2 logs
+```
+
 Pm2 Module System installation:
 it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-module-system/) modules with pm2.
 
