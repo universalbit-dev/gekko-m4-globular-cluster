@@ -202,10 +202,10 @@ long: function()
 pingPong: function() {
 
  switch (this.trend.longPos) {
-	case (this.candle.close < (this.trend.longPos - (this.trend.longPos * (this.trend.pingPong.gainsPercentage / 14) / 100))):
+	case (this.candle.close < (this.trend.longPos - ((this.trend.longPos * (this.trend.pingPong.gainsPercentage / 14)) / 100))):
 	this.trend.longPos = this.candle.close;
 	break;
-  	case (this.candle.close < (this.trend.longPos + (this.trend.longPos * this.trend.pingPong.gainsPercentage / 100))):
+  	case (this.candle.close < (this.trend.longPos + ((this.trend.longPos * this.trend.pingPong.gainsPercentage) / 100))):
 	this.trend.longPos = false;
 	this.advice('short');
  	break;
