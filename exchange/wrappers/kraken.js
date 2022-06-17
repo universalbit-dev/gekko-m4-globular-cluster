@@ -9,6 +9,8 @@ const marketData = require('./kraken-markets.json');
 
 const Trader = function(config) {
   _.bindAll(this);
+  //key='';
+  //secret='';
   if(_.isObject(config)) {
     this.key = config.key;
     this.secret = config.secret;
