@@ -3,6 +3,8 @@ const _=require('lodash');const moment=require('moment');const Errors=require('.
 
 const Trader = function(config) {
   _.bindAll(this);
+  //key='';
+  //secret='';
   if(_.isObject(config)) {
     this.key = config.key;
     this.secret = config.secret;
