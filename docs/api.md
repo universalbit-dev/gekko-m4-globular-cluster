@@ -28,8 +28,8 @@ by editing these files it is possible to customize settings of an exchange
 
 
 ##### Exmo
-[exmo](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo.js)
-[exmo-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo-markets.json)
+* [exmo](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo.js)
+* [exmo-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo-markets.json)
 
 
 -----
