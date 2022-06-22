@@ -1,8 +1,8 @@
 by editing these files it is possible to customize settings of an exchange 
 
 ##### Bitfinex
-[bitfinex.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex.js)
-[bitfinex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex-markets.json)
+* [bitfinex.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex.js)
+* [bitfinex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex-markets.json)
 
 
 -----
@@ -10,8 +10,8 @@ by editing these files it is possible to customize settings of an exchange
 
 
 ##### Kraken
-[kraken.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken.js)
-[kraken-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken-markets.json)
+* [kraken.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken.js)
+* [kraken-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken-markets.json)
 
 
 -----
@@ -19,8 +19,8 @@ by editing these files it is possible to customize settings of an exchange
 
 
 ##### Poloniex
-[poloniex.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex.js)
-[poloniex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex-markets.json)
+* [poloniex.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex.js)
+* [poloniex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex-markets.json)
 
 
 -----
