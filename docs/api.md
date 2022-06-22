@@ -2,17 +2,17 @@ by editing these files it is possible to customize settings of an exchange
 
 
 [bitfinex.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex.js)
-[bitfinex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex-market.json)
+[bitfinex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/bitfinex-markets.json)
 
 
 [kraken.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken.js)
-[kraken-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken-market.json)
+[kraken-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/kraken-markets.json)
 
 [poloniex.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex.js)
-[poloniex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex-market.json)
+[poloniex-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/poloniex-markets.json)
 
 [exmo](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo.js)
-[exmo-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo-market.json)
+[exmo-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo-markets.json)
 
 
 
