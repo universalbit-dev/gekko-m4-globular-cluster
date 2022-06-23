@@ -34,9 +34,10 @@ by editing these files it is possible to customize settings of an exchange
 
 Exmo Api Npm Package:
 ```
-npm i exmo-api --build-from-source
+npm i exmo-api
 
 ```
+[Npm Package](https://www.npmjs.com/package/exmo-api/v/0.1.0)
 [Exmo REST API](https://info.exmo.com/en/api/exmo-rest-api/)
 
 -----
