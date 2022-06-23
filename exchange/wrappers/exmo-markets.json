@@ -11,11 +11,11 @@
 
 "markets":[
 {
-"pair":["BTC","LTC"],"minimalOrder": {"amount": "0.4","unit": "asset"}
+"pair":["BTC","LTC"],"minimalOrder": {"amount": "0.1","unit": "asset"}
 },
 
 {
-"pair": ["USD","LTC"],"minimalOrder": {"amount": "0.4","unit": "asset"}
+"pair": ["USD","LTC"],"minimalOrder": {"amount": "0.1","unit": "asset"}
 },
 
 {
