@@ -37,8 +37,8 @@ Exmo Api Npm Package:
 npm i exmo-api
 
 ```
-[Npm Package](https://www.npmjs.com/package/exmo-api/v/0.1.0)
-[Exmo REST API](https://info.exmo.com/en/api/exmo-rest-api/)
+* [Npm Package](https://www.npmjs.com/package/exmo-api/v/0.1.0)
+* [Exmo REST API](https://info.exmo.com/en/api/exmo-rest-api/)
 
 -----
 
