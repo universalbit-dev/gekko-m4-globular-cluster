@@ -23,7 +23,7 @@ config.debug =true;
 config.watch = {exchange: 'bitfinex',currency: 'BTC',asset: 'LTC'};
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC'};
 config.watch = {exchange: 'poloniex',currency:'BTC',asset:'LTC'};
-//config.watch = {exchange: 'exmo',currency:'LTC',asset:'ETH'};
+config.watch = {exchange: 'exmo',currency:'BTC',asset:'LTC'};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true};
@@ -37,6 +37,10 @@ config.paperTrader ={reportInCurrency: true,simulationBalance: {asset: 1,currenc
 config.adapter='sqlite';
 //Api
 config.trader ={enabled:false,exchange:'bitfinex',currency:'BTC',asset:'LTC',key:'API',secret:'SECRET'};
+config.trader ={enabled:false,exchange:'kraken',currency:'XBT',asset:'LTC',key:'API',secret:'SECRET'};
+config.trader ={enabled:false,exchange:'poloniex',currency:'BTC',asset:'LTC',key:'API',secret:'SECRET'};
+config.trader ={enabled:false,exchange:'exmo',currency:'BTC',asset:'LTC',key:'API',secret:'SECRET'};
+
 config.candleWriter={enabled:false,adapter:'sqlite'};
 //BackTest
 config.backtest ={enabled:true};
