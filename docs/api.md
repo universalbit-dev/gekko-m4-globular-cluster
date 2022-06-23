@@ -32,6 +32,13 @@ by editing these files it is possible to customize settings of an exchange
 * [exmo-market.json](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/exchange/wrappers/exmo-markets.json)
 
 
+Exmo Api Npm Package:
+```
+npm i exmo-api --build-from-source
+
+```
+[Exmo](https://info.exmo.com/en/api/exmo-rest-api/)
+
 -----
 
 
