@@ -37,7 +37,7 @@ Exmo Api Npm Package:
 npm i exmo-api --build-from-source
 
 ```
-[Exmo](https://info.exmo.com/en/api/exmo-rest-api/)
+[Exmo REST API](https://info.exmo.com/en/api/exmo-rest-api/)
 
 -----
 
