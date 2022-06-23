@@ -1,7 +1,9 @@
 const _ = require('lodash');
 const moment = require('moment');
 const retry = require('../exchangeUtils').retry;
-
+const fs=require('fs');
+const file=require('file-system');
+var exmo = require('exmo-api');
 
 const CryptoJS = require("crypto-js");
 const querystring = require('querystring');
@@ -11,10 +13,11 @@ API_URL='https://api.exmo.com/v1/';
 
 const marketData = require('./exmo-markets.json');
 
+
 const Trader = function(config) {
   _.bindAll(this);
-  //key='';
-  //secret='';
+  //this.key="";
+  //this.secret="";
   
   if(_.isObject(config)) {
       if(_.isString(config.key)) this.key = config.key;
@@ -40,7 +43,8 @@ const recoverableErrors = [
 
 const includes = (str, list) => {
   if(!_.isString(str))
-  return false;
+    return false;
+
   return _.some(list, item => str.includes(item));
 }
 
