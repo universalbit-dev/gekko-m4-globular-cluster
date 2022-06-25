@@ -436,4 +436,4 @@ to report license incompatibility [issue](https://universalbit.it:3000/universal
 [License]: Gekko-M4/node_modules/buffer-from/LICENSE "buffer-from Module License"
 [buffer-from](https://www.npmjs.com/package/buffer-from)
 
-the list goes on ... in the node_modules directory you will find all the modules listed
+the list goes on ... after installation,in the node_modules directory,you will find all the modules listed.
