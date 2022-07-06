@@ -9,9 +9,9 @@
   it is working.
 */
 
-console.log('=========================================');
+console.log('##########################################');
 console.log('UniversalBit Blockchain Powered by Gekko');
-console.log('=========================================');
+console.log('##########################################');
 var util = require(__dirname + '/core/util.js');
 
 console.log('\tGekko v' + util.getVersion());
