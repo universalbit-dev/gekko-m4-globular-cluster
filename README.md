@@ -47,18 +47,18 @@ improve graphic and correct some errors, enhance the application by solving some
 During these months (from June 2021) I am committed to understanding how this application could work and there is still a lot of work to be done. this application is not intended as a quick profit use.
 
 
-Gekko-M4 [Buy/Sell]
+### Gekko-M4 [Buy/Sell]
 
-help to improve the universalbit blockchain project
-
-
+##### help to improve the universalbit blockchain project
 
 
 
 
 
 
-Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
+
+
+##### Donation Address : LTC LWgAMAXEbcMienXHqzmSn8Gg4A6Q6RywWt
 
 
 Gekko-M4
