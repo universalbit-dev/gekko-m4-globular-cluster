@@ -60,7 +60,6 @@
     "koa-static": "^2.0.0",
     "kraken-api": "^1.0.1",
     "lodash": "^2.4.2",
-    "lodash": "^4.17.5",
     "mathjs": "^9.4.4",
     "moment": "^2.29.1",
     "mongodb": "^4.1.0",
