@@ -31,20 +31,37 @@ this.name = 'INVERTER';
 this.resetTrend();
 // DEBUG
 this.debug = true;
+      
+//Indicators
 //SMA
 this.addTulipIndicator('maFast', 'sma', { optInTimePeriod: this.settings.SMA_long});
+this.addIndicator("maFast", "SMA", {optInTimePeriod: this.settings.SMA_long});
+
 this.addTulipIndicator('maSlow', 'sma', { optInTimePeriod: this.settings.SMA_short});
-//BULL BEAR - RSI -
+this.addIndicator("maSlow", "SMA", {optInTimePeriod: this.settings.SMA_short});
+
+//RSI
 this.addTulipIndicator('BULL_RSI', 'rsi', { optInTimePeriod: this.settings.BULL_RSI });
+this.addIndicator("BULL_RSI", "RSI", {optInTimePeriod: this.settings.BULL_RSI});
+
 this.addTulipIndicator('BEAR_RSI', 'rsi', { optInTimePeriod: this.settings.BEAR_RSI });
+this.addIndicator("BEAR_RSI", "RSI", {optInTimePeriod: this.settings.BEAR_RSI});
+
 //DEMA
 this.addTulipIndicator('longDEMA', 'dema', {optInTimePeriod : this.settings.DEMA_long});
+this.addIndicator("longDEMA", "DEMA", {optInTimePeriod: this.settings.DEMA_long});
 
 this.addTulipIndicator('shortDEMA', 'dema', {optInTimePeriod : this.settings.DEMA_short});
+this.addIndicator("shortDEMA", "DEMA", {optInTimePeriod: this.settings.DEMA_short});
+
 //RSI
 this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : this.settings.RSI});
+this.addIndicator("rsi", "RSI", {optInTimePeriod: this.settings.RSI});
+
 //ADX
 this.addTulipIndicator('ADX', 'adx', {optInTimePeriod: this.settings.ADX});
+this.addIndicator("ADX", "ADX", {optInTimePeriod: this.settings.ADX});
+
 //Mod (RSI modifiers)
 this.BULL_MOD_high = this.settings.BULL_MOD_high;
 this.BULL_MOD_low = this.settings.BULL_MOD_low;
