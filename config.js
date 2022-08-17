@@ -27,7 +27,7 @@ config.watch = {exchange: 'exmo',currency:'BTC',asset:'LTC'};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true};
-config.tradingAdvisor.candleSize=15;
+config.tradingAdvisor.candleSize=10;
 config.tradingAdvisor.historySize=1;
 config.tradingAdvisor.method= 'INVERTER';
 //Plugin
@@ -44,6 +44,16 @@ config.trader ={enabled:false,exchange:'exmo',currency:'BTC',asset:'LTC',key:'AP
 config.candleWriter={enabled:false,adapter:'sqlite'};
 //BackTest
 config.backtest ={enabled:true};
+config.backtest = {
+daterange: 'scan',
+// daterange: {from: "2022-07-13",to: "2022-07-20"},
+batchSize: 50};
+//**BackTest Result Exporter
+config.backtestResultExporter = {
+enabled: false,writeToDisk: false,
+data: {stratUpdates: false,portfolioValues: true,stratCandles: true,roundtrips: true,trades: true}
+};
+
 //Importer
 config.importer={enabled:true};
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,journalMode: require('./web/isWindows.js') ? 'DELETE' : 'WAL',dependencies:[{module: 'sqlite3'}]};
@@ -52,13 +62,13 @@ config.childToParent = {enabled: false};
 //Strategy
 config.method='INVERTER';
 config.INVERTER = {
-SMA_long:15,SMA_short:55,DEMA_short:10,DEMA_long:21,RSI:14,
+SMA_long:10,SMA_short:55,DEMA_short:10,DEMA_long:21,RSI:14,
 BULL_RSI:7,BULL_RSI_high:82,BULL_RSI_low:60,
 BEAR_RSI:14,BEAR_RSI_high:60,BEAR_RSI_low:15,
 BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,
 ADX:14,ADX_high:70,ADX_low:50,
 Stop_Loss_Percent:3,Stop_Gain_Percent:3,Min_Loss_Percent:1.5,Min_Gain_Percent:1.5,
-PINGPONG_GAINS_PERCENTAGE:20};
+PINGPONG_GAINS_PERCENTAGE:10};
 config['I understand that Gekko only automates MY OWN trading strategies']=false;
 module.exports = config;
 
