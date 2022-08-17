@@ -58,7 +58,8 @@ data: {stratUpdates: false,portfolioValues: true,stratCandles: true,roundtrips: 
 config.importer={enabled:true};
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,journalMode: require('./web/isWindows.js') ? 'DELETE' : 'WAL',dependencies:[{module: 'sqlite3'}]};
 //Child to Parent
-config.childToParent = {enabled: false};
+//config.childToParent = {enabled: true};
+
 //Strategy
 config.method='INVERTER';
 config.INVERTER = {
