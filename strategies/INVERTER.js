@@ -1,27 +1,18 @@
 /*
-// Downloaded from: https://github.com/xFFFFF/Gekko-Strategies
-
-Extra Indicators : https://github.com/Gab0/gekko-extra-indicators
-Gabriel Araujo (Gab0)
--Stop Loss Stop Gain
--Short Spread
-
-RSI Bull and Bear + ADX modifier
-Use different RSI-strategies depending on a longer trend
-But modify this slighly if shorter BULL/BEAR is detected
-(CC-BY-SA 4.0) Tommie Hansen
-https://creativecommons.org/licenses/by-sa/4.0/
-UPDATE:
-Add pingPong for sideways market(Rafael Martín)
-
-(CC-BY-SA 4.0) UniversalBit Blockchain
-INVERTER
-https://creativecommons.org/licenses/by-sa/4.0/
-Update:
-- Switch
-- Inverter
-- Indicators DEMA && SMA
+//UniversalBit BlockChain INVERTER Strategy
+//
+//Source Code: [Gab0](https://github.com/Gab0/)
+//https://github.com/Gab0/gekko-adapted-strategies
+//
+//Authors:
+//RSI_BULL_BEAR & RSI_BULL_BEAR_ADX (@TommieHansen)
+//PingPong Function for sideways market(@RafaelMartín)
+//(CC BY-SA 4.0:https://creativecommons.org/licenses/by-sa/4.0/)
+//
+//Extra Indicators : https://github.com/Gab0/gekko-extra-indicators
+//Gabriel Araujo (@Gab0)
 */
+
 
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
