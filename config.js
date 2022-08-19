@@ -51,7 +51,7 @@ config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,jo
 config.method='INVERTER';
 
 config.INVERTER= {
-SMA_long:10,SMA_short:55,DEMA_short:10,DEMA_long:21,RSI:14,
+SMA_long:1000,SMA_short:55,DEMA_short:10,DEMA_long:21,RSI:14,
 BULL_RSI:7,BULL_RSI_high:82,BULL_RSI_low:60,
 BEAR_RSI:14,BEAR_RSI_high:60,BEAR_RSI_low:15,
 BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,
