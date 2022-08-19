@@ -17,6 +17,7 @@
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var coretulind = require('../core/tulind.js');
+var _ = require('lodash');
 var ws = require ('reconnecting-websocket');
 var tulind = require('tulind');
 
