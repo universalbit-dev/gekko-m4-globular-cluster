@@ -209,21 +209,21 @@ long: function()
 
 //PingPong
 pingPong: function() {
+ switch (this.trend.longPos)
+{
+        case this.trend.direction == 'up':
+        this.resetTrend();
+        this.trend.longPos = true;
+        break;
+        case this.trend.direction == 'down':
+        this.resetTrend();
+        this.trend.longPos = false;
+        break;
+        default:
+        this.trend.longPos = this.candle.close;
+}
+},
 
- switch (this.trend.longPos) {
-    case this.candle.close < (this.trend.longPos - ((this.trend.longPos * (this.trend.pingPong.gainsPercentage / 10)) / 100)):
-    this.trend.longPos = this.candle.close;
-	break;
-  	case (this.candle.close < (this.trend.longPos + ((this.trend.longPos * this.trend.pingPong.gainsPercentage) / 100))):
-	this.trend.longPos = false;
-	this.advice('short');
- 	break;
-	case (this.trend.direction == 'down'):return;
-	break;
-  	default:
-  	this.trend.longPos = this.candle.close;
-  	this.advice('long');
-}},
 //End Backtest
 	end: function()
 	{
