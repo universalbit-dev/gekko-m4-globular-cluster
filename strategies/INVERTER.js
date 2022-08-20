@@ -36,32 +36,32 @@ this.debug = true;
 //Indicators
 //SMA
 this.addTulipIndicator('maFast', 'sma', { optInTimePeriod: this.settings.SMA_long});
-this.addIndicator("maFast", "SMA", {optInTimePeriod: this.settings.SMA_long});
+this.addIndicator("maFast", "SMA", {optInTimePeriod: this.settings.SMA_long});//
 
 this.addTulipIndicator('maSlow', 'sma', { optInTimePeriod: this.settings.SMA_short});
-this.addIndicator("maSlow", "SMA", {optInTimePeriod: this.settings.SMA_short});
+this.addIndicator("maSlow", "SMA", {optInTimePeriod: this.settings.SMA_short});//
 
 //RSI
 this.addTulipIndicator('BULL_RSI', 'rsi', { optInTimePeriod: this.settings.BULL_RSI });
-this.addIndicator("BULL_RSI", "RSI", {optInTimePeriod: this.settings.BULL_RSI});
+this.addIndicator("BULL_RSI", "RSI", {optInTimePeriod: this.settings.BULL_RSI});//
 
 this.addTulipIndicator('BEAR_RSI', 'rsi', { optInTimePeriod: this.settings.BEAR_RSI });
-this.addIndicator("BEAR_RSI", "RSI", {optInTimePeriod: this.settings.BEAR_RSI});
+this.addIndicator("BEAR_RSI", "RSI", {optInTimePeriod: this.settings.BEAR_RSI});//
 
 //DEMA
 this.addTulipIndicator('longDEMA', 'dema', {optInTimePeriod : this.settings.DEMA_long});
-this.addIndicator("longDEMA", "DEMA", {optInTimePeriod: this.settings.DEMA_long});
+this.addIndicator("longDEMA", "DEMA", {optInTimePeriod: this.settings.DEMA_long});//
 
 this.addTulipIndicator('shortDEMA', 'dema', {optInTimePeriod : this.settings.DEMA_short});
-this.addIndicator("shortDEMA", "DEMA", {optInTimePeriod: this.settings.DEMA_short});
+this.addIndicator("shortDEMA", "DEMA", {optInTimePeriod: this.settings.DEMA_short});//
 
 //RSI
 this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : this.settings.RSI});
-this.addIndicator("rsi", "RSI", {optInTimePeriod: this.settings.RSI});
+this.addIndicator("rsi", "RSI", {optInTimePeriod: this.settings.RSI});//
 
 //ADX
 this.addTulipIndicator('ADX', 'adx', {optInTimePeriod: this.settings.ADX});
-this.addIndicator("ADX", "ADX", {optInTimePeriod: this.settings.ADX});
+this.addIndicator("ADX", "ADX", {optInTimePeriod: this.settings.ADX});//
 
 //Mod (RSI modifiers)
 this.BULL_MOD_high = this.settings.BULL_MOD_high;
@@ -123,21 +123,23 @@ if( val < cur.min ) this.stat.adx.min = val;
 check: function()
 {
 //Indicators
-let ind = this.tulipIndicators,rsi = ind.rsi.result.result,maSlow = ind.maSlow.result.result,maFast = ind.maFast.result.result,longDEMA = ind.longDEMA.result.result,shortDEMA = ind.shortDEMA.result.result,adx = ind.ADX.result.result;
+let ind = this.tulipIndicators,rsi = ind.rsi.result,maSlow = ind.maSlow.result,maFast = ind.maFast.result,longDEMA = ind.longDEMA.result,shortDEMA = ind.shortDEMA.result,adx = ind.ADX.result;
 
 switch (this.candle.close) {
-	case ((this.stoplow != 0.0)&&(this.candle.close < this.stoplow)):
-	this.advice('short');
+        case ((this.candle.close < this.stoplow)&&(this.stoplow != 0.0)):
+        this.advice('long');
         break;
-	case ((this.stophigh != 0.0)&&(this.candle.close > this.stophigh)):
-	this.advice('short');
-	break;
+        case ((this.candle.close > this.stophigh)&&(this.stophigh != 0.0)):
+        this.advice('short');
+        break;
 }
+
 //Bear
 if((longDEMA < shortDEMA) && (maFast < maSlow))
 {
 	rsi = ind.BEAR_RSI.result.result;
-	let rsi_hi = this.settings.BEAR_RSI_high,rsi_low = this.settings.BEAR_RSI_low;
+	let rsi_hi = this.settings.BEAR_RSI_high,
+        rsi_low = this.settings.BEAR_RSI_low;
 // Adx
 	if( adx > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BEAR_MOD_high;
 	else if( adx < this.settings.ADX_low ) rsi_low = rsi_low + this.BEAR_MOD_low;
