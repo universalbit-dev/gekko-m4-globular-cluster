@@ -123,7 +123,13 @@ if( val < cur.min ) this.stat.adx.min = val;
 check: function()
 {
 //Indicators
-let ind = this.tulipIndicators,rsi = ind.rsi.result,maSlow = ind.maSlow.result,maFast = ind.maFast.result,longDEMA = ind.longDEMA.result,shortDEMA = ind.shortDEMA.result,adx = ind.ADX.result;
+let ind=this.tulipIndicators,
+rsi =this.tulipIndicators.rsi.result,
+maSlow =this.tulipIndicators.maSlow.result,   
+maFast =this.tulipIndicators.maFast.result,   
+longDEMA =this.tulipIndicators.longDEMA.result,   
+shortDEMA=this.tulipIndicators.shortDEMA.result,
+adx=this.tulipIndicators.ADX.result;
 
 switch (this.candle.close) {
         case ((this.candle.close < this.stoplow)&&(this.stoplow != 0.0)):
