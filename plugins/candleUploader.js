@@ -1,8 +1,8 @@
 const axios = require('axios');
 const _ = require('lodash');
-const log = require('../core/log.js');
-const util = require('../core/util.js');
-const config = util.getConfig();
+var util = require('../../core/util');
+var log = require(dirs.core + 'log');
+var config = util.getConfig();
 
 const CandleUploader = function(done) {
   _.bindAll(this);
