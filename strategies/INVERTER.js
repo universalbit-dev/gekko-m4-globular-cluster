@@ -129,7 +129,7 @@ maSlow =this.tulipIndicators.maSlow.result,
 maFast =this.tulipIndicators.maFast.result,   
 longDEMA =this.tulipIndicators.longDEMA.result,   
 shortDEMA=this.tulipIndicators.shortDEMA.result,
-adx=this.tulipIndicators.ADX.result;
+ADX=this.tulipIndicators.ADX.result;
 
 switch (this.candle.close) {
         case ((this.candle.close < this.stoplow)&&(this.stoplow != 0.0)):
