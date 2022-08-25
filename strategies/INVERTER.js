@@ -60,8 +60,8 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : this.settings.RSI});
 this.addIndicator("rsi", "RSI", {optInTimePeriod: this.settings.RSI});//
 
 //ADX
-this.addTulipIndicator('ADX', 'adx', {optInTimePeriod: this.settings.ADX});
-this.addIndicator("ADX", "ADX", {optInTimePeriod: this.settings.ADX});//
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.ADX});
+this.addIndicator("adx", "ADX", {optInTimePeriod: this.settings.ADX});//
 
 //Mod (RSI modifiers)
 this.BULL_MOD_high = this.settings.BULL_MOD_high;
@@ -129,7 +129,7 @@ maSlow =this.tulipIndicators.maSlow.result,
 maFast =this.tulipIndicators.maFast.result,   
 longDEMA =this.tulipIndicators.longDEMA.result,   
 shortDEMA=this.tulipIndicators.shortDEMA.result,
-ADX=this.tulipIndicators.ADX.result;
+adx=this.tulipIndicators.adx.result;
 
 switch (this.candle.close) {
         case ((this.candle.close < this.stoplow)&&(this.stoplow != 0.0)):
