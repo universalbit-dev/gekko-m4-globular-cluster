@@ -41,9 +41,13 @@ config.candleWriter={enabled:false,adapter:'sqlite'};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 // Note that these settings are only used in backtesting mode, see here:
-// @link: https://gekko.wizb.it/docs/commandline/backtesting.html
+// For backtesting you should enable and configure the following plugins:
+//trading advisor (to run your strategy).
+//paper trader (to execute simulated trades).
+//performance analyzer (to calculate how succesfull the strategy would have been).
+//Besides that, make sure to configure config.watch.
+
 
 config.backtest = {
   daterange: 'scan',
