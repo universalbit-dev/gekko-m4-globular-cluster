@@ -35,9 +35,12 @@ config.adapter='sqlite';
 config.trader ={enabled:false,exchange:'bitfinex',currency:'BTC',asset:'LTC',key:'',secret:''};
 config.trader={enabled:false,exchange:'kraken',currency:'XBT',asset:'LTC',key:'',secret:''};
 config.trader={enabled:false,exchange:'poloniex',currency:'BTC',asset:'LTC',key:'',secret:''};
-config.trader={enabled:false,exchange:'exmo',currency:'LTC',asset:'ETH',key:'',secret:''};
+config.trader={enabled:false,exchange:'exmo',currency:'BTC',asset:'LTC',key:'',secret:''};
 
-config.candleWriter={enabled:false,adapter:'sqlite'};
+config.candleWriter={enabled:true,adapter:'sqlite'};
+
+config.adviceLogger={enabled:true};
+config.backtestResultExporter={enabled:true};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
