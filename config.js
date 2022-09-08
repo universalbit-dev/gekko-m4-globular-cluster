@@ -40,8 +40,22 @@ config.trader={enabled:false,exchange:'poloniex',currency:'BTC',asset:'LTC',key:
 config.trader={enabled:false,exchange:'exmo',currency:'LTC',asset:'ETH',key:'',secret:''};
 
 config.candleWriter={enabled:false,adapter:'sqlite'};
-//BackTest
-config.backtest ={enabled:true};
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       CONFIGURING BACKTESTING
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Note that these settings are only used in backtesting mode, see here:
+// @link: https://gekko.wizb.it/docs/commandline/backtesting.html
+
+config.backtest = {
+  daterange: 'scan',
+  // daterange: {
+  //   from: "2018-03-01",
+  //   to: "2018-04-28"
+  //},
+  batchSize: 50
+}
+
 //Importer
 config.importer={enabled:true};
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,journalMode: require('./web/isWindows.js') ? 'DELETE' : 'WAL',dependencies:[{module: 'sqlite3'}] };
