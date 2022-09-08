@@ -28,9 +28,7 @@ config.tradingAdvisor = {enabled:true};
 config.tradingAdvisor.candleSize=10;
 config.tradingAdvisor.historySize=1;
 config.tradingAdvisor.method= 'INVERTER';
-//Plugin
-config.paperTrader ={enabled:true};
-config.paperTrader = {reportInCurrency: true,simulationBalance: {asset: 1,currency: 100},verbose: false,feeMaker: 0.5,feeTaker:0.5,feeUsing: 'maker',slippage: 0.05};
+
 //Adapter
 config.adapter='sqlite';
 //**BTC-LTC trader=enabled:false
@@ -55,12 +53,37 @@ config.backtest = {
   //},
   batchSize: 50
 }
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       CONFIGURING PAPERTRADER
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+config.paperTrader = {
+  enabled: true,
+  // report the profit in the currency or the asset?
+  reportInCurrency: true,
+  // start balance, on what the current balance is compared with
+  simulationBalance: {
+    // these are in the unit types configured in the watcher.
+    asset: 1,
+    currency: 100,
+  },
+  // how much fee in % does each trade cost?
+  feeMaker: 0.15,
+  feeTaker: 0.25,
+  feeUsing: 'maker',
+  // how much slippage/spread should Gekko assume per trade?
+  slippage: 0.05,
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       CONFIGURING PERFORMANCE ANALYZER
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5}
+
 
 //Importer
 config.importer={enabled:true};
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,journalMode: require('./web/isWindows.js') ? 'DELETE' : 'WAL',dependencies:[{module: 'sqlite3'}] };
 //Child to Parent
-//config.childToParent = {enabled: true};
+config.childToParent = {enabled: false};
 //Strategy
 config.method='INVERTER';
 
