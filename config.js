@@ -41,7 +41,6 @@ config.candleWriter={enabled:false,adapter:'sqlite'};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Note that these settings are only used in backtesting mode, see here:
 // For backtesting you should enable and configure the following plugins:
 //trading advisor (to run your strategy).
 //paper trader (to execute simulated trades).
