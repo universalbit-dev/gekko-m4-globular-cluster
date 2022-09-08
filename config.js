@@ -55,7 +55,7 @@ config.backtest = {
   //   to: "2018-04-28"
   //},
   batchSize: 50
-}
+};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,11 +75,11 @@ config.paperTrader = {
   feeUsing: 'maker',
   // how much slippage/spread should Gekko assume per trade?
   slippage: 0.05,
-}
+};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PERFORMANCE ANALYZER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5}
+config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
 
 //Importer
