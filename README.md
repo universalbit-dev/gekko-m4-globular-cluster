@@ -157,7 +157,7 @@ node gekko -c config.js
 
 ```
 npm i pm2 -g
-pm2 start gekko-m4-nodejs_v12-ccxt.js
+pm2 start gekko-m4.js
 ```
 
 ##### [Pm2 Process Manager](https://pm2.keymetrics.io/)
