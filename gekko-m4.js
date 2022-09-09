@@ -8,7 +8,7 @@ pm2.connect(function(err) {
   pm2.start({
     script    : 'gekko.js',
     args      : '-c config.js --ui',
-    name      : 'gekko-m4.js'
+    name      : 'gekko-m4'
   }, function(err, apps) {
     if (err) {
       console.error(err)
