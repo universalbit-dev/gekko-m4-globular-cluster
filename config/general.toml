@@ -1,5 +1,5 @@
 # This file is a part of configuration , default setup enable sqlite module 
-#and need sqlite3 as depencies for work.
+#and need sqlite3 as dependencies for work.
 
 enabled = true
 debug = true
