@@ -64,10 +64,12 @@ During these months (from June 2021) I am committed to understanding how this ap
 [introduction](https://universalbit.it/blockchain/gekko-m4/)
 
 
-Install Build Essential:
+Install [Build Essential](https://packages.debian.org/bullseye/build-essential): 
+this package is required for building Debian packages.
 
 ```
 apt install build-essential
+
 ```
 
 NVM Node Version Manager:
@@ -94,18 +96,27 @@ git clone https://universalbit.it:3000/universalbit-blockchain/Gekko-M4.git
 ```
 
 Install Node-Gyp :
+node-gyp is a cross-platform command-line tool written in Node.js for compiling native addon modules for Node.js. [node-gyp](https://www.npmjs.com/package/node-gyp)
 
 ```
 npm i node-gyp -g
+
 ```
 
-Gekko-M4 node_modules:
+Installation of Gekko-M4 from source: eternal development
 
 ```
 npm i --build-from-source
+
 ```
 
 Indicators and Database:
+the indicators are used to create a buying and selling strategy, there are hundreds and each with multiple functions. in backtest mode it is possible to understand some syntax or runtime errors
+
+Databse Sqlite and Sqlite3
+labeled as SQL database engine [sqlite npm](https://www.npmjs.com/package/sqlite)
+
+Sqlite3 module required [sqlite3](https://www.npmjs.com/package/sqlite3)
 
 ```
 npm i tulind --save
@@ -120,6 +131,7 @@ npm i sqlite3 --save
 Thanks developers.
 
 ##### Some note: a working example
+
 
 * Webserver [Nginx](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/docs/webserver.md)
 
