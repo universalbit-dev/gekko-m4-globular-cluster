@@ -42,6 +42,7 @@
     "d3": "^4.x",
     "deasync": "^0.1.21",
     "echarts": "^4.3.x",
+    "exmo-api":"^0.1.0",
     "fs-extra":"^10.0.0",
     "file-system": "^2.2.2",
     "gekko-api-client": "^0.6.14",
