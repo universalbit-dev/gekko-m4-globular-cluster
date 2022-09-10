@@ -1,25 +1,9 @@
 {
-
-"assets": ["BTC","LTC","ETH","USD"],
-
-"currencies":[
-"EXM","USD","EUR","GBP","RUB","PLN","UAH","KZT","USDT","BTC","LTC","DOGE","DASH","ETH","WAVES","ZEC",
-"XRP","ETC","BCH","BTG","EOS","XLM","OMG","TRX","ADA","NEO","GAS","ZRX","GUSD","XEM","SMART","QTUM",
-"DAI","MKR","MNC","USDC","ROOBEE","DCR","XTZ","VLX","CRON","ONT","ONG","ALGO","ATOM","WXT","CHZ","ONE",
-"IQN","PRQ","HAI","LINK","UNI","YFI","GNY","XYM","BTCV","DOT","TON","SGB","SHIB","GMT","SOL","EXFI","SOLO","NEAR"
-],
-
+"assets": ["LTC"],
+"currencies":["BTC"],
 "markets":[
 {
-"pair":["BTC","LTC"],"minimalOrder": {"amount": "0.1","unit": "asset"}
-},
+"pair":["BTC","LTC"],"minimalOrder": {"amount": "0.0004","unit": "asset"}
+}]
 
-{
-"pair": ["USD","LTC"],"minimalOrder": {"amount": "0.1","unit": "asset"}
-},
-
-{
-"pair":["BTC","ETH"],"minimalOrder": {"amount": "0.001","unit": "asset"}
 }
-
-]}
