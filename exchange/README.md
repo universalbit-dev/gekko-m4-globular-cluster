@@ -2,14 +2,12 @@
 
 ##### install available exchanges
 
-Exchange node_modules:
+Exchanges node_modules:
+
 ```
 npm i --build-from-source
 
 ```
-Sqlite3 Database:
-```
-npm i sqlite3 --save
-```
+
 
 Thanks developers
