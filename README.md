@@ -149,10 +149,6 @@ Thanks developers.
 
 *[config.js](https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/src/master/config.js)
 
-MODE:
-
-##### |  Watcher  |  PaperTrade  |  BackTest  |  Realtime  |  Importer  |
-
 
 
 ### Start Application using Pm2
@@ -165,19 +161,15 @@ pm2 start gekko-m4.js
 
 
 #### Standard node commands:
-[First Run] User Interface
+First Run User Interface:
 ```
 node gekko -c config.js --ui
 ```
 
-[Terminal Mode with DEBUG Messages] 
-
+Terminal with DEBUG Messages:
 ```
 node gekko -c config.js
 ```
-
-
-
 -----
 
 
@@ -194,7 +186,7 @@ Note:
 There are no easy gains
 
 ###### Custom Strategy: INVERTER
-This strategy intended as "low freq trade", essentially do nothing in down trend. sells in the event of a sudden rise or an uptrend period.
+This strategy intended as "low freq trade",buy-sell in the event of a sudden rise or an uptrend period.
 
 ### Resources:
 * [Documentation](https://gekko.wizb.it/docs/installation/installing_gekko.html)
