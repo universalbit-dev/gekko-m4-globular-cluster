@@ -120,7 +120,7 @@
   "bugs": {
     "url": "https://universalbit.it:3000/universalbit-blockchain/Gekko-M4/issues"
   },
-  "homepage": "https://",
+  "homepage": "",
   "main": "gekko.js",
   "directories": {
     "doc": "docs",
