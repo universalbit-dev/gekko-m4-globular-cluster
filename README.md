@@ -154,38 +154,29 @@ MODE:
 ##### |  Watcher  |  PaperTrade  |  BackTest  |  Realtime  |  Importer  |
 
 
-*[First Run]()
 
+### Start Application using Pm2
+enabled [cluster-mode](https://pm2.keymetrics.io/docs/usage/cluster-mode/#cluster-mode)
+```
+npm i pm2 -g
+pm2 start gekko-m4.js
+```
+##### [Pm2 Process Manager](https://pm2.keymetrics.io/)
+
+
+#### Standard node commands:
+[First Run] User Interface
 ```
 node gekko -c config.js --ui
 ```
-*[Terminal Mode with DEBUG Messages]()
+
+[Terminal Mode with DEBUG Messages] 
+
 ```
 node gekko -c config.js
 ```
 
 
-##### Start Application using Pm2
-
-```
-npm i pm2 -g
-pm2 start gekko-m4.js
-```
-
-##### [Pm2 Process Manager](https://pm2.keymetrics.io/)
-
-##### Logs
-```
-pm2 logs
-```
-[Read](https://pm2.io/docs/runtime/guide/log-management/)
-
-##### Pm2 Module System installation:
-it is also possible to [manage](https://pm2.keymetrics.io/docs/advanced/pm2-module-system/) modules with pm2.
-
-```
-pm2 i module_name@version
-```
 
 -----
 
