@@ -31,11 +31,6 @@ config.tradingAdvisor.method= 'INVERTER';
 
 //Adapter
 config.adapter='sqlite';
-//**BTC-LTC trader=enabled:false
-config.trader ={enabled:false,exchange:'bitfinex',currency:'BTC',asset:'LTC',key:'',secret:''};
-config.trader={enabled:false,exchange:'kraken',currency:'XBT',asset:'LTC',key:'',secret:''};
-config.trader={enabled:false,exchange:'poloniex',currency:'BTC',asset:'LTC',key:'',secret:''};
-config.trader={enabled:false,exchange:'exmo',currency:'BTC',asset:'LTC',key:'',secret:''};
 
 config.candleWriter={enabled:true,adapter:'sqlite'};
 
@@ -59,9 +54,20 @@ config.backtest = {
   //},
   batchSize: 50
 };
+
+//**BTC-LTC trader=enabled:false
+//if plugin trader enabled:true  disable plugin papertrader
+config.trader ={enabled:false,exchange:'bitfinex',currency:'BTC',asset:'LTC',key:'',secret:''};
+config.trader={enabled:false,exchange:'kraken',currency:'XBT',asset:'LTC',key:'',secret:''};
+config.trader={enabled:false,exchange:'poloniex',currency:'BTC',asset:'LTC',key:'',secret:''};
+config.trader={enabled:false,exchange:'exmo',currency:'BTC',asset:'LTC',key:'',secret:''};
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//plugin papertrade enabled:true  disable plugin trader
+
 config.paperTrader = {
   enabled: true,
   // report the profit in the currency or the asset?
