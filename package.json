@@ -60,7 +60,7 @@
     "koa-static": "^2.0.0",
     "kraken-api": "^1.0.1",
     "ledger-analytics": "^0.1.9-a",
-    "lodash": "^2.4.1",
+    "lodash": "^2.4.2",
     "mathjs": "^9.4.4",
     "moment": "^2.29.1",
     "nan": "^2.15.0",
