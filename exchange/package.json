@@ -27,7 +27,7 @@
     "kraken-api": "^1.0.1",
     "exmo-api": "^0.1.0",
     "node-binance-api": "^0.12.5",
-    "poloniex-node-api": "^3.x",
+    "poloniex-node-api": "^2.x",
     "therocktrading": "^0.9.0",
     "lodash": "^4.17.5",
     "moment": "^2.22.1",
