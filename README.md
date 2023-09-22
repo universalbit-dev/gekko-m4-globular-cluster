@@ -7,11 +7,10 @@
 #### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 
 #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
-
-#### Gekko-M4 Engine node v20.4.0 (npm v9.7.2)
+#### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
 -----
 
-
+#### Gekko-M4 Engine node v20.4.0 (npm v9.7.2)
 #### Required Packages:
 
 ```
