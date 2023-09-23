@@ -6,7 +6,7 @@
   "dependencies": {
     "async": "^3.2.4",
     "ccxt": "^4.0.98",
-    "core-js":"^3.32.2",
+    "core-js": "^3.32.2",
     "lodash": "^4.17.21",
     "lodash-migrate": "^0.3.16",
     "moment": "^2.22.1",
