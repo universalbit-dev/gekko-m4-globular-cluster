@@ -16,7 +16,6 @@
 ```
 sudo apt install curl git build-essential
 ```
-
 ##### NVM Node Version Manager:
 nvm allows you to quickly install and use different versions of node via the command line.
 ```
@@ -63,11 +62,12 @@ node gekko.js -c config.js --backtest
 
 #### Required Packages:
 ```
-sudo apt install perl 
+sudo apt install perl libdatetime-perl libjson-perl
 ```
 #### Install dependencies:
 
 ```
+sudo cpan install RJBS/perl-5.38.0.tar.gz
 sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy  
 ```
 #### Usage
