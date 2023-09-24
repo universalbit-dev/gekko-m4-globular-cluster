@@ -1,7 +1,7 @@
 /*
 
 */
-let _ = require('lodash');
+let _ = require('../lodash');
 require('lodash-migrate');
 
 var async = require('async');
@@ -11,8 +11,7 @@ var Heart = require(dirs.budfox + 'heart');
 var MarketDataProvider =  require(dirs.budfox + 'marketDataProvider');
 var CandleManager = require(dirs.budfox + 'candleManager');
 var BudFox = function(config) {
-  _.bindAll(this);
-
+  _.bindAll(this, _.functionsIn(this));
   Readable.call(this, {objectMode: true});
 // BudFox internal modules:
   this.heart = new Heart;
