@@ -44,15 +44,11 @@ Thanks developers.
 #### Run Gekko-M4 
 ```
 npm i pm2 -g
-pm2 start gekko-m4.js --env development
+pm2 start nn.js --env development
+pm2 monit 
 ```
 #### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 
-
-#### Importer
-```
-node gekko.js -c config.js --import
-```
 #### Backtest
 ```
 node gekko.js -c config.js --backtest
