@@ -10,7 +10,7 @@ var util = require('../core/util');
 const config = util.getConfig();
 
 const ChildToParent = function() {
-
+_.bindAll(this, _.functionsIn(this));
   subscriptions
     // .filter(sub => config.childToParent.events.includes(sub.event))
     .forEach(sub => {
