@@ -1,11 +1,10 @@
 const _ = require('../lodash');
-
 let fs = require('fs-extra');
 
 var util = require('../util');
 var dirs = util.dirs();
 
-// build a config object out of a directory of TOML files
+// build a config object out of a directory of JSON files
 module.exports = function() {
   const configDir = util.dirs().config;
 
@@ -15,7 +14,7 @@ module.exports = function() {
   if(_config.tradingAdvisor.enabled) {
     // also load the strat
     let strat = _config.tradingAdvisor.method;
-    let stratFile = configDir + 'strategies/' + strat + '.json';
+    let stratFile = configDir + 'strategies/conf/' + strat + '.json';
     if(!fs.existsSync(stratFile))
       util.die('Cannot find the strategy config file for ' + strat);
   }
