@@ -1,27 +1,26 @@
 const _ = require('../../core/lodash');
-
+require('lodash-migrate');
 let fs = require('fs-extra');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
-const talib=require('../../core/talib');
+//const talib=require('../../core/talib');
 const tulind=require('../../core/tulind');
 const log = require('../../core/log');
 
 
-const allowedTalibIndicators = _.keys(talib);
+//const allowedTalibIndicators = _.keys(talib);
 const allowedTulipIndicators = _.keys(tulind);
 
 const AsyncIndicatorRunner = function() {
-  this.talibIndicators = {};
+  //this.talibIndicators = {};
   this.tulipIndicators = {};
-
   this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
   this.candlePropsCacheSize = 10000;
-
   this.inflight = false;
   this.backlog = [];
   this.age = 0;
+  _.bindAll(this, _.functionsIn(this));
 }
 
 AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
@@ -51,20 +50,23 @@ AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
 
 AsyncIndicatorRunner.prototype.calculateIndicators = function(next) {
   const done = _.after(
-    _.size(this.talibIndicators) + _.size(this.tulipIndicators),
-    this.handlePostFlight(next)
+    //_.size(this.talibIndicators) +
+    _.size(this.tulipIndicators),this.handlePostFlight(next)
   );
 
   // handle result from talib
+  /*
   const talibResultHander = name => (err, result) => {
     if(err)
       util.die('TALIB ERROR:', err);
 
-    this.talibIndicators[name].result = _.mapValues(result, v => _.last(v));
+    //this.talibIndicators[name].result = _.mapValues(result, v => _.last(v));
     done();
   }
+  */
 
   // handle result from talib
+/*
   _.each(
     this.talibIndicators,
     (indicator, name) => indicator.run(
@@ -72,7 +74,7 @@ AsyncIndicatorRunner.prototype.calculateIndicators = function(next) {
       talibResultHander(name)
     )
   );
-
+*/
   // handle result from tulip
   var tulindResultHander = name => (err, result) => {
     if(err)
@@ -104,6 +106,7 @@ AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
   }
 }
 
+/*
 AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, parameters) {
   if(!talib)
     util.die('Talib is not enabled');
@@ -121,6 +124,7 @@ AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, paramete
     result: NaN
   }
 }
+*/
 
 AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, parameters) {
   if(!tulind) {
