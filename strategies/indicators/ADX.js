@@ -7,21 +7,19 @@ let util = require('../../core/util');
 let config = util.getConfig();
 let log = require('../../core/log.js');
 
-
 var DX = require('./DX.js');
 
 var Indicator = function (period)
 {
     this.input = 'candle';
     this.indicates = 'trend_strength';
-
     this.dx = new DX(period);
-
     this.result = 0;
     this.periodRatio = (period - 1)/period;
     this.initadx = 0;
     this.initialized = 1;
     this.period = period;
+    _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle)

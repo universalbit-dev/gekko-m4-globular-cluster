@@ -16,6 +16,7 @@ var Indicator = function(config) {
   this.cci = new CCI({ history: this.cciLength, constant: 0.015 });
   this.ema1 = new EMA(this.emaLength);
   this.ema2 = new EMA(this.emaLength);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle) {

@@ -8,26 +8,20 @@ let util = require('../../core/util');
 let config = util.getConfig();
 let log = require('../../core/log.js');
 
-var ADX = require('./DX');
+var ADX = require('./ADX');
 
 var Indicator = function (period) {
     this.input = 'candle';
-
-
     this.ADX = new ADX(period);
-
-
     this.age = 0;
+    _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle) {
-
     this.ADX.update(candle);
-
     this.result = this.ADX.result;
     this.DIup = this.ADX.dx.dm_up;
     this.DIdown = this.ADX.dx.dm_down;
-
     this.age++;
 }
 

@@ -15,6 +15,7 @@ var Indicator = function (weight) {
     this.prices = [];
     this.result = 0;
     this.age = 0;
+    _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (price) {

@@ -7,11 +7,10 @@ let log = require('../../core/log.js');
 
 var Indicator = function(settings) {
     this.input = 'candle';
-
     this.result = NaN;
     this.age = 0;
-
     this.last = 0;
+    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(candle) {

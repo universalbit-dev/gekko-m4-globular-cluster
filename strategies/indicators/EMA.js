@@ -9,6 +9,7 @@ var Indicator = function(weight) {
   this.weight = weight;
   this.result = false;
   this.age = 0;
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(price) {
@@ -16,10 +17,8 @@ Indicator.prototype.update = function(price) {
   // ema, because we haven't calculated any yet.
   if(this.result === false)
     this.result = price;
-
   this.age++;
   this.calculate(price);
-
   return this.result;
 }
 

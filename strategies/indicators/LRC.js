@@ -20,7 +20,7 @@ var Indicator = function(settings) {
       this.history.push(0.0);
       this.x.push(i);
   }
-
+  _.bindAll(this, _.functionsIn(this));
   // log.debug("Created LRC indicator with h: ", this.depth);
 }
 

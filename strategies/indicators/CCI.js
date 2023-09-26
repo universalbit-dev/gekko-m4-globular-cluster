@@ -16,7 +16,8 @@ var Indicator = function(settings) {
   this.constant = settings.constant;
   this.maxSize = settings.history;
   for (var i = 0; i < this.maxSize; i++)
-      this.hist.push(0.0);
+  this.hist.push(0.0);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(candle) {

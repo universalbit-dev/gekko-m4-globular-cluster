@@ -15,6 +15,7 @@ var Indicator = function(config) {
   this.wmaLength = config.wmaLength;
   this.cci = new CCI({ history: this.cciLength, constant: 0.015 });
   this.wma = new WMA(this.wmaLength);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle) {

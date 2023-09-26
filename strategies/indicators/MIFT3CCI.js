@@ -17,6 +17,7 @@ var Indicator = function(config) {
   this.ema1 = new EMA(this.emaLength);
   this.ema2 = new EMA(this.emaLength);
   this.ema3 = new EMA(this.emaLength);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle) {

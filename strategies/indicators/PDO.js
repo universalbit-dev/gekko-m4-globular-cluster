@@ -11,12 +11,11 @@ var SMA = require("./SMA");
 
 var Indicator = function(settings) {
     this.input = 'price';
-
     this.result = NaN;
     this.age = 0;
     this.period = settings.optInTimePeriod;
-
     this.sma = SMA(this.period);
+    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(price) {

@@ -11,6 +11,7 @@ var Indicator = function(config) {
   this.result = false;
   this.inner = new EMA(config.weight);
   this.outer = new EMA(config.weight);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 // add a price and calculate the EMAs and

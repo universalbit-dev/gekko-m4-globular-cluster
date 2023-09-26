@@ -9,12 +9,11 @@ var SMA = require('./SMA');
 
 var Indicator = function(settings) {
     this.input = 'candle';
-
     this.result = NaN;
     this.age = 0;
-
     this.shortsma = new SMA(5);
     this.longsma = new SMA(34);
+    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(candle) {

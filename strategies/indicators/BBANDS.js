@@ -12,12 +12,11 @@ var SMA = require('./SMA.js');
 var Indicator = function(BBSettings) {
     this.input='price';
     this.settings = BBSettings;
-
     this.center = new SMA(this.settings.TimePeriod);
-
     this.lower=0;
     this.middle=0;
     this.upper=0;
+    _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.calcstd = function(prices, Average)

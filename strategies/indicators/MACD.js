@@ -12,6 +12,7 @@ var Indicator = function(config) {
   this.short = new EMA(config.short);
   this.long = new EMA(config.long);
   this.signal = new EMA(config.signal);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(price) {

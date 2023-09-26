@@ -8,17 +8,13 @@ var SMA = require('./SMA');
 
 var Indicator = function(settings) {
     this.input = 'candle';
-
     this.result = NaN;
     this.age = 0;
-
-
     this.lastPrice = -1;
-
     this.timePeriod = settings.optInTimePeriod;
-
     this.posHist = [];
     this.negHist = [];
+    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.sum = function(a, b) {

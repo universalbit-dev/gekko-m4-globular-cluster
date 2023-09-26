@@ -11,19 +11,17 @@ var ATR = require('./ATR.js');
 
 var Indicator = function (period)
 {
-
     this.input='candle';
-
     this.lastcandle = false;
     this.requiredHistory = period;
     this.period = period;
-
     this.age = 0;
     this.result = false;
     this.atr = new ATR(period);
     this.periodWeight = (period-1)/period;
     this.dm_up = 0;
     this.dm_down = 0;
+    _.bindAll(this, _.functionsIn(this));
 }
 
 

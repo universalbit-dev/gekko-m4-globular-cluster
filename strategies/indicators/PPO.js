@@ -15,6 +15,7 @@ var Indicator = function(config) {
   this.long = new EMA(config.long);
   this.MACDsignal = new EMA(config.signal);
   this.PPOsignal = new EMA(config.signal);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(price) {
