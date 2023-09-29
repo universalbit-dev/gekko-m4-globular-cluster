@@ -6,7 +6,7 @@ var moment = require('moment');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
-var log = require(dirs.core + '/log');
+var log = require('../log');
 
 var adapter = config[config.adapter];
 var Reader = require(dirs.gekko + adapter.path + '/reader');
