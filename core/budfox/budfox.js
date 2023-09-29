@@ -5,7 +5,7 @@ let _ = require('../lodash');
 require('lodash-migrate');
 
 var async = require('async');
-var util = require(__dirname + '/../util');
+var util = require('../util');
 var dirs = util.dirs();
 var Heart = require(dirs.budfox + 'heart');
 var MarketDataProvider =  require(dirs.budfox + 'marketDataProvider');
