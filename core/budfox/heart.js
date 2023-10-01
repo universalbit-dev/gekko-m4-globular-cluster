@@ -2,7 +2,7 @@
 
 
 
-let _ = require('lodash');
+let _ = require('../lodash');
 require('lodash-migrate');
 var util = require('../util');
 var log = require('../log');
@@ -18,7 +18,7 @@ else
 
 var Heart = function() {
   this.lastTick = false;
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 util.makeEventEmitter(Heart);
