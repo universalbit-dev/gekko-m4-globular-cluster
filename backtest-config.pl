@@ -31,7 +31,7 @@ binance:LTC:BTC
 # If You are using only one exchange or one exchange and one currency You can put default values below, 
 # and adding only asset name to @pairs ex: NULS, ADA, TRX - without binance:BTC before asset ex: perl backtest.pl -p NULS,ADA,TRX.
 
-$default_set = 'exchange_simulator:BTC';
+#$default_set = 'exchange_simulator:BTC';
 
 
 # CSV file name. You don't need change this. All new data will append to exist file without deleting or replacing.
