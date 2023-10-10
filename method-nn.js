@@ -58,7 +58,7 @@ config.adapter='sqlite';
 
 //Trader
 config.trader={enabled:false,
-exchange:'',currency:'BTC',asset:'LTC',key:'',secret:''};
+exchange:'',currency:'LTC',asset:'BTC',key:'',secret:''};
 
 config.candleWriter={enabled:false,
   adapter:'sqlite'};
