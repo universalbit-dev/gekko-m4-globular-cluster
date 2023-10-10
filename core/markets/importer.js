@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('../lodash');
 require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
@@ -10,10 +10,10 @@ var gekkoEnv = util.gekkoEnv();
 var adapter = config[config.adapter];
 var daterange = config.importer.daterange;
 
-var from = moment.utc(config.daterange.from);
+var from = moment.utc(daterange.from);
 
-if(config.daterange.to) {
-  var to = moment.utc(config.daterange.to);
+if(daterange.to) {
+  var to = moment.utc(daterange.to);
 } else {
   var to = moment().utc();
   log.debug(
@@ -43,7 +43,7 @@ if(to <= from)
   util.die('This daterange does not make sense.')
 
 var Market = function() {
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
   this.exchangeSettings = exchangeChecker.settings(config.watch);
 
   this.tradeBatcher = new TradeBatcher(this.exchangeSettings.tid);
