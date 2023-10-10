@@ -14,7 +14,6 @@ function(candleSize) {
   this.candleSize = candleSize;
   this.smallCandles = [];
   this.calculatedCandles = [];
-  _.bindAll(this);
 }
 
 util.makeEventEmitter(CandleBatcher);
