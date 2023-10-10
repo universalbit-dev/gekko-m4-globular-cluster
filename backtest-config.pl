@@ -3,14 +3,15 @@ no warnings qw(uninitialized);
 # Put your strategy names between brackets in line below. Strategy seperate with space or newline.
 #You can add all Your strategies from gekko/strategies directory with adding line ALL.
 @strategies = qw(
-Strategy
+NEURALNET
 );
 # Put your pairs between brackets in line below. Use exchange:currency:asset format.
 #Seperate pair using space or newline. You can add all Your paris with ALL line or all pairs for exchange with exchange_simulator:ALL 
 #line or exchange_simulator:BTC:ALL line. Another option is adding dates for dataset for indivual pairs, 
 #ex: exchange_simulator:BNB:NULS:2018-04-05:2018-05-01
 @pairs = qw(
-exchange_simulator:LTC:BTC
+kraken:LTC:XBT
+binance:LTC:BTC
 );
 
 # BUG - USE ONE CANDLE VALUE TEMPORARY! Put your candle values between brackets in line below. 
