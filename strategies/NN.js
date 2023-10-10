@@ -1,107 +1,116 @@
-//https://cs.stanford.edu/people/karpathy/convnetjs/started.html
-let convnetjs = require('../core/convnet.js');
-let DQNAgent = require('../core/rl.js');
-let deepqlearn = require('convnet/build/deepqlearn');
-const tulind = require('../core/tulind');
+/*
+NeuralNetwork
+NoBuy - NoSell
+*/
 
-let math = require('mathjs');
-var log = require('../core/log.js');
-let config = require('../method-nn.js');
-let _ = require('../core/lodash');
-var ws = require ('reconnecting-websocket');
-var NN = require('./indicators/NN.js');
-var method = {
+//https://cs.stanford.edu/people/karpathy/convnetjs/started.html
+var convnetjs = require('../core/convnet.js');
+var math = require('mathjs');
+var log = require('../core/log');
+var config= require('../core/util').getConfig();
+var tulind = require('tulind');
+
+var strat = {
   priceBuffer : [],
   predictionCount : 0,
-  batchsize : 8,
-  layer_neurons : 20,
-  layer_activation : 'relu',
-  scale : 1,
-  prevAction : 'wait',
+  batchsize : 10,
+  num_neurons : 19,
+  layer_activation : 'sigmoid',
+  layer_activation2 : 'relu',
+  scale : 5,
+  prevAction : 'forward',
   prevPrice : 0,
   stoplossCounter : 0,
-  hodl_threshold : 1,
-  
+  hodle_threshold : 1,
+
   init : function() {
-
+    //indicators
+    //DEMA
+    this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
     this.name = 'NN';
-    this.candle = candle;
-    this.requiredHistory = 60;
-    this.out_depth_nn=4;
+    this.requiredHistory = config.tradingAdvisor.historySize;
 
-    this.addTulipIndicator('demaFast', 'dema', {optInTimePeriod: this.settings.DEMA});
-    var layers = [
-      {type:'input', out_sx: 7, out_sy:8, out_depth: this.out_depth_nn},
-      {type:'svm', num_classes:20},
-      {type:'conv', num_neurons: 10000,group_size: 2,activation:'sigmoid'},
-      {type:'svm', num_classes:20},
-      {type:'regression', num_neurons: 20}
+    const layers = [
+      {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
+      {type:'conv', num_neurons: 19, activation: this.layer_activation},
+      {type:'svm', num_classes:1},
+      {type:'regression', num_neurons: 7},
     ];
-    var layers2 = [
-      {type:'input', out_sx: 7, out_sy:8, out_depth: this.out_depth_nn},
-      {type:'svm', num_classes:20},
-      {type:'fc', num_neurons: 10000,group_size: 2,activation:'relu'},
-      {type:'svm', num_classes:20},
-      {type:'regression', num_neurons: 20}
-    ];
-    var layers3 = [
-      {type:'input', out_sx: 7, out_sy:8, out_depth: this.out_depth_nn},
-      {type:'svm', num_classes:20},
-      {type:'conv', num_neurons: 10000,group_size: 2,activation:'sigmoid'},
-      {type:'svm', num_classes:20},
-      {type:'regression', num_neurons: 20}
+    const layers2 = [
+      {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
+      {type:'conv', num_neurons: 19, activation: this.layer_activation2},
+      {type:'svm', num_classes:1},
+      {type:'regression', num_neurons: 1}
     ];
 
     this.nn = new convnetjs.Net();
-    this.nn.makeLayers(layers,layers2,layers3);
-    this.trainer = new convnetjs.SGDTrainer(this.nn, {
-      learning_rate: this.settings.learning_rate,
-      momentum: this.settings.momentum,
-      batch_size: this.batchsize,
-      l2_decay: this.settings.decay
-    });
-    this.hodl_threshold = this.settings.hodl_threshold || 1;
-  },
+    this.nn.makeLayers(layers,layers2);
 
-  learn: function() {
-    for (let i = 0; i < this.priceBuffer.length - this.out_depth_nn; i++) {
-      let data = this.priceBuffer[i];
-      let current_price = this.priceBuffer[i + 1];
+
+    if(this.settings.method == 'sgd')
+    {
+      this.trainer = new convnetjs.SGDTrainer(this.nn, {
+        learning_rate: this.settings.learning_rate,
+        momentum: this.settings.momentum,
+        batch_size: this.batchsize,
+        l2_decay: this.settings.decay,
+        l1_decay: this.settings.decay
+      });
+    }
+    else if(this.settings.method == 'adadelta')
+    {
+      this.trainer = new convnetjs.SGDTrainer(this.nn, {
+        method: this.settings.method,
+        learning_rate: this.settings.learning_rate,
+        momentum: this.settings.momentum,
+        batch_size: this.batchsize,
+        l2_decay: this.settings.decay,
+        l1_decay: this.settings.decay
+      });
+    }
+    else
+    {
+      this.trainer = new convnetjs.Trainer(this.nn, {
+        method: this.settings.method,
+        batch_size: this.batchsize,
+        eps: 1e-6,
+        ro: 0.95,
+        l2_decay: this.settings.decay,
+        l1_decay: this.settings.decay
+      });
+    }
+
+
+    this.hodle_threshold = this.settings.hodle_threshold || 1;
+  },
+  learn : function () {
+    for (let i = 0; i < this.priceBuffer.length - 1; i++) {
+      let data = [this.priceBuffer[i]];
+      let current_price = [this.priceBuffer[i + 1]];
       let vol = new convnetjs.Vol(data);
       this.trainer.train(vol, current_price);
-      let predicted_values = this.nn.forward(vol);
-      let accuracymatch = predicted_values.w[0] === current_price.first;
-      this.nn.backward(accuracymatch);
       this.predictionCount++;
     }
   },
-
   setNormalizeFactor : function(candle) {
-    this.candle = candle;
     this.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
     log.debug('Set normalization factor to',this.scale);
   },
-
   update : function(candle)
   {
-    let demaFast = this.tulipIndicators.demaFast.result.result;
-    this.candle = candle;
+    price=this.tulipIndicators.price.result.result;
     if (1 === this.scale && 1 < candle.high && 0 === this.predictionCount) this.setNormalizeFactor(candle);
-    this.priceBuffer.push([
-      (candle.low / this.scale),(candle.high / this.scale),
-      (candle.close / this.scale),(candle.open / this.scale),
-      (candle.volume / 1000),(demaFast / this.scale)
-    ]);
+    this.priceBuffer.push(price / this.scale );
 
     if (2 > this.priceBuffer.length) return;
-    for (tweakme=0;tweakme<5;++tweakme)this.learn();
-
+     for (i=0;i<3;++i)
+      this.learn();
     while (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.shift();
   },
-
   onTrade: function(event) {
-    if ('buy' === event.action){this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;this.prevPrice = event.price;
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
   },
 
   predictCandle : function() {
@@ -111,30 +120,40 @@ var method = {
   },
 
   check : function(candle) {
-    this.candle = candle;
     if(this.predictionCount > this.settings.min_predictions)
     {
-    if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action)
-      {this.stoplossCounter++;log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');}
+      if (
+          'buy' === this.prevAction
+          && this.settings.stoploss_enabled
+          && 'stoploss' === this.indicators.stoploss.action
+      ) {
+        this.stoplossCounter++;
+        log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');
+        //this.advice('short');
+      }
       let prediction = this.predictCandle() * this.scale;
-      let currentPrice = candle.open;
+      let currentPrice = candle.close;
       let meanp = math.mean(prediction, currentPrice);
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
-      let signalSell = candle.open > this.prevPrice || candle.open < (this.prevPrice*this.hodl_threshold);
+      let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.hodle_threshold);
       let signal = meanp < currentPrice;
       if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
-      {log.debug('|NN|NO-BUY|',meanAlpha);}
+      {
+        log.debug("Buy - Predicted variation: ",meanAlpha);
+        return log.info('NOBUY');
+        //this.advice('long');
+      }
       else if
       ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
-      {log.debug('|NN|NO-SELL|',meanAlpha);}
-
+      {
+        log.debug("Sell - Predicted variation: ",meanAlpha);
+        return log.info('NOSELL')
+        //this.advice('short');
+      }
     }
   },
-
   end : function() {
     log.debug('Triggered stoploss',this.stoplossCounter,'times');
   }
-
 };
-
-module.exports = method;
+module.exports = strat;
