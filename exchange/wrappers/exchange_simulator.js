@@ -6,10 +6,9 @@ const moment = require('moment');
 const TREND_DURATION = 1000;
 
 const Trader = function() {
+  _.bindAll(this, _.functionsIn(this));
   this.name = 'Exchange Simulator';
   this.at = moment().subtract(30, 'minutes');
-
-
   // simulate data
   this.price = 100;
   this.trend = 'up';
