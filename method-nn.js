@@ -22,7 +22,7 @@ config.debug =true;
 config.watch = {exchange: '',currency:'LTC',asset:'BTC',key:'',secret:''};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:10};
+config.tradingAdvisor = {enabled:false,candleSize:1,historySize:10};
 config.tradingAdvisor.method= 'NEURALNET';
 
 /*
@@ -103,6 +103,6 @@ config.importer.daterange={to:"2018-01-05 00:00:00"};
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,dependencies:[{module: 'sqlite3'}] };
 
 //Child to Parent
-config.childToParent = {enabled: true};
+config.childToParent = {enabled: false};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
