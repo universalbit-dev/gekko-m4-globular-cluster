@@ -9,7 +9,7 @@ var math = require('mathjs');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var ws = require ('reconnecting-websocket');
-var tulind = require('../core/tulind');
+var tulind = require('tulind');
 
 var strat = {
   priceBuffer : [],
