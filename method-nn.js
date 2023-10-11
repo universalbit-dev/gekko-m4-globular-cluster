@@ -71,8 +71,7 @@ config.backtestResultExporter={enabled:false};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 config.backtest={enabled:false};
-config.backtest.daterange={from:"2018-01-01 00:00:00"};
-config.backtest.daterange={to:"2018-01-05 00:00:00"};
+config.backtest.daterange={from:"2018-01-01 00:00:00",to:"2018-01-05 00:00:00"};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
@@ -97,8 +96,7 @@ config.performanceAnalyzer = {enabled: false,
 
 //Importer
 config.importer={enabled:false};
-config.importer.daterange={from:"2018-01-01 00:00:00"};
-config.importer.daterange={to:"2018-01-05 00:00:00"};
+config.importer.daterange={from:"2018-01-01 00:00:00",to:"2018-01-05 00:00:00"};
 
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version: 0.1,dependencies:[{module: 'sqlite3'}] };
 
