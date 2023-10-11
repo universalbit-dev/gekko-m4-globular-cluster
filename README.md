@@ -51,11 +51,13 @@ node gekko.js -c method-nn.js --backtest
 ```
 sudo apt install perl libdatetime-perl libjson-perl
 ```
-#### Install dependencies:
+#### Perl dependencies:
 
 ```
 sudo cpan install RJBS/perl-5.38.0.tar.gz
-sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy Net::SSL Net::SSLeay  
+sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy Net::SSL Net::SSLeay
+sudo perlbrew use perl-5.20.1
+sudo cpan DBI
 ```
 #### Run
 ```
