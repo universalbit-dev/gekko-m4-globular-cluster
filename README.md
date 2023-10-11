@@ -51,31 +51,27 @@ node gekko.js -c method-nn.js --backtest
 ```
 sudo apt install perl libdatetime-perl libjson-perl
 ```
-#### Perl dependencies:
 
-```
-sudo cpan install RJBS/perl-5.38.0.tar.gz
-sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy Net::SSL Net::SSLeay
-```
 [PerlBrew](https://perlbrew.pl/)
 ```
-sudo apt install perlbrew
-sudo cpan DBI
+\curl -L https://install.perlbrew.pl | bash
+sudo perlbrew install perl-5.36.1
+sudo perlbrew switch perl-5.36.1
 ```
-#### Run
+
+#### Perl Modules:
+```
+sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy Net::SSL Net::SSLeay DBI
+```
+
+#### Run backtest-tool
 ```
 ./backtest.pl
 ```
-
 #### Usage
 ```
 usage: ./backtest.pl [mode] [optional parameter]
 To run other features ./backtest.pl -h
-```
-
-#### Run BackTest-Tool
-```
-perl ./backtest.pl
 ```
 
 #### Run Gekko-M4 
