@@ -1,4 +1,4 @@
-let _ = require('../lodash');
+const _ = require('../lodash');
 require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
@@ -9,12 +9,16 @@ var moment = require('moment');
 var adapter = config[config.adapter];
 var Reader = require(dirs.gekko + adapter.path + '/reader');
 var daterange = config.backtest.daterange;
+var requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
 
-var to = moment.utc(config.daterange.to);
-var from = moment.utc(config.daterange.from);
+var to = moment.utc(daterange.to);
+var from = moment.utc(daterange.from).subtract(requiredHistory, 'm');
 
 if(to <= from)
   util.die('This daterange does not make sense.')
+
+if(!config.paperTrader.enabled)
+  util.die('You need to enable the \"Paper Trader\" first to run a backtest.')
 
 if(!from.isValid())
   util.die('invalid `from`');
@@ -23,8 +27,7 @@ if(!to.isValid())
   util.die('invalid `to`');
 
 var Market = function() {
-
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
   this.pushing = false;
   this.ended = false;
   this.closed = false;
@@ -37,6 +40,10 @@ var Market = function() {
   log.write('');
 
   this.reader = new Reader();
+
+
+  log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', daterange.from, 'UTC');
+
   this.batchSize = config.backtest.batchSize;
   this.iterator = {
     from: from.clone(),
@@ -102,8 +109,11 @@ Market.prototype.processCandles = function(err, candles) {
     to: this.iterator.from.clone().add(this.batchSize * 2, 'm').subtract(1, 's')
   }
 
-  if(!this.closed)
-    this.get();
+  if(!this.closed) {
+    setTimeout(() => {
+      this.get();
+    }, 5);
+  }
 }
 
 module.exports = Market;
