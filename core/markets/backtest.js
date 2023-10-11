@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('../lodash');
 require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
