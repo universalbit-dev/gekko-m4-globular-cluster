@@ -49,7 +49,7 @@ node gekko.js -c method-nn.js --backtest
 
 #### Required Packages:
 ```
-sudo apt install perl libdatetime-perl libjson-perl
+sudo apt install perl libdatetime-perl libjson-perl perlbrew
 ```
 
 [PerlBrew](https://perlbrew.pl/)
