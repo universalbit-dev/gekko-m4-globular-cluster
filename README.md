@@ -60,7 +60,6 @@ sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUti
 [PerlBrew](https://perlbrew.pl/)
 ```
 sudo apt install perlbrew
-sudo perlbrew use perl-5.20.1
 sudo cpan DBI
 ```
 #### Run
