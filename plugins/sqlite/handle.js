@@ -22,7 +22,7 @@ else var sqlite3 = require('sqlite3');
 
 var plugins = require(util.dirs().gekko + 'plugins');
 var version = adapter.version;
-var dbName = config.watch.exchange.toLowerCase() + '_' + '.db';
+var dbName = config.watch.exchange.toLowerCase() + '_' + '0.1' + '.db';
 var dir = dirs.gekko + adapter.dataDirectory;
 var fullPath = [dir, dbName].join('/');
 var mode = util.gekkoMode();
