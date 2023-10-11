@@ -55,8 +55,8 @@ sudo apt install perl libdatetime-perl libjson-perl
 [PerlBrew](https://perlbrew.pl/)
 ```
 \curl -L https://install.perlbrew.pl | bash
-sudo perlbrew install perl-5.36.1
-sudo perlbrew switch perl-5.36.1
+perlbrew install perl-5.36.1
+perlbrew switch perl-5.36.1
 ```
 
 #### Perl Modules:
