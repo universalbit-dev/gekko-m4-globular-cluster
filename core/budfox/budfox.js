@@ -46,7 +46,7 @@ var BudFox = function(config) {
   this.heart.pump();
 }
 
-var Readable = require('readable-stream').Readable;
+var Readable = require('stream').Readable;
 BudFox.prototype = Object.create(Readable.prototype, {
   constructor: { value: BudFox }
 });

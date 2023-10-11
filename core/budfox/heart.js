@@ -2,7 +2,7 @@
 
 
 
-let _ = require('../lodash');
+const _ = require('../lodash');
 require('lodash-migrate');
 var util = require('../util');
 var log = require('../log');
@@ -14,7 +14,7 @@ if (util.getConfig().watch.tickrate)
 else if(util.getConfig().watch.exchange != 'exmo')
   var TICKRATE = 2;
 else
-  var TICKRATE = 20;
+  var TICKRATE = 10;
 
 var Heart = function() {
   this.lastTick = false;
