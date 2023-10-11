@@ -2,7 +2,8 @@
 
 
 */
-let _ = require('lodash');require('lodash-migrate');
+const _ = require('../../core/lodash');
+require('lodash-migrate');
 
 var util = require('../../core/util');
 var config = util.getConfig();
@@ -13,7 +14,7 @@ var sqliteUtil = require('./util');
 var log = require('../../core/log');
 
 var Store = function(done, pluginMeta) {
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
   this.done = done;
 
   this.db = sqlite.initDB(false);

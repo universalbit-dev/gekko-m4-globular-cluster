@@ -2,7 +2,8 @@
 
 
 */
-let _ = require('lodash');require('lodash-migrate');
+const _ = require('../../core/lodash');
+require('lodash-migrate');
 
 var util = require('../../core/util.js');
 var config = util.getConfig();
@@ -14,10 +15,9 @@ var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 
 var Reader = function() {
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
   this.db = sqlite.initDB(true);
 }
-
 
 // returns the most recent window complete candle
 // windows within `from` and `to`

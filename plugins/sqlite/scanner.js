@@ -5,7 +5,7 @@
 const _ = require('../../core/lodash');
 
 const async = require('async');
-let fs = require('fs-extra');
+const fs = require('fs-extra');
 const util = require('../../core/util.js');
 var config = util.getConfig();
 

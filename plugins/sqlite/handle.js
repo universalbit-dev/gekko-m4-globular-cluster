@@ -4,8 +4,7 @@
 */
 
 const _ = require('../../core/lodash');
-
-let fs = require('fs-extra');
+const fs = require('fs-extra');
 var util = require('../../core/util.js');
 var config = util.getConfig();
 
@@ -23,7 +22,7 @@ else var sqlite3 = require('sqlite3');
 
 var plugins = require(util.dirs().gekko + 'plugins');
 var version = adapter.version;
-var dbName = config.watch.exchange.toLowerCase() + '_' + version + '.db';
+var dbName = config.watch.exchange.toLowerCase() + '_' + '.db';
 var dir = dirs.gekko + adapter.dataDirectory;
 var fullPath = [dir, dbName].join('/');
 var mode = util.gekkoMode();
