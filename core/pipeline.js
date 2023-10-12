@@ -17,7 +17,7 @@ var async = require('async');
 var log = require(dirs.core + 'log');
 var pipeline = (settings) => {
   var mode = settings.mode;
-  var config = settings.config;
+  var config = util.getConfig();
   var GekkoStream = require(dirs.core + 'gekkoStream');
   var plugins = [];
   var emitters = {};
