@@ -2,14 +2,13 @@
 // them and sends it to the parent process.
 
 const log = require('../core/log');
-let _ = require('lodash');
-require('lodash-migrate');
+const _ = require('../core/lodash');
 
 const util = require('../core/util');
 const env = util.gekkoEnv();
 const config = util.getConfig();
 const moment = require('moment');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 const BacktestResultExporter = function() {
   this.performanceReport;
@@ -35,7 +34,7 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.trades)
     this.processTradeCompleted = null;
 
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
