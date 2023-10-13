@@ -11,7 +11,6 @@ NEURALNET
 #ex: exchange_simulator:BNB:NULS:2018-04-05:2018-05-01
 @pairs = qw(
 kraken:LTC:XBT
-binance:LTC:BTC
 );
 
 # BUG - USE ONE CANDLE VALUE TEMPORARY! Put your candle values between brackets in line below. 
