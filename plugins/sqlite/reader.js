@@ -16,7 +16,7 @@ var sqliteUtil = require('./util');
 
 var Reader = function() {
   _.bindAll(this, _.functionsIn(this));
-  this.db = sqlite.initDB(true);
+  this.db = sqlite.initDB(false);
 }
 
 // returns the most recent window complete candle
