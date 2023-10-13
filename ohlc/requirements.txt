@@ -6,7 +6,7 @@ ccxt==4.0.76
 certifi==2023.7.22
 cffi==1.15.1
 chardet==3.0.4
-cryptography==41.0.3
+cryptography==41.0.4
 idna==2.8
 launchpadlib ==1.11.0
 multidict==4.5.2
