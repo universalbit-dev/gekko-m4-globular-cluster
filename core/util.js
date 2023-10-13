@@ -7,7 +7,6 @@ var moment = require('moment');
 const _ = require('./lodash-core');
 
 var fs = require('fs-extra');
-var file = require('file-system');
 var semver = require('semver');
 var program = require('commander');
 var startTime = moment().utc();
