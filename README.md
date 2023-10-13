@@ -3,9 +3,9 @@
 ### Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
 #### unlike easy gains
 #### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
-
-#### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
 #### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
+#### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
+
 ---
 
 * #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
