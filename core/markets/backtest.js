@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('../lodash');
 require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
@@ -27,7 +27,7 @@ if(!to.isValid())
   util.die('invalid `to`');
 
 var Market = function() {
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
   this.pushing = false;
   this.ended = false;
   this.closed = false;
