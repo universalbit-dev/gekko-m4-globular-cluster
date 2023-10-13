@@ -38,6 +38,10 @@ npm i && npm audit fix
 ```
 Thanks developers.
 
+#### Import
+```
+node gekko.js -c method-nn.js --import
+```
 #### Backtest
 ```
 node gekko.js -c method-nn.js --backtest
