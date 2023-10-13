@@ -49,7 +49,8 @@ node gekko.js -c method-nn.js --import
 node gekko.js -c method-nn.js --backtest
 ```
 
-### [BackTest-Tool]
+### [BackTest-Tool](https://github.com/xFFFFF/Gekko-BacktestTool)
+CLI tool that enhances the features of Gekko.The tool performs a test with multiple pairs on a single run.
 
 #### Required Packages:
 ```
@@ -97,7 +98,6 @@ npm install tulind --build-from-source
 ---
 #### Resources:
 * Gekko-Quasar-UI [0.6.9-m4](https://github.com/universalbit-dev/gekko-quasar-ui)
-* Webserver [Apache2 and Nginx](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/webserver.md)
 * [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
 * [Forum](https://forum.gekko.wizb.it/)
