@@ -1,4 +1,6 @@
-#### Virtual Environment [NodEnv](https://gist.github.com/mrbar42/faa10a68e32a40c2363aed5e150d68da)
+also can be integrated with the environment which was built
+by virtualenv (python) [nodeenv 1.8.0](https://pypi.org/project/nodeenv/)
+
 ```
 # install the base app
 git clone https://github.com/nodenv/nodenv.git ~/.nodenv
@@ -28,3 +30,8 @@ node --version
 npm --version
 npx --version
 ```
+
+Thanks 
+@mrbar42 
+#### Virtual Environment [NodEnv](https://gist.github.com/mrbar42/faa10a68e32a40c2363aed5e150d68da)
+
