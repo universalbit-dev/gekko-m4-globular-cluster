@@ -38,6 +38,8 @@ npm i && npm audit fix
 ```
 Thanks developers.
 
+* [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
+
 #### Import
 ```
 node gekko.js -c method-nn.js --import
