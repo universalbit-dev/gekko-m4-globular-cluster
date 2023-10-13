@@ -1,4 +1,4 @@
-let _ = require('../lodash');
+let _ = require('lodash');
 require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
@@ -27,7 +27,7 @@ if(!to.isValid())
   util.die('invalid `to`');
 
 var Market = function() {
-  _.bindAll(this, _.functionsIn(this));
+  _.bindAll(this);
   this.pushing = false;
   this.ended = false;
   this.closed = false;
@@ -90,7 +90,7 @@ Market.prototype.processCandles = function(err, candles) {
 
   if(!this.ended && amount < this.batchSize) {
     var d = function(ts) {
-      return moment.unix(ts).utc().format('YYYY-MM-DD HH:mm:ss');
+      return moment.unix(ts).utc().format('YYYY-MM-DD');
     }
     var from = d(_.first(candles).start);
     var to = d(_.last(candles).start);
