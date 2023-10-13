@@ -66,9 +66,7 @@ config.backtestResultExporter={enabled:false};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-config.backtest={enabled:false};
-config.backtest.daterange={from:"2018-01-01 00:00:00",to:"2018-02-30 00:00:00"};
+config.backtest={enabled:false,daterange:'scan'};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
