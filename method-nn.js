@@ -68,7 +68,7 @@ config.backtestResultExporter={enabled:false};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 config.backtest={enabled:false};
-config.backtest.daterange={from:"2018-01-01 00:00:00",to:"2018-01-05 00:00:00"};
+config.backtest.daterange={from:"2018-01-01 00:00:00",to:"2018-02-30 00:00:00"};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
@@ -90,9 +90,11 @@ config.paperTrader = {enabled: false,
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.performanceAnalyzer = {enabled: false,riskFreeReturn: 5};
 
-//Importer
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       CONFIGURING IMPORTER
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.importer={enabled:false};
-config.importer.daterange={from:"2018-01-01 00:00:00",to:"2018-01-05 00:00:00"};
+config.importer.daterange={from:"2018-01-01 00:00:00",to:"2018-12-01 00:00:00"};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING DB
