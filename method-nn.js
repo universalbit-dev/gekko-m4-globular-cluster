@@ -36,20 +36,9 @@ hodl_threshold:1,price_buffer_len:100,min_predictions:1000
 };
 
 config.NN= {
-DEMA:5,
-threshold_buy:1.0,
-interval:3,
-threshold_sell:-1.0,
-method:'sgd',
-learning_rate:0.01,
-momentum:0.9,
-l1_decay:0.001,
-decay:0.001,
-stoploss_enabled:false,
-stoploss_threshold:0.85,
-hodl_threshold:1,
-price_buffer_len:100,
-min_predictions:9
+interval:3,threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
+l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:false,stoploss_threshold:0.85,
+hodl_threshold:1,price_buffer_len:100,min_predictions:9
 };
 
 //Adapter
@@ -72,20 +61,14 @@ config.backtest = {
   batchSize: 50
 }
 
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.paperTrader = {enabled: false,
   reportInCurrency: true,
-  simulationBalance: {
-  asset: 1,
-  currency: 100,
-  },
-  feeMaker: 0.15,
-  feeTaker: 0.25,
-  feeUsing: 'maker',
-  slippage: 0.05,
+  simulationBalance: {asset: 1,currency: 100},
+  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
+  slippage: 0.05
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
