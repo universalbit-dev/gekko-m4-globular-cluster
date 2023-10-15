@@ -22,7 +22,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false,candleSize:1,historySize:10};
-config.tradingAdvisor.method= 'NEURALNET';
+config.tradingAdvisor.method= 'NN';
 
 /*
 |NO-BUY||NO-SELL|
@@ -57,9 +57,11 @@ config.backtestResultExporter={enabled:false};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.backtest = {
   enabled:false,
-  daterange: 'full',
+  daterange: {
+    from: "2021-01-01",to: "2021-03-01"
+  },
   batchSize: 50
-}
+};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
@@ -89,8 +91,5 @@ config.importer = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
-
-//Child to Parent
-config.childToParent = {enabled: false};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
