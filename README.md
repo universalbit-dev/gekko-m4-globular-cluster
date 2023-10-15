@@ -52,8 +52,14 @@ node gekko.js -c method-nn.js --import
 ```
 node gekko.js -c method-nn.js --backtest
 ```
+#### Trade
+* [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md)
+```
+node gekko.js -c method-nn.js
+```
 
-#### Run Gekko-M4 
+#### Run Gekko-M4
+
 ```
 npm i pm2 -g
 pm2 start nn.js
