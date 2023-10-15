@@ -1,71 +1,41 @@
 {
- "name": "gekko-m4",
- "version": "0.6.8-m4",
- "description": "Gekko-M4",
- "main": "gekko.js",
- "repository": {
-  "type": "git",
-  "url": "git+https://github.com/universalbit-dev/gekko-m4.git"
- },
- "contribution": "universalbit-dev",
- "author": "Mike van Rossum <mike@mvr.me>",
- "license": "MIT",
- "dependencies": {
-  "@neurosity/reinforcejs": "^1.0.0",
-  "async": "^3.2.4",
-  "cjs": "^0.0.11",
-  "co-fs": "^1.2.0",
-  "commander": "^6.2.1",
-  "convnet": "^1.0.0",
-  "core-js": "^3.32.2",
-  "crypto-js": "^3.1.9-1",
-  "fs-extra": "^11.1.0",
-  "gekko-broker": "file:exchange",
-  "humanize-duration": "^3.20.1",
-  "kraken-api": "^1.0.1",
-  "lodash": "^3.10.1",
-  "lodash-migrate": "^0.3.16",
-  "mathjs": "^9.4.4",
-  "moment": "^2.22.1",
-  "npm": "^9.6.0",
-  "opn": "^4.0.2",
-  "path": "^0.12.7",
-  "pm2": "^5.3.0",
-  "promisify-node": "^0.5.0",
-  "prompt-lite": "^0.1.1",
-  "reconnecting-websocket": "^4.4.0",
-  "relieve": "^2.2.3",
-  "request-promise": "^4.2.2",
-  "retry": "^0.12.0",
-  "semver": "^5.4.1",
-  "sqlite": "^4.1.2",
-  "sqlite3": "^5.1.4",
-  "stats-lite": "^2.0.4",
-  "tulind": "^0.8.20",
-  "util": "^0.12.5",
-  "uuid": "^9.0.0",
-  "ws": "^8.12.1"
- },
- "engines": {
-  "node": ">=16"
- },
- "keywords": [
-  "gekko-m4",
-  "watching",
-  "papertrade",
-  "trade",
-  "backtest",
-  "educational",
-  "cryptocurrency"
- ],
- "bugs": {
-  "url": "https://github.com/universalbit-dev/gekko-m4/issues"
- },
- "homepage": "https://github.com/universalbit-dev/gekko-m4#readme",
- "directories": {
-  "doc": "docs"
- },
- "scripts": {
-  "postinstall": "npm link exchange/ && npm fund"
- }
+  "name": "gekko-broker",
+  "version": "0.6.8-m4",
+  "description": "Gekko's order execution library",
+  "main": "dependencyCheck.js",
+  "dependencies": {
+    "async": "^3.2.4",
+    "ccxt": "^4.0.98",
+    "core-js": "^3.32.2",
+    "lodash": "^4.17.21",
+    "lodash-migrate": "^0.3.16",
+    "moment": "^2.22.1",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "request-promise-core": "^1.1.4",
+    "retry": "^0.13.1",
+    "semver": "^7.5.3",
+    "sqlite": "^4.2.1",
+    "sqlite3": "^5.1.6",
+    "tulind": "^0.8.20"
+  },
+  "contribution": "universalbit-dev",
+  "author": "Mike van Rossum <mike@mvr.me>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/universalbit-dev/gekko-m4.git#master"
+  },
+  "keywords": [
+    "exchange",
+    "wrappers",
+    "gekko-broker"
+  ],
+  "bugs": {
+    "url": "https://github.com/universalbit-dev/gekko-m4/issues"
+  },
+  "homepage": "https://github.com/universalbit-dev/gekko-m4/tree/master#readme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
