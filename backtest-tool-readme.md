@@ -1,3 +1,36 @@
+### [BackTest-Tool](https://github.com/xFFFFF/Gekko-BacktestTool)
+CLI tool that enhances the features of Gekko.The tool performs a test with multiple pairs on a single run.
+
+#### Required Packages:
+```
+sudo apt install perl libdatetime-perl libjson-perl perlbrew
+```
+
+[PerlBrew](https://perlbrew.pl/)
+```
+\curl -L https://install.perlbrew.pl | bash
+perlbrew install perl-5.36.1
+perlbrew switch perl-5.36.1
+```
+
+#### Perl Modules:
+```
+sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy Net::SSL Net::SSLeay DBI
+```
+
+#### Run backtest-tool
+```
+./backtest.pl
+```
+#### Usage
+```
+usage: ./backtest.pl [mode] [optional parameter]
+To run other features ./backtest.pl -h
+```
+
+
+
+
 # Gekko BacktestTool
 ![Logo](https://i.imgur.com/G3Dcv7i.png)   
 [![Donate with Bitcoin](https://en.cryptobadges.io/badge/small/32G2cYTNFJ8heKUbALWSgGvYQikyJ9dHZp)](https://en.cryptobadges.io/donate/32G2cYTNFJ8heKUbALWSgGvYQikyJ9dHZp)   
