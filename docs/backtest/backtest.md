@@ -6,7 +6,7 @@
 | CandleWriter | Store Candle in a database      | disabled        |
 | PaperTrader      | Simulate Fake Trades  | enabled       |
 | Importer | Import Exchange Data      | disabled        |
-| TradingAdvisor | Buy and Sell Advice      | enabled        |
+| TradingAdvisor | Advice Buy-Sell Orders      | enabled        |
 
 ```
 node gekko -c method.nn -b
