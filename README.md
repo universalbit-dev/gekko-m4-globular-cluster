@@ -43,10 +43,12 @@ Thanks developers.
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 
 #### Import
+* [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
 ```
 node gekko.js -c method-nn.js --import
 ```
-#### Backtest
+#### Backtest 
+* [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
 ```
 node gekko.js -c method-nn.js --backtest
 ```
