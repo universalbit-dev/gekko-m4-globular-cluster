@@ -1,3 +1,5 @@
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
+
 * backtest mode
 
 | Plugin         | description     | enable  |
