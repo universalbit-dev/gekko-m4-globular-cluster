@@ -5,7 +5,7 @@ var plugins = [
     slug: 'candleWriter',
     async: true,
     modes: ['realtime', 'importer'],
-    path: config => config.adapter + '/writer',
+    path: config => 'sqlite/writer.js',
     version: 0.1,
   },
   {
