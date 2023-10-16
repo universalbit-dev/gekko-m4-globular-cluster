@@ -2,7 +2,7 @@
 // them and sends it to the parent process.
 
 const log = require('../core/log');
-const _ = require('lodash');
+const _ = require('../core/lodash');
 require('lodash-migrate');
 
 const util = require('../core/util');
@@ -35,7 +35,7 @@ const BacktestResultExporter = function() {
 
   if(!config.backtestResultExporter.data.trades)
     this.processTradeCompleted = null;
-  _.bindAll(this);
+  _.bindAll(this, _.functionsIn(this));
 }
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
