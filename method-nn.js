@@ -44,7 +44,6 @@ config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 config.candleWriter={enabled:false,adapter:'sqlite'};
 
 config.adviceLogger={enabled:false};
-config.backtestResultExporter={enabled:false};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
@@ -55,6 +54,18 @@ config.backtest = {
     from: "2021-01-01",to: "2021-03-01"
   },
   batchSize: 50
+};
+
+config.backtestResultExporter = {
+  enabled: false,
+  writeToDisk: true,
+  data: {
+    stratUpdates: false,
+    portfolioValues: true,
+    stratCandles: true,
+    roundtrips: true,
+    trades: true
+  }
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
