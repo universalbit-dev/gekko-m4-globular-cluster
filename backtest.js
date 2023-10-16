@@ -21,7 +21,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:false,candleSize:1,historySize:10};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:10};
 config.tradingAdvisor.method= 'NN';
 
 /*
@@ -41,23 +41,24 @@ config.adapter='sqlite';
 //Trader
 config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
+config.candleWriter={enabled:false,adapter:'sqlite'};
 
-config.adviceLogger={enabled:false};
+config.adviceLogger={enabled:true};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.backtest = {
-  enabled:false,
+  enabled:true,
   daterange: {
     from: "2021-01-01",to: "2021-03-01"
   },
+
   batchSize: 50
 };
 
 config.backtestResultExporter = {
-  enabled: false,
+  enabled: true,
   writeToDisk: true,
   data: {
     stratUpdates: false,
@@ -71,7 +72,7 @@ config.backtestResultExporter = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.paperTrader = {enabled: false,
+config.paperTrader = {enabled: true,
   reportInCurrency: true,
   simulationBalance: {asset: 1,currency: 100},
   feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
@@ -81,15 +82,15 @@ config.paperTrader = {enabled: false,
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PERFORMANCE ANALYZER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.performanceAnalyzer = {enabled: false,riskFreeReturn: 5};
+config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING IMPORTER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.importer = {
-  enabled:true,
+  enabled:false,
   daterange:{from:"2021-01-01",to:"2021-03-01"}
-}
+};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING DB
