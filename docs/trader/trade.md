@@ -81,7 +81,6 @@ secret:'0-0000000000000000000000000000000000000000'
 config.candleWriter={enabled:true,adapter:'sqlite'};
 
 config.adviceLogger={enabled:true};
-config.backtestResultExporter={enabled:false};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
@@ -93,6 +92,18 @@ config.backtest = {
   },
 
   batchSize: 50
+};
+
+config.backtestResultExporter = {
+  enabled: false,
+  writeToDisk: true,
+  data: {
+    stratUpdates: false,
+    portfolioValues: true,
+    stratCandles: true,
+    roundtrips: true,
+    trades: true
+  }
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
