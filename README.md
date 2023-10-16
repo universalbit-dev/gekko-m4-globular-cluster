@@ -45,12 +45,12 @@ Thanks developers.
 #### Import
 * [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
 ```
-node gekko.js -c method-nn.js --import
+node gekko.js -c import.js -i
 ```
 #### Backtest 
 * [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
 ```
-node gekko.js -c method-nn.js --backtest
+node gekko.js -c backtest.js -b
 ```
 #### Trade
 * [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md)
