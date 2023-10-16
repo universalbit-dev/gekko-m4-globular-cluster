@@ -14,7 +14,7 @@
 
 
 ```
-node gekko -c method.nn -i
+node gekko -c import.js -i
 ```
 
 ##### *Terminal OutPut:
@@ -30,7 +30,7 @@ node gekko -c method.nn -i
 
 * import [mode]
 
-method-nn.js
+import.js
 
 ```
 /*
