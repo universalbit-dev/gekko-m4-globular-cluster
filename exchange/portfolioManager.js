@@ -2,7 +2,7 @@
 
 
 */
-let _=require('../core/lodash');require('lodash-migrate');
+const _=require('../core/lodash');require('lodash-migrate');
 const async=require('async');const errors=require('./exchangeErrors');class Portfolio{constructor(config,api){_.bindAll(this, _.functionsIn(this));this.config=config;this.api=api;this.balances={};this.fee=null;}
 getBalance(fund){return this.getFund(fund).amount;}
 getFund(fund){return _.find(this.balances,function(f){return f.name===fund});}
