@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const _ = require('lodash');
+let _ = require('../../core/lodash3');
 require('lodash-migrate');
 
 const exchangeUtils = require('../exchangeUtils');

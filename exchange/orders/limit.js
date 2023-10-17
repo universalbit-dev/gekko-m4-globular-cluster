@@ -11,7 +11,7 @@ throw ':(';
 
 */
 
-const _ = require('lodash');
+const _ = require('../../core/lodash3');
 require('lodash-migrate');
 const async = require('async');
 const events = require('events');

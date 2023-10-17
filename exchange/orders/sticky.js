@@ -12,7 +12,7 @@
     - native move
 */
 
-const _ = require('lodash');
+const _ = require('../../core/lodash3');
 require('lodash-migrate');
 
 const async = require('async');
@@ -152,14 +152,14 @@ class StickyOrder extends BaseOrder {
     }
 
     const alreadyFilled = this.calculateFilled();
-  
+
     let setTakerLimit = String(this.setTakerLimit);
     if (setTakerLimit.charAt(setTakerLimit.length-1) == '%') {
       if (setTakerLimit.slice(0,-1) > 0 && this.side === 'buy') this.price = this.roundPrice(Number(this.price) + Number(this.price*setTakerLimit.slice(0,-1)/100));
       if (setTakerLimit.slice(0,-1) > 0 && this.side === 'sell') this.price = this.roundPrice(Number(this.price) - Number(this.price*setTakerLimit.slice(0,-1)/100));
     } else {
       if (this.setTakerLimit > 0 && this.side === 'buy') this.price = this.roundPrice(Number(this.price) + Number(this.setTakerLimit));
-      if (this.setTakerLimit > 0 && this.side === 'sell') this.price = this.roundPrice(Number(this.price) - Number(this.setTakerLimit));  
+      if (this.setTakerLimit > 0 && this.side === 'sell') this.price = this.roundPrice(Number(this.price) - Number(this.setTakerLimit));
     }
 
     this.submit({
@@ -768,7 +768,7 @@ class StickyOrder extends BaseOrder {
       next(undefined, summary);
     });
   }
- 
+
 }
 
 module.exports = StickyOrder;
