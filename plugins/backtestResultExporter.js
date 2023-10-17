@@ -126,7 +126,7 @@ BacktestResultExporter.prototype.writeToDisk = function(backtest, next) {
   if(config.backtestResultExporter.filename) {
     filename = config.backtestResultExporter.filename;
   } else {
-    const now = moment().format('YYYY-MM-DD_HH-mm-ss');
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
     filename = `backtest-${config.tradingAdvisor.method}-${now}.json`;
   }
 
