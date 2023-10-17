@@ -1,6 +1,6 @@
 var log = require('../core/log');
 moment = require('moment');
-let _ = require('lodash');
+let _ = require('../core/lodash3');
 require('lodash-migrate');
 
 util = require('../core/util');
