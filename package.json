@@ -23,7 +23,7 @@
   "gekko-broker": "file:exchange",
   "humanize-duration": "^3.20.1",
   "kraken-api": "^1.0.1",
-  "lodash": "^3.10.1",
+  "lodash": "^4.17.21",
   "lodash-migrate": "^0.3.16",
   "mathjs": "^11.11.2",
   "moment": "^2.29.4",
