@@ -2,7 +2,7 @@
 // - `candles`: array of minutly candles.
 // - `candle`: the most recent candle after a fetch Gekko.
 
-let _ = require('lodash');
+let _ = require('../lodash3');
 require('lodash-migrate');
 
 var moment = require('moment');

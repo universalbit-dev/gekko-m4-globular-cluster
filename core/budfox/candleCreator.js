@@ -4,7 +4,7 @@
 
 //The CandleCreator creates one minute candles based on trade batches.
 
-let _ = require('lodash');
+let _ = require('../lodash3');
 require('lodash-migrate');
 
 var moment = require('moment');
