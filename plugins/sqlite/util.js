@@ -3,6 +3,8 @@
 
 */
 const _ = require('../../core/lodash');
+require('lodash-migrate');
+
 var util = require('../../core/util');
 
 var config = util.getConfig();
