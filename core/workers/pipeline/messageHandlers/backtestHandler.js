@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require('../lodash3');
 
 // Relay the backtest message it when it comes in.
 module.exports = done => {
