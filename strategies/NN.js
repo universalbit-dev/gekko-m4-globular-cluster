@@ -5,7 +5,7 @@ NoBuy - NoSell
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
-var math = require('mathjs');
+var math = require('mathjs');var uuid =require('uuid');
 var log = require('../core/log');
 var config= require('../core/util').getConfig();
 var tulind = require('tulind');
