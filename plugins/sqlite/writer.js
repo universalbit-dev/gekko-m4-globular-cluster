@@ -1,7 +1,7 @@
 /*
 CandleWriter
 */
-let _ = require('lodash');
+let _ = require('../../core/lodash3');
 require('lodash-migrate');
 
 var util = require('../../core/util');
