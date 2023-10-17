@@ -3,6 +3,7 @@
 
 */
 const _ = require('../../core/lodash');
+require('lodash-migrate');
 
 const async = require('async');
 const fs = require('fs-extra');
