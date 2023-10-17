@@ -1,6 +1,6 @@
 const _ = require('../lodash');
 
-var batchSize = 10000;
+var batchSize = 1000;
 let fs = require('fs-extra');
 var moment = require('moment');
 var util = require('../util');
@@ -29,7 +29,7 @@ if(!to.isValid())
 
 let iterator = {
   from: from.clone(),
-  to: from.clone().add(batchSize, 'm').subtract(1, 'm')
+  to: from.clone().add(batchSize, 'm').subtract(1, 's')
 }
 
 var DONE = false;
@@ -65,7 +65,7 @@ const getBatch = () => {
 const shiftIterator = () => {
   iterator = {
     from: iterator.from.clone().add(batchSize, 'm'),
-    to: iterator.from.clone().add(batchSize * 2, 'm').subtract(1, 'm')
+    to: iterator.from.clone().add(batchSize * 2, 'm').subtract(1, 's')
   }
 }
 
