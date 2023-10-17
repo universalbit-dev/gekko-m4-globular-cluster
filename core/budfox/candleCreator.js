@@ -21,7 +21,7 @@ var config = require('../../core/util.js').getConfig();
 
 var CandleCreator = function() {
   _.bindAll(this);
-  this.threshold = moment("1970-01-01", "YYYY-MM-DD");
+  this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
 util.makeEventEmitter(CandleCreator);
