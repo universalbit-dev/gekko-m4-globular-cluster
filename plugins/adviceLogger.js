@@ -7,6 +7,14 @@ util = require('../core/util');
 config = util.getConfig();
 adviceLoggerConfig = config.adviceLogger;
 
+(function(_) {
+  var bindAll = _.bindAll;
+  _.bindAll = function(object, methodNames) {
+    if(typeof methodNames==='undefined') methodNames = _.functions(object);
+    return bindAll(object, methodNames);
+  };
+})(_);
+
 var Actor = function() {
   this.price = 'N/A';
   this.marketTime = {format: function() {return 'N/A'}};
