@@ -8,6 +8,7 @@
     "axios": "^1.5.1",
     "ccxt": "^4.0.98",
     "core-js": "^3.32.2",
+    "events": "^3.3.0",
     "lodash": "^4.17.21",
     "lodash-migrate": "^0.3.16",
     "moment": "^2.22.1",
