@@ -21,12 +21,16 @@ var strat = {
   prevAction : 'forward',
   prevPrice : 0,
   stoplossCounter : 0,
+  stoploss_enabled: true,
+  threshold:0.85,
   hodle_threshold : 1,
 
   init : function() {
     //indicators
     //DEMA
     this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
+    this.addIndicator('stoploss', 'StopLoss');
+    
     this.name = 'NN';
     this.requiredHistory = config.tradingAdvisor.historySize;
 
