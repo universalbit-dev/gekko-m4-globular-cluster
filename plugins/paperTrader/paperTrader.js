@@ -2,7 +2,7 @@
 
 
 */
-let _ = require('lodash');require('lodash-migrate');
+let _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util.js');
 const ENV = util.gekkoEnv();
 var log = require('../../core/log.js');
