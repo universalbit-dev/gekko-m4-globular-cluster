@@ -12,8 +12,8 @@ var tulind = require('tulind');
 var strat = {
   priceBuffer : [],
   predictionCount : 0,
-  batchsize : 10,
-  num_neurons : 19,
+  batchsize : 50,
+  num_neurons : 10000,
   layer_activation : 'sigmoid',
   layer_activation2 : 'relu',
   scale : 5,
@@ -33,22 +33,22 @@ var strat = {
     this.addIndicator('stoploss', 'StopLoss');
 
     this.name = 'NN';
+    this.nn = new convnetjs.Net();
     this.requiredHistory = config.tradingAdvisor.historySize;
 
     const layers = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
-      {type:'conv', num_neurons: 19, activation: this.layer_activation},
+      {type:'conv', num_neurons:10000, activation: this.layer_activation},
       {type:'svm', num_classes:1},
-      {type:'regression', num_neurons: 7},
+      {type:'regression', num_neurons: 1},
     ];
     const layers2 = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
-      {type:'conv', num_neurons: 19, activation: this.layer_activation2},
+      {type:'conv', num_neurons:10000, activation: this.layer_activation2},
       {type:'svm', num_classes:1},
       {type:'regression', num_neurons: 1}
     ];
 
-    this.nn = new convnetjs.Net();
     this.nn.makeLayers(layers,layers2);
 
 
