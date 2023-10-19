@@ -1,6 +1,5 @@
 /*
 NeuralNetwork
-NoBuy - NoSell
 */
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
@@ -23,6 +22,8 @@ var strat = {
   stoplossCounter : 0,
   stoploss_enabled: true,
   threshold:0.85,
+  threshold_buy:1.0,
+  threshold_sell:-1.0,
   hodle_threshold : 1,
 
   init : function() {
@@ -30,7 +31,7 @@ var strat = {
     //DEMA
     this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
     this.addIndicator('stoploss', 'StopLoss');
-    
+
     this.name = 'NN';
     this.requiredHistory = config.tradingAdvisor.historySize;
 
@@ -133,7 +134,7 @@ var strat = {
       ) {
         this.stoplossCounter++;
         log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');
-        //this.advice('short');
+        this.advice('short');
       }
       let prediction = this.predictCandle() * this.scale;
       let currentPrice = candle.close;
@@ -144,15 +145,13 @@ var strat = {
       if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
         log.debug("Buy - Predicted variation: ",meanAlpha);
-        return log.info('NOBUY');
-        //this.advice('long');
+        log.info('BUY');this.advice('long');
       }
       else if
       ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
       {
         log.debug("Sell - Predicted variation: ",meanAlpha);
-        return log.info('NOSELL')
-        //this.advice('short');
+        log.info('SELL');this.advice('short');
       }
     }
   },
