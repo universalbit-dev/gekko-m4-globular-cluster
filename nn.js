@@ -8,7 +8,7 @@ pm2.connect(function(err) {
 pm2.start({
   script    : 'gekko.js',
   args      : '-c method-nn.js',
-  name      : '|NN|NO-BUY-NO-SELL|'
+  name      : '|NeuralNetwork|'
 },
 
 function(err, apps) {
