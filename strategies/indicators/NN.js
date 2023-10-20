@@ -6,7 +6,7 @@ let log = require('../../core/log.js');
 
 let convnetjs = require('../../core/convnet.js');
 let DQNAgent = require('../../core/rl.js');
-let deepqlearn = require('convnet/build/deepqlearn');
+let deepqlearn = require('../../core/deepqlearn');
 var math = require('mathjs');
 var Indicator = function(settings) {
   this.input = 'candle'
