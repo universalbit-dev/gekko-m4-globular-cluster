@@ -4,6 +4,7 @@ NeuralNetwork
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
+var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var log = require('../core/log');
 var config= require('../core/util').getConfig();
