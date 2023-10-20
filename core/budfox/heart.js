@@ -1,6 +1,6 @@
-// The heart schedules and emit ticks every 20 seconds.
+/*
 
-
+*/
 
 const _ = require('../lodash');
 require('lodash-migrate');
