@@ -11,7 +11,7 @@
 | TradingAdvisor | Advice Buy-Sell Orders      | enabled        |
 
 ```
-node gekko -c method.nn -b
+node gekko -c backtest.js -b
 ```
 
 ##### *Terminal OutPut:
