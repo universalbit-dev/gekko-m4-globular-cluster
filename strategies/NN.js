@@ -26,6 +26,7 @@ var strat = {
   threshold_buy:1.0,
   threshold_sell:-1.0,
   hodle_threshold : 1,
+  min_predictions:999,
 
   init : function() {
     //indicators
