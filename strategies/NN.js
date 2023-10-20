@@ -144,13 +144,13 @@ var strat = {
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
       let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.hodle_threshold);
       let signal = meanp < currentPrice;
-      if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
+      if ('buy' != this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
         log.debug("Buy - Predicted variation: ",meanAlpha);
         log.info('BUY');this.advice('long');
       }
       else if
-      ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
+      ('sell' != this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
       {
         log.debug("Sell - Predicted variation: ",meanAlpha);
         log.info('SELL');this.advice('short');
