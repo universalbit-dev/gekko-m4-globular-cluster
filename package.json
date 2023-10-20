@@ -36,7 +36,7 @@
   "prompt-lite": "^0.1.1",
   "reconnecting-websocket": "^4.4.0",
   "relieve": "^2.2.3",
-  "retry": "^0.12.0",
+  "retry": "^0.13.1",
   "semver": "^5.4.1",
   "sqlite": "^4.1.2",
   "sqlite3": "^5.1.4",
