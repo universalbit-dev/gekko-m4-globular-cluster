@@ -17,7 +17,7 @@ var strat = {
   layer_activation : 'sigmoid',
   layer_activation2 : 'relu',
   scale : 5,
-  prevAction : 'continue',
+  prevAction : 'wait',
   prevPrice : 0,
   stoplossCounter : 0,
   stoploss_enabled: true,
