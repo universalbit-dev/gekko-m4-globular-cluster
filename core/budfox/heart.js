@@ -11,7 +11,7 @@ var moment = require('moment');
 
 if (util.getConfig().watch.tickrate)
   var TICKRATE = util.getConfig().watch.tickrate;
-else if(util.getConfig().watch.exchange != 'kraken')var TICKRATE = 2;
+else if(util.getConfig().watch.exchange !== 'kraken')var TICKRATE = 2;
 else
   var TICKRATE = 10;
 
