@@ -36,7 +36,7 @@ else
 
 var Market = function() {
 
-  _.bindAll(this, _.functionsIn(this));
+  _.bindAll(this);
 
   Readable.call(this, {objectMode: true});
 
