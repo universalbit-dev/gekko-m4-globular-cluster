@@ -2,7 +2,7 @@
 // database (which is expected to be updated regularly, like with a
 // realtime market running in parallel).
 
-const _ = require('../lodash');
+const _ = require('../lodash3');
 require('lodash-migrate');
 const moment = require('moment');
 
