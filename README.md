@@ -69,6 +69,14 @@ pm2 monit
 * [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
 
+#### Setup OpenDNS 
+* [OpenDNS](https://www.opendns.com/setupguide/)
+```
+pm2 start opendns.js
+```
+
+
+
 #### Indicators:
 #### [Tulip Node](https://www.npmjs.com/package/tulind)
 Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
