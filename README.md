@@ -42,18 +42,18 @@ Thanks developers.
 
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 
-#### Import
-* [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
+ 
+* ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
 ```
 node gekko.js -c import.js -i
 ```
-#### Backtest 
-* [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
+ 
+* ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
 ```
 node gekko.js -c backtest.js -b
 ```
-#### Trade
-* [configuration file](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md)
+ 
+* ##### [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md)
 ```
 node gekko.js -c method-nn.js
 ```
@@ -68,9 +68,10 @@ pm2 monit
 * [BackTest-Tool]()
 * [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
+* [OpenDNS](https://www.opendns.com/)
 
-#### Setup OpenDNS 
-* [OpenDNS](https://www.opendns.com/setupguide/)
+
+##### Run OpenDNS 
 ```
 pm2 start opendns.js
 ```
