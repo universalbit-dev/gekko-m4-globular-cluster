@@ -1,5 +1,6 @@
 const Kraken = require('kraken-api');
 const moment = require('moment');
+const ws = require('./WebSocketsPolyfill');
 //lodash 4.17.15
 const _ = require('../../core/lodash');
 const exchangeUtils = require('../exchangeUtils');
