@@ -19,6 +19,7 @@ config.debug =true;
 
 //import kraken exchange data
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:2};
+config.market={type:'leech'};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false,candleSize:1,historySize:10};
