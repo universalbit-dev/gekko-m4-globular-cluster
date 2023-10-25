@@ -6,18 +6,16 @@ const _ = require('../../core/lodash');
 const exchangeUtils = require('../exchangeUtils');
 const retry = exchangeUtils.retry;
 const scientificToDecimal = exchangeUtils.scientificToDecimal;
-
+const util= require('../../core/util');
+const config = util.getConfig();
 const marketData = require('./kraken-markets.json');
 
 const Trader = function(config) {
-  _.bindAll(this, _.functionsIn(this));
-  if(_.isObject(config)) {
-    this.key = config.key;
-    this.secret = config.secret;
-    this.currency = config.currency.toUpperCase()
-    this.asset = config.asset.toUpperCase();
-  }
-
+  _.bindAll(this,_.functionsIn(this));
+  this.key = config.key;
+  this.secret = config.secret;
+  this.currency = config.currency.toUpperCase()
+  this.asset = config.asset.toUpperCase();
   this.name = 'kraken';
   this.since = null;
 
@@ -31,7 +29,7 @@ const Trader = function(config) {
   this.kraken = new Kraken(
     this.key,
     this.secret,
-    {timeout: +moment.duration(60, 'seconds')}
+
   );
 }
 
