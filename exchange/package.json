@@ -6,7 +6,7 @@
   "dependencies": {
     "async": "^3.2.4",
     "axios": "^1.5.1",
-    "ccxt": "^4.0.98",
+    "ccxt": "^4.1.26",
     "core-js": "^3.32.2",
     "events": "^3.3.0",
     "lodash": "^4.17.21",
