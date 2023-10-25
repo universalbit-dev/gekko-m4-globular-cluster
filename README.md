@@ -38,7 +38,7 @@ cd gekko-m4
 ```
 npm i && npm audit fix
 ```
-Thanks developers.
+[Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 
