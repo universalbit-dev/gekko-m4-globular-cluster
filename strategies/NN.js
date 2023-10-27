@@ -37,7 +37,7 @@ var strat = {
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
-    this.requiredHistory = config.tradingAdvisor.historySize;
+    this.requiredHistory = 60;
 
     const layers = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
