@@ -38,6 +38,7 @@ var strat = {
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     this.requiredHistory = 60;
+    //requests 60 minutes of historic data
 
     const layers = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
