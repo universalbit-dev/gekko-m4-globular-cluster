@@ -21,7 +21,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:2};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:false,candleSize:1,historySize:10};
+config.tradingAdvisor = {enabled:false,candleSize:1,historySize:60};
 config.tradingAdvisor.method= 'NN';
 
 /*
