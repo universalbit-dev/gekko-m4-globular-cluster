@@ -4,7 +4,7 @@
 */
 
 var moment = require('moment');
-const _ = require('./lodash');
+const _ = require('./lodash');require('lodash-migrate');
 
 var fs = require('fs-extra');
 var semver = require('semver');
