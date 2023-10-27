@@ -2,7 +2,7 @@
 
 
 */
-
+require('lodash-migrate');
 var subscriptions = [
   {
     emitter: 'market',
