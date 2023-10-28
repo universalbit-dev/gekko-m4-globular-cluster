@@ -18,7 +18,7 @@ var config = {};
 config.debug =true;
 
 //import kraken exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:2};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'USD',tickrate:2};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false,candleSize:1,historySize:60};
