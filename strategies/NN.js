@@ -33,7 +33,7 @@ var strat = {
     //indicators
     //DEMA
     this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
-    this.addIndicator('stoploss', 'StopLoss');
+    this.addIndicator('stoploss', 'StopLoss',this.settings.stoploss_threshold);
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
