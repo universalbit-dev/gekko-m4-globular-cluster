@@ -18,7 +18,7 @@ sudo apt install curl git build-essential
 ##### NVM Node Version Manager:
 nvm allows you to quickly install and use different versions of node via the command line.
 ```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
 ```
 
 ##### [NodeJs 20](https://nodejs.org/en/blog/release/v20.0.0)
