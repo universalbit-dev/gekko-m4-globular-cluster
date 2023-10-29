@@ -141,7 +141,7 @@ Optional parameters:
 - **I**mport all new candles for all XBT pairs:   
 `$ perl backtest.pl -i -p kraken:XBT:ALL -f last -t now`
 
-- **I**mport all candles for pairs defined in backtest-config.pl from 2017-01-02 to now:   
+- **I**mport all candles for pairs defined in backtest-config.pl from 2021-01-01 to now:   
 `$ perl backtest.pl -i -f 2021-01-01 -t now`
 
-- **S**earch best parameters for strategy: edit TOML file in config/strategies     
+- **S**earch best parameters for strategy: edit TOML file in strategies/config     
