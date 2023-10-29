@@ -77,7 +77,7 @@ dema=this.tulipIndicators.dema.result.result;
 bbands = this.tulipIndicators.bbands.result;
 ```
 
-#### Display results in console
+#### log.info(indicator:value);
 ```
 if(rsi != undefined)log.info('RSI:',rsi);
 if(sma != undefined)log.info('SMA:',sma);
