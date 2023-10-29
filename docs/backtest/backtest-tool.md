@@ -144,4 +144,4 @@ Optional parameters:
 - **I**mport all candles for pairs defined in backtest-config.pl from 2021-01-01 to now:   
 `$ perl backtest.pl -i -f 2021-01-01 -t now`
 
-- **S**earch best parameters for strategy: edit TOML file in strategies/config     
+- **S**earch best parameters for strategy: edit file in strategies/conf
