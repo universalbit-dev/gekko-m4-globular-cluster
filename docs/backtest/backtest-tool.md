@@ -62,9 +62,11 @@ You can do the same with many strategies and CandleSize values. You can test all
 3. Copy all extrated files to main Gekko's directory.   
 
 ### Debian, Ubuntu, Linux Mint
-1. Clone git https://github.com/xFFFFF/Gekko-BacktestTool
-2. Copy files to Gekko's main directory
-3. Install dependencies: 
+```
+git clone https://github.com/xFFFFF/Gekko-BacktestTool
+```
+* Copy files to Gekko's main directory
+* Install dependencies: 
 ```
 sudo cpan install Parallel::ForkManager Time::Elapsed Getopt::Long List::MoreUtils File::chdir Statistics::Basic DBI  DBD::SQLite JSON::XS TOML File::Basename File::Find::Wanted Template LWP::UserAgent LWP::Protocol::https Set::CrossProduct DBD::CSV Text::Table File::Copy  
 ```
@@ -130,16 +132,16 @@ Optional parameters:
 
 ### Some examples
 - **B**acktests of all available pairs for Binance Exchange in Gekko's scan datarange mode:   
-`$ perl backtest.pl -p binance:ALL`
+`$ perl backtest.pl -p kraken:ALL`
 
 - **B**acktest on all pairs and strategies defined in backtest-config.pl with candles 5, 10, 20, 40 and 12 hours warmup period:   
 `$ perl backtest.pl -n 5:144,10:73,20:36,40:15`
 
 - **I**mport all new candles for all BNB pairs:   
-`$ perl backtest.pl -i -p binance:BNB:ALL -f last -t now`
+`$ perl backtest.pl -i -p kraken:BTC:ALL -f last -t now`
 
 - **I**mport all candles for pairs defined in backtest-config.pl from 2017-01-02 to now:   
-`$ perl backtest.pl -i -f 2017-01-02 -t now`
+`$ perl backtest.pl -i -f 2021-01-02 -t now`
 
 - **S**earch best parameters for strategy: edit TOML file in config/strategies    
  
