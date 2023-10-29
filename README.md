@@ -41,7 +41,7 @@ npm i && npm audit fix
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
-
+---
  
 * ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
 ```
