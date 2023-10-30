@@ -10,13 +10,13 @@
 | Importer | Import Exchange Data      | disabled        |
 | TradingAdvisor | Advice Buy-Sell Orders      | enabled        |
 
-```
+```bash
 node gekko -c backtest.js -b
 ```
 
-##### *Terminal OutPut:
+* ##### Terminal OutPut:
 ---
-```
+```bash
 (INFO):	Setting up Gekko in backtest mode
 (INFO):	Setting up:
 (INFO):		 Trading Advisor
@@ -35,7 +35,7 @@ node gekko -c backtest.js -b
 * #### [backtest mode ] configuration file
 
 backtest.js
-```
+```js
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
