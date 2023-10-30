@@ -13,13 +13,13 @@
 
 
 
-```
+```bash
 node gekko -c import.js -i
 ```
 
 ##### *Terminal OutPut:
 ---
-```
+```bash
 (INFO):	Setting up Gekko in importer mode
 (INFO):
 (INFO):	Setting up:
@@ -32,7 +32,7 @@ node gekko -c import.js -i
 
 import.js
 
-```
+```js
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
