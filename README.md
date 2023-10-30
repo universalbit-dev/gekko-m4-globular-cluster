@@ -43,7 +43,7 @@ npm i && npm audit fix
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 ---
  
-* ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
+* ##### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
 ```bash
 node gekko.js -c import.js -i
 ```
