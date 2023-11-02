@@ -18,32 +18,38 @@ var config = {};
 config.debug =true;
 
 //import kraken exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'USD',tickrate:2};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',
+key:'',
+secret:'',
+tickrate:10};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:false,candleSize:1,historySize:60};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
 config.tradingAdvisor.method= 'NN';
 
 /*
-|NO-BUY||NO-SELL|
+|NN|
 */
 
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 config.NN= {
 interval:3,threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
-l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:true,threshold:0.85,
-hodl_threshold:1,price_buffer_len:100,min_predictions:100
+l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:false,stoploss_threshold:0.85,
+hodl_threshold:1,price_buffer_len:100,min_predictions:999
 };
 
 //Adapter
 config.adapter='sqlite';
 
 //Trader
-config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
+config.trader={
+enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',
+key:'',
+secret:''
+};
 
-config.candleWriter={enabled:false,adapter:'sqlite'};
-
-config.adviceLogger={enabled:false};
+config.candleWriter={enabled:true,adapter:'sqlite'};
+config.adviceLogger={enabled:true};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
@@ -81,7 +87,7 @@ config.paperTrader = {enabled: false,
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PERFORMANCE ANALYZER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.performanceAnalyzer = {enabled: false,riskFreeReturn: 5};
+config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING IMPORTER

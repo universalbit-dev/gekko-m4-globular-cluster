@@ -18,7 +18,7 @@ var config = {};
 config.debug =true;
 
 //import kraken exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'USD',tickrate:10};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false,candleSize:1,historySize:10};
@@ -31,7 +31,7 @@ config.tradingAdvisor.method= 'NN';
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 config.NN= {
 interval:3,threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
-l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:false,threshold:0.85,
+l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:false,stoploss_threshold:0.85,
 hodl_threshold:1,price_buffer_len:100,min_predictions:999
 };
 
