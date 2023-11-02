@@ -27,17 +27,17 @@ var strat = {
   threshold_buy:1.0,
   threshold_sell:-1.0,
   hodle_threshold : 1,
-  min_predictions:100,
+  min_predictions:999,
 
   init : function() {
     //indicators
     //DEMA
     this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
-    this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
+    this.addIndicator('stoploss', 'StopLoss');
+
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     this.requiredHistory = 60;
-    //requests 60 minutes of historic data
 
     const layers = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
