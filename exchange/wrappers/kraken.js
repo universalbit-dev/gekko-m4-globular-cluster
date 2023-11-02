@@ -330,27 +330,6 @@ Trader.prototype.getOrder = function(order, callback) {
     const amount = parseFloat( data.result[ order ].vol_exec );
     const date = moment.unix( data.result[ order ].closetm );
 
-    // TODO: figure out fees, kraken is reporting 0 fees:
-    // { 'OF6L2D-6LIKD-4OOHR7':
-    //   { refid: null,
-    //     userref: 0,
-    //     status: 'closed',
-    //     reason: null,
-    //     opentm: 1530694339.8116,
-    //     closetm: 1530694402.9572,
-    //     starttm: 0,
-    //     expiretm: 0,
-    //     descr: [Object],
-    //     vol: '0.00500000',
-    //     vol_exec: '0.00500000',
-    //     cost: '27.9',
-    //     fee: '0',
-    //     price: '5595.0',
-    //     stopprice: '0.00000',
-    //     limitprice: '0.00000',
-    //     misc: '',
-    //     oflags: 'fciq' } } }
-
     callback(undefined, {
       price,
       amount,
