@@ -40,7 +40,6 @@ npm i && npm audit fix
 ```
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
-* [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 
  
 * ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
@@ -94,6 +93,7 @@ npm install tulind --build-from-source
 * [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
 * [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 * [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
+* [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 
 ##### [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
 
