@@ -4,10 +4,9 @@
 #### unlike easy gains
 #### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 #### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
-#### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
-
 ---
 
+* #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
 * #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
 * #### Gekko-M4 Engine Now using node v20.8.0 (npm v10.1.0)
 
