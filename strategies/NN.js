@@ -11,7 +11,7 @@ var util = require('../core/util');
 var config= util.getConfig();
 var tulind = require('../core/tulind');
 
-var strat = {
+var method = {
   priceBuffer : [],
   predictionCount : 0,
   batchsize : 50,
@@ -33,7 +33,7 @@ var strat = {
     //indicators
     //DEMA
     this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
-    this.addIndicator('stoploss', 'StopLoss');
+    stoploss=require('./indicators/StopLoss.js');
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
@@ -116,7 +116,7 @@ var strat = {
     while (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.shift();
   },
   onTrade: function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    if ('buy' === event.action) {this.stoploss.long(event.price);}
     this.prevAction = event.action;
     this.prevPrice = event.price;
   },
@@ -133,7 +133,7 @@ var strat = {
       if (
           'buy' === this.prevAction
           && this.settings.stoploss_enabled
-          && 'stoploss' === this.indicators.stoploss.action
+          && 'stoploss' === this.stoploss.action
       ) {
         this.stoplossCounter++;
         log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');
@@ -162,4 +162,4 @@ var strat = {
     log.debug('Triggered stoploss',this.stoplossCounter,'times');
   }
 };
-module.exports = strat;
+module.exports = method;
