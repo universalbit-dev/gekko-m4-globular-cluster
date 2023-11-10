@@ -20,11 +20,16 @@ nvm allows you to quickly install and use different versions of node via the com
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 ```
 
-##### [NodeJs 20](https://nodejs.org/en/blog/release/v20.0.0)
+##### [NodeJs 21](https://nodejs.org/en/blog/release/v21.0.0)
 
 ```
-nvm install 20
-nvm use 20
+nvm install 21
+nvm use 21
+```
+```
+export NVM_DIR="/home/universalbit/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 ```
 
 clone project:
