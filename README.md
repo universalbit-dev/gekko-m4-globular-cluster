@@ -44,7 +44,11 @@ npm i && npm audit fix
 ```
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
-
+#### Install PM2 Process Manager 
+```
+cd gekko-m4
+npm i pm2 -g
+```
  
 * ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
 ```
@@ -64,7 +68,6 @@ node gekko.js -c method-nn.js
 #### Run Gekko-M4
 
 ```
-npm i pm2 -g
 pm2 start nn.js
 pm2 monit 
 ```
