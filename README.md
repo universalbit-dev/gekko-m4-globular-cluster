@@ -46,7 +46,6 @@ npm i && npm audit fix
 
 #### Install PM2 Process Manager 
 ```
-cd gekko-m4
 npm i pm2 -g
 ```
  
