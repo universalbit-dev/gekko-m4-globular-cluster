@@ -21,12 +21,15 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
 ```
 
 ##### [NodeJs 21](https://nodejs.org/en/blog/release/v21.0.0)
-
 ```
 nvm install 21
 nvm use 21
 ```
-
+[?](https://github.com/nvm-sh/nvm)
+```
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+```
 clone project:
 ```
 git clone https://github.com/universalbit-dev/gekko-m4.git
