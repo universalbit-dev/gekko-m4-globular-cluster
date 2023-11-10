@@ -27,17 +27,17 @@ var method = {
   threshold_buy:1.0,
   threshold_sell:-1.0,
   hodle_threshold : 1,
-  min_predictions:999,
+  min_predictions:100,
 
   init : function() {
     //indicators
     //DEMA
     this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
-    stoploss=require('./indicators/StopLoss.js');
-
+    this.addIndicator('stoploss', 'StopLoss', this.settings);
     this.name = 'NN';
     this.nn = new convnetjs.Net();
-    this.requiredHistory = 60;
+    this.requiredHistory = 10;
+    //requests 10 minutes of historic data
 
     const layers = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
@@ -116,7 +116,7 @@ var method = {
     while (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.shift();
   },
   onTrade: function(event) {
-    if ('buy' === event.action) {this.stoploss.long(event.price);}
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
     this.prevAction = event.action;
     this.prevPrice = event.price;
   },
@@ -133,7 +133,7 @@ var method = {
       if (
           'buy' === this.prevAction
           && this.settings.stoploss_enabled
-          && 'stoploss' === this.stoploss.action
+          && 'stoploss' === this.indicators.stoploss.action
       ) {
         this.stoplossCounter++;
         log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');
@@ -148,13 +148,15 @@ var method = {
       if ('buy' != this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
         log.debug("Buy - Predicted variation: ",meanAlpha);
-        log.info('BUY');this.advice('long');
+        log.info('BUY');
+        this.advice('long');
       }
       else if
       ('sell' != this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
       {
         log.debug("Sell - Predicted variation: ",meanAlpha);
-        log.info('SELL');this.advice('short');
+        log.info('SELL');
+        this.advice('short');
       }
     }
   },
