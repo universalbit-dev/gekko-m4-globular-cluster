@@ -24,7 +24,7 @@ secret:'',
 tickrate:10};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:10};
 config.tradingAdvisor.method= 'NN';
 
 /*
@@ -35,7 +35,7 @@ config.tradingAdvisor.method= 'NN';
 config.NN= {
 interval:3,threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
 l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:false,stoploss_threshold:0.85,
-hodl_threshold:1,price_buffer_len:100,min_predictions:999
+hodl_threshold:1,price_buffer_len:100,min_predictions:100
 };
 
 //Adapter
