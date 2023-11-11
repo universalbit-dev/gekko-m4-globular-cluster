@@ -8,7 +8,7 @@
 
 * #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
 * #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
-* #### Gekko-M4 Engine Now using node v20.8.0 (npm v10.1.0)
+
 
 Required Packages:
 ```
