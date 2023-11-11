@@ -67,14 +67,6 @@ var plugins = [
     slug: 'backtestResultExporter',
     async: false,
     modes: ['backtest']
-  },
-  {
-    name: 'Child to parent',
-    description: 'Relays events from the child to the parent process',
-    slug: 'childToParent',
-    async: false,
-    modes: ['realtime'],
-    greedy: true
   }
 ];
 
