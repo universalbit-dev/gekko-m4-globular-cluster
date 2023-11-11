@@ -20,10 +20,10 @@ nvm allows you to quickly install and use different versions of node via the com
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
 ```
 
-##### [NodeJs 21](https://nodejs.org/en/blog/release/v21.0.0)
+##### [NodeJs 20](https://nodejs.org/en)
 ```
-nvm install 21
-nvm use 21
+nvm install 20
+nvm use 20
 ```
 [?](https://github.com/nvm-sh/nvm#install--update-script)
 ```
