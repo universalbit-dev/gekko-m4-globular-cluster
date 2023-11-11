@@ -1,4 +1,3 @@
-require('lodash-migrate');
 var plugins = [
   {
     name: 'Candle writer',
