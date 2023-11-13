@@ -8,11 +8,8 @@
   backtesting on historical data. Also look at the code to see what how
   it is working.
 */
-
-const _ = require('./core/lodash');
-require('lodash-migrate');
-const util = require('./core/util');
-const async = require('async');
+const _ = require('lodash');
+const util = require('./core/util');const async = require('async');
 
 console.log('##########################################');
 console.log('UniversalBit Blockchain Powered by Gekko');
