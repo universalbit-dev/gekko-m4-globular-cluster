@@ -2,7 +2,6 @@
 
 
 */
-require('lodash-migrate');
 var subscriptions = [
   {
     emitter: 'market',
@@ -108,7 +107,7 @@ var subscriptions = [
     emitter: 'performanceAnalyzer',
     event: 'roundtrip',
     handler: 'processRoundtrip'
-  },
+  }
 ];
 
 module.exports = subscriptions;
