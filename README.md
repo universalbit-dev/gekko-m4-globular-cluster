@@ -69,13 +69,14 @@ pm2 start nn.js
 pm2 monit 
 ```
 
-* [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
-* [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
-* [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
-* [OpenDNS Website](https://www.opendns.com/)
-* src: [opendns.js](https://github.com/universalbit-dev/gekko-m4/blob/master/opendns.js)
+* ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
+* ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
+* ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
+* ##### [OpenDNS Website](https://www.opendns.com/)
+* ##### src: [opendns.js](https://github.com/universalbit-dev/gekko-m4/blob/master/opendns.js)
+
 ##### Run OpenDNS 
-```
+```bash
 pm2 start opendns.js
 ```
 
