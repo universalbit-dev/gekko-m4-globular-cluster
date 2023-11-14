@@ -1,10 +1,10 @@
-const _ = require('../../lodash');
+const _ = require('lodash');
 
 var start = (mode, config) => {
 var util = require(__dirname + '/../../util');
 
   // force correct gekko env
-  util.setGekkoEnv('child-process');
+  util.setGekkoEnv('node:child_process');
 
   var dirs = util.dirs();
 
