@@ -1,12 +1,5 @@
 //DPO indicator by Gab0 - 04/jan/2019;
-
-// INPUT SETTINGS:
 // optInTimePeriod: period for EMA
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
@@ -16,7 +9,6 @@ var Indicator = function(settings) {
     this.sma = new SMA(settings.optInTimePeriod);
     this.delay = (settings.optInTimePeriod / 2) +1;
     this.pricehist = [];
-    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(price) {

@@ -1,17 +1,10 @@
 // required indicators
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
-
 var EMA = require('./EMA.js');
 var Indicator = function(config) {
   this.input = 'price';
   this.result = false;
   this.inner = new EMA(config.weight);
   this.outer = new EMA(config.weight);
-  _.bindAll(this, _.functionsIn(this));
 }
 
 // add a price and calculate the EMAs and

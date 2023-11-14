@@ -1,10 +1,5 @@
 // stop loss as an indicator
 // originally created by scraqz. Thanks!
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var Indicator = function(settings) {
   this.input = 'candle';
   this.candle = null;

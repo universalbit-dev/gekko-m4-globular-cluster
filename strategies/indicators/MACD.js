@@ -1,8 +1,3 @@
-// required indicators
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
 
 var EMA = require('./EMA.js');
 
@@ -12,7 +7,6 @@ var Indicator = function(config) {
   this.short = new EMA(config.short);
   this.long = new EMA(config.long);
   this.signal = new EMA(config.signal);
-  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(price) {

@@ -1,16 +1,9 @@
 //EMV indicator by Gab0 - 06/jan/2019;
-// Settings: NONE;
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var Indicator = function(settings) {
     this.input = 'candle';
     this.result = NaN;
     this.age = 0;
     this.last = 0;
-    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(candle) {

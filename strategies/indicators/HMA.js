@@ -1,9 +1,4 @@
 // HMA ported by Gab0 03/29/2018;
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var WMA = require('./WMA');
 
 var Indicator = function (weight) {

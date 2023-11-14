@@ -1,11 +1,4 @@
 // Inverse Fisher Transformation on CCI (using EMA smoothening)
-
-// required indicators
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var CCI = require('./CCI.js');
 var EMA = require('./EMA.js');
 
@@ -16,7 +9,6 @@ var Indicator = function(config) {
   this.cci = new CCI({ history: this.cciLength, constant: 0.015 });
   this.ema1 = new EMA(this.emaLength);
   this.ema2 = new EMA(this.emaLength);
-  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle) {

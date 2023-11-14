@@ -1,11 +1,6 @@
 /*
  * CCI
  */
- let _ = require('../../core/lodash');
- let util = require('../../core/util');
- let config = util.getConfig();
- let log = require('../../core/log');
-
 var Indicator = function(settings) {
   this.input = 'candle';
   this.tp = 0.0;
@@ -17,7 +12,6 @@ var Indicator = function(settings) {
   this.maxSize = settings.history;
   for (var i = 0; i < this.maxSize; i++)
   this.hist.push(0.0);
-  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(candle) {

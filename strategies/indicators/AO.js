@@ -1,10 +1,3 @@
-//AO indicator by Gab0 - 04/jan/2019;
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
-
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
@@ -13,7 +6,6 @@ var Indicator = function(settings) {
     this.age = 0;
     this.shortsma = new SMA(5);
     this.longsma = new SMA(34);
-    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(candle) {

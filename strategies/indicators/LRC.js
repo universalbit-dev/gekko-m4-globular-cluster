@@ -1,11 +1,6 @@
 /*
  * Linear regression curve
  */
- let _ = require('../../core/lodash');
- let util = require('../../core/util');
- let config = util.getConfig();
- let log = require('../../core/log')
-
 var Indicator = function(settings) {
   this.input = 'price';
   this.depth = settings;
@@ -20,8 +15,6 @@ var Indicator = function(settings) {
       this.history.push(0.0);
       this.x.push(i);
   }
-  _.bindAll(this, _.functionsIn(this));
-  // log.debug("Created LRC indicator with h: ", this.depth);
 }
 
 Indicator.prototype.update = function(price) {

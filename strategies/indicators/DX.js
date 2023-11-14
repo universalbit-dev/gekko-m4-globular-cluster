@@ -2,11 +2,6 @@
 // for use on gekko trading bot. Same license as gekko.
 // "ported" from tulip: https://tulipindicators.org/dx
 // gab0 - 2018;
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var ATR = require('./ATR.js');
 
 var Indicator = function (period)
@@ -21,7 +16,6 @@ var Indicator = function (period)
     this.periodWeight = (period-1)/period;
     this.dm_up = 0;
     this.dm_down = 0;
-    _.bindAll(this, _.functionsIn(this));
 }
 
 

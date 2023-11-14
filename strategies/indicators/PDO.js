@@ -1,12 +1,6 @@
 //PDO indicator by Gab0 - 06/jan/2019;
 // Settings
 //   optInTimePeriod: SMA Time Period;
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
-
 var SMA = require("./SMA");
 
 var Indicator = function(settings) {
@@ -15,7 +9,6 @@ var Indicator = function(settings) {
     this.age = 0;
     this.period = settings.optInTimePeriod;
     this.sma = SMA(this.period);
-    _.bindAll(this, _.functionsIn(this));
 };
 
 Indicator.prototype.update = function(price) {

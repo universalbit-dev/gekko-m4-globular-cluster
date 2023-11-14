@@ -1,5 +1,5 @@
 // required indicators
-let _ = require('../../core/lodash');
+let _ = require('lodash');require('lodash-migrate');
 let util = require('../../core/util');
 let config = util.getConfig();
 let log = require('../../core/log.js');
@@ -15,7 +15,6 @@ var Indicator = function(config) {
   this.long = new EMA(config.long);
   this.MACDsignal = new EMA(config.signal);
   this.PPOsignal = new EMA(config.signal);
-  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function(price) {

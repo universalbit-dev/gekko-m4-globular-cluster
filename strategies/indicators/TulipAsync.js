@@ -9,7 +9,7 @@
 // * is not available
 // ****************************************************************************
 
-let _ = require('../../core/lodash');
+let _ = require('lodash');require('lodash-migrate');
 let util = require('../../core/util');
 let config = util.getConfig();
 let log = require('../../core/log.js');

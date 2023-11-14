@@ -1,11 +1,5 @@
 // Inverse Fisher Transformation on CCI (using WMA smoothening)
 
-// required indicators
-let _ = require('../../core/lodash');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var CCI = require('./CCI.js');
 var WMA = require('./WMA.js');
 
@@ -15,7 +9,6 @@ var Indicator = function(config) {
   this.wmaLength = config.wmaLength;
   this.cci = new CCI({ history: this.cciLength, constant: 0.015 });
   this.wma = new WMA(this.wmaLength);
-  _.bindAll(this, _.functionsIn(this));
 }
 
 Indicator.prototype.update = function (candle) {
