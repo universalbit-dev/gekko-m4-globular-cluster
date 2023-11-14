@@ -1,4 +1,4 @@
-const _ = require('../../lodash');
+const _ = require('lodash');
 
 var util = require(__dirname + '/../../util');
 var dirs = util.dirs();
@@ -6,7 +6,7 @@ var ipc = require('relieve').IPCEE(process);
 
 ipc.on('start', config => {
 
-  util.setGekkoEnv('child-process');
+  util.setGekkoEnv('node:child_process');
   config.debug = false;
   util.setConfig(config);
 
