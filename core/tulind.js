@@ -1,5 +1,5 @@
 var semver = require('semver');
-const _ = require('./lodash');
+const _ = require('lodash');
 
 
 var tulind= require ('tulind');

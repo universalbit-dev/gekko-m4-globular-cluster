@@ -11,7 +11,7 @@
 */
 var util = require('./util');
 var dirs = util.dirs();
-const _ = require('./lodash');
+const _ = require('lodash');
 
 var async = require('async');
 var log = require(dirs.core + 'log');

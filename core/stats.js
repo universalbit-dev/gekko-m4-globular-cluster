@@ -1,5 +1,5 @@
 var stats = require('stats-lite');
-const _ = require('./lodash');
+const _ = require('lodash');
 
 
 

@@ -1,4 +1,4 @@
-const _ = require('./lodash');
+const _ = require('lodash');
 
 var prompt = require('prompt-lite');
 var moment = require('moment');

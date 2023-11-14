@@ -4,7 +4,7 @@
 */
 
 var moment = require('moment');
-const _ = require('./lodash');require('lodash-migrate');
+const _ = require('lodash');
 
 var fs = require('fs-extra');
 var semver = require('semver');
@@ -183,7 +183,7 @@ if(!util.recentNode())
     ' and you need atleast ',
     util.getRequiredNodeVersion()
   ].join(''), true);
-_.bindAll(this, _.functionsIn(this));
+_.bindAll(this, _.functions(this));
 module.exports = util;
 
 /*

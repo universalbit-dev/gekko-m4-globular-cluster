@@ -2,7 +2,7 @@
 
 */
 
-const _ = require('./lodash');
+const _ = require('lodash');
 
 var async = require('async');
 var Emitter = require('./emitter');
