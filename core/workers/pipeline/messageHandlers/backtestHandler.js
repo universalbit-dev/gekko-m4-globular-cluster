@@ -1,9 +1,7 @@
-const _ = require('../lodash3');
-
+const _ = require('../lodash3');require('lodash-migrate');
 // Relay the backtest message it when it comes in.
 module.exports = done => {
   let backtest;
-
   return {
     message: message => {
       if(message.type === 'error') {

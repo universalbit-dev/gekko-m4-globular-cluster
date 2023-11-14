@@ -1,4 +1,4 @@
-const _ = require('../lodash3');
+const _ = require('../lodash3');require('lodash-migrate');
 
 module.exports = cb => {
 
