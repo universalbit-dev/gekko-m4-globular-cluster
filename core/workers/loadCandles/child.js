@@ -1,8 +1,8 @@
-const _ = require('../../lodash');
+const _ = require('lodash');
 var start = (config, candleSize, daterange) => {
 var util = require(__dirname + '/../../util');
 
-  util.setGekkoEnv('child-process');
+  util.setGekkoEnv('node:child_process');
   config.debug = false;
   util.setConfig(config);
 
