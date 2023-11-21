@@ -10,7 +10,7 @@ var log = require('../core/log');
 var util = require('../core/util');
 var config= util.getConfig();
 var tulind = require('../core/tulind');
-
+stoploss= require('./indicators/StopLoss');
 var method = {
   priceBuffer : [],
   predictionCount : 0,
@@ -32,9 +32,7 @@ var method = {
   init : function() {
     //indicators
     //DEMA
-    this.addTulipIndicator('price', 'dema', {optInTimePeriod:1});
-    this.addIndicator('stoploss', 'StopLoss', {threshold :this.settings.stoploss_threshold});
-
+    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     this.requiredHistory = 10;
@@ -105,9 +103,9 @@ var method = {
   },
   update : function(candle)
   {
-    price=this.tulipIndicators.price.result.result;
+    emaFast=this.tulipIndicators.emaFast.result.result;
     if (1 === this.scale && 1 < candle.high && 0 === this.predictionCount) this.setNormalizeFactor(candle);
-    this.priceBuffer.push(price / this.scale );
+    this.priceBuffer.push(emaFast / this.scale );
 
     if (2 > this.priceBuffer.length) return;
      for (i=0;i<3;++i)
@@ -127,6 +125,7 @@ var method = {
   },
 
   check : function(candle) {
+  log.info(candle);
     if(this.predictionCount > this.settings.min_predictions)
     {
       if (
@@ -134,9 +133,9 @@ var method = {
           && this.settings.stoploss_enabled
           && 'stoploss' === this.indicators.stoploss.action
       ) {
-        this.stoplossCounter++;
+        this.stoplossCounter++;log.info(stoplossCounter);
         log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');
-        this.advice('short');
+        //this.advice('short');
       }
       let prediction = this.predictCandle() * this.scale;
       let currentPrice = candle.close;
@@ -144,18 +143,18 @@ var method = {
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
       let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.hodle_threshold);
       let signal = meanp < currentPrice;
-      if ('buy' != this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
+      if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
         log.debug("Buy - Predicted variation: ",meanAlpha);
-        log.info('BUY');
-        this.advice('long');
+        log.info('Reverse');
+        //this.advice('short');
       }
       else if
-      ('sell' != this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
+      ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
       {
         log.debug("Sell - Predicted variation: ",meanAlpha);
-        log.info('SELL');
-        this.advice('short');
+        log.info('Reverse');
+        //this.advice('long');
       }
     }
   },
