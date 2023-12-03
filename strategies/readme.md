@@ -11,7 +11,7 @@ Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100
 npm install tulind --build-from-source
 ```
 
-### Add tulipindicator:
+### Add [TulipIndicator](https://tulipindicators.org/)
 
 #### [RSI](https://en.wikipedia.org/wiki/Relative_strength_index)
 The relative strength index (RSI) is a technical indicator used in the analysis of financial markets. It is intended to chart the current and historical strength or weakness of a stock or market based on the closing prices of a recent trading period. The indicator should not be confused with relative strength.
