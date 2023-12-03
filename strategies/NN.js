@@ -10,7 +10,6 @@ var log = require('../core/log');
 var util = require('../core/util');
 var config= util.getConfig();
 var tulind = require('../core/tulind');
-stoploss= require('./indicators/StopLoss');
 var method = {
   priceBuffer : [],
   predictionCount : 0,
@@ -31,6 +30,7 @@ var method = {
 
   init : function() {
     //indicators
+    this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
     //DEMA
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     this.name = 'NN';
