@@ -22,7 +22,7 @@ var method = {
   prevPrice : 0,
   stoplossCounter : 0,
   stoploss_enabled: true,
-  threshold:0.85,
+  threshold:1,
   threshold_buy:1.0,
   threshold_sell:-1.0,
   hodle_threshold : 1,
