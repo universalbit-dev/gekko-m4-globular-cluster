@@ -5,7 +5,7 @@ var Indicator = function(settings) {
   this.candle = null;
   this.price = 0;
   this.action = 'continue'; // continue
-  this.threshold = settings.threshold;
+  this.threshold = 1;
  }
 
 Indicator.prototype.update = function(candle) {
