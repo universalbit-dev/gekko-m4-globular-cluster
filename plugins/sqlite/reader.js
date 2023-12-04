@@ -2,8 +2,7 @@
 
 
 */
-const _ = require('../../core/lodash');
-require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
 
 var util = require('../../core/util.js');
 var config = util.getConfig();
@@ -15,7 +14,7 @@ var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 
 var Reader = function() {
-  _.bindAll(this, _.functionsIn(this));
+  _.bindAll(this);
   this.db = sqlite.initDB(false);
 }
 
