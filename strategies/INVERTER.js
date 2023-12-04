@@ -114,8 +114,6 @@ log.info('Indicators need several hours to work properly');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
-lastLongPrice = 0.0;
-
 //Debug
 startTime = new Date();
 //Info Messages
@@ -127,7 +125,12 @@ startTime = new Date();
 //Trend
 resetTrend: function()
 {
-trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:0,pingPong :{gainsPercentage: 1}};
+trend = {
+duration:0,direction:'none',state:'none',bb:'none',
+longPos:false,
+stoploss:this.settings.stoploss,stopgain:this.settings.stopgain,
+lastLongPrice:0.0,lastShortPrice:0.0};
+
 this.trend = trend;
 },
 
@@ -235,15 +238,11 @@ ADX Value 	Trend Strength
 
 	//DI going red (short)
 	if(di_minus > di_plus && di_minus > this.settings.diminus) 
-	{
-	this.trend.state = 'short';
-	}
+	{this.trend.state = 'short';}
 	
 	//DI going green (long)
 	if(di_plus > di_minus && di_plus > this.settings.diplus) 
-	{
-	this.trend.state = 'long';
-	}
+	{this.trend.state = 'long';}
 	
 	switch (true)
 	{
@@ -286,12 +285,20 @@ ADX Value 	Trend Strength
 		log.info('|DM+|DM-|:',di_plus,di_minus);
 		log.info('=================================================');
 	}
-
-        // BEAR TREND
+	
+        //BEAR TREND
 		if (maFast < maSlow){this.trend.bb='bear';log.info('|BEAR-TREND|');}
-		// BULL TREND
+		//BULL TREND
 		else if (maFast > maSlow){this.trend.bb='bull';log.info('|BULL-TREND|');}
-
+		
+		//StopLoss 1%
+        if((this.candle.close < this.trend.lastLongPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'long'))
+        {log.info('||StopLoss||');this.advice('short');}
+		if((this.candle.close > this.trend.lastShortPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'long'))
+		{log.info('||StopLoss||');this.advice('long');}
+		
+       
+        
 },
 
 //LONG
@@ -317,21 +324,21 @@ short: function(){
 pingPong: function(){
 
 	switch (true)
-	{	
-		case ((this.trend.direction == 'up')&&(this.trend.bb == 'bull')):
-		this.lastLongPrice = this.candle;
-		this.trend.longPos = true;
-		break;
+	{
+	case ((this.trend.direction !== 'up')&&(this.trend.bb !== 'bull')):
+	this.trend.lastLongPrice = this.candle;
+	this.trend.longPos = true;
+	break;
 		
-		case ((this.trend.direction == 'down')&&(this.trend.bb == 'bear')):
-		this.lastShortPrice = this.candle;
-		this.trend.longPos = false;
-		break;
+	case ((this.trend.direction !== 'down')&&(this.trend.bb !== 'bear')):
+	this.trend.lastShortPrice = this.candle;
+	this.trend.longPos = false;
+	break;
 
-		default:
-		log.info('==========');
-		log.info('|PINGPONG|');
-		log.info('==========');
+	default:
+	log.info('==========');
+	log.info('|PINGPONG|');
+	log.info('==========');
 	}
 },
 
