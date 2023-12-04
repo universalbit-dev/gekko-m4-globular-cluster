@@ -74,8 +74,6 @@ this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.maSlow})
 /* Outputs: dema */
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.dema});
 
-this.addTulipIndicator('BULL_RSI', 'rsi', {optInTimePeriod: this.settings.BULL_RSI});
-this.addTulipIndicator('BEAR_RSI', 'rsi', {optInTimePeriod: this.settings.BEAR_RSI});
 /* Relative Strength Index */
 /* Type: indicator */
 /* Input arrays: 1    Options: 1    Output arrays: 1 */
@@ -147,8 +145,6 @@ di_minus = this.tulipIndicators.di.result.diMinus;
 maFast = this.tulipIndicators.maFast.result.result;
 maSlow = this.tulipIndicators.maSlow.result.result;
 dema = this.tulipIndicators.dema.result.result;
-bull_power = this.tulipIndicators.BULL_RSI.result.result; 
-bear_power = this.tulipIndicators.BEAR_RSI.result.result;
 this.adxstrength='none';
 
 log.info('=============');
@@ -238,13 +234,13 @@ ADX Value 	Trend Strength
 	}
 
 	//DI going red (short)
-	if(di_minus > di_plus && di_minus > this.settings.diminus && this.trend.state !== 'short') 
+	if(di_minus > di_plus && di_minus > this.settings.diminus) 
 	{
 	this.trend.state = 'short';
 	}
 	
 	//DI going green (long)
-	if(di_plus > di_minus && di_plus > this.settings.diplus && this.trend.state !== 'long') 
+	if(di_plus > di_minus && di_plus > this.settings.diplus) 
 	{
 	this.trend.state = 'long';
 	}
