@@ -293,9 +293,7 @@ ADX Value 	Trend Strength
 	
 	//StopLoss 1%
         if((this.candle.close < this.trend.lastLongPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'short'))
-        {log.info('||StopLoss||');this.advice('short');}
-        if((this.candle.close > this.trend.lastShortPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'long'))
-        {log.info('||StopLoss||');this.advice('long');}     
+        {log.info('||StopLoss||');this.advice('short');}  
 },
 
 //LONG
