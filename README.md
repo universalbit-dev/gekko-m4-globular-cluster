@@ -52,7 +52,7 @@ npm i pm2 -g
 node gekko.js -c import.js -i
 ```
  
-* ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
+* ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/backtest.js)
 ```
 node gekko.js -c backtest.js -b
 ```
