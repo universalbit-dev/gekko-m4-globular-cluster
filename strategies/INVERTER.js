@@ -177,14 +177,14 @@ log.info('==============================');
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
 	//rsi high - sell   '70'
-	case (rsi > 60 && rsi < 80):
+	case (rsi > 65 && rsi < 85):
 	log.info('====================');
 	log.info('|RSI|Overbought|SELL|');
 	log.info('====================');
 	this.short();
 	break;
 	//rsi low  - buy    '30'
-	case (rsi > 20 && rsi < 40):
+	case (rsi > 15 && rsi < 35):
 	log.info('==================');
 	log.info('|RSI|Oversold|BUY|');
 	log.info('==================');
