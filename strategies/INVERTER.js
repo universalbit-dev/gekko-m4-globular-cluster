@@ -58,9 +58,6 @@ this.debug = true;
 
 //Indicators overview
 
-//StopLoss : 1%
-this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
-
 /* Simple Moving Average */
 /* Type: overlay */
 /* Input arrays: 1    Options: 1    Output arrays: 1 */
@@ -153,12 +150,6 @@ dema = this.tulipIndicators.dema.result.result;
 bull_power = this.tulipIndicators.BULL_RSI.result.result; 
 bear_power = this.tulipIndicators.BEAR_RSI.result.result;
 this.adxstrength='none';
-
-/* StopLoss */
-if((this.settings.stoploss_enabled) && ('stoploss' === this.indicators.stoploss.action)) 
-{
-log.info('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');this.advice('short');
-}
 
 log.info('=============');
 log.info('|INDICATORS:|');
