@@ -35,15 +35,7 @@ l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:true,threshold:1,
 hodl_threshold:1,price_buffer_len:100,min_predictions:100
 };
 
-config.INVERTER={
-  RSI : 14,ADX:14,dema:14,
-  BULL_RSI : 10,BULL_RSI_high : 80,BULL_RSI_low : 60,
-  BEAR_RSI : 15,BEAR_RSI_high : 50,BEAR_RSI_low : 20,
-  BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,
-  stoploss_enabled:true,threshold:1,diplus:23.5,diminus:23,
-  maFast:60,maSlow:50
-};
-
+config.INVERTER={RSI : 14,ADX:14,dema:14,BULL_RSI : 10,BEAR_RSI : 15,diplus:23.5,diminus:23,maFast:60,maSlow:50};
 
 //Adapter
 config.adapter='sqlite';
