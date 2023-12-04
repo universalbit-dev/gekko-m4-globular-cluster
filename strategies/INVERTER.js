@@ -291,7 +291,7 @@ ADX Value 	Trend Strength
 		//BULL TREND
 		else if (maFast > maSlow){this.trend.bb='bull';log.info('|BULL-TREND|');}
 		
-		//StopLoss 1%
+		//StopLoss 2%
         if((this.candle.close < this.trend.lastLongPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'long'))
         {log.info('||StopLoss||');this.advice('short');}
 		if((this.candle.close > this.trend.lastShortPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'long'))
