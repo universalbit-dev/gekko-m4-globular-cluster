@@ -127,12 +127,7 @@ startTime = new Date();
 //Trend
 resetTrend: function()
 {
-trend = {
-duration:0,direction:'none',state:'none',bb:'none',
-longPos:false,
-stoploss:this.settings.stoploss,stopgain:this.settings.stopgain,
-lastLongPrice:0.0,lastShortPrice:0.0};
-
+trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:false,lastLongPrice:0.0,lastShortPrice:0.0};
 this.trend = trend;
 },
 
