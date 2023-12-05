@@ -109,6 +109,8 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.ADX});
 /* Outputs: dx */
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.ADX});
 
+this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
+
 log.info('================================================');
 log.info('Indicators need several hours to work properly');
 log.info('keep calm and make somethig of amazing');
@@ -133,6 +135,14 @@ lastLongPrice:0.0,lastShortPrice:0.0};
 
 this.trend = trend;
 },
+
+onTrade: function(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    // store the previous action (buy/sell)
+    this.prevAction = event.action;
+    // store the price of the previous trade
+    this.prevPrice = event.price;
+  },
 
 check: function(candle)
 {
@@ -290,10 +300,9 @@ ADX Value 	Trend Strength
 		if (maFast < maSlow){this.trend.bb='bear';log.info('|BEAR-TREND|');}
 		//BULL TREND
 		else if (maFast > maSlow){this.trend.bb='bull';log.info('|BULL-TREND|');}
-	
-	//StopLoss 1%
-        if((this.candle.close < this.trend.lastLongPrice * (this.trend.stoploss / 100))&&(this.trend.state == 'short'))
-        {log.info('||StopLoss||');this.advice('short');}  
+		
+		if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action))
+		{log.debug('>>> STOPLOSS triggered <<<');this.advice('short');}
 },
 
 //LONG
