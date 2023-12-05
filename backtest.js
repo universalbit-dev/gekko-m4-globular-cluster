@@ -24,9 +24,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:10};
 config.tradingAdvisor.method= 'INVERTER';
 
-/*
-|NO-BUY||NO-SELL|
-*/
+/* |NO-BUY||NO-SELL| */
 
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 config.NN= {
@@ -55,7 +53,6 @@ config.backtest = {
   daterange: {
     from: "2021-01-01",to: "2021-03-01"
   },
-
   batchSize: 50
 };
 
