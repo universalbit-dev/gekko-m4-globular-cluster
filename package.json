@@ -20,13 +20,13 @@
   "convnet": "^1.0.0",
   "core-js": "^3.32.2",
   "crypto-js": "^4.2.0",
-  "fs-extra": "^11.1.0",
+  "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
-  "humanize-duration": "^3.20.1",
+  "humanize-duration": "^3.31.0",
   "kraken-api": "^1.0.1",
   "lodash": "^4.17.21",
   "lodash-migrate": "^0.3.16",
-  "mathjs": "^11.11.2",
+  "mathjs": "^12.2.0",
   "moment": "^2.29.4",
   "opn": "^4.0.2",
   "path": "^0.12.7",
@@ -45,7 +45,7 @@
   "tulind": "^0.8.20",
   "util": "^0.12.5",
   "uuid": "^9.0.1",
-  "ws": "^8.12.1"
+  "ws": "^8.15.0"
  },
  "engines": {
   "node": ">=16"
