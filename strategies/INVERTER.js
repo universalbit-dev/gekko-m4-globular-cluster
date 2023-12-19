@@ -138,15 +138,7 @@ onTrade: function(event) {
     // store the price of the previous trade
     this.prevPrice = event.price;
   },
-//called on each new candle, before check.
-update: function(candle) {
-    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-      if (err) {
-        return console.log(err);
-      }
-    });
 
-  },
 check: function(candle)
 {
 	log.info('=======');
