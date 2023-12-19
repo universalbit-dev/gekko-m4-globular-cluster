@@ -18,7 +18,7 @@ INVERTER:
 
 RSI Overbought/Oversold
 ADX Trend Strength (DI+ DI-)
-StopLoss Fixed 1%
+StopLoss Fixed 3%
 
 some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
 
@@ -28,7 +28,6 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var _ = require('../core/lodash');
 var ws = require ('reconnecting-websocket');
-var fs = require('fs-extra');
 
 /* https://tulipindicators.org/ */
 var tulind = require('../core/tulind');
@@ -48,11 +47,9 @@ init: function()
 {
 //Strategy Name
 this.name = 'INVERTER';
-this.startTime = new Date();
 log.info('============================================');
 log.info('Start INVERTER');
 log.info('============================================');
-
 
 //Init
 this.resetTrend();
@@ -118,6 +115,8 @@ log.info('Indicators need several hours to work properly');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
+//Debug
+startTime = new Date();
 //Info Messages
 		log.info("=====================================");
 		log.info('Running', this.name);
@@ -173,28 +172,28 @@ log.info('==============================');
 switch (true) {
 	//rsi high - sell   '70'
 	case (rsi > 65 && rsi < 85):
-	log.info('====================');
-	log.info('|RSI|Overbought|SELL|');
-	log.info('====================');
+	log.info('=========================');
+	log.info('|NUT|RSI|Overbought|SELL|');
+	log.info('=========================');
 	this.short();
 	break;
 	//rsi low  - buy    '30'
 	case (rsi > 15 && rsi < 35):
-	log.info('==================');
-	log.info('|RSI|Oversold|BUY|');
-	log.info('==================');
+	log.info('======================');
+	log.info('|NUT|RSI|Oversold|BUY|');
+	log.info('======================');
     this.long();
 	break;
     //weak
 	case (rsi > 40 && rsi < 60):
-	log.info('==========');
-	log.info('|RSI|WEAK|');
-	log.info('==========');
+	log.info('==============');
+	log.info('|NUT|RSI|WEAK|');
+	log.info('==============');
 	this.pingPong();
 	break;
 	default:
 	log.info('========================');
-	log.info('|RSI||',rsi);
+	log.info('|NUT|RSI||',rsi);
 	log.info('========================');
 	}
 
@@ -212,42 +211,39 @@ ADX Value 	Trend Strength
 	switch (true) {
 		
 		case (adx > 0 && adx < 25):
-		log.info('================');
-		log.info('|ADX|WEAK TREND|');
-		log.info('================');
-		log.info('weak');this.pingPong();break;
+		log.info('====================');
+		log.info('|NUT|ADX|WEAK TREND|');
+		log.info('====================');
+		log.info('nut_weak');this.adxstrength='weak';break;
 		
 		case (adx > 25 && adx < 50):
-		log.info('==================');
-		log.info('|ADX|STRONG|TREND|');
-		log.info('==================');
-		log.info('strong');this.adxstrength='strong';break;
+		log.info('======================');
+		log.info('|NUT|ADX|STRONG|TREND|');
+		log.info('======================');
+		log.info('nut_strong');this.adxstrength='strong';break;
 		
 		case (adx > 50 && adx < 75):
-		log.info('=======================');
-		log.info('|ADX|VERY STRONG|TREND|');
-		log.info('=======================');
-		log.info('very_strong');this.adxstrength='verystrong';break;
+		log.info('===========================');
+		log.info('|NUT|ADX|VERY STRONG|TREND|');
+		log.info('===========================');
+		log.info('nut_very_strong');this.adxstrength='verystrong';break;
 		
 		case (adx > 75 && adx < 100):
-		log.info('============================');
-		log.info('|ADX|Extremely|Strong|TREND|');
-		log.info('============================');
-		log.info('extreme_strong');this.adxstrength='extremestrong';break;
+		log.info('================================');
+		log.info('|NUT|ADX|Extremely|Strong|TREND|');
+		log.info('================================');
+		log.info('nut_extreme_strong');this.adxstrength='extremestrong';break;
 		
 		default:
-		log.info('====================');
-		log.info('|ADX|Trend Strength|');
-		log.info('====================');
+		log.info('=======================');
+		log.info('|NUT|ADX|Trend Strength|');
+		log.info('=======================');
 	}
 
 	//DI going red (short)
-	if(di_minus > di_plus && di_minus > this.settings.diminus) 
-	{this.trend.state = 'short';}
-	
+	if(di_minus > di_plus && di_minus > this.settings.diminus) {this.trend.state = 'short';}
 	//DI going green (long)
-	if(di_plus > di_minus && di_plus > this.settings.diplus) 
-	{this.trend.state = 'long';}
+	if(di_plus > di_minus && di_plus > this.settings.diplus) {this.trend.state = 'long';}
 	
 	switch (true)
 	{
@@ -255,65 +251,72 @@ ADX Value 	Trend Strength
 	When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend. 
 	When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend. 
 	*/
-		case (this.adxstrength == 'strong')&&(this.trend.state == 'long'):
+	    case (this.adxstrength == 'nut_weak')&&((this.trend.state == 'screw_up')||(this.trend.state == 'screw_down')):
+		//Absent or Weak Trend 
+		this.trend.direction = 'nut_weak';this.pingPong();
+		break;
+		
+		case (this.adxstrength == 'nut_strong')&&(this.trend.state == 'screw_up')&&(rsi > 15 && rsi < 35):
 		//prices moving up adx strength 25-50
-		this.trend.direction = 'up';
-		this.pingPong();break;
+		this.trend.direction = 'screw_up';this.long();
+		break;
 		
-		case (this.adxstrength == 'strong')&&(this.trend.state == 'short'):
+		case (this.adxstrength == 'nut_strong')&&(this.trend.state == 'screw_down')&&(rsi > 65 && rsi < 85):
 		//prices moving down adx strength 25-50
-		this.trend.direction = 'down';
-		this.pingPong();break;
+		this.trend.direction = 'screw_down';this.short();
+	    break;
 		
-	    case (this.adxstrength == 'verystrong')&&(this.trend.state == 'long'):
+	    case (this.adxstrength == 'nut_verystrong')&&(this.trend.state == 'screw_up')&&(rsi > 15 && rsi < 35):
 	    //prices moving up adx strength 50-75
-	    this.trend.direction = 'up';
-	    this.long();break;
-	    
-		case (this.adxstrength == 'verystrong')&&(this.trend.state == 'short'):
+	    this.trend.direction = 'screw_up';
+	    this.long();
+	    break;
+		
+		case (this.adxstrength == 'nut_verystrong')&&(this.trend.state == 'screw_down')&&(rsi > 65 && rsi < 85):
 		//price moving down adx strength 50-75
-		this.trend.direction = 'down';
-		this.short();break;
-		
-		case (this.adxstrength == 'extremestrong')&&(this.trend.state == 'long'):
+		this.trend.direction = 'screw_down';this.short();
+		break;
+
+		case (this.adxstrength == 'nut_extremestrong')&&(this.trend.state == 'screw_up')&&(rsi > 15 && rsi < 35):
 		//price moving down adx strength 75-100
-		this.trend.direction = 'up';
-		this.long();break;
-		
-		case (this.adxstrength == 'extremestrong')&&(this.trend.state == 'short'):
+		this.trend.direction = 'screw_up';this.long();
+		break;
+
+		case (this.adxstrength == 'nut_extremestrong')&&(this.trend.state == 'screw_down')&&(rsi > 65 && rsi < 85):
 		//price moving down adx strength 75-100
-		this.trend.direction = 'down';
-		this.short();break;
-		
+		this.trend.direction = 'screw_down';this.short();
+		break;
+
 		default:
 		log.info('=================================================');
 		log.info('|DM+|DM-|:',di_plus,di_minus);
 		log.info('=================================================');
 	}
-	
+
         //BEAR TREND
-		if (maFast < maSlow){this.trend.bb='bear';log.info('|BEAR-TREND|');}
+		if ((maFast < maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bear';log.info('|BEAR-TREND|');}
 		//BULL TREND
-		else if (maFast > maSlow){this.trend.bb='bull';log.info('|BULL-TREND|');}
+		else if ((maFast > maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bull';log.info('|BULL-TREND|');}
 		
-		if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action))
-		{log.debug('>>> STOPLOSS triggered <<<');this.advice('short');}
+		if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action)){log.debug('>>> STOPLOSS triggered <<<');this.short();}
 },
+
+//Nut & Screw & Bolt
 
 //LONG
 long: function(){
-  if ((this.trend.direction !== 'up')&&(this.trend.state  !== 'long')&&(this.trend.bb !== 'bull'))
-  {this.resetTrend();this.trend.direction = 'up';this.advice('long');
-  if (this.debug)log.info('Going long');}
-  if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
+  if ((this.trend.direction !== 'screw_up')&&(this.trend.state  !== 'screw_up')&&(this.trend.bb !== 'bull')&&(rsi > 28 && rsi < 32))
+  {this.resetTrend();this.trend.direction = 'screw_up';this.advice('long');
+  if (this.debug)log.info('|Bolt Up|');}
+  if (this.debug) {this.trend.duration++;log.info('Bolt Up since', this.trend.duration, 'Bolt(s)');}
 },
 
 //SHORT
 short: function(){
-  if ((this.trend.direction !== 'down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
-  {this.resetTrend();this.trend.direction = 'down';this.advice('short');
-  if (this.debug)log.info('Going short');}
-  if (this.debug) {this.trend.duration++;log.info('Short since', this.trend.duration, 'candle(s)');}
+  if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'screw_down')&&(this.trend.bb !== 'bear')&&(rsi > 68 && rsi < 72))
+  {this.resetTrend();this.trend.direction = 'screw_down';this.advice('short');
+  if (this.debug)log.info('|Bolt Down|');}
+  if (this.debug) {this.trend.duration++;log.info('Bolt Down since', this.trend.duration, 'Bolt(s)');}
 },
 
 //PingPong
@@ -324,12 +327,12 @@ pingPong: function(){
 
 	switch (true)
 	{
-	case ((this.trend.direction !== 'up')&&(this.trend.bb !== 'bull')):
+	case ((this.trend.direction !== 'screw_up')&&(this.trend.bb !== 'bull')&&(this.trend.state  !== 'screw_up')):
 	this.trend.lastLongPrice = this.candle;
 	this.trend.longPos = true;
 	break;
 		
-	case ((this.trend.direction !== 'down')&&(this.trend.bb !== 'bear')):
+	case ((this.trend.direction !== 'screw_down')&&(this.trend.bb !== 'bear')&&(this.trend.state  !== 'screw_down')):
 	this.trend.lastShortPrice = this.candle;
 	this.trend.longPos = false;
 	break;
