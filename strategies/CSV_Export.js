@@ -21,11 +21,9 @@ var method = {
     this.startTime = new Date();
     this.debug = true;
   },
-
-
-  //called on each new candle, before check.
-  update: function(candle) {
-    fs.appendFile('Data Exports/' + this.settings.Asset + ':' + this.settings.Currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+//called on each new candle, before check.
+update: function(candle) {
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
       if (err) {
         return console.log(err);
       }
@@ -34,9 +32,7 @@ var method = {
   },
 
   /* CHECK */
-  check: function() {}, // check()
-
-
+  check: function() {}, // check(
   /* END backtest */
   end: function() {
 
