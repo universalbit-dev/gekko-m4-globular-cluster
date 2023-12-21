@@ -52,4 +52,4 @@ Level3.forEach(function(host){
 //https://nodejs.org/api/dns.html#dnssetserversservers
 resolver.setServers(['208.67.220.123','208.67.220.220','208.67.222.220','208.67.220.222','208.67.222.123','4.2.2.1','4.2.2.2','208.67.222.222','74.82.42.42']);
 // This request will use the Servers, independent of global settings.
-resolver.resolve4('', (err, addresses) => {});
+resolver.resolve4('noads.libredns.gr', (err, addresses) => {});
