@@ -4,7 +4,7 @@ const resolver = new Resolver();
 var ping = require('ping');
 
 /* Run Bash Script */
-var exec = require('child_process').exec
+var exec = require('node:child_process').exec
 exec('echo $(curl -s https://api64.ipify.org?format=json)',
     function (error, stdout, stderr) {
         console.log('\x1b[33m%s\x1b[0m','Your Ip:' + stdout);
