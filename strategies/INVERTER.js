@@ -18,7 +18,7 @@ INVERTER:
 
 RSI Overbought/Oversold
 ADX Trend Strength (DI+ DI-)
-StopLoss Fixed 3%
+StopLoss 
 
 some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
 
