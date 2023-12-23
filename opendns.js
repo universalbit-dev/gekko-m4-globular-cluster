@@ -19,10 +19,10 @@ exec('echo $(curl -s https://api64.ipify.org?format=json)',
 var OpenDNS= ['208.67.222.123','208.67.220.220','208.67.222.220','208.67.220.222','208.67.222.222','208.67.220.123'];
 
 /*
-Level3 DNS 4.2.2.2 4.2.2.1 redirects mistyped URL to Level 3 Web Search
+Level3 DNS 4.2.2.3 4.2.2.4 redirects mistyped URL to Level 3 Web Search
 https://serverlogic3.com/what-is-a-level-3-public-dns-server/
 */
-var Level3=['4.2.2.2','4.2.2.1'];
+var Level3=['4.2.2.3','4.2.2.4'];
 
 /* HE DNS Hurricane Electric */
 var HeDNS=['74.82.42.42'];
