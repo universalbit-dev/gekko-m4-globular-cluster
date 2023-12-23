@@ -2,8 +2,7 @@
 // them and sends it to the parent process.
 
 const log = require('../core/log');
-const _ = require('../core/lodash');
-require('lodash-migrate');
+const _ = require('../core/lodash3');require('lodash-migrate');
 
 const util = require('../core/util');
 const dirs = util.dirs();
@@ -18,24 +17,14 @@ const BacktestResultExporter = function() {
   this.stratUpdates = [];
   this.stratCandles = [];
   this.trades = [];
-
   this.candleProps = config.backtestResultExporter.data.stratCandleProps;
 
-  if(!config.backtestResultExporter.data.stratUpdates)
-    this.processStratUpdate = null;
-
-  if(!config.backtestResultExporter.data.roundtrips)
-    this.processRoundtrip = null;
-
-  if(!config.backtestResultExporter.data.stratCandles)
-    this.processStratCandles = null;
-
-  if(!config.backtestResultExporter.data.portfolioValues)
-    this.processPortfolioValueChange = null;
-
-  if(!config.backtestResultExporter.data.trades)
-    this.processTradeCompleted = null;
-  _.bindAll(this, _.functionsIn(this));
+  if(!config.backtestResultExporter.data.stratUpdates)this.processStratUpdate = null;
+  if(!config.backtestResultExporter.data.roundtrips)this.processRoundtrip = null;
+  if(!config.backtestResultExporter.data.stratCandles)this.processStratCandles = null;
+  if(!config.backtestResultExporter.data.portfolioValues)this.processPortfolioValueChange = null;
+  if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
+  _.bindAll(this);
 }
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
@@ -57,8 +46,7 @@ BacktestResultExporter.prototype.processStratCandle = function(candle) {
     }
   }
 
-  if(config.backtestResultExporter.data.portfolioValues)
-    strippedCandle.portfolioValue = this.portfolioValue;
+  if(config.backtestResultExporter.data.portfolioValues)strippedCandle.portfolioValue = this.portfolioValue;
 
   this.stratCandles.push(strippedCandle);
 };
@@ -85,9 +73,7 @@ BacktestResultExporter.prototype.processStratUpdate = function(stratUpdate) {
   });
 }
 
-BacktestResultExporter.prototype.processPerformanceReport = function(performanceReport) {
-  this.performanceReport = performanceReport;
-}
+BacktestResultExporter.prototype.processPerformanceReport = function(performanceReport) {this.performanceReport = performanceReport;}
 
 BacktestResultExporter.prototype.finalize = function(done) {
   const backtest = {
@@ -97,27 +83,13 @@ BacktestResultExporter.prototype.finalize = function(done) {
     performanceReport: this.performanceReport
   };
 
-  if(config.backtestResultExporter.data.stratUpdates)
-    backtest.stratUpdates = this.stratUpdates;
-
-  if(config.backtestResultExporter.data.roundtrips)
-    backtest.roundtrips = this.roundtrips;
-
-  if(config.backtestResultExporter.data.stratCandles)
-    backtest.stratCandles = this.stratCandles;
-
-  if(config.backtestResultExporter.data.trades)
-    backtest.trades = this.trades;
-
-  if(env === 'child-process') {
-    process.send({backtest});
-  }
-
-  if(config.backtestResultExporter.writeToDisk) {
-    this.writeToDisk(backtest, done);
-  } else {
-    done();
-  }
+  if(config.backtestResultExporter.data.stratUpdates)backtest.stratUpdates = this.stratUpdates;
+  if(config.backtestResultExporter.data.roundtrips)backtest.roundtrips = this.roundtrips;
+  if(config.backtestResultExporter.data.stratCandles)backtest.stratCandles = this.stratCandles;
+  if(config.backtestResultExporter.data.trades)backtest.trades = this.trades;
+  if(env === 'child-process') {process.send({backtest});}
+  if(config.backtestResultExporter.writeToDisk) {this.writeToDisk(backtest, done);}
+  else {done();}
 };
 
 BacktestResultExporter.prototype.writeToDisk = function(backtest, next) {
@@ -130,16 +102,14 @@ BacktestResultExporter.prototype.writeToDisk = function(backtest, next) {
     filename = `backtest-${config.tradingAdvisor.method}-${now}.json`;
   }
 
-  fs.writeFile(
-    util.dirs().gekko + filename,
+  fs.writeFile('logs/json/' + filename,
     JSON.stringify(backtest),
     err => {
       if(err) {
         log.error('unable to write backtest result', err);
       } else {
-        log.info('written backtest to: ', util.dirs().gekko + filename);
+        log.info('written backtest to: ', 'logs/json/' + filename);
       }
-
       next();
     }
   );
