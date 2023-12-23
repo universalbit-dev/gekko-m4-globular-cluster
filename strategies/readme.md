@@ -85,3 +85,53 @@ if(adx != undefined)log.info('ADX:',adx);
 if(dema != undefined)log.info('DEMA:',dema);
 if(bbands != undefined)log.info('BBANDS:',bbands);
 ```
+
+##### Gekko Async Indicator Runner an incredible [porting](https://en.wikipedia.org/wiki/Porting) job
+async indicators are in the /strategies/indicators directory:
+
+* [ADX]
+* [AO]
+* [ATR]
+* [BBANDS]
+* [CCI]
+* [DEMA]
+* [DI] 
+* [DMI]
+* [DPO]
+* [DX]
+* [EMA]
+* [EMV]
+* [HMA]
+* [IFTCCI]
+* [LRC]
+* [MACD]
+* [MFI]
+* [PDO]
+* [PPO]
+* [ROC]
+* [RSI]
+* [SMA]
+* [SMMA]
+* [STC]
+* [STOCH]
+* [StopLoss] 
+* [TEMA]
+* [TRANGE]
+* [TRIX]
+* [TSI] 
+* [TulipAsync]
+* [UO]
+* [WMA]
+
+
+
+
+
+
+
+
+
+
+
+
+
