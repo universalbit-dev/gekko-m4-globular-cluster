@@ -309,7 +309,7 @@ ADX Value 	Trend Strength
 
 //LONG
 long: function(){
-  if ((this.trend.direction !== 'screw_up')&&(this.trend.state  !== 'screw_up')&&(this.trend.bb !== 'bull')&&(rsi > 28 && rsi < 32))
+  if ((this.trend.direction != 'screw_up')&&(this.trend.state  != 'screw_up')&&(this.trend.bb != 'bull')&&(rsi > 28 && rsi < 32))
   {this.resetTrend();this.trend.direction = 'screw_up';this.advice('long');
   if (this.debug)log.info('|Bolt Up|');}
   if (this.debug) {this.trend.duration++;log.info('Bolt Up since', this.trend.duration, 'Bolt(s)');}
@@ -317,7 +317,7 @@ long: function(){
 
 //SHORT
 short: function(){
-  if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'screw_down')&&(this.trend.bb !== 'bear')&&(rsi > 68 && rsi < 72))
+  if ((this.trend.direction != 'screw_down')&&(this.trend.state  != 'screw_down')&&(this.trend.bb != 'bear')&&(rsi > 74 && rsi < 78))
   {this.resetTrend();this.trend.direction = 'screw_down';this.advice('short');
   if (this.debug)log.info('|Bolt Down|');}
   if (this.debug) {this.trend.duration++;log.info('Bolt Down since', this.trend.duration, 'Bolt(s)');}
