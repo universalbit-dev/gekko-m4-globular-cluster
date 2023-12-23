@@ -89,7 +89,7 @@ if(bbands != undefined)log.info('BBANDS:',bbands);
 ##### Gekko Async Indicator Runner an incredible [porting](https://en.wikipedia.org/wiki/Porting) job
 async indicators are in the /strategies/indicators directory:
 
-* [ADX]
+* [ADX](https://github.com/universalbit-dev/gekko-m4/blob/master/strategies/indicators/ADX.js)
 * [AO]
 * [ATR]
 * [BBANDS]
