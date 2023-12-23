@@ -1,6 +1,4 @@
-/*
-NeuralNetwork
-*/
+/*NeuralNetwork*/
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
@@ -8,6 +6,8 @@ var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var log = require('../core/log');
 var util = require('../core/util');
+var fs = require('fs-extra');
+
 var config= util.getConfig();
 var tulind = require('../core/tulind');
 var method = {
@@ -29,8 +29,15 @@ var method = {
   min_predictions:100,
 
   init : function() {
+    log.info('================================================');
+    log.info('keep calm and make somethig of amazing');
+    log.info('================================================');
+
+    //Date
+    startTime = new Date();
+
     //indicators
-    this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
+    this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
     //DEMA
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     this.name = 'NN';
@@ -58,8 +65,8 @@ var method = {
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
         batch_size: this.batchsize,
-        l2_decay: this.settings.decay,
-        l1_decay: this.settings.decay
+        l2_decay: this.settings.l2_decay,
+        l1_decay: this.settings.l1_decay
       });
     }
     else if(this.settings.method == 'adadelta')
@@ -69,8 +76,8 @@ var method = {
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
         batch_size: this.batchsize,
-        l2_decay: this.settings.decay,
-        l1_decay: this.settings.decay
+        l2_decay: this.settings.l2_decay,
+        l1_decay: this.settings.l1_decay
       });
     }
     else
@@ -80,8 +87,8 @@ var method = {
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
         batch_size: this.batchsize,
-        l2_decay: this.settings.decay,
-        l1_decay: this.settings.decay
+        l2_decay: this.settings.l2_decay,
+        l1_decay: this.settings.l1_decay
       });
     }
 
@@ -111,6 +118,11 @@ var method = {
      for (i=0;i<3;++i)
       this.learn();
     while (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.shift();
+
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+  	if (err) {return console.log(err);}
+  	});
   },
   onTrade: function(event) {
     if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
@@ -125,18 +137,8 @@ var method = {
   },
 
   check : function(candle) {
-  log.info(candle);
     if(this.predictionCount > this.settings.min_predictions)
     {
-      if (
-          'buy' === this.prevAction
-          && this.settings.stoploss_enabled
-          && 'stoploss' === this.indicators.stoploss.action
-      ) {
-        this.stoplossCounter++;log.info(stoplossCounter);
-        log.debug('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');
-        //this.advice('short');
-      }
       let prediction = this.predictCandle() * this.scale;
       let currentPrice = candle.close;
       let meanp = math.mean(prediction, currentPrice);
@@ -145,18 +147,16 @@ var method = {
       let signal = meanp < currentPrice;
       if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
-        log.debug("Buy - Predicted variation: ",meanAlpha);
-        log.info('Reverse');
-        //this.advice('short');
+        log.debug("Buy - Predicted variation: ",meanAlpha);this.advice('long');
       }
       else if
       ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
       {
-        log.debug("Sell - Predicted variation: ",meanAlpha);
-        log.info('Reverse');
-        //this.advice('long');
+        log.debug("Sell - Predicted variation: ",meanAlpha);this.advice('short');
       }
     }
+    if ('stoploss' === this.indicators.stoploss.action){this.learn();}
+
   },
   end : function() {
     log.debug('Triggered stoploss',this.stoplossCounter,'times');

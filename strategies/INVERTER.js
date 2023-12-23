@@ -27,15 +27,15 @@ some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var _ = require('../core/lodash');
-var ws = require ('reconnecting-websocket');
-
+var ws = require('reconnecting-websocket');
+var fs = require('fs-extra');
 /* https://tulipindicators.org/ */
 var tulind = require('../core/tulind');
 
 /*
 
-Method INVERTER: 
-Process Exchange Data and make indicators data overview: 
+Method INVERTER:
+Process Exchange Data and make indicators data overview:
 |RSI| |SMA| |ADX| |DI| |DX| |DEMA| |StopLoss|
 
 */
@@ -111,11 +111,10 @@ this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.ADX});
 this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
 
 log.info('================================================');
-log.info('Indicators need several hours to work properly');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
-//Debug
+//Date
 startTime = new Date();
 //Info Messages
 		log.info("=====================================");
@@ -138,6 +137,12 @@ onTrade: function(event) {
     this.prevPrice = event.price;
   },
 
+update: function(candle) {
+	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+	if (err) {return console.log(err);}
+	});
+},
 check: function(candle)
 {
 	log.info('=======');
@@ -182,9 +187,9 @@ switch (true) {
 	log.info('======================');
 	log.info('|NUT|RSI|Oversold|BUY|');
 	log.info('======================');
-    this.long();
+  this.long();
 	break;
-    //weak
+  //weak
 	case (rsi > 40 && rsi < 60):
 	log.info('==============');
 	log.info('|NUT|RSI|WEAK|');
@@ -209,31 +214,31 @@ ADX Value 	Trend Strength
 
 */
 	switch (true) {
-		
+
 		case (adx > 0 && adx < 25):
 		log.info('====================');
 		log.info('|NUT|ADX|WEAK TREND|');
 		log.info('====================');
 		log.info('nut_weak');this.adxstrength='weak';break;
-		
+
 		case (adx > 25 && adx < 50):
 		log.info('======================');
 		log.info('|NUT|ADX|STRONG|TREND|');
 		log.info('======================');
 		log.info('nut_strong');this.adxstrength='strong';break;
-		
+
 		case (adx > 50 && adx < 75):
 		log.info('===========================');
 		log.info('|NUT|ADX|VERY STRONG|TREND|');
 		log.info('===========================');
 		log.info('nut_very_strong');this.adxstrength='verystrong';break;
-		
+
 		case (adx > 75 && adx < 100):
 		log.info('================================');
 		log.info('|NUT|ADX|Extremely|Strong|TREND|');
 		log.info('================================');
 		log.info('nut_extreme_strong');this.adxstrength='extremestrong';break;
-		
+
 		default:
 		log.info('=======================');
 		log.info('|NUT|ADX|Trend Strength|');
@@ -244,34 +249,34 @@ ADX Value 	Trend Strength
 	if(di_minus > di_plus && di_minus > this.settings.diminus) {this.trend.state = 'short';}
 	//DI going green (long)
 	if(di_plus > di_minus && di_plus > this.settings.diplus) {this.trend.state = 'long';}
-	
+
 	switch (true)
 	{
 	/*
-	When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend. 
-	When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend. 
+	When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend.
+	When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend.
 	*/
 	    case (this.adxstrength == 'nut_weak')&&((this.trend.state == 'screw_up')||(this.trend.state == 'screw_down')):
-		//Absent or Weak Trend 
+		//Absent or Weak Trend
 		this.trend.direction = 'nut_weak';this.pingPong();
 		break;
-		
+
 		case (this.adxstrength == 'nut_strong')&&(this.trend.state == 'screw_up')&&(rsi > 15 && rsi < 35):
 		//prices moving up adx strength 25-50
 		this.trend.direction = 'screw_up';this.long();
 		break;
-		
+
 		case (this.adxstrength == 'nut_strong')&&(this.trend.state == 'screw_down')&&(rsi > 65 && rsi < 85):
 		//prices moving down adx strength 25-50
 		this.trend.direction = 'screw_down';this.short();
 	    break;
-		
+
 	    case (this.adxstrength == 'nut_verystrong')&&(this.trend.state == 'screw_up')&&(rsi > 15 && rsi < 35):
 	    //prices moving up adx strength 50-75
 	    this.trend.direction = 'screw_up';
 	    this.long();
 	    break;
-		
+
 		case (this.adxstrength == 'nut_verystrong')&&(this.trend.state == 'screw_down')&&(rsi > 65 && rsi < 85):
 		//price moving down adx strength 50-75
 		this.trend.direction = 'screw_down';this.short();
@@ -292,13 +297,12 @@ ADX Value 	Trend Strength
 		log.info('|DM+|DM-|:',di_plus,di_minus);
 		log.info('=================================================');
 	}
-
-        //BEAR TREND
+    //BEAR TREND
 		if ((maFast < maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bear';log.info('|BEAR-TREND|');}
 		//BULL TREND
 		else if ((maFast > maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bull';log.info('|BULL-TREND|');}
-		
-		if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action)){log.debug('>>> STOPLOSS triggered <<<');this.short();}
+
+		if ('stoploss' === this.indicators.stoploss.action){this.resetTrend();}
 },
 
 //Nut & Screw & Bolt
@@ -331,7 +335,7 @@ pingPong: function(){
 	this.trend.lastLongPrice = this.candle;
 	this.trend.longPos = true;
 	break;
-		
+
 	case ((this.trend.direction !== 'screw_down')&&(this.trend.bb !== 'bear')&&(this.trend.state  !== 'screw_down')):
 	this.trend.lastShortPrice = this.candle;
 	this.trend.longPos = false;
