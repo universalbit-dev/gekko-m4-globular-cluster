@@ -37,6 +37,7 @@
   "promisify-node": "^0.5.0",
   "prompt-lite": "^0.1.1",
   "querystring": "^0.2.1",
+  "readline-sync": "^1.4.10",
   "reconnecting-websocket": "^4.4.0",
   "relieve": "^2.2.3",
   "retry": "^0.12.0",
