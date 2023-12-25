@@ -1,4 +1,4 @@
-const _ = require('../lodash');
+const _ = require('../lodash3');
 
 var batchSize = 1000;
 let fs = require('fs-extra');

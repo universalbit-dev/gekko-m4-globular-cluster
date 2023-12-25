@@ -1,5 +1,5 @@
 
-const _ = require('../lodash');
+const _ = require('../lodash3');
 var BATCH_SIZE = 60; // minutes
 var MISSING_CANDLES_ALLOWED = 3; // minutes, per batch
 
