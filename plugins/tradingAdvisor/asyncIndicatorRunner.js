@@ -78,26 +78,6 @@ AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
   }
 }
 
-/*
-AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, parameters) {
-  if(!talib)
-    util.die('Talib is not enabled');
-
-  if(!_.contains(allowedTalibIndicators, type))
-    util.die('I do not know the talib indicator ' + type);
-
-  if(this.setup)
-    util.die('Can only add talib indicators in the init method!');
-
-  var basectx = this;
-
-  this.talibIndicators[name] = {
-    run: talib[type].create(parameters),
-    result: NaN
-  }
-}
-*/
-
 AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, parameters) {
   if(!tulind) {
     util.die('Tulip indicators is not enabled');
