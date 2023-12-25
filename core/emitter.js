@@ -9,7 +9,7 @@ var util = require('util');
 var events = require('events');
 var NativeEventEmitter = events.EventEmitter;
 var GekkoEventEmitter = function() {
-  _.bindAll(this);
+  _.bindAll(this,[]);
   NativeEventEmitter.call(this);
   this.defferedEvents = [];
 }
