@@ -43,9 +43,13 @@ npm i && npm audit fix
 ```
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
-#### Install [PM2](https://pm2.keymetrics.io/) Process Manager 
-```
+#### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4
+```bash
 npm i pm2 -g
+```
+```bash
+pm2 start nn.js
+pm2 monit 
 ```
  
 * ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
@@ -61,13 +65,6 @@ node gekko.js -c backtest.js -b
 * ##### [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md)
 ```
 node gekko.js -c method-nn.js
-```
-
-#### Run Gekko-M4
-
-```bash
-pm2 start nn.js
-pm2 monit 
 ```
 
 * ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
