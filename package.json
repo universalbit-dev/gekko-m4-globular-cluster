@@ -11,6 +11,7 @@
  "author": "Mike van Rossum <mike@mvr.me>",
  "license": "MIT",
  "dependencies": {
+  "@inquirer/prompts": "^3.3.0",
   "@neurosity/reinforcejs": "^1.0.0",
   "async": "^3.2.4",
   "axios": "^1.6.1",
@@ -29,7 +30,7 @@
   "kraken-api": "^1.0.1",
   "lodash": "^4.17.21",
   "lodash-migrate": "^0.3.16",
-  "mathjs": "^12.2.0",
+  "mathjs": "^12.2.1",
   "moment": "^2.29.4",
   "opn": "^4.0.2",
   "path": "^0.12.7",
@@ -47,6 +48,7 @@
   "stats-lite": "^2.0.4",
   "stream": "^0.0.2",
   "tulind": "^0.8.20",
+  "underscore": "^1.13.6",
   "util": "^0.12.5",
   "uuid": "^9.0.1",
   "ws": "^8.15.0"
