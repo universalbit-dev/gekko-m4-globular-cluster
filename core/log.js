@@ -27,7 +27,7 @@ var sendToParent = function() {
 }
 
 var Log = function() {
-  _.bindAll(this);
+  _.bindAll(this,[]);
   this.env = util.gekkoEnv();
 
   if(this.env === 'standalone')
