@@ -2,14 +2,13 @@
 
 
 */
-const _ = require('../lodash');
-require('lodash-migrate');
+const _ = require('../lodash3');require('lodash-migrate');
 
 var util = require('../util');
 var MarketFetcher = require('./marketFetcher');
 var dirs = util.dirs();
 var Manager = function(config) {
-  _.bindAll(this, _.functionsIn(this));
+  _.bindAll(this);
 // fetch trades
   this.source = new MarketFetcher(config);
 // relay newly fetched trades

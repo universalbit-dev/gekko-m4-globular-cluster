@@ -1,5 +1,4 @@
-let _ = require('../lodash3');
-require('lodash-migrate');
+let _ = require('../lodash3');require('lodash-migrate');
 
 var moment = require('moment');
 var util = require('../../core/util.js');
@@ -10,7 +9,7 @@ var TradeBatcher = function(tid) {
   if(!_.isString(tid))
     throw new Error('tid is not a string');
 
-  _.bindAll(this,[]);
+  _.bindAll(this);
   this.tid = tid;
   this.last = -1;
 }

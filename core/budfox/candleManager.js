@@ -14,7 +14,7 @@ var log = require('../../core/log');
 
 var CandleCreator = require(dirs.budfox + 'candleCreator');
 var Manager = function() {
-  _.bindAll(this,[]);
+  _.bindAll(this);
 
   this.candleCreator = new CandleCreator;
   this.candleCreator
