@@ -10,7 +10,7 @@ var TradeBatcher = function(tid) {
   if(!_.isString(tid))
     throw new Error('tid is not a string');
 
-  _.bindAll(this);
+  _.bindAll(this,[]);
   this.tid = tid;
   this.last = -1;
 }
