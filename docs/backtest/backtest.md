@@ -59,7 +59,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'USD',tickrate:10};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000};
 config.tradingAdvisor.method= 'NN';
 
 /*
