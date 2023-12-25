@@ -23,7 +23,7 @@ var Gekko = function(plugins) {
   this.producers = this.plugins
     .filter(p => p.meta.emits);
   this.finalize = _.bind(this.finalize, this);
-  _.bindAll(this, _.functions(this));
+  _.bindAll(this);
 }
 
 Gekko.prototype = Object.create(Writable.prototype, {

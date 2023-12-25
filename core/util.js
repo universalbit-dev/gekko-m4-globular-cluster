@@ -171,6 +171,7 @@ program
   .option('-c, --config <file>', 'Config file')
   .option('-b, --backtest', 'backtesting mode')
   .option('-i, --import', 'importer mode')
+  .option('--ui', 'launch a web UI')
   .parse(process.argv);
 
 // make sure the current node version is recent enough

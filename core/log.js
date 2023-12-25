@@ -5,8 +5,7 @@
 var moment = require('moment');
 var fmt = require('util').format;
 
-const _ = require('./lodash3');
-require('lodash-migrate');
+const _ = require('./lodash3');require('lodash-migrate');
 
 var util = require('./util');
 var config = util.getConfig();
@@ -27,7 +26,7 @@ var sendToParent = function() {
 }
 
 var Log = function() {
-  _.bindAll(this,[]);
+  _.bindAll(this);
   this.env = util.gekkoEnv();
 
   if(this.env === 'standalone')
