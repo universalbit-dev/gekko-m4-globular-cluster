@@ -43,7 +43,7 @@ npm i && npm audit fix
 ```
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
-#### Install PM2 Process Manager 
+#### Install [PM2](https://pm2.keymetrics.io/) Process Manager 
 ```
 npm i pm2 -g
 ```
