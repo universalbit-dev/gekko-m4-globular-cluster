@@ -73,7 +73,7 @@ SOFTWARE.
   
 ---
 ##### node_modules 
-huge work behind a simple install command
+[huge work](https://github.com/askmike/gekko/graphs/contributors) behind a simple install command
 
 open [issue](https://github.com/universalbit-dev/gekko-m4/issues) 
 
