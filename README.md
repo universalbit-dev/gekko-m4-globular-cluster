@@ -57,7 +57,7 @@ pm2 monit
 node gekko.js -c import.js -i
 ```
  
-* ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/backtest.js)
+* ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
 ```
 node gekko.js -c backtest.js -b
 ```
