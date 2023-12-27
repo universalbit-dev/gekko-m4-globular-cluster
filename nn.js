@@ -8,7 +8,9 @@ pm2.connect(function(err) {
 pm2.start({
   script    : 'gekko.js',
   args      : '-c method-nn.js',
-  name      : '|NeuralNet|'
+  name      : '|NeuralNet|',
+  instances : "1",
+  exec_mode : "cluster"
 },
 
 function(err, apps) {
