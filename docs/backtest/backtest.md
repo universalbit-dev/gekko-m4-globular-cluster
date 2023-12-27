@@ -92,7 +92,7 @@ config.backtest = {
     from: "2021-01-01",to: "2021-03-01"
   },
 
-  batchSize: 50
+  batchSize: 1000
 };
 
 config.backtestResultExporter = {
