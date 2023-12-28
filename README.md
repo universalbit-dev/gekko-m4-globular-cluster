@@ -43,6 +43,11 @@ npm i && npm audit fix
 ```
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
+* ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
+```
+node gekko.js -c import.js -i
+```
+
 #### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (backtest mode)
 ```bash
 npm i pm2 -g
@@ -50,11 +55,6 @@ npm i pm2 -g
 ```bash
 pm2 start gekko-m4.js
 pm2 monit 
-```
- 
-* ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
-```
-node gekko.js -c import.js -i
 ```
  
 * ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
