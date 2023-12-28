@@ -24,16 +24,15 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000};
 config.tradingAdvisor.method= 'INVERTER';
 
-/* |NO-BUY||NO-SELL| */
-
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
-config.NN= {
-interval:3,threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
-l1_decay:0.001,decay:0.001,DEMA:5,stoploss_enabled:true,threshold:1,
-hodl_threshold:1,price_buffer_len:100,min_predictions:100
-};
+config.NN={
+threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
+l1_decay:0.001,l2_decay:0.001,dema:5,threshold:3,price_buffer_len:100,min_predictions:100};
 
-config.INVERTER={RSI :14,ADX:14,dema:14,diplus:23.5,diminus:23,maFast:60,maSlow:50,threshold:3};
+config.INVERTER={RSI :14,ADX:8,dema:14,diplus:23.5,diminus:23,maFast:60,maSlow:50,threshold:3};
+
+config.StochRSI={interval:6,threshold:3};
+config.StochRSI.thresholds={low:10,high:90,persistence:6};
 
 //Adapter
 config.adapter='sqlite';
