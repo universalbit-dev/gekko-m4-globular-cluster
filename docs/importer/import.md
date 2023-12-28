@@ -59,10 +59,6 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 config.tradingAdvisor = {enabled:false,candleSize:1,historySize:1000};
 config.tradingAdvisor.method= 'NN';
 
-/*
-|NO-BUY||NO-SELL|
-*/
-
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 config.NN= {
 interval:3,threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.9,
