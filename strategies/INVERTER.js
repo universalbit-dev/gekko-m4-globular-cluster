@@ -18,7 +18,7 @@ INVERTER:
 
 RSI Overbought/Oversold
 ADX Trend Strength (DI+ DI-)
-StopLoss 
+StopLoss
 
 some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
 
@@ -31,7 +31,9 @@ var ws = require('reconnecting-websocket');
 var fs = require('fs-extra');
 /* https://tulipindicators.org/ */
 var tulind = require('../core/tulind');
-
+var stop= require('./stoploss.js');
+var settings = config.INVERTER;
+var stoploss= require('./indicators/StopLoss.js');
 /*
 
 Method INVERTER:
@@ -50,7 +52,7 @@ this.name = 'INVERTER';
 log.info('============================================');
 log.info('Start INVERTER');
 log.info('============================================');
-
+this.requiredHistory = config.tradingAdvisor.historySize;
 //Init
 this.resetTrend();
 this.debug = true;
@@ -135,19 +137,22 @@ onTrade: function(event) {
     this.prevAction = event.action;
     // store the price of the previous trade
     this.prevPrice = event.price;
-  },
+},
 
 update: function(candle) {
-	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-	if (err) {return console.log(err);}
-	});
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+    if (err) {return console.log(err);}
+    });
 },
+onTrade: function(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+  },
+
 check: function(candle)
-{
-	log.info('=======');
-	log.info('|CHECK|');
-	log.info('=======');
+{log.info('=======');log.info('|CHECK|');log.info('=======');
 
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
@@ -175,7 +180,7 @@ log.info('==============================');
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	//rsi high - sell   '70'
+	//rsi high - sell   '76'
 	case (rsi > 74 && rsi < 78):
 	log.info('=========================');
 	log.info('|NUT|RSI|Overbought|SELL|');
@@ -303,6 +308,9 @@ ADX Value 	Trend Strength
 		else if ((maFast > maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bull';log.info('|BULL-TREND|');}
 
 		if ('stoploss' === this.indicators.stoploss.action){this.resetTrend();}
+
+if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
+
 },
 
 //Nut & Screw & Bolt

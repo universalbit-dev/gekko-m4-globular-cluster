@@ -7,8 +7,10 @@ var math = require('mathjs');var uuid = require('uuid');
 var log = require('../core/log');
 var util = require('../core/util');
 var fs = require('fs-extra');
+var stoploss= require('./indicators/StopLoss.js');
 
 var config= util.getConfig();
+var settings = config.NN;
 var tulind = require('../core/tulind');
 var method = {
   priceBuffer : [],
