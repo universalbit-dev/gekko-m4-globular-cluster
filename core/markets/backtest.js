@@ -27,7 +27,7 @@ if(!to.isValid())
   util.die('invalid `to`');
 
 var Market = function() {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.pushing = false;
   this.ended = false;
   this.closed = false;
@@ -35,8 +35,10 @@ var Market = function() {
   Readable.call(this, {objectMode: true});
 
   log.write('');
+  log.info('\t=================================================');
   log.info('\tWARNING: BACKTESTING FEATURE NEEDS PROPER TESTING');
   log.info('\tWARNING: ACT ON THESE NUMBERS AT YOUR OWN RISK!');
+  log.info('\t=================================================');
   log.write('');
 
   this.reader = new Reader();
