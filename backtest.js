@@ -31,7 +31,7 @@ l1_decay:0.001,l2_decay:0.001,dema:5,threshold:3,price_buffer_len:100,min_predic
 
 config.INVERTER={RSI :14,ADX:8,dema:14,diplus:23.5,diminus:23,maFast:60,maSlow:50,threshold:3};
 
-config.StochRSI={interval:6,threshold:3};
+config.StochRSI={interval:6,threshold:1};
 config.StochRSI.thresholds={low:10,high:90,persistence:6};
 
 //Adapter
