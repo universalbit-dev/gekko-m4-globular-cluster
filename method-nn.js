@@ -43,7 +43,7 @@ config.adapter='sqlite';
 
 //Trader
 config.trader={
-enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',
+enabled:false,exchange:'kraken',currency:'XBT',asset:'LTC',
 key:'',
 secret:''
 };
