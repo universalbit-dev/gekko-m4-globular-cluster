@@ -31,7 +31,6 @@ var ws = require('reconnecting-websocket');
 var fs = require('fs-extra');
 /* https://tulipindicators.org/ */
 var tulind = require('../core/tulind');
-var stop= require('./stoploss.js');
 var settings = config.INVERTER;
 var stoploss= require('./indicators/StopLoss.js');
 /*
