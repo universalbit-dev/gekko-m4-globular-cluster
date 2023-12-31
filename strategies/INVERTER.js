@@ -60,13 +60,15 @@ this.debug = true;
 //Indicators overview
 
 /* Simple Moving Average */
+//longer-term: sma1000 / sma50
+//shorter-term: sma10 / sma20
 /* Type: overlay */
 /* Input arrays: 1    Options: 1    Output arrays: 1 */
 /* Inputs: real */
 /* Options: period */
 /* Outputs: sma */
-this.addTulipIndicator('maFast', 'sma', {optInTimePeriod: this.settings.maFast});
-this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.maSlow});
+this.addTulipIndicator('sma1000', 'sma', {optInTimePeriod: this.settings.sma1000});
+this.addTulipIndicator('sma50', 'sma', {optInTimePeriod: this.settings.sma50});
 /* Double Exponential Moving Average */
 /* Type: overlay */
 /* Input arrays: 1    Options: 1    Output arrays: 1 */
@@ -159,8 +161,8 @@ adx=this.tulipIndicators.adx.result.result;
 dx=this.tulipIndicators.dx.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
-maFast = this.tulipIndicators.maFast.result.result;
-maSlow = this.tulipIndicators.maSlow.result.result;
+sma1000 = this.tulipIndicators.sma1000.result.result;
+sma50 = this.tulipIndicators.sma50.result.result;
 dema = this.tulipIndicators.dema.result.result;
 this.adxstrength='none';
 
@@ -172,8 +174,8 @@ log.info('|ADX:|',adx);
 log.info('|DX|',dx);
 log.info('|DI+|',di_plus);
 log.info('|DI-|',di_minus);
-log.info('|SMA +|',maFast);
-log.info('|SMA -|',maSlow);
+log.info('|SMA1000 +|',sma1000);
+log.info('|SMA50 -|',sma50);
 log.info('|DEMA||',dema);
 log.info('==============================');
 
@@ -303,9 +305,9 @@ ADX Value 	Trend Strength
 		log.info('=================================================');
 	}
     //BEAR TREND
-		if ((maFast < maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bear';log.info('|BEAR-TREND|');}
+		if ((sma1000 < sma50)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bear';log.info('|BEAR-TREND|');}
 		//BULL TREND
-		else if ((maFast > maSlow)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bull';log.info('|BULL-TREND|');}
+		else if ((sma1000 > sma50)&&(this.adxstrength != 'nut_weak')){this.trend.bb='bull';log.info('|BULL-TREND|');}
 
 		if ('stoploss' === this.indicators.stoploss.action){this.resetTrend();}
 
