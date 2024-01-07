@@ -44,8 +44,6 @@ var method = {
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     this.name = 'NN';
     this.nn = new convnetjs.Net();
-    this.requiredHistory = 10;
-    //requests 10 minutes of historic data
     const layers = [
       {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
       {type:'conv', num_neurons:10000, activation: this.layer_activation},
