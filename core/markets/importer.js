@@ -29,8 +29,8 @@ if(!from.isValid())
 if(!to.isValid())
   util.die('invalid `to`');
 
-var TradeBatcher = require(dirs.budfox + 'tradeBatcher');
-var CandleManager = require(dirs.budfox + 'candleManager');
+var TradeBatcher = require(dirs.dlna + 'tradeBatcher');
+var CandleManager = require(dirs.dlna + 'candleManager');
 var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
 
 var error = exchangeChecker.cantFetchFullHistory(config.watch);
