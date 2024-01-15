@@ -7,8 +7,8 @@ var async = require('async');
 var util = require('../util');
 var dirs = util.dirs();
 var Heart = require(dirs.budfox + 'heart');
-var MarketDataProvider =  require(dirs.budfox + 'marketDataProvider');
-var CandleManager = require(dirs.budfox + 'candleManager');
+var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');
+var CandleManager = require(dirs.dlna + 'candleManager');
 var BudFox = function(config) {
   _.bindAll(this);
   Readable.call(this, {objectMode: true});
@@ -46,16 +46,16 @@ var BudFox = function(config) {
 }
 
 var Readable = require('stream').Readable;
-BudFox.prototype = Object.create(Readable.prototype, {
-  constructor: { value: BudFox }
+Dlna.prototype = Object.create(Readable.prototype, {
+  constructor: { value: Dlna }
 });
 
-BudFox.prototype._read = function noop() {}
-BudFox.prototype.pushCandles = function(candles) {
+Dlna.prototype._read = function noop() {}
+Dlna.prototype.pushCandles = function(candles) {
   _.each(candles, this.push);
 }
 
-module.exports = BudFox;
+module.exports = Dlna;
 
 /*
 The MIT License (MIT)
