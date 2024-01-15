@@ -109,7 +109,7 @@ var util = {
       plugins: ROOT + 'plugins/',
       methods: ROOT + 'strategies/',
       indicators: ROOT + 'strategies/indicators/',
-      budfox: ROOT + 'core/budfox/',
+      dlna: ROOT + 'core/dlna/',
       importers: ROOT + 'importers/exchanges/',
       tools: ROOT + 'core/tools/',
       workers: ROOT + 'core/workers/',
