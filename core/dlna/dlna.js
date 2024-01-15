@@ -9,14 +9,14 @@ var dirs = util.dirs();
 var Heart = require(dirs.dlna + 'heart');
 var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');
 var CandleManager = require(dirs.dlna + 'candleManager');
-var BudFox = function(config) {
+var Dlna = function(config) {
   _.bindAll(this);
   Readable.call(this, {objectMode: true});
-// BudFox internal modules:
+// Dlna internal modules:
   this.heart = new Heart;
   this.marketDataProvider = new MarketDataProvider(config);
   this.candleManager = new CandleManager;
-//    BudFox data flow:
+//    Dlna data flow:
 // relay a marketUpdate event
   this.marketDataProvider.on(
     'marketUpdate',
