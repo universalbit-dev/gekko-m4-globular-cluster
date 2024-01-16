@@ -12,7 +12,9 @@ const moment = require('moment');
 const checker = require('./exchangeChecker');
 const errors = require('./exchangeErrors');
 const Portfolio = require('./portfolioManager');
-// const Market = require('./market');
+const util = require('../core/util');
+const config = util.getConfig();
+
 const orders = require('./orders');
 const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
