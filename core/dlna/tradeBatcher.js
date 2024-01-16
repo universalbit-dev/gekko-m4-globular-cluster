@@ -1,8 +1,8 @@
-let _ = require('../lodash3');require('lodash-migrate');
+const _ = require('../lodash3');require('lodash-migrate');
 
 var moment = require('moment');
 var util = require('../../core/util.js');
-var config = require('../../core/util.js').getConfig();
+var config = util.getConfig();
 var log = require('../../core/log');
 
 var TradeBatcher = function(tid) {
@@ -85,7 +85,6 @@ TradeBatcher.prototype.convertDates = function(batch) {
     return trade;
   });
 }
-
 module.exports = TradeBatcher;
 /*
 The MIT License (MIT)
