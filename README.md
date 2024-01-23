@@ -1,6 +1,5 @@
-
-* [Net Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
-* [Mining]()
+* [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
+* [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/workers.md)
 * [Buy-Sell]()
   ---
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
