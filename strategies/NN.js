@@ -10,7 +10,7 @@ var fs = require('fs-extra');
 var stoploss= require('./indicators/StopLoss.js');
 
 var config= util.getConfig();
-var settings = config.NN;
+var settings = config.NN;this.settings=settings;
 var tulind = require('../core/tulind');
 var method = {
   priceBuffer : [],
