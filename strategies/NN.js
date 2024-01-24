@@ -45,13 +45,13 @@ var method = {
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     const layers = [
-      {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
+      {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
       {type:'conv', num_neurons:10000, activation: this.layer_activation},
       {type:'svm', num_classes:1},
       {type:'regression', num_neurons: 1}
     ];
     const layers2 = [
-      {type:'input', out_sx: 7, out_sy:8, out_depth: 4},
+      {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
       {type:'conv', num_neurons:10000, activation: this.layer_activation2},
       {type:'svm', num_classes:1},
       {type:'regression', num_neurons: 1}
