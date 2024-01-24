@@ -21,10 +21,10 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',
 key:'',
 secret:'',
-tickrate:20};
+tickrate:60};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:240};
 config.tradingAdvisor.method= 'NN';
 
 /*
@@ -35,7 +35,7 @@ config.tradingAdvisor.method= 'NN';
 config.NN= {
 threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.001,momentum:0.9,
 l1_decay:0.001,decay:0.001,emaFast:1,stoploss_enabled:true,threshold:1,
-hodl_threshold:1,price_buffer_len:100,min_predictions:100,prevAction:'wait',prevPrice:0, predictionCount:0,scale:5
+hodl_threshold:1,price_buffer_len:100,min_predictions:100,prevAction:'wait',prevPrice:0, predictionCount:0,scale:5,batch_size:8
 };
 
 //Adapter
