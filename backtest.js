@@ -18,16 +18,16 @@ var config = {};
 config.debug =true;
 
 //import kraken exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:240};
 config.tradingAdvisor.method= 'INVERTER';
 
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 config.NN={
 threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.001,momentum:0.9,
-l1_decay:0.001,l2_decay:0.001,dema:5,threshold:3,price_buffer_len:100,min_predictions:100};
+l1_decay:0.001,l2_decay:0.001,dema:5,threshold:3,price_buffer_len:100,min_predictions:100,scale:5,batch_size:8};
 
 config.INVERTER={RSI :14,ADX:14,dema:14,diplus:25.5,diminus:25,sma1000:1000,sma50:50,threshold:3};
 
