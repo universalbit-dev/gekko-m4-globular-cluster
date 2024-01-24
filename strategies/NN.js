@@ -64,7 +64,7 @@ var method = {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
-        batch_size: this.batchsize,
+        batch_size: 8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
@@ -75,7 +75,7 @@ var method = {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
-        batch_size: this.batchsize,
+        batch_size: 8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
@@ -86,7 +86,7 @@ var method = {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
-        batch_size: this.batchsize,
+        batch_size: 8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
