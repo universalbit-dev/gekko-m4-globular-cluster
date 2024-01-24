@@ -28,7 +28,7 @@ var method = {
   threshold_buy:1.0,
   threshold_sell:-1.0,
   hodle_threshold : 1,
-  min_predictions:100,
+  min_predictions:10,
 
   init : function() {
     log.info('================================================');
