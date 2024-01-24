@@ -15,7 +15,7 @@ var tulind = require('../core/tulind');
 var method = {
   priceBuffer : [],
   predictionCount : 0,
-  batchsize : 50,
+  batch_size : 8,
   num_neurons : 10000,
   layer_activation : 'sigmoid',
   layer_activation2 : 'relu',
