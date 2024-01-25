@@ -30,10 +30,8 @@ config.tradingAdvisor.method= 'NN';
 
 ///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 config.NN={
-threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.001,momentum:0.9,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:10,prevAction:'wait',prevPrice:0,
-predictionCount:0,scale:5,batch_size:8
-};
+threshold_buy:1.0,threshold_sell:-1.0,method:'sgd',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3, hodl_threshold:1,scale:5,batch_size:8};
 
 //Adapter
 config.adapter='sqlite';
