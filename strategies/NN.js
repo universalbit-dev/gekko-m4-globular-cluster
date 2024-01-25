@@ -1,40 +1,22 @@
 /*NeuralNetwork*/
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
+var log = require('../core/log.js');
+var config = require('../core/util.js').getConfig();
+var tulind = require('tulind');
+var _ = require('lodash');
+
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
-var log = require('../core/log');
-var util = require('../core/util');
 var fs = require('fs-extra');
-var stoploss= require('./indicators/StopLoss.js');
-
-var config= util.getConfig();
 var settings = config.NN;this.settings=settings;
-var tulind = require('../core/tulind');
 var method = {
   priceBuffer : [],
-  predictionCount : 0,
-  batch_size : 8,
-  num_neurons : 10000,
-  layer_activation : 'sigmoid',
-  layer_activation2 : 'relu',
-  scale : 5,
-  prevAction : 'wait',
-  prevPrice : 0,
-  stoplossCounter : 0,
-  stoploss_enabled: true,
-  threshold:1,
-  threshold_buy:1.0,
-  threshold_sell:-1.0,
-  hodle_threshold : 1,
-  min_predictions:10,
-
   init : function() {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
-
     //Date
     startTime = new Date();
 
@@ -46,25 +28,19 @@ var method = {
     this.nn = new convnetjs.Net();
     const layers = [
       {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:10000, activation: this.layer_activation},
-      {type:'svm', num_classes:1},
-      {type:'regression', num_neurons: 1}
-    ];
-    const layers2 = [
-      {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:10000, activation: this.layer_activation2},
-      {type:'svm', num_classes:1},
-      {type:'regression', num_neurons: 1}
+      {type:'fc', num_neurons:20, activation: 'relu'},
+      {type:'fc', num_neurons:20, activation:'sigmoid'},
+      {type:'regression', num_neurons:1}
     ];
 
-    this.nn.makeLayers(layers);this.nn.makeLayers(layers2);
+    this.nn.makeLayers(layers);
 
     if(this.settings.method == 'sgd')
     {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
-        batch_size: 8,
+        batch_size:8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
@@ -75,7 +51,7 @@ var method = {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
-        batch_size: 8,
+        batch_size:8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
@@ -86,7 +62,7 @@ var method = {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
-        batch_size: 8,
+        batch_size:8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
@@ -147,15 +123,15 @@ var method = {
       let signal = meanp < currentPrice;
       if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
-        log.debug("Buy - Predicted variation: ",meanAlpha);this.advice('long');
+        log.debug("Buy - Predicted variation: ",meanAlpha);this.advice('long');this.learn();
       }
       else if
       ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell)
       {
-        log.debug("Sell - Predicted variation: ",meanAlpha);this.advice('short');
+        log.debug("Sell - Predicted variation: ",meanAlpha);this.advice('short');this.learn();
       }
     }
-    if ('stoploss' === this.indicators.stoploss.action){this.learn();}
+    if ('stoploss' === this.indicators.stoploss.action){this.update(candle);this.learn();}
 
   },
   end : function() {
