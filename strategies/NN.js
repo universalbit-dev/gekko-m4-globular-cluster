@@ -50,10 +50,20 @@ var method = {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
-        momentum: this.settings.momentum,
+        eps: 1e-6,
+        ro:0.95,
         batch_size:8,
-        l2_decay: this.settings.l2_decay,
-        l1_decay: this.settings.l1_decay
+        l2_decay: this.settings.l2_decay
+      });
+    }
+      else if(this.settings.method == 'adagrad')
+    {
+      this.trainer = new convnetjs.SGDTrainer(this.nn, {
+        method: this.settings.method,
+        learning_rate: this.settings.learning_rate,
+        eps: 1e-6,
+        batch_size:8,
+        l2_decay: this.settings.l2_decay
       });
     }
     else
