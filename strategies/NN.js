@@ -102,7 +102,7 @@ var method = {
       });
     }
 
-    this.hodle_threshold = this.settings.hodle_threshold || 1;
+    this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
 
   learn : function () {
@@ -153,7 +153,7 @@ var method = {
       let currentPrice = candle.close;
       let meanp = math.mean(prediction, currentPrice);
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
-      let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.hodle_threshold);
+      let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.hodl_threshold);
       let signal = meanp < currentPrice;
       if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
