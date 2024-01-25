@@ -13,6 +13,12 @@ var fs = require('fs-extra');
 var settings = config.NN;this.settings=settings;
 var method = {
   priceBuffer : [],
+  predictionCount : 0,
+  stoplossCounter : 0,
+  prevPrice : 0,
+  prevAction : 'wait',
+  hodl_threshold : 1,
+  
   init : function() {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
@@ -115,14 +121,14 @@ var method = {
     }
   },
   setNormalizeFactor : function(candle) {
-    this.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
-    log.debug('Set normalization factor to',this.scale);
+    this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
+    log.debug('Set normalization factor to',this.settings.scale);
   },
   update : function(candle)
   {
     emaFast=this.tulipIndicators.emaFast.result.result;
-    if (1 === this.scale && 1 < candle.high && 0 === this.predictionCount) this.setNormalizeFactor(candle);
-    this.priceBuffer.push(emaFast / this.scale );
+    if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount) this.setNormalizeFactor(candle);
+    this.priceBuffer.push(emaFast / this.settings.scale );
 
     if (2 > this.priceBuffer.length) return;
      for (i=0;i<3;++i)
@@ -149,11 +155,11 @@ var method = {
   check : function(candle) {
     if(this.predictionCount > this.settings.min_predictions)
     {
-      let prediction = this.predictCandle() * this.scale;
+      let prediction = this.predictCandle() * this.settings.scale;
       let currentPrice = candle.close;
       let meanp = math.mean(prediction, currentPrice);
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
-      let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.hodl_threshold);
+      let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice*this.settings.hodl_threshold);
       let signal = meanp < currentPrice;
       if ('buy' !== this.prevAction && signal === false  && meanAlpha> this.settings.threshold_buy )
       {
@@ -165,7 +171,8 @@ var method = {
         log.debug("Sell - Predicted variation: ",meanAlpha);this.advice('short');this.learn();
       }
     }
-    if ('stoploss' === this.indicators.stoploss.action){this.update(candle);this.learn();}
+    if ('stoploss' === this.indicators.stoploss.action)
+    {this.stoplossCounter++;this.update(candle);this.learn();}
 
   },
   end : function() {
