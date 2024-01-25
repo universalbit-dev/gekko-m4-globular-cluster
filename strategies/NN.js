@@ -45,6 +45,7 @@ var method = {
         l1_decay: this.settings.l1_decay
       });
     }
+
     else if(this.settings.method == 'adadelta')
     {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
@@ -56,12 +57,33 @@ var method = {
         l2_decay: this.settings.l2_decay
       });
     }
-      else if(this.settings.method == 'adagrad')
+    else if(this.settings.method == 'adagrad')
     {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
         eps: 1e-6,
+        batch_size:8,
+        l2_decay: this.settings.l2_decay
+      });
+    }
+    else if(this.settings.method == 'nesterov')
+    {
+      this.trainer = new convnetjs.SGDTrainer(this.nn, {
+        method: this.settings.method,
+        learning_rate: this.settings.learning_rate,
+        momentum: 0.9,
+        batch_size:8,
+        l2_decay: this.settings.l2_decay
+      });
+    }
+    else if(this.settings.method == 'windowgrad')
+    {
+      this.trainer = new convnetjs.SGDTrainer(this.nn, {
+        method: this.settings.method,
+        learning_rate: this.settings.learning_rate,
+        eps: 1e-6,
+        ro:0.95,
         batch_size:8,
         l2_decay: this.settings.l2_decay
       });
@@ -73,6 +95,8 @@ var method = {
         learning_rate: this.settings.learning_rate,
         momentum: this.settings.momentum,
         batch_size:8,
+        eps: 1e-6,
+        ro:0.95,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
