@@ -2,7 +2,7 @@
 
 */
 
-//The CandleCreator creates one minute candles based on trade batches.
+//The CandleCreator creates minute candles based on trade batches.
 
 let _ = require('../lodash3');require('lodash-migrate');
 
@@ -113,12 +113,12 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
   });
 
   while(start < end) {
-    start.add(1, 'm');
+    start.add(5, 'm');
     i = +start;
     j++;
 
     if(_.contains(minutes, i))
-      continue; // we have a candle for this minute
+      continue; // we have a candle for 5 minute
 
     var lastPrice = candles[j].close;
 
