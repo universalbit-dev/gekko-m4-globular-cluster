@@ -11,7 +11,7 @@
  "author": "Mike van Rossum <mike@mvr.me>",
  "license": "MIT",
  "dependencies": {
-  "@inquirer/prompts": "^3.3.0",
+  "@inquirer/prompts": "^3.3.2",
   "@neurosity/reinforcejs": "^1.0.0",
   "async": "^3.2.4",
   "axios": "^1.6.1",
