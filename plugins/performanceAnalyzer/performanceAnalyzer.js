@@ -1,4 +1,4 @@
-let _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
 
 const moment = require('moment');
 const statslite = require('stats-lite');
@@ -13,8 +13,7 @@ const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
 const Logger = require('./logger');
 const PerformanceAnalyzer = function() {
-  _.bindAll(this);
-
+_.bindAll(this,_.functions(this));
   this.dates = {
     start: false,
     end: false
