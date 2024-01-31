@@ -1,4 +1,4 @@
-let _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
 const fs = require('fs-extra');
 
 const util = require('../../core/util');
@@ -9,7 +9,7 @@ const moment = require('moment');
 const log = require('../../core/log');
 const CandleBatcher = require('../../core/candleBatcher');
 const isLeecher = config.market && config.market.type === 'leech';
-const Actor = function(done){ _.bindAll(this);
+const Actor = function(done){ _.bindAll(this,_.functions(this));
   this.done = done;
   this.batcher = new CandleBatcher(config.tradingAdvisor.candleSize);
   this.strategyName = config.tradingAdvisor.method;
@@ -25,6 +25,7 @@ const Actor = function(done){ _.bindAll(this);
 } else done();
 
 }
+util.makeEventEmitter(Actor);
 
 Actor.prototype.setupStrategy = function() {
   if(!fs.existsSync(dirs.methods + this.strategyName + '.js'))

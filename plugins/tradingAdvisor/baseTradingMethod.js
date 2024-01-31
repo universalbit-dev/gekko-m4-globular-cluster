@@ -1,6 +1,6 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
 
-let fs = require('fs-extra');
+var fs = require('fs-extra');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
@@ -29,7 +29,7 @@ _.each(indicatorFiles, function(indicator) {
 const allowedIndicators = _.keys(Indicators);
 
 var Base = function(settings) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 
   // properties
   this.age = 0;
@@ -44,7 +44,6 @@ var Base = function(settings) {
   this.deferredTicks = [];
 
   this.propogatedAdvices = 0;
-
   this.completedWarmup = false;
 
   this.asyncIndicatorRunner = new AsyncIndicatorRunner();

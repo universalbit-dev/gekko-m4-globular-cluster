@@ -10,12 +10,14 @@ const allowedTulipIndicators = _.keys(tulind);
 const AsyncIndicatorRunner = function() {
   this.tulipIndicators = {};
   this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
-  this.candlePropsCacheSize = 10000;
+  this.candlePropsCacheSize = 100000;
   this.inflight = false;
   this.backlog = [];
   this.age = 0;
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 }
+util.makeEventEmitter(AsyncIndicatorRunner);
+
 
 AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   if(this.inflight) {
@@ -77,6 +79,26 @@ AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
     }
   }
 }
+
+/*
+AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, parameters) {
+  if(!talib)
+    util.die('Talib is not enabled');
+
+  if(!_.contains(allowedTalibIndicators, type))
+    util.die('I do not know the talib indicator ' + type);
+
+  if(this.setup)
+    util.die('Can only add talib indicators in the init method!');
+
+  var basectx = this;
+
+  this.talibIndicators[name] = {
+    run: talib[type].create(parameters),
+    result: NaN
+  }
+}
+*/
 
 AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, parameters) {
   if(!tulind) {
