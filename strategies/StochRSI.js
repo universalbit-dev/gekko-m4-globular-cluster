@@ -1,16 +1,17 @@
 /*
+
   StochRSI - SamThomp 11/06/2014
   (updated by askmike) @ 30/07/2016
-*/
 
+*/
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var tulind = require('tulind');
-var _ = require('lodash');
-
-var fs = require('fs-extra');
-var settings = config.StochRSI;this.settings=settings;
+var tulind = require('../core/tulind');
+const _ = require('../core/lodash3');require('lodash-migrate');
+const fs = require('fs-extra');
+var settings = config.INVERTER;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
+
 
 var method = {};
 method.init = function() {
@@ -26,15 +27,15 @@ method.init = function() {
     adviced: false
   };
 
-  this.requiredHistory = config.tradingAdvisor.historySize;
+  this.requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.interval});
   this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
+
   this.RSIhistory = [];
-	
   log.info('================================================');
   log.info('keep calm and make somethig of amazing');
   log.info('================================================');
-
+//Date
 startTime = new Date();
 }
 
@@ -54,27 +55,22 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
     });
-}
+},
 
-method.onTrade= function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
- }
 // for debugging purposes log the last
 // calculated parameters.
 method.log = function() {var digits = 8;
   log.debug('calculated StochRSI properties for candle:');
-  log.debug('\t', 'rsi:', this.rsi.toFixed(digits));
-  log.debug("StochRSI min:\t\t" + this.lowestRSI.toFixed(digits));
-  log.debug("StochRSI max:\t\t" + this.highestRSI.toFixed(digits));
-  log.debug("StochRSI Value:\t\t" + this.stochRSI.toFixed(2));
+  log.debug('\t', 'rsi:', this.rsi);
+  log.debug("StochRSI min:\t\t" + this.lowestRSI);
+  log.debug("StochRSI max:\t\t" + this.highestRSI);
+  log.debug("StochRSI Value:\t\t" + this.stochRSI);
 }
 
 method.check = function() {
     rsi=this.tulipIndicators.rsi.result.result;
 	this.rsi=rsi;
-	if(this.stochRSI > settings.thresholds.high) {
+	if(this.stochRSI > this.settings.thresholds.high) {
 		// new trend detected
 		if(this.trend.direction !== 'high')
 			this.trend = {
@@ -88,13 +84,13 @@ method.check = function() {
 
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 
-		if(this.trend.duration >= settings.thresholds.persistence)
+		if(this.trend.duration >= this.settings.thresholds.persistence)
 			this.trend.persisted = true;
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100) {this.trend.adviced = true;this.advice('short');}
 		else{this.advice();}
 
-	} else if(this.stochRSI < settings.thresholds.low) {
+	} else if(this.stochRSI < this.settings.thresholds.low) {
 
 		// new trend detected
 		if(this.trend.direction !== 'low')
@@ -102,7 +98,7 @@ method.check = function() {
 		this.trend.duration++;
 
 		log.debug('In low since', this.trend.duration, 'candle(s)');
-		if(this.trend.duration >= settings.thresholds.persistence){this.trend.persisted = true;}
+		if(this.trend.duration >= this.settings.thresholds.persistence){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0) {this.trend.adviced = true;this.advice('long');}
 		else {this.advice();}
 
