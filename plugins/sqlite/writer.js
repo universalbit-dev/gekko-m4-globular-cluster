@@ -1,19 +1,17 @@
 /*
 CandleWriter
 */
-let _ = require('../../core/lodash3');
-require('lodash-migrate');
-
+const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util');
+var log = require('../../core/log');
 var config = util.getConfig();
 
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 
-var log = require('../../core/log');
 
 var Store = function(done, pluginMeta) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.done = done;
 
   this.db = sqlite.initDB(false);
@@ -22,6 +20,8 @@ var Store = function(done, pluginMeta) {
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
+util.makeEventEmitter(Store);
+
 
 Store.prototype.upsertTables = function() {
   var createQueries = [

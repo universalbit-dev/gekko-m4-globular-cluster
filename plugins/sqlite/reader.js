@@ -3,7 +3,6 @@
 
 */
 const _ = require('../../core/lodash3');require('lodash-migrate');
-
 var util = require('../../core/util.js');
 var config = util.getConfig();
 
@@ -14,9 +13,11 @@ var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 
 var Reader = function() {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.db = sqlite.initDB(false);
 }
+util.makeEventEmitter(Reader);
+
 
 // returns the most recent window complete candle
 // windows within `from` and `to`

@@ -2,19 +2,18 @@
 
 
 */
-const _ = require('../../core/lodash');
-require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
+const util = require('../../core/util.js');
 
 const async = require('async');
 const fs = require('fs-extra');
-const util = require('../../core/util.js');
 var config = util.getConfig();
 
 const dirs = util.dirs();
 var sqlite3 = require('sqlite3');
 // todo: rewrite with generators or async/await..
 module.exports = done => {
-  const dbDirectory = dirs.gekko + config.sqlite.dataDirectory
+  const dbDirectory = config.sqlite.dataDirectory;
 
   if(!fs.existsSync(dbDirectory))
     return done(null, []);

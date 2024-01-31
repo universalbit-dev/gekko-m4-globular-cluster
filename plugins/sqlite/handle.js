@@ -3,15 +3,14 @@
 
 */
 
-const _ = require('../../core/lodash');
-require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
+var util = require('../../core/util.js');
 
 const fs = require('fs-extra');
-var util = require('../../core/util.js');
 var config = util.getConfig();
 
 var dirs = util.dirs();
-var adapter = config.sqlite;
+var adapter = config.adapter;
 
 // verify the correct dependencies are installed
 var pluginHelper = require(dirs.core + 'pluginUtil');
@@ -25,7 +24,7 @@ else var sqlite3 = require('sqlite3');
 var plugins = require(util.dirs().gekko + 'plugins');
 var version = adapter.version;
 var dbName = config.watch.exchange.toLowerCase() + '_' + '0.1' + '.db';
-var dir = dirs.gekko + adapter.dataDirectory;
+var dir = config.sqlite.dataDirectory;
 var fullPath = [dir, dbName].join('/');
 var mode = util.gekkoMode();
 if (mode === 'realtime' || mode === 'importer') {
