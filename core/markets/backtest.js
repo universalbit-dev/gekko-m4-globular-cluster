@@ -1,13 +1,12 @@
-let _ = require('../lodash3');
-require('lodash-migrate');
+const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
 var log = require(dirs.core + 'log');
 var moment = require('moment');
 
-var adapter = config[config.adapter];
-var Reader = require(dirs.gekko + adapter.path + '/reader');
+var adapter = config.adapter;
+var Reader = require('../../plugins/sqlite/reader');
 var daterange = config.backtest.daterange;
 var requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
 

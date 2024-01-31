@@ -1,10 +1,9 @@
-const _ = require('../lodash3');
-require('lodash-migrate');
+const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
 var dirs = util.dirs();
 var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
 var config = util.getConfig();
-var slug = config.watch.exchange.toLowerCase();
+var slug = config.watch.exchange;
 var exchange = exchangeChecker.getExchangeCapabilities(slug);
 
 if(!exchange)

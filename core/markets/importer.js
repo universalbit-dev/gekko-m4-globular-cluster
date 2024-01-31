@@ -1,5 +1,4 @@
-let _ = require('../lodash');
-require('lodash-migrate');
+const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
@@ -43,7 +42,7 @@ if(to <= from)
   util.die('This daterange does not make sense.')
 
 var Market = function() {
-  _.bindAll(this, _.functionsIn(this));
+  _.bindAll(this,_.functions(this));
   this.exchangeSettings = exchangeChecker.settings(config.watch);
 
   this.tradeBatcher = new TradeBatcher(this.exchangeSettings.tid);
