@@ -1,5 +1,4 @@
-let _ = require('../../core/lodash3');
-require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
 
 const util = require('../../core/util.js');
 const config = util.getConfig();
@@ -13,7 +12,7 @@ require(dirs.gekko + '/exchange/dependencyCheck');
 
 const Trader = function(next) {
 
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 
   this.brokerConfig = {
     ...config.trader,
@@ -53,8 +52,6 @@ const Trader = function(next) {
 
   setInterval(this.sync, 1000 * 60 * 10);
 }
-
-// teach our trader events
 util.makeEventEmitter(Trader);
 
 Trader.prototype.sync = function(next) {
