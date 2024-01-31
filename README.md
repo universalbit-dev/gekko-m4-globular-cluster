@@ -1,58 +1,23 @@
+#### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
+
 * [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
 * [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/README.md)
 * [Buy-Sell]()
+  
   ---
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
 
 ### Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
 #### unlike easy gains
 #### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
-#### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
 ---
-
-* #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
-* #### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
-* #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
+* [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
 
-Required Packages:
-```
-sudo apt install curl git build-essential
-```
-##### NVM Node Version Manager:
-nvm allows you to quickly install and use different versions of node via the command line.
-```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-```
 
-##### [NodeJs 20](https://nodejs.org/en)
-```
-nvm install 20
-nvm use 20
-```
-[?](https://github.com/nvm-sh/nvm#install--update-script)
-```
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-```
-clone project:
-```
-git clone https://github.com/universalbit-dev/gekko-m4.git
-cd gekko-m4
-```
-#### Install:
--Engine
-```
-npm i && npm audit fix
-```
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
 ---
-
-* ###### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
-```
-node gekko.js -c import.js -i
-```
 
 #### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (backtest mode)
 ```bash
@@ -63,15 +28,7 @@ pm2 start gekko-m4.js
 pm2 monit 
 ```
  
-* ##### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md)
-```
-node gekko.js -c backtest.js -b
-```
- 
-* ##### [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md)
-```
-node gekko.js -c method-nn.js
-```
+
 
 * ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
@@ -84,6 +41,9 @@ pm2 start opendns.js
 ```
 
 
+* #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
+* #### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
+* #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
 
 
 #### Indicators:
