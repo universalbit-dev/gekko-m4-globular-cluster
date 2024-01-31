@@ -21,20 +21,16 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',
 key:'',
 secret:'',
-tickrate:60};
+tickrate:5};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:240};
+config.tradingAdvisor = {enabled:true,candleSize:60,historySize:1};
 config.tradingAdvisor.method= 'NN';
 
-/*
-|NN|
-*/
-
-///https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
+//https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
 config.NN={
-threshold_buy:1.0,threshold_sell:-1.0,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3, hodl_threshold:1,scale:5,batch_size:8};
+threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3, hodl_threshold:1,scale:5,batch_size:1};
 
 //Adapter
 config.adapter='sqlite';
