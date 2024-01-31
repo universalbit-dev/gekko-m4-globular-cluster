@@ -1,10 +1,3 @@
-#### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
-
-* [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
-* [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/README.md)
-* [Buy-Sell]()
-  
-  ---
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
 
 ### Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
@@ -63,6 +56,15 @@ npm install tulind --build-from-source
 * [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 * [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
+
+
+---
+#### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
+
+* [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
+* [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/README.md)
+* [Buy-Sell](https://github.com/universalbit-dev/gekko-m4/edit/master/README.md)
+
 
 ##### [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
 
