@@ -1,9 +1,8 @@
 // Small plugin that subscribes to some events, stores
 // them and sends it to the parent process.
 
-const log = require('../core/log');
 const _ = require('../core/lodash3');require('lodash-migrate');
-
+const log = require('../core/log');
 const util = require('../core/util');
 const dirs = util.dirs();
 const env = util.gekkoEnv();
@@ -24,8 +23,10 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.stratCandles)this.processStratCandles = null;
   if(!config.backtestResultExporter.data.portfolioValues)this.processPortfolioValueChange = null;
   if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 }
+util.makeEventEmitter(BacktestResultExporter);
+
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
   this.portfolioValue = portfolio.balance;

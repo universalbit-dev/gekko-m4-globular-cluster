@@ -1,25 +1,19 @@
-var log = require('../core/log');
-moment = require('moment');
-let _ = require('../core/lodash3');
-require('lodash-migrate');
 
+const _ = require('../core/lodash3');require('lodash-migrate');
+var log = require('../core/log');
 util = require('../core/util');
 config = util.getConfig();
-adviceLoggerConfig = config.adviceLogger;
+moment = require('moment');
 
-(function(_) {
-  var bindAll = _.bindAll;
-  _.bindAll = function(object, methodNames) {
-    if(typeof methodNames==='undefined') methodNames = _.functions(object);
-    return bindAll(object, methodNames);
-  };
-})(_);
+adviceLoggerConfig = config.adviceLogger;
 
 var Actor = function() {
   this.price = 'N/A';
   this.marketTime = {format: function() {return 'N/A'}};
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 }
+util.makeEventEmitter(Actor);
+
 
 Actor.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
