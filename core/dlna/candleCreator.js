@@ -2,15 +2,14 @@
 
 */
 
-//The CandleCreator creates minute candles based on trade batches.
+//The CandleCreator creates candles based on trade batches.
 
-let _ = require('../lodash3');require('lodash-migrate');
-
+const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
-var config = require('../../core/util.js').getConfig();
+var config = util.getConfig();
 var CandleCreator = function() {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
@@ -39,28 +38,28 @@ CandleCreator.prototype.filter = function(trades) {
   }, this);
 }
 
-// put each trade in a per minute bucket
+// put each trade in a per second bucket
 CandleCreator.prototype.fillBuckets = function(trades) {
   _.each(trades, function(trade) {
-    var minute = trade.date.format('YYYY-MM-DD HH:mm');
+    var second = trade.date.format('YYYY-MM-DD HH:mm:ss');
 
-    if(!(minute in this.buckets))
-      this.buckets[minute] = [];
+    if(!(second in this.buckets))
+      this.buckets[second] = [];
 
-    this.buckets[minute].push(trade);
+    this.buckets[second].push(trade);
   }, this);
 
   this.lastTrade = _.last(trades);
 }
 CandleCreator.prototype.calculateCandles = function() {
-  var minutes = _.size(this.buckets);
+  var seconds = _.size(this.buckets);
   if (this.lastTrade !== undefined)
     // create a string referencing the minute this trade happened in
-    var lastMinute = this.lastTrade.date.format('YYYY-MM-DD HH:mm');
+    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss');
 
   var candles = _.map(this.buckets, function(bucket, name) {
     var candle = this.calculateCandle(bucket);
-    if(name !== lastMinute)
+    if(name !== lastSecond)
       delete this.buckets[name];
 
     return candle;
@@ -74,7 +73,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
 
   var f = parseFloat;
   var candle = {
-    start: first.date.clone().startOf('minute'),
+    start: first.date.clone().startOf('second'),
     open: f(first.price),
     high: f(first.price),
     low: f(first.price),
@@ -96,8 +95,8 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
-// Gekko expects a candle every minute, if nothing happened
-// during a particular minute Gekko will add empty candles with:
+// Gekko expects a candle every 30 second, if nothing happened
+// during 30 seconds Gekko will add empty candles with:
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
   if(!amount)
@@ -108,17 +107,17 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
   var end = _.last(candles).start;
   var i, j = -1;
 
-  var minutes = _.map(candles, function(candle) {
+  var seconds = _.map(candles, function(candle) {
     return +candle.start;
   });
 
   while(start < end) {
-    start.add(5, 'm');
+    start.add(30, 's');
     i = +start;
     j++;
 
-    if(_.contains(minutes, i))
-      continue; // we have a candle for 5 minute
+    if(_.contains(seconds, i))
+      continue; // we have a candle for 30 seconds
 
     var lastPrice = candles[j].close;
 

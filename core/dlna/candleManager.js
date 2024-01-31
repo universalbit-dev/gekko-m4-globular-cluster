@@ -14,14 +14,13 @@ var log = require('../../core/log');
 
 var CandleCreator = require(dirs.dlna + 'candleCreator');
 var Manager = function() {
-  _.bindAll(this);
-
+  _.bindAll(this,_.functions(this));
   this.candleCreator = new CandleCreator;
   this.candleCreator
     .on('candles', this.relayCandles);
 };
-
 util.makeEventEmitter(Manager);
+
 Manager.prototype.processTrades = function(tradeBatch) {
   this.candleCreator.write(tradeBatch);
 }

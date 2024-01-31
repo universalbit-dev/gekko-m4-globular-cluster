@@ -3,19 +3,18 @@
 
 */
 const _ = require('../lodash3');require('lodash-migrate');
-
 var util = require('../util');
+
 var MarketFetcher = require('./marketFetcher');
 var dirs = util.dirs();
 var Manager = function(config) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 // fetch trades
   this.source = new MarketFetcher(config);
 // relay newly fetched trades
   this.source
     .on('trades batch', this.relayTrades);
 }
-
 util.makeEventEmitter(Manager);
 
 // HANDLERS

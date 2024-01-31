@@ -1,5 +1,4 @@
-const _ = require('../lodash3');
-require('lodash-migrate');
+const _ = require('../lodash3');require('lodash-migrate');
 
 var moment = require('moment');
 var utc = moment.utc;
@@ -16,7 +15,7 @@ var Fetcher = function(config) {
 
   var exchangeName = config.watch.exchange.toLowerCase();
   var DataProvider = require(util.dirs().gekko + 'exchange/wrappers/' + exchangeName);
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 
 // Create a public dataProvider object which can retrieve live
 // trade information from an exchange.

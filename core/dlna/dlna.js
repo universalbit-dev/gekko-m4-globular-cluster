@@ -10,7 +10,7 @@ var Heart = require(dirs.dlna + 'heart');
 var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');
 var CandleManager = require(dirs.dlna + 'candleManager');
 var Dlna = function(config) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   Readable.call(this, {objectMode: true});
 // Dlna internal modules:
   this.heart = new Heart;
@@ -44,6 +44,7 @@ var Dlna = function(config) {
   );
   this.heart.pump();
 }
+util.makeEventEmitter(Dlna);
 
 var Readable = require('stream').Readable;
 Dlna.prototype = Object.create(Readable.prototype, {
