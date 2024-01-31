@@ -1,15 +1,15 @@
 /*
-Gekko uses a custom event emitter within the GekkoStream (the plugins) to guarantee
- the correct order of events that are triggered by eachother. Turns sync events from
-LIFO into a FIFO stack based model(https://forum.gekko.wizb.it/thread-56579.html)
+Custom event emitter.Turns sync events from LIFO into a FIFO stack based model
+(https://forum.gekko.wizb.it/thread-56579.html)
 */
 const _ = require('./lodash3');require('lodash-migrate');
+const trailingStop=require('../exchange/triggers/trailingStop');
 
 var util = require('util');
 var events = require('events');
 var NativeEventEmitter = events.EventEmitter;
 var GekkoEventEmitter = function() {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   NativeEventEmitter.call(this);
   this.defferedEvents = [];
 }

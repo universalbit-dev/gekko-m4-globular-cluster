@@ -7,14 +7,13 @@ var util = require('./util');
 
 var CandleBatcher =
 function(candleSize) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   if(!_.isNumber(candleSize))
     throw new Error('candleSize is not a number');
   this.candleSize = candleSize;
   this.smallCandles = [];
   this.calculatedCandles = [];
 }
-
 util.makeEventEmitter(CandleBatcher);
 
 CandleBatcher.prototype.write = function(candles) {

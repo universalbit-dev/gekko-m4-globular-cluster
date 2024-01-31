@@ -1,10 +1,8 @@
 /*
 Small writable stream wrapper
 */
-
+const _ = require('./lodash3');require('lodash-migrate');
 var Writable = require('stream').Writable;
-const _ = require('lodash');
-
 var async = require('async');
 var moment = require('moment');
 
@@ -23,8 +21,11 @@ var Gekko = function(plugins) {
   this.producers = this.plugins
     .filter(p => p.meta.emits);
   this.finalize = _.bind(this.finalize, this);
-  _.bindAll(this);
+  _.bindAll(this, _.functions(this));
 }
+util.makeEventEmitter(Gekko);
+
+
 
 Gekko.prototype = Object.create(Writable.prototype, {
   constructor: { value: Gekko }

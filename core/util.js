@@ -2,10 +2,9 @@
 
 
 */
-
+const _ = require('./lodash3');require('lodash-migrate');
 var moment = require('moment');
-const _ = require('lodash');
-
+const EventEmitter = require('events')
 var fs = require('fs-extra');
 var semver = require('semver');
 var program = require('commander');
@@ -180,10 +179,10 @@ if(!util.recentNode())
     'Your local version of Node.js is too old. ',
     'You have ',
     process.version,
-    ' and you need atleast ',
+    ' and you need at least ',
     util.getRequiredNodeVersion()
   ].join(''), true);
-_.bindAll(this, _.functions(this));
+  _.bindAll(this,_.functions(this));
 module.exports = util;
 
 /*

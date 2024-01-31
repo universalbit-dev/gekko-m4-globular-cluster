@@ -26,7 +26,7 @@ var sendToParent = function() {
 }
 
 var Log = function() {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.env = util.gekkoEnv();
 
   if(this.env === 'standalone')
@@ -34,6 +34,8 @@ var Log = function() {
   else if(this.env === 'child-process')
     this.output = sendToParent();
 };
+util.makeEventEmitter(Log);
+
 
 Log.prototype = {
   _write: function(method, args, name) {

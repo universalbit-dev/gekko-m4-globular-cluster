@@ -1,7 +1,3 @@
-const _ = require('lodash');
-
-var semver = require('semver');
-
 var convnetjs = convnetjs || { REVISION: 'ALPHA' };
 (function(global) {
   "use strict";
