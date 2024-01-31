@@ -27,13 +27,6 @@ pm2 monit
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
 * ##### [OpenDns.js](https://github.com/universalbit-dev/gekko-m4/blob/master/opendns.js)
-
-##### Run OpenDNS 
-```bash
-pm2 start opendns.js
-```
-
-
 * #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
 * #### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
 * #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
