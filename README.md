@@ -25,14 +25,13 @@ pm2 monit
  
 
 
-* ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
+* ##### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
+* ##### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
+* ##### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv) 
 * ##### [OpenDns.js](https://github.com/universalbit-dev/gekko-m4/blob/master/opendns.js)
-* #### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
-* #### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
-* #### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv)
-
+* ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
 
 #### Indicators:
 #### [Tulip Node](https://www.npmjs.com/package/tulind)
@@ -52,8 +51,6 @@ npm install tulind --build-from-source
 * [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
-
-
 ---
 #### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
 
