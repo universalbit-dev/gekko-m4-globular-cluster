@@ -22,9 +22,9 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:5};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:60,historySize:1};
-config.tradingAdvisor.method= 'INVERTER';
+config.tradingAdvisor.method= 'NN';
 
-https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+//https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
 config.NN={
 threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3, hodl_threshold:1,scale:5,batch_size:1};
@@ -50,8 +50,9 @@ config.adviceLogger={enabled:true};
 config.backtest = {
   enabled:true,
   daterange: {
-    from: "2021-02-01",to: "2021-03-01"
+    from: "2021-01-01",to: "2021-03-01"
   },
+
   batchSize: 1000
 };
 
@@ -72,7 +73,7 @@ config.backtestResultExporter = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.paperTrader = {enabled: true,
   reportInCurrency: true,
-  simulationBalance: {asset: 1,currency: 1},
+  simulationBalance: {asset: 1,currency: 100},
   feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
   slippage: 0.05
 };
@@ -97,3 +98,5 @@ config.importer = {
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
+
+    
