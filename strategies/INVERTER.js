@@ -53,7 +53,6 @@ log.info('============================================');
 //Init
 this.resetTrend();
 this.debug = true;
-requiredHistory =config.tradingAdvisor.candleSize;
 
 //Indicators overview
 
