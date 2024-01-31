@@ -1,6 +1,6 @@
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
 
-### UniversalBit-dev BlockChain:
+### UniversalBit-dev:
 ### Gekko-m4 import simulate and trade exchange data.
 
 ##### unlike easy gains 
