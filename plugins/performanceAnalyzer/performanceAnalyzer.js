@@ -13,11 +13,8 @@ const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
 const Logger = require('./logger');
 const PerformanceAnalyzer = function() {
-_.bindAll(this,_.functions(this));
-  this.dates = {
-    start: false,
-    end: false
-  }
+  _.bindAll(this,_.functions(this));
+  this.dates = {start: false,end: false};
   this.startPrice = 0;
   this.endPrice = 0;
   this.currency = watchConfig.currency;
@@ -38,6 +35,7 @@ _.bindAll(this,_.functions(this));
   this.openRoundTrip = false;
   this.warmupCompleted = false;
 }
+util.makeEventEmitter(PerformanceAnalyzer);
 
 PerformanceAnalyzer.prototype.processPortfolioValueChange = function(event) {
   if(!this.start.balance) {
