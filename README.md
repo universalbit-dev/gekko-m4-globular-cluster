@@ -1,8 +1,10 @@
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
 
-### Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
-#### unlike easy gains
-#### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
+### UniversalBit-dev BlockChain:
+### Gekko-m4 import simulate and trade exchange data.
+
+##### unlike easy gains 
+##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 ---
 * [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
@@ -49,6 +51,7 @@ npm install tulind --build-from-source
 * [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 * [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
+* Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
 
 
 ---
