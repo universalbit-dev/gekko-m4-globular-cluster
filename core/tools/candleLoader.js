@@ -1,13 +1,13 @@
-const _ = require('../lodash3');
+const _ = require('../lodash3');require('lodash-migrate');
+const fs = require('fs-extra');
 
-var batchSize = 1000;
-let fs = require('fs-extra');
 var moment = require('moment');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
 var log = require('../log');
 
+var batchSize = 60;
 var adapter = config[config.adapter];
 var Reader = require(dirs.gekko + adapter.path + '/reader');
 var daterange = config.daterange;
@@ -39,6 +39,7 @@ var reader = new Reader();
 var batcher;
 var next;
 var doneFn = () => {
+
   process.nextTick(() => {
     next(result);
   })

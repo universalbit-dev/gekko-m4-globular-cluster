@@ -1,8 +1,8 @@
 
-const _ = require('../lodash3');
-var BATCH_SIZE = 60; // minutes
-var MISSING_CANDLES_ALLOWED = 3; // minutes, per batch
+const _ = require('../lodash3');require('lodash-migrate');
 
+var missing_candle_allowed = 3;
+var batchSize = 60;
 
 var moment = require('moment');
 var async = require('async');
@@ -49,20 +49,17 @@ var scan = function(done) {
       }
 
       // figure out where the gaps are..
-
       var missing = optimal - res.available + 1;
 
       log.info(`The database has ${missing} candles missing, Figuring out which ones...`);
 
       var iterator = {
-        from: last - (BATCH_SIZE * 60),
+        from: last - (batchSize * 60),
         to: last
       }
 
       var batches = [];
-      // loop through all candles we have
-      // in batches and track whether they
-      // are complete
+      // loop through all candles we have in batches and track whether they are complete
       async.whilst(
           () => {
             return iterator.from > first
@@ -74,7 +71,7 @@ var scan = function(done) {
               from,
               iterator.to,
               (err, count) => {
-                var complete = count + MISSING_CANDLES_ALLOWED > BATCH_SIZE;
+                var complete = count + missing_candle_allowed > batchSize;
 
                 if(complete)
                   batches.push({
@@ -86,8 +83,8 @@ var scan = function(done) {
               }
             );
 
-            iterator.from -= BATCH_SIZE * 60;
-            iterator.to -= BATCH_SIZE * 60;
+            iterator.from -= batchSize * 60;
+            iterator.to -= batchSize * 60;
           },
           () => {
             if(batches.length === 0) {

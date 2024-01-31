@@ -1,7 +1,5 @@
-const _ = require('../lodash3');
-
-let fs = require('fs-extra');
-
+const _ = require('../lodash3');require('lodash-migrate');
+const fs = require('fs-extra');
 var util = require('../util');
 var dirs = util.dirs();
 
