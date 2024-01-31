@@ -2,7 +2,7 @@
 
 
 */
-let _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util.js');
 const ENV = util.gekkoEnv();
 var log = require('../../core/log.js');
@@ -13,7 +13,7 @@ const watchConfig = config.watch;
 const dirs = util.dirs();
 const TrailingStop = require(dirs.broker + 'triggers/trailingStop');
 const PaperTrader = function() {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 
   if(calcConfig.feeUsing === 'maker') {
     this.rawFee = calcConfig.feeMaker;
@@ -43,6 +43,7 @@ const PaperTrader = function() {
   this.warmupCompleted = false;
   this.warmupCandle;
 }
+util.makeEventEmitter(PaperTrader);
 
 PaperTrader.prototype.relayPortfolioChange = function() {
   this.deferredEmit('portfolioChange', {
