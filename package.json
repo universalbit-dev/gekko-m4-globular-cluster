@@ -22,12 +22,9 @@
   "convnet": "^1.0.0",
   "core-js": "^3.32.2",
   "crypto-js": "^4.2.0",
-  "events": "^3.3.0",
   "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
   "humanize-duration": "^3.31.0",
-  "inquirer": "^9.2.12",
-  "inquirer-date-prompt": "^2.0.1",
   "kraken-api": "^1.0.1",
   "lodash": "^4.17.21",
   "lodash-migrate": "^0.3.16",
@@ -35,12 +32,9 @@
   "moment": "^2.29.4",
   "opn": "^4.0.2",
   "path": "^0.12.7",
-  "ping": "^0.4.4",
   "promisify-node": "^0.5.0",
   "prompt-lite": "^0.1.1",
   "querystring": "^0.2.1",
-  "readline-sync": "^1.4.10",
-  "reconnecting-websocket": "^4.4.0",
   "relieve": "^2.2.3",
   "retry": "^0.12.0",
   "semver": "^5.4.1",
@@ -50,9 +44,7 @@
   "stream": "^0.0.2",
   "tulind": "^0.8.20",
   "underscore": "^1.13.6",
-  "util": "^0.12.5",
-  "uuid": "^9.0.1",
-  "ws": "^8.16.0"
+  "uuid": "^9.0.1"
  },
  "engines": {
   "node": ">=16"
