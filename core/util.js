@@ -4,7 +4,7 @@
 */
 const _ = require('./lodash3');require('lodash-migrate');
 var moment = require('moment');
-const EventEmitter = require('events')
+const EventEmitter = require('node:events');
 var fs = require('fs-extra');
 var semver = require('semver');
 var program = require('commander');
@@ -123,7 +123,7 @@ var util = {
     );
   },
   makeEventEmitter: function(dest) {
-    util.inherit(dest, require('events').EventEmitter);
+    util.inherit(dest, require('node:events').EventEmitter);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
