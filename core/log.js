@@ -3,7 +3,7 @@
 
 */
 var moment = require('moment');
-var fmt = require('util').format;
+var fmt = require('node:util').format;
 
 const _ = require('./lodash3');require('lodash-migrate');
 
@@ -31,7 +31,7 @@ var Log = function() {
 
   if(this.env === 'standalone')
     this.output = console;
-  else if(this.env === 'child-process')
+  else if(this.env === 'node:child-process')
     this.output = sendToParent();
 };
 util.makeEventEmitter(Log);
