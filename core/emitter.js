@@ -4,8 +4,7 @@ Custom event emitter.Turns sync events from LIFO into a FIFO stack based model
 */
 const _ = require('./lodash3');require('lodash-migrate');
 const trailingStop=require('../exchange/triggers/trailingStop');
-
-var util = require('util');
+const util = require('node:util');
 const events = require('node:events');
 var NativeEventEmitter = events.EventEmitter;
 var GekkoEventEmitter = function() {
