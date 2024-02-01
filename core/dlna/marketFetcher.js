@@ -62,7 +62,7 @@ Fetcher.prototype.fetch = function() {
     since = false;
 
   this.tries = 0;
-  log.debug('Requested', this.pair, 'trade data from', this.exchange.name, '...');
+  log.debug('Requested', this.pair, 'exchange data');
   this._fetch(since);
 }
 
