@@ -6,7 +6,7 @@ const _ = require('./lodash3');require('lodash-migrate');
 const trailingStop=require('../exchange/triggers/trailingStop');
 
 var util = require('util');
-var events = require('events');
+const events = require('node:events');
 var NativeEventEmitter = events.EventEmitter;
 var GekkoEventEmitter = function() {
   _.bindAll(this,_.functions(this));
