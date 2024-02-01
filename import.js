@@ -72,7 +72,7 @@ config.backtestResultExporter = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.paperTrader = {enabled: false,
   reportInCurrency: true,
-  simulationBalance: {asset: 1,currency: 100},
+  simulationBalance: {asset: 100,currency: 1},
   feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
   slippage: 0.05
 };
