@@ -116,18 +116,19 @@ var util = {
       broker: ROOT + 'exchange/'
     }
   },
+  
   inherit: function(dest, source) {
-    require('util').inherits(
-      dest,
-      source
-    );
+    require('node:util').inherits(dest,source);
   },
+  
   makeEventEmitter: function(dest) {
     util.inherit(dest, require('node:events').EventEmitter);
   },
+  
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
   },
+  
   gekkoMode: function() {
     if(_gekkoMode)
       return _gekkoMode;
