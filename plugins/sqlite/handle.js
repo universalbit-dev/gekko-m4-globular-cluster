@@ -10,7 +10,7 @@ const fs = require('fs-extra');
 var config = util.getConfig();
 
 var dirs = util.dirs();
-var adapter = config[config.adapter];
+var adapter = config[config.sqlite];
 
 // verify the correct dependencies are installed
 var pluginHelper = require(dirs.core + 'pluginUtil');
@@ -22,7 +22,7 @@ if (config.debug) var sqlite3 = require('sqlite3');
 else var sqlite3 = require('sqlite3');
 
 var plugins = require(util.dirs().gekko + 'plugins');
-var version = adapter.version;
+var version = config.sqlite.version;
 var dbName = config.watch.exchange.toLowerCase() + '_' + '0.1' + '.db';
 var dir = config.sqlite.dataDirectory;
 var fullPath = [dir, dbName].join('/');
