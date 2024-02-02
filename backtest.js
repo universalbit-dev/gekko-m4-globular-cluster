@@ -50,7 +50,7 @@ config.adviceLogger={enabled:true};
 config.backtest = {
   enabled:true,
   daterange: {
-    from: "2021-01-01",to: "2021-03-01"
+    from: "2021-01-02",to: "2021-03-01"
   },
 
    batchSize: 60
