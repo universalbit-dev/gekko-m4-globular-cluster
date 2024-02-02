@@ -31,7 +31,7 @@ var Log = function() {
 
   if(this.env === 'standalone')
     this.output = console;
-  else if(this.env === 'node:child-process')
+  else if(this.env === 'child-process')
     this.output = sendToParent();
 };
 util.makeEventEmitter(Log);
