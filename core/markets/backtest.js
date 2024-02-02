@@ -51,8 +51,11 @@ var Market = function() {
     to: from.clone().add(this.batchSize, 'm').subtract(1, 's')
   }
 }
+util.makeEventEmitter(Market);
+
 
 var Readable = require('stream').Readable;
+
 Market.prototype = Object.create(Readable.prototype, {
   constructor: { value: Market }
 });
