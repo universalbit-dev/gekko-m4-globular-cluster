@@ -5,7 +5,7 @@ var dirs = util.dirs();
 var log = require(dirs.core + 'log');
 var moment = require('moment');
 
-var adapter = config.adapter;
+var adapter = config[config.adapter];
 var Reader = require('../../plugins/sqlite/reader');
 var daterange = config.backtest.daterange;
 var requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
