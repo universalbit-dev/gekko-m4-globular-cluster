@@ -2,10 +2,10 @@
 
 
 */
-const _ = require('./lodash3');require('lodash-migrate');
+
 var moment = require('moment');
-const EventEmitter = require('node:events');
-const util = require('node:util');
+const _ = require('./lodash3');
+
 var fs = require('fs-extra');
 var semver = require('semver');
 var program = require('commander');
@@ -18,17 +18,17 @@ var _gekkoMode = false;
 var _gekkoEnv = false;
 
 var _args = false;
-var gekkoutil = {
+var util = {
   getConfig: function() {
     // cache
     if(_config)
       return _config;
 
-    if(!program.config)gekkoutil.die('Please specify a config file.', true);
+    if(!program.config)util.die('Please specify a config file.', true);
 
-    if(!fs.existsSync(gekkoutil.dirs().gekko + program.config))gekkoutil.die('Cannot find the specified config file.', true);
+    if(!fs.existsSync(util.dirs().gekko + program.config))util.die('Cannot find the specified config file.', true);
 
-    _config = require(gekkoutil.dirs().gekko + program.config);
+    _config = require(util.dirs().gekko + program.config);
     return _config;
   },
   setConfig: function(config) {
@@ -41,7 +41,7 @@ var gekkoutil = {
       _config[key] = value;
   },
   getVersion: function() {
-    return gekkoutil.getPackage().version;
+    return util.getPackage().version;
   },
   getPackage: function() {
     if(_package)
@@ -52,10 +52,10 @@ var gekkoutil = {
     return _package;
   },
   getRequiredNodeVersion: function() {
-  return gekkoutil.getPackage().engines.node;
+  return util.getPackage().engines.node;
   },
   recentNode: function() {
-    var required = gekkoutil.getRequiredNodeVersion();
+    var required = util.getRequiredNodeVersion();
     return semver.satisfies(process.version, required);
   },
   // check if two moments are corresponding
@@ -73,12 +73,12 @@ var gekkoutil = {
     }
   },
   logVersion: function() {
-    return  `Gekko version: v${gekkoutil.getVersion()}`
+    return  `Gekko version: v${util.getVersion()}`
     + `\nNodejs version: ${process.version}`;
   },
   die: function(m, soft) {
 
-    if(_gekkoEnv === 'node:child_process') {
+    if(_gekkoEnv === 'child-process') {
       return process.send({type: 'error', error: '\n ERROR: ' + m + '\n'});
     }
 
@@ -92,7 +92,7 @@ var gekkoutil = {
         log('\nError:\n');
         log(m, '\n\n');
         log('\nMeta debug info:\n');
-        log(gekkoutil.logVersion());
+        log(util.logVersion());
         log('');
       }
     }
@@ -118,10 +118,13 @@ var gekkoutil = {
     }
   },
   inherit: function(dest, source) {
-    util.inherits(dest,source);
+    require('node:util').inherits(
+      dest,
+      source
+    );
   },
   makeEventEmitter: function(dest) {
-    util.inherits(dest, require('node:events').EventEmitter);
+    util.inherit(dest, require('node:events').EventEmitter);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
@@ -164,14 +167,24 @@ var gekkoutil = {
 // NOTE: those options are only used
 // in stand alone mode
 program
-
+  .version(util.logVersion())
   .option('-c, --config <file>', 'Config file')
   .option('-b, --backtest', 'backtesting mode')
   .option('-i, --import', 'importer mode')
   .option('--ui', 'launch a web UI')
   .parse(process.argv);
-  _.bindAll(this,_.functions(this));
-module.exports = gekkoutil;
+
+// make sure the current node version is recent enough
+if(!util.recentNode())
+  util.die([
+    'Your local version of Node.js is too old. ',
+    'You have ',
+    process.version,
+    ' and you need atleast ',
+    util.getRequiredNodeVersion()
+  ].join(''), true);
+_.bindAll(this, _.functions(this));
+module.exports = util;
 
 /*
 
