@@ -87,20 +87,21 @@ config.backtest = {
   daterange: {
     from: "2021-01-01",to: "2021-03-01"
   },
-  batchSize: 1000
+batchSize: 60
 };
 
 config.backtestResultExporter = {
-  enabled: false,
+  enabled: true,
   writeToDisk: true,
   data: {
     stratUpdates: false,
     portfolioValues: true,
-    stratCandles: true,
+    stratCandles: false,
     roundtrips: true,
     trades: true
   }
 };
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
