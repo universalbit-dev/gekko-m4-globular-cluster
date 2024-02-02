@@ -10,7 +10,7 @@ const fs = require('fs-extra');
 var config = util.getConfig();
 
 var dirs = util.dirs();
-var adapter = config[config.adapter];
+var adapter = config[config.sqlite];
 
 // verify the correct dependencies are installed
 var pluginHelper = require(dirs.core + 'pluginUtil');
