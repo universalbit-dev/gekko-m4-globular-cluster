@@ -9,7 +9,7 @@ var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
 const _ = require('../core/lodash3');require('lodash-migrate');
 const fs = require('fs-extra');
-var settings = config.INVERTER;this.settings=settings;
+var settings = config.StochRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 
