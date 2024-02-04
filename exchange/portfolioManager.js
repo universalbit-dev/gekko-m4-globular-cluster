@@ -2,14 +2,14 @@
 
 
 */
-const _=require('../core/lodash3');require('lodash-migrate');
+const _=require('../core/lodash');
 const async=require('async');
 const errors=require('./exchangeErrors');
 const util = require('../core/util');
 const config = util.getConfig();
 
 class Portfolio{constructor(config,api){
-_.bindAll(this);
+_.bindAll(this, _.functionsIn(this));
 this.config=config;
 this.api=api;this.balances={};
 this.fee=null;
