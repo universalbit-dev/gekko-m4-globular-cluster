@@ -1,8 +1,9 @@
 const _ = require('../../core/lodash');
 const exchangeUtils = require('../exchangeUtils');
-const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
 const states = require('./states');
+//
+const bindAll = exchangeUtils.bindAll;
 
 //base order
 class BaseOrder extends EventEmitter {
