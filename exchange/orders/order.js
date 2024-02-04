@@ -1,3 +1,4 @@
+const EventEmitter=require('node:events');
 const _ = require('../../core/lodash');
 const exchangeUtils = require('../exchangeUtils');
 const isValidOrder = exchangeUtils.isValidOrder;
