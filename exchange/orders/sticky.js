@@ -12,9 +12,7 @@
     - native move
 */
 
-const _ = require('../../core/lodash3');
-require('lodash-migrate');
-
+const _ = require('../../core/lodash');
 const async = require('async');
 const events = require('node:events');
 const moment = require('moment');
@@ -24,8 +22,7 @@ const states = require('./states');
 
 class StickyOrder extends BaseOrder {
   constructor({api, marketConfig, capabilities}) {
-    super(api);
-
+    super(api)
     this.market = marketConfig;
     this.capabilities = capabilities;
 
