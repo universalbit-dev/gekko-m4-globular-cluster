@@ -38,7 +38,7 @@
   "relieve": "^2.2.3",
   "retry": "^0.12.0",
   "semver": "^5.4.1",
-  "sqlite": "^4.2.1",
+  "sqlite": "^5.1.1",
   "sqlite3": "^5.1.7",
   "stats-lite": "^2.0.4",
   "stream": "^0.0.2",
