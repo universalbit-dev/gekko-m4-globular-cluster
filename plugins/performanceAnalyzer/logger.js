@@ -88,6 +88,13 @@ if(mode === 'backtest') {
 
   Logger.prototype.finalize = function(report) {
 
+    log.write('');
+    log.info('\t=================================================');
+    log.info('\tBACKTESTING FEATURE NEEDS PROPER TESTING');
+    log.info('\tACT ON THESE NUMBERS AT YOUR OWN RISK!');
+    log.info('\t=================================================');
+    log.write('');
+
     log.info();
     log.info('(ROUNDTRIP) REPORT:');
 
