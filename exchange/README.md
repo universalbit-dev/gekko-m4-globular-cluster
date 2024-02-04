@@ -4,7 +4,8 @@ npm i
 ```
 
 
-Thanks developers
+[Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
+
 
 
 
