@@ -58,8 +58,6 @@ Logger.prototype.logRoundtrip = function(rt) {
 }
 
 if(mode === 'backtest') {
-  // we only want to log a summarized one line report, like:
-  // 2016-12-19 20:12:00: Paper trader simulated a BUY 0.000 USDT => 1.098 BTC
   Logger.prototype.handleTrade = function(trade) {
     if(trade.action !== 'sell' && trade.action !== 'buy')
       return;
