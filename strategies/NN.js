@@ -183,6 +183,12 @@ var method = {
     {
       let prediction = this.predictCandle() * this.settings.scale;
       let currentPrice = candle.close;
+      /*
+      Mean Formula
+      The measure of central tendencies is used to describe data clusters around a central value. 
+      The mean definition indicates a varied formula used to calculate the mean depending on the data provided. 
+      The general formula to calculate the mean is as follows: Mean=Sum of Given Data/Total Number of Data      
+      */
       let meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
