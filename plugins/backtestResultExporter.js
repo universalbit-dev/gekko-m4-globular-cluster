@@ -8,7 +8,7 @@ const dirs = util.dirs();
 const env = util.gekkoEnv();
 const config = util.getConfig();
 const moment = require('moment');
-const fs = require('fs-extra');
+const fs = require('node:fs');
 
 const BacktestResultExporter = function() {
   this.performanceReport;
