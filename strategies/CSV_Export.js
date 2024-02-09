@@ -9,7 +9,7 @@
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 let _ = require('../core/lodash');
-let fs = require('fs-extra');
+let fs = require('node:fs');
 
 var method = {
 
