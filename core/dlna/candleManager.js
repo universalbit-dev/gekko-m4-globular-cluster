@@ -6,7 +6,7 @@ let _ = require('../lodash3');
 require('lodash-migrate');
 
 var moment = require('moment');
-var fs = require('fs-extra');
+var fs = require('node:fs');
 var util = require('../../core/util');
 var dirs = util.dirs();
 var config = require('../../core/util.js').getConfig();
