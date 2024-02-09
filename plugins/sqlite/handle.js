@@ -6,7 +6,7 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util.js');
 
-const fs = require('fs-extra');
+const fs = require('node:fs');
 var config = util.getConfig();
 
 var dirs = util.dirs();
