@@ -51,10 +51,10 @@ config.debug =true;
 config.watch = {exchange:'kraken',
 currency:'XBT',asset:'LTC',
 key:'0-0000000000000000000000000000000000000000',
-secret:'0-0000000000000000000000000000000000000000',tickrate:5};
+secret:'0-0000000000000000000000000000000000000000',tickrate:60};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:60,historySize:1};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
 config.tradingAdvisor.method= 'NN';
 
 config.StochRSI={interval:14,threshold:1};
