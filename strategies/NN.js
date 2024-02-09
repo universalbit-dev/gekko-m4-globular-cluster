@@ -11,7 +11,7 @@ var _ = require('lodash');
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
-var fs = require('fs-extra');
+var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 var method = {
   priceBuffer : [],
