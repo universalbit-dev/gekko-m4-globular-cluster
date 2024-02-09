@@ -21,10 +21,10 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',
 key:'',
 secret:'',
-tickrate:5};
+tickrate:60};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:60,historySize:1};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
 config.tradingAdvisor.method= 'NN';
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
