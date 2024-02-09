@@ -91,7 +91,7 @@ batchSize: 60
 };
 
 config.backtestResultExporter = {
-  enabled: true,
+  enabled: false,
   writeToDisk: true,
   data: {
     stratUpdates: false,
