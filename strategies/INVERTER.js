@@ -28,7 +28,7 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
 const _ = require('../core/lodash3');require('lodash-migrate');
-const fs = require('fs-extra');
+const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 /*
