@@ -56,10 +56,10 @@ var config = {};
 config.debug =true;
 
 //import kraken exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:5};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:60,historySize:1};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
 config.tradingAdvisor.method= 'NN';
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
