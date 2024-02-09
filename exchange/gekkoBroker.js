@@ -7,7 +7,7 @@
 
 const _ = require('../core/lodash');
 const async = require('async');
-const events = require('node:events');
+const EventEmitter = require('node:events');
 const moment = require('moment');
 const checker = require('./exchangeChecker');
 const errors = require('./exchangeErrors');
