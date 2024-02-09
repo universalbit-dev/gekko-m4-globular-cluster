@@ -1,5 +1,5 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-let fs = require('fs-extra');
+let fs = require('node:fs');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
