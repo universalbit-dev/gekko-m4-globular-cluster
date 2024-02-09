@@ -1,4 +1,5 @@
-let _=require('../core/lodash3');require('lodash-migrate');var fs= require('fs-extra');
+let _=require('../core/lodash3');require('lodash-migrate');
+var fs= require('node:fs');
 var moment=require('moment');var errors=require('./exchangeErrors');var Checker=function(){_.bindAll((this));}
 Checker.prototype.getExchangeCapabilities=function(slug){if(!fs.existsSync(__dirname+'/wrappers/'+slug+'.js'))
 throw new errors.ExchangeError(`Gekko does not know the exchange"${slug}"`);return require('./wrappers/'+slug).getCapabilities();}
