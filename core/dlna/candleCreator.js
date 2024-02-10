@@ -112,12 +112,12 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
   });
 
   while(start < end) {
-    start.add(30, 's');
+    start.add(60, 's');
     i = +start;
     j++;
 
     if(_.contains(seconds, i))
-      continue; // we have a candle for 30 seconds
+      continue; // we have a candle for 60 seconds
 
     var lastPrice = candles[j].close;
 
