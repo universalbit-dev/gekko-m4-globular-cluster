@@ -56,12 +56,12 @@ Trader.getCapabilities = function () {
   return {
     name: 'Exchange Simulator',
     slug: 'exchange_simulator',
-    currencies: ['LTC'],
-    assets: ['BTC'],
+    currencies: ['BTC'],
+    assets: ['LTC'],
     maxTradesAge: 60,
     maxHistoryFetch: null,
     markets: [
-      { pair: ['LTC', 'BTC'], minimalOrder: {amount: 0.0004} },
+      { pair: ['BTC', 'LTC'], minimalOrder: {amount: 0.1} },
     ],
     requires: ['key', 'secret'],
     fetchTimespan: 60,
