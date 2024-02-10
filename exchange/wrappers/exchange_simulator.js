@@ -14,6 +14,7 @@ const Trader = function() {
   this.trend = 'up';
   this.tid = 0;
 }
+util.makeEventEmitter(Trader);
 
 Trader.prototype.getTrades = function(since, cb) {
   const amount = moment().diff(this.at, 'seconds');
