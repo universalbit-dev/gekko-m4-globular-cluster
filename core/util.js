@@ -5,7 +5,7 @@
 
 var moment = require('moment');
 const _ = require('./lodash3');
-
+const EventEmitter = require('node:events');
 var fs = require('node:fs');
 var semver = require('semver');
 var program = require('commander');
