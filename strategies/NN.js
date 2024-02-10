@@ -27,13 +27,12 @@ var method = {
     log.info('================================================');
     //Date
     startTime = new Date();
-
     //indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
     //DEMA
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     this.name = 'NN';
-    this.requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
+    requiredHistory =config.tradingAdvisor.candleSize; 
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
@@ -183,12 +182,6 @@ var method = {
     {
       let prediction = this.predictCandle() * this.settings.scale;
       let currentPrice = candle.close;
-      /*
-      Mean Formula
-      The measure of central tendencies is used to describe data clusters around a central value. 
-      The mean definition indicates a varied formula used to calculate the mean depending on the data provided. 
-      The general formula to calculate the mean is as follows: Mean=Sum of Given Data/Total Number of Data      
-      */
       let meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       let meanAlpha = (meanp - currentPrice) / currentPrice * 100;
@@ -198,19 +191,19 @@ var method = {
 
 if ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy)
 {
-log.info('Alpha',meanAlpha);this.advice('long');
+log.info('Alpha',meanAlpha);//this.advice('long');
 this.brain();
 }
       else if
       ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)
 {
-log.debug("Alpha",meanAlpha);this.advice('short');
+log.debug("Alpha",meanAlpha);//this.advice('short');
 this.brain();
 }
     }
     if ('stoploss' === this.indicators.stoploss.action)
     {
-    this.advice('short');
+    //this.advice('short');
     this.stoplossCounter++;log.info(':',this.indicators.stoploss.action);
     this.brain();this.prevAction='sell';signal=false;
     }
