@@ -32,7 +32,7 @@ l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3
 config.INVERTER={RSI :14,ADX:14,dema:14,diplus:25.5,diminus:25,sma240:240,sma50:50,threshold:3};
 
 config.StochRSI={interval:14,threshold:1};
-config.StochRSI.thresholds={low:20,high:80,persistence:5};
+config.StochRSI.thresholds={low:30,high:70,persistence:5};
 
 //Adapter
 config.adapter='sqlite';
