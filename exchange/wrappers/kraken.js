@@ -32,6 +32,7 @@ const Trader = function(config) {
 
   );
 }
+util.makeEventEmitter(Trader);
 
 const recoverableErrors = [
   'SOCKETTIMEDOUT',
