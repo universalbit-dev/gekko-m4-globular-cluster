@@ -2,6 +2,8 @@
 
 const _ = require('../../core/lodash');
 const moment = require('moment');
+const util = require('../../core/util');
+const config = util.getConfig();
 
 const TREND_DURATION = 1000;
 
