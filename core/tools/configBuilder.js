@@ -1,6 +1,7 @@
 const _ = require('../lodash3');require('lodash-migrate');
 const fs = require('node:fs');
 var util = require('../util');
+var config = require('../core/util.js').getConfig();
 var dirs = util.dirs();
 
 // build a config object out of a directory of JS files
@@ -8,7 +9,7 @@ module.exports = function() {
   const configDir = util.dirs().config;
 
   // attach the proper adapter
-  let adapter = _config.adapter;
+  let adapter = config.adapter;
 
   if(_config.tradingAdvisor.enabled) {
     // also load the strat
