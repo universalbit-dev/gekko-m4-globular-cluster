@@ -11,9 +11,9 @@ module.exports = function() {
   // attach the proper adapter
   let adapter = config.adapter;
 
-  if(_config.tradingAdvisor.enabled) {
+  if(config.tradingAdvisor.enabled) {
     // also load the strat
-    let strat = _config.tradingAdvisor.method;
+    let strat = config.tradingAdvisor.method;
     let stratFile = configDir + 'strategies/conf/' + strat + '_conf' + '.js';
     if(!fs.existsSync(stratFile))
       util.die('Cannot find the strategy config file for ' + strat);
@@ -22,7 +22,7 @@ module.exports = function() {
   const mode = util.gekkoMode();
 
   if(mode === 'backtest')
-  return _config;
+  return config;
 }
 
 /*
