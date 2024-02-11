@@ -1,3 +1,5 @@
+// required indicators
+var util = require('../../core/util');
 var SMA = require('./SMA');
 
 var Indicator = function (weight) {
@@ -8,6 +10,7 @@ var Indicator = function (weight) {
   this.result = 0;
   this.age = 0;
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (price) {
   this.prices[this.age] = price;

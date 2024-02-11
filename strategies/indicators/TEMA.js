@@ -1,5 +1,5 @@
 var EMA = require('./EMA.js');
-
+var util = require('../../core/util');
 var Indicator = function(config) {
   this.input = 'price';
   this.arrTema = [];
@@ -9,6 +9,7 @@ var Indicator = function(config) {
   this.ema2 = new EMA(config.weight);
   this.ema3 = new EMA(config.weight);
 }
+util.makeEventEmitter(Indicator);
 
 // add a price and calculate the EMAs and
 // the result

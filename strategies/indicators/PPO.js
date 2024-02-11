@@ -1,11 +1,6 @@
 // required indicators
-let _ = require('lodash');require('lodash-migrate');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
-
 var EMA = require('./EMA.js');
-
+var util = require('../../core/util');
 var Indicator = function(config) {
   this.result = {};
   this.input = 'price';
@@ -16,6 +11,7 @@ var Indicator = function(config) {
   this.MACDsignal = new EMA(config.signal);
   this.PPOsignal = new EMA(config.signal);
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
   this.short.update(price);

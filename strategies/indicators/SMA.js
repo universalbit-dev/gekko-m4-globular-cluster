@@ -1,5 +1,6 @@
 // required indicators
-// Simple Moving Average - O(1) implementation
+// Simple Moving Average - O(1) implementation 
+var util = require('../../core/util');
 var Indicator = function(windowLength) {
   this.input = 'price';
   this.windowLength = windowLength;
@@ -8,6 +9,7 @@ var Indicator = function(windowLength) {
   this.age = 0;
   this.sum = 0;
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
   var tail = this.prices[this.age] || 0; // oldest price in window

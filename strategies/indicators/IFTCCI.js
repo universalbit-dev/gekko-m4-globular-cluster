@@ -2,7 +2,7 @@
 
 var CCI = require('./CCI.js');
 var WMA = require('./WMA.js');
-
+var util = require('../../core/util');
 var Indicator = function(config) {
   this.result = false;
   this.cciLength = config.cciLength;
@@ -10,6 +10,7 @@ var Indicator = function(config) {
   this.cci = new CCI({ history: this.cciLength, constant: 0.015 });
   this.wma = new WMA(this.wmaLength);
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle) {
   this.cci.update(candle);

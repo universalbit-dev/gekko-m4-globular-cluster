@@ -1,8 +1,12 @@
 //EMV indicator by Gab0 - 06/jan/2019;
+// Settings: NONE;
+
 var Indicator = function(settings) {
     this.input = 'candle';
+
     this.result = NaN;
     this.age = 0;
+
     this.last = 0;
 };
 

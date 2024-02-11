@@ -1,4 +1,5 @@
 //TRIX indicator by Gab0 - 05/jan/2019;
+
 var EMA = require('./EMA');
 
 var Indicator = function(settings) {
@@ -48,7 +49,7 @@ Indicator.prototype.update = function(price) {
             {
                 this.thirdema.update(this.secondema.result);
             }
-
+            
         }
 
 

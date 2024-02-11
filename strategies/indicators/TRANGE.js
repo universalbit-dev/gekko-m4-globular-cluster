@@ -1,6 +1,7 @@
 // True Range indicator;
 // compatible with Gekko Trading Bot. ported from tulip.
 // Gab0 - 2018
+
 var Indicator = function()
 {
 

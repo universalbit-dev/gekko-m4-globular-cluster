@@ -3,7 +3,7 @@
 // "ported" from tulip: https://tulipindicators.org/adx
 // gab0 - 2018
 var DX = require('./DX.js');
-
+var util = require('../../core/util');
 var Indicator = function (period)
 {
     this.input = 'candle';
@@ -15,6 +15,7 @@ var Indicator = function (period)
     this.initialized = 1;
     this.period = period;
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle)
 {

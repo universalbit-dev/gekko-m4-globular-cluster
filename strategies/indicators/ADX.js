@@ -2,13 +2,16 @@
 // usable on gekko trading bot. Same license as gekko.
 // "ported" from tulip: https://tulipindicators.org/adx
 // gab0 - 2018
+
 var DX = require('./DX.js');
 
 var Indicator = function (period)
 {
     this.input = 'candle';
     this.indicates = 'trend_strength';
+
     this.dx = new DX(period);
+
     this.result = 0;
     this.periodRatio = (period - 1)/period;
     this.initadx = 0;

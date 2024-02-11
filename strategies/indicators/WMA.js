@@ -1,4 +1,5 @@
 //WMA port by Gab0 - 03/29/2018;
+
 var Indicator = function(windowLength) {
     this.input = 'price';
     this.windowLength = windowLength;

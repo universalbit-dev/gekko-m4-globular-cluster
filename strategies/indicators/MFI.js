@@ -1,12 +1,18 @@
 //MFI indicator by Gab0 - 04/jan/2019;
+
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
     this.input = 'candle';
+
     this.result = NaN;
     this.age = 0;
+
+
     this.lastPrice = -1;
+
     this.timePeriod = settings.optInTimePeriod;
+
     this.posHist = [];
     this.negHist = [];
 };
@@ -36,7 +42,7 @@ Indicator.prototype.update = function(candle) {
         this.posHist.push(0.0);
         this.negHist.push(moneyFlow);
     }
-    else
+    else 
     {
         this.posHist.push(0.0);
         this.negHist.push(0.0);

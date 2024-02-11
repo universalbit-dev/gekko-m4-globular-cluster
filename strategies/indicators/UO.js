@@ -1,5 +1,6 @@
+// required indicators
 var SMA = require('./SMA.js');
-
+var util = require('../../core/util');
 var Indicator = function(settings) {
   this.input = 'candle';
   this.lastClose = 0;
@@ -14,6 +15,7 @@ var Indicator = function(settings) {
   this.thirdLow = new SMA(settings.third.period);
   this.thirdHigh = new SMA(settings.third.period);
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {
   var close = candle.close;

@@ -1,6 +1,8 @@
 /*
  * Linear regression curve
  */
+var log = require('../../core/log');
+var util = require('../../core/util');
 var Indicator = function(settings) {
   this.input = 'price';
   this.depth = settings;
@@ -15,17 +17,20 @@ var Indicator = function(settings) {
       this.history.push(0.0);
       this.x.push(i);
   }
+
+  // log.debug("Created LRC indicator with h: ", this.depth);
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
-
-  // We need sufficient history to get the right result.
+  
+  // We need sufficient history to get the right result. 
   if(this.result === false && this.age < this.depth) {
 
     this.history[this.age] = price;
     this.age++;
     this.result = false;
-     // log.debug("Waiting for sufficient age: ", this.age, " out of ", this.depth);
+     // log.debug("Waiting for sufficient age: ", this.age, " out of ", this.depth); 
     //
     return;
   }

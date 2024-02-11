@@ -47,6 +47,7 @@ var Indicator = function(config) {
     this.age = 0;
     //log.debug('*** Usage info for Tulip indicator', this.indName, ':\n', tulind.indicators[this.indName]);
 }
+util.makeEventEmitter(Indicator);
 
 
 Indicator.prototype.addCandle = function (candle) {

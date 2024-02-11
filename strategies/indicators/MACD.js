@@ -1,6 +1,6 @@
-
+// required indicators
 var EMA = require('./EMA.js');
-
+var util = require('../../core/util');
 var Indicator = function(config) {
   this.input = 'price';
   this.diff = false;
@@ -8,6 +8,7 @@ var Indicator = function(config) {
   this.long = new EMA(config.long);
   this.signal = new EMA(config.signal);
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
   this.short.update(price);
