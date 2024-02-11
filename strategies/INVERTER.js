@@ -27,7 +27,6 @@ some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
-const _ = require('../core/lodash3');require('lodash-migrate');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
@@ -165,15 +164,15 @@ log.info('|SMA240 +|',sma240);
 log.info('|SMA50 -|',sma50);
 log.info('|DEMA||',dema);
 log.info('==============================');
-
-if(di_plus < di_minus || di_plus > this.settings.diplus)
+	
+if(di_plus > di_minus && di_plus > this.settings.diplus)
 	{
 	this.trend.state = 'green';
 	log.info('=================================================');
 	log.info('|GREEN|:',di_plus,di_minus);
 	log.info('=================================================');
 	}
-	if(di_minus > di_plus || di_minus > this.settings.diminus) 
+	if(di_minus > di_plus && di_minus > this.settings.diminus) 
 	{
 	this.trend.state = 'red';
 	log.info('=================================================');
