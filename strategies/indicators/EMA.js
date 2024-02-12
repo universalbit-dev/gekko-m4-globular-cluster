@@ -1,10 +1,10 @@
-﻿var util = require('../../core/util');
+﻿const util = require('../../core/util');
 var Indicator = function(weight) {
   this.input = 'price';
   this.weight = weight;
   this.result = false;
   this.age = 0;
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {

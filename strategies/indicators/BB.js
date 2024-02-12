@@ -16,7 +16,7 @@ var Indicator = function(BBSettings) {
     this.upper = 0;
     this.middle = 0;
     this.lower = 0;
-  }
+  };
   util.makeEventEmitter(Indicator);
   
   Indicator.prototype.update = function(price) {

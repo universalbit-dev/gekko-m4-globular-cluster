@@ -1,4 +1,5 @@
 // HMA ported by Gab0 03/29/2018;
+const util=require('../../core/util');
 var WMA = require('./WMA');
 
 var Indicator = function (weight) {
@@ -11,6 +12,7 @@ var Indicator = function (weight) {
     this.result = 0;
     this.age = 0;
 }
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (price) {
     this.prices[this.age] = price;

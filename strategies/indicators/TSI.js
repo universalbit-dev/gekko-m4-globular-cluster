@@ -1,6 +1,7 @@
 // required indicators
+const util = require('../../core/util');
 var EMA = require('./EMA.js');
-var util = require('../../core/util');
+
 var Indicator = function(settings) {
   this.input = 'candle';
   this.lastClose = null;
@@ -9,7 +10,7 @@ var Indicator = function(settings) {
   this.outer = new EMA(settings.short);
   this.absoluteInner = new EMA(settings.long);
   this.absoluteOuter = new EMA(settings.short);
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {

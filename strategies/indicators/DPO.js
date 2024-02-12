@@ -2,21 +2,18 @@
 
 // INPUT SETTINGS:
 // optInTimePeriod: period for EMA
-
+const util=require('../../core/util');
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
     this.input = 'price';
-
     this.result = NaN;
     this.age = 0;
-
     this.sma = new SMA(settings.optInTimePeriod);
-
     this.delay = (settings.optInTimePeriod / 2) +1;
-
     this.pricehist = [];
 };
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
 

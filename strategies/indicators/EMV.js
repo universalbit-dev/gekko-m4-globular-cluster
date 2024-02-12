@@ -1,6 +1,6 @@
 //EMV indicator by Gab0 - 06/jan/2019;
 // Settings: NONE;
-
+const util=require('../../core/util');
 var Indicator = function(settings) {
     this.input = 'candle';
 
@@ -9,6 +9,7 @@ var Indicator = function(settings) {
 
     this.last = 0;
 };
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {
 

@@ -1,12 +1,12 @@
 // 引用上面的EMA代码
+const util=require('../../core/util');
 var EMA = require('./EMA.js');
-var util = require('../../core/util');
 var Indicator = function(config) {
   this.input = 'price'  
   this.result = false;
   this.short = new EMA(config.short);
   this.long = new EMA(config.long);
-}
+};
 util.makeEventEmitter(Indicator);
 
 // 分别向快线与慢线中灌入当前价格，计算当前EMA

@@ -1,5 +1,5 @@
 //WMA port by Gab0 - 03/29/2018;
-
+const util = require('../../core/util');
 var Indicator = function(windowLength) {
     this.input = 'price';
     this.windowLength = windowLength;
@@ -7,7 +7,8 @@ var Indicator = function(windowLength) {
     this.result = 0;
     this.age = 0;
     this.sum = 0;
-}
+};
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
     var tail = this.prices[this.age] || 0; // oldest price in window

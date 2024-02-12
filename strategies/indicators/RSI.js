@@ -1,6 +1,7 @@
 // required indicators
+const util = require('../../core/util');
 var SMMA = require('./SMMA.js');
-var util = require('../../core/util');
+
 var Indicator = function (settings) {
   this.input = 'candle';
   this.lastClose = null;
@@ -12,7 +13,7 @@ var Indicator = function (settings) {
   this.rs = 0;
   this.result = 0;
   this.age = 0;
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle) {

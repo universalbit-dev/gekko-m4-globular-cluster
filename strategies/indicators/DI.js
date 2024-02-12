@@ -14,7 +14,7 @@ var Indicator = function (period)
     this.initadx = 0;
     this.initialized = 1;
     this.period = period;
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle)

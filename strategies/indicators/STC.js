@@ -1,15 +1,12 @@
 // STC coded by Gab0 03/29/2018;
 //settings: short, long, signal, cycle, smooth;
+const util = require('../../core/util');
 var MACD = require('./MACD');
 var STOCH = require('./STOCH');
 
 var Indicator = function (settings) {
     this.input = 'price';
-
-    this.signal = new MACD({'short': settings.short,
-                            'long': settings.long,
-                            'signal': settings.signal});
-
+    this.signal = new MACD({'short': settings.short,'long': settings.long,'signal': settings.signal});
     this.MACDs = [];
     this.PFs = [];
     this.Frac1 = 0;
@@ -18,6 +15,8 @@ var Indicator = function (settings) {
     this.Factor = settings.smooth;
     this.age = 0;
 };
+util.makeEventEmitter(Indicator);
+
 
 Indicator.prototype.getMin = function (data) {
     var minimum = 9999999;

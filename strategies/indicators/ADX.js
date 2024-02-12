@@ -2,7 +2,7 @@
 // usable on gekko trading bot. Same license as gekko.
 // "ported" from tulip: https://tulipindicators.org/adx
 // gab0 - 2018
-
+const util=require('../../core/util');
 var DX = require('./DX.js');
 
 var Indicator = function (period)
@@ -17,7 +17,8 @@ var Indicator = function (period)
     this.initadx = 0;
     this.initialized = 1;
     this.period = period;
-}
+};
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle)
 {

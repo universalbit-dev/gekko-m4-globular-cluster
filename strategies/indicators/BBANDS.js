@@ -2,7 +2,7 @@
 // port by Gab0 - 2017
 // not exact results when compared to TA-Lib but GOOD ENOUGH;
 // Bollinger Bands implementation;
-
+const util = require('../../core/util');
 var SMA = require('./SMA.js');
 var Indicator = function(BBSettings) {
     this.input='price';
@@ -13,7 +13,8 @@ var Indicator = function(BBSettings) {
     this.lower=0;
     this.middle=0;
     this.upper=0;
-}
+};
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.calcstd = function(prices, Average)
 {

@@ -1,5 +1,5 @@
 //AO indicator by Gab0 - 04/jan/2019;
-
+const util=require('../../core/util');
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
@@ -11,6 +11,7 @@ var Indicator = function(settings) {
     this.shortsma = new SMA(5);
     this.longsma = new SMA(34);
 };
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {
 

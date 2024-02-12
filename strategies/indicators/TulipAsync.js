@@ -8,11 +8,11 @@
 // * strategies, with custom candle size batching, where asyncIndicatorRunner
 // * is not available
 // ****************************************************************************
+const util = require('../../core/util');
+const _ = require('lodash');require('lodash-migrate');
 
-let _ = require('lodash');require('lodash-migrate');
-let util = require('../../core/util');
-let config = util.getConfig();
-let log = require('../../core/log.js');
+const config = util.getConfig();
+const log = require('../../core/log.js');
 
 const tulind = require('tulind');
 const dirs = util.dirs();
@@ -46,9 +46,8 @@ var Indicator = function(config) {
     this.indLength = config.length;
     this.age = 0;
     //log.debug('*** Usage info for Tulip indicator', this.indName, ':\n', tulind.indicators[this.indName]);
-}
+};
 util.makeEventEmitter(Indicator);
-
 
 Indicator.prototype.addCandle = function (candle) {
     this.age++;

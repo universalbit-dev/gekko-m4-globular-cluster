@@ -14,7 +14,7 @@ var Indicator = function(settings) {
   this.maxSize = settings.history;
   for (var i = 0; i < this.maxSize; i++)
       this.hist.push(0.0);
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {

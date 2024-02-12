@@ -1,8 +1,9 @@
 /*
  * Linear regression curve
  */
+const util = require('../../core/util');
 var log = require('../../core/log');
-var util = require('../../core/util');
+
 var Indicator = function(settings) {
   this.input = 'price';
   this.depth = settings;
@@ -19,7 +20,7 @@ var Indicator = function(settings) {
   }
 
   // log.debug("Created LRC indicator with h: ", this.depth);
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {

@@ -1,13 +1,13 @@
 // stop loss as an indicator
 // originally created by scraqz. Thanks!
-var util = require('../../core/util');
+const util = require('../../core/util');
 var Indicator = function(settings) {
   this.input = 'candle';
   this.candle = null;
   this.price = 0;
   this.action = 'continue'; // continue
   this.threshold = settings.threshold;
-}
+};
 util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {

@@ -1,20 +1,17 @@
 //TRIX indicator by Gab0 - 05/jan/2019;
-
+const util=require('../../core/util');
 var EMA = require('./EMA');
 
 var Indicator = function(settings) {
     this.input = 'price';
-
     this.result = NaN;
     this.age = 0;
-
     this.period = settings.optInTimePeriod;
-
     this.mainema = new EMA(this.period);
     this.secondema = new EMA(this.period);
     this.thirdema = new EMA(this.period);
-
 };
+util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
 
