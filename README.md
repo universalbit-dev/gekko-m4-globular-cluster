@@ -9,6 +9,11 @@ Gekko-m4 import simulate and trade exchange data
 ##### unlike easy gains 
 ##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 ---
+```
+Meta debug info:
+Gekko version: v0.6.8-m4
+Nodejs version: v20.11.0
+```
 * [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
 
