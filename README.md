@@ -38,7 +38,6 @@ pm2 monit
 * ##### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
 * ##### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
 * ##### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv) 
-* ##### [OpenDns.js](https://github.com/universalbit-dev/gekko-m4/blob/master/opendns.js)
 * ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
 
 #### Indicators:
