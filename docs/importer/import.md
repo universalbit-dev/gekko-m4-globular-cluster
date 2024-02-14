@@ -56,7 +56,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:5};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
+config.tradingAdvisor = {enabled:false,candleSize:1,historySize:40,method:'INVERTER'};
 
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
