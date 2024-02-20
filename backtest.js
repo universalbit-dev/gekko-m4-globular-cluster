@@ -34,6 +34,11 @@ longema:240,shortema:50,threshold:3};
 config.StochRSI={interval:14,threshold:1};
 config.StochRSI.thresholds={low:30,high:70,persistence:5};
 
+config.NNSTOCH={
+threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:1, hodl_threshold:1,scale:5,batch_size:1,i>
+config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
+
 //Adapter
 config.adapter='sqlite';
 
