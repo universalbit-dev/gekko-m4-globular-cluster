@@ -216,12 +216,12 @@ var method = {
     'high',adviced: this.trend.adviced};
     this.trend.duration++;
     log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
-	default:
-	this.advice();
+    default:
+    this.advice();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-	}
+    }
 	
-	switch (true){
+    switch (true){
 	case(this.trend.duration >= this.settings.thresholds.persistence):
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
