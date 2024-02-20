@@ -22,7 +22,7 @@ const Trader = function(config) {
   this.market = _.find(Trader.getCapabilities().markets, (market) => {
     return market.pair[0] === this.currency && market.pair[1] === this.asset
   });
-  this.pair = this.market.book;
+  this.pair = 'XLTCXXBT';
 
   this.interval = 3100;
 
