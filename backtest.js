@@ -28,7 +28,7 @@ config.NN={
 threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3, hodl_threshold:1,scale:5,batch_size:1};
 
-config.INVERTER={rsi:14,adx:14,dema:5,diplus:25.5,diminus:25,
+config.INVERTER={rsi:14,adx:14,dema:1,diplus:25.5,diminus:25,
 longema:240,shortema:50,threshold:3};
 
 config.StochRSI={interval:14,threshold:1};
