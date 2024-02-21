@@ -4,7 +4,7 @@
 */
 const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
-
+var config = require('../../core/util.js').getConfig();
 var MarketFetcher = require('./marketFetcher');
 var dirs = util.dirs();
 var Manager = function(config) {

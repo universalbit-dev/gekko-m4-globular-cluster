@@ -5,7 +5,7 @@
 const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
 var log = require('../log');
-
+var config = require('../../core/util.js').getConfig();
 var moment = require('moment');
 
 if (util.getConfig().watch.tickrate){var TICKRATE = util.getConfig().watch.tickrate;}

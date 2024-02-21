@@ -7,7 +7,7 @@
 const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
-var config = util.getConfig();
+var config = require('../../core/util.js').getConfig();
 var CandleCreator = function() {
   _.bindAll(this,_.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");

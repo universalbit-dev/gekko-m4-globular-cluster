@@ -1,10 +1,10 @@
 /*
 
 */
-let _ = require('../lodash3');require('lodash-migrate');
-
+var _ = require('../lodash3');require('lodash-migrate');
 var async = require('async');
 var util = require('../util');
+var config = require('../../core/util.js').getConfig();
 var dirs = util.dirs();
 var Heart = require(dirs.dlna + 'heart');
 var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');

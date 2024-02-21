@@ -2,7 +2,7 @@ const _ = require('../lodash3');require('lodash-migrate');
 
 var moment = require('moment');
 var util = require('../../core/util.js');
-var config = util.getConfig();
+var config = require('../../core/util.js').getConfig();
 var log = require('../../core/log');
 
 var TradeBatcher = function(tid) {
