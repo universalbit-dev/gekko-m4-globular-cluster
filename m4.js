@@ -7,7 +7,7 @@ pm2.connect(function(err) {
 
 pm2.start({
   script    : 'gekko.js',
-  args      : '-c backtest.js',
+  args      : '-c backtest.js -b',
   name      : '|BackTest|',
   instances : "1",
   exec_mode : "cluster"
