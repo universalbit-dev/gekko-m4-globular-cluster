@@ -2,16 +2,15 @@ const Kraken = require('kraken-api');
 const moment = require('moment');
 const ws = require('./WebSocketsPolyfill');
 
-const _ = require('../../core/lodash3');require('lodash-migrate');
-const exchangeUtils = require('../exchangeUtils');
-const retry = exchangeUtils.retry;
+const _ = require('../../core/lodash');require('lodash-migrate');
+const exchangeUtils = require('../exchangeUtils');const retry = exchangeUtils.retry;
 const scientificToDecimal = exchangeUtils.scientificToDecimal;
 const util= require('../../core/util');
 const config = util.getConfig();
 const marketData = require('./kraken-markets.json');
 
 const Trader = function(config) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.key = config.key;
   this.secret = config.secret;
   this.currency = config.currency.toUpperCase()
