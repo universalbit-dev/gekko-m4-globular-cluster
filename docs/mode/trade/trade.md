@@ -55,7 +55,7 @@ secret:'0-0000000000000000000000000000000000000000',tickrate:60};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
-config.tradingAdvisor.method= 'NN';
+config.tradingAdvisor.method= 'NNSTOCH';
 
 config.StochRSI={interval:14,threshold:1};
 config.StochRSI.thresholds={low:20,high:80,persistence:5};
