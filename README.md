@@ -30,9 +30,7 @@ npm i pm2 -g
 pm2 start gekko-m4.js
 pm2 monit 
 ```
- 
-
-
+* ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
 * ##### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
@@ -50,7 +48,6 @@ npm install tulind --build-from-source
 ---
 #### Resources:
 * Gekko-Quasar-UI [0.6.9-m4](https://github.com/universalbit-dev/gekko-quasar-ui)
-* [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
 * [Forum](https://forum.gekko.wizb.it/)
 * [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
