@@ -2,9 +2,9 @@
 
 ### UniversalBit-dev: 
 Gekko-m4 import simulate and trade exchange data
-* [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/importer/import.md)
-* [simulate](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest.md) 
-* [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/trader/trade.md) 
+* [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
+* [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
+* [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
 
 ##### unlike easy gains 
 ##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
