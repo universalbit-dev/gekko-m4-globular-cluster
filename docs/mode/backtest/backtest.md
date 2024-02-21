@@ -14,6 +14,10 @@
 node gekko -c backtest.js -b
 ```
 
+```bash
+pm2 start m4.js
+```
+
 * ##### Terminal OutPut:
 ---
 ```bash
