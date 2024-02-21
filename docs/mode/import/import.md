@@ -137,7 +137,8 @@ config.importer = {
 //                       CONFIGURING DB
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',
+dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 ```
