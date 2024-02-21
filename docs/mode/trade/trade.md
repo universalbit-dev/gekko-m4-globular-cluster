@@ -11,7 +11,7 @@
 | TradingAdvisor | Advice Buy-Sell Orders      | enabled        |
 
 ```
-node gekko -c method.nn
+node gekko -c trade.js
 ```
 
 
@@ -22,7 +22,7 @@ node gekko -c method.nn
 (INFO):	Setting up:
 (INFO):		 Trading Advisor
 (INFO):		 Calculate trading advice
-(INFO):		 Using the strategy: NN
+(INFO):		 Using the strategy: NNSTOCH
 ```
 
 * #### [trade mode] configuration file
