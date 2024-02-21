@@ -27,7 +27,7 @@ node gekko -c method.nn
 
 * #### [trade mode] configuration file
 
-method-nn.js
+m4.js
 ```
 /*
 The MIT License (MIT)
