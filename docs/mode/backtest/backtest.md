@@ -21,7 +21,7 @@ node gekko -c backtest.js -b
 (INFO):	Setting up:
 (INFO):		 Trading Advisor
 (INFO):		 Calculate trading advice
-(INFO):		 Using the strategy: NN
+(INFO):		 Using the strategy: INVERTER
 (INFO):	Setting up:
 (INFO):		 Paper Trader
 (INFO):		 Paper trader that simulates fake trades.
