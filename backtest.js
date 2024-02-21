@@ -26,7 +26,8 @@ config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERT
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
 config.NN={
 threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3, hodl_threshold:1,scale:5,batch_size:1};
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3,
+hodl_threshold:1,scale:5,batch_size:1};
 
 config.INVERTER={rsi:14,adx:14,dema:1,diplus:25.5,diminus:25,
 longema:240,shortema:50,threshold:3};
@@ -36,7 +37,8 @@ config.StochRSI.thresholds={low:30,high:70,persistence:5};
 
 config.NNSTOCH={
 threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:1, hodl_threshold:1,scale:5,batch_size:1,interval:3};
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:1, 
+hodl_threshold:1,scale:5,batch_size:1,interval:3};
 config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 
 //Adapter
