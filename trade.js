@@ -25,13 +25,18 @@ tickrate:60};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
-config.tradingAdvisor.method= 'NN';
+config.tradingAdvisor.method= 'NNSTOCH';
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
 config.NN={
 threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3,
 hodl_threshold:1,scale:5,batch_size:1};
+
+config.NNSTOCH={
+threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:1, hodl_threshold:1,scale:5,batch_size:1,interval:3};
+config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 
 //Adapter
 config.adapter='sqlite';
