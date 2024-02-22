@@ -19,8 +19,8 @@ config.debug =true;
 
 //import kraken exchange data
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',
-key:'',
-secret:'',
+key:'000000-000000-000000',
+secret:'000000-000000-000000',
 tickrate:60};
 
 //Trading Advisor
@@ -44,8 +44,8 @@ config.adapter='sqlite';
 //Trader
 config.trader={
 enabled:false,exchange:'kraken',currency:'XBT',asset:'LTC',
-key:'',
-secret:''
+key:'000000-000000-000000',
+secret:'000000-000000-000000'
 };
 
 config.candleWriter={enabled:true,adapter:'sqlite'};
@@ -63,7 +63,7 @@ batchSize: 60
 };
 
 config.backtestResultExporter = {
-  enabled: true,
+  enabled: false,
   writeToDisk: true,
   data: {
     stratUpdates: false,
