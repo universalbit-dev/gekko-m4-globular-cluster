@@ -162,7 +162,8 @@ var method = {
      for (i=0;i<3;++i)
      this.learn();this.brain();
      while (this.settings.price_buffer_len < _.size(this.priceBuffer)) this.priceBuffer.shift();
-
+     
+//CSV Log Book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
