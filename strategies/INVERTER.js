@@ -123,7 +123,7 @@ lastLongPrice:0.0,lastShortPrice:0.0};
 this.trend = trend;
 },
 
-//CSV
+//CSV Log Book
 update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
