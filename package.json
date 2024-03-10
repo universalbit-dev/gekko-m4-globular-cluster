@@ -22,6 +22,8 @@
   "convnet": "^1.0.0",
   "core-js": "^3.36.0",
   "crypto-js": "^4.2.0",
+  "eslint": "^8.57.0",
+  "events": "^3.3.0",
   "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
   "humanize-duration": "^3.31.0",
@@ -41,7 +43,6 @@
   "sqlite": "^5.1.1",
   "sqlite3": "^5.1.7",
   "stats-lite": "^2.0.4",
-  "stream": "^0.0.2",
   "tulind": "^0.8.20",
   "underscore": "^1.13.6",
   "uuid": "^9.0.1"
