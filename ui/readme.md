@@ -18,6 +18,5 @@ pm2 status
 pm2 monit
 ```
 
-* [Curl](https://curl.se/)
 * [NodeJs-HTTPS-API](https://nodejs.org/api/https.html)
   
