@@ -39,6 +39,7 @@ https
     app.get('/', (req,res)=>{res.send("HTTPS CDN OPERATION")})
   });
 
+module.exports = app;
 
 
 
