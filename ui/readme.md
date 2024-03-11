@@ -1,5 +1,9 @@
 ## HTTP AND HTTPS Server : "CDN OPERATION"
 
+```bash
+npm i
+```
+
 #### ssl certificate required for start https server:
 ```bash
 openssl genrsa -out key.pem
