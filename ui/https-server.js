@@ -1,4 +1,3 @@
-//Import builtin NodeJS modules to instantiate the service
 const https = require("https");
 const fs = require("fs-extra");
 
