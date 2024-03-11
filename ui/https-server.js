@@ -10,9 +10,6 @@ const express = require("express");
 //Instantiate an Express application
 const app = express();
 
-//Create a NodeJS HTTPS listener on port 4000 that points to the Express app
-//Use a callback function to tell when the server is created.
-
 //Register a local variable in your app which contains the CDN function
 app.locals.CDN = function(path, type, classes, alt) {
     if(type == 'js') {
