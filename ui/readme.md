@@ -12,7 +12,7 @@ openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
 pm2 start http-server.js
 pm2 start https-server.js
 ```
-##### port:  
+##### Port:  
 * http:3000  
 * https:4000
 
@@ -20,10 +20,6 @@ pm2 start https-server.js
 #### [Quick Start Pm2](https://pm2.keymetrics.io/docs/usage/quick-start/)
 ```bash
 pm2 status
-```
-#### [Monitor Process](https://pm2.keymetrics.io/docs/usage/monitoring/)
-```bash
-pm2 monit
 ```
 
 * [NodeJs-HTTPS-API](https://nodejs.org/api/https.html)
