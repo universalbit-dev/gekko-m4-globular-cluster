@@ -36,7 +36,6 @@ https
     },
     app
 )
-//This code tells the service to listed to any request coming to the / route.
 //Create an try point route for the Express app listening on port 4000.
 //Once the request is received, it will display a message "HTTPS CDN OPERATION"
   .listen(4000, () => {
