@@ -1,19 +1,23 @@
-run server.js file: CDN OPERATION
+## HTTP AND HTTPS Server : "CDN OPERATION"
+
+#### ssl certificate required for start https server:
 ```bash
-node server.js
+openssl genrsa -out key.pem
+openssl req -new -key key.pem -out csr.pem
+openssl x509 -req -days 9999 -in csr.pem -signkey key.pem -out cert.pem
 ```
 
-##### [Pm2 advanced process manager](https://pm2.keymetrics.io/)
+#### [Pm2 advanced process manager](https://pm2.keymetrics.io/)
 ```bash
-npm i pm2 -g
-pm2 start server.js
+pm2 start http-server.js
+pm2 start https-server.js
 ```
+
 #### [Quick Start Pm2](https://pm2.keymetrics.io/docs/usage/quick-start/)
-
 ```bash
 pm2 status
 ```
-
+#### [Monitor Process](https://pm2.keymetrics.io/docs/usage/monitoring/)
 ```bash
 pm2 monit
 ```
