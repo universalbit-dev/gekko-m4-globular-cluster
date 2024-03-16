@@ -7,6 +7,7 @@ Gekko-m4 import simulate and trade exchange data
 * [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
 
 ##### unlike easy gains and record price
+
 ##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 ---
 ```
@@ -56,6 +57,7 @@ npm install tulind --build-from-source
 * [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 * [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
+* [Perché gestiamo MALE il denaro?](https://www.youtube.com/watch?v=Y63fReR8vYA) con lo psichiatra @ValerioRosso
 ---
 #### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
 
