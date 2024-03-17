@@ -1,5 +1,6 @@
-#### UniversalBit-dev
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
+##### [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
+
 
 <img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="5%"></img>
 ##### sustainable personal finance
@@ -68,7 +69,6 @@ npm install tulind --build-from-source
 * [Buy-Sell](https://github.com/universalbit-dev/gekko-m4/edit/master/README.md)
 
 
-##### [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
 
 
 
