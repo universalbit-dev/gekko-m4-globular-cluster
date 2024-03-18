@@ -6,7 +6,6 @@ google_analytics: G-MN27QKSXPR
 theme: jekyll-theme-minimal
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:
-plugins:
 - "jekyll-feed"
 - "jekyll-seo-tag"
 - "jekyll-remote-theme"
