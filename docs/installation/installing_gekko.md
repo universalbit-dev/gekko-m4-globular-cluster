@@ -6,3 +6,8 @@
 git clone https://github.com/universalbit-dev/gekko-m4
 npm i
 ```
+
+pm2 advanced process manager
+```bash
+npm i pm2 --save
+```
