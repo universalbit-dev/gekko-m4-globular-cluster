@@ -12,7 +12,7 @@ const _ = require('../core/lodash3');require('lodash-migrate');
 const fs = require('node:fs');
 var settings = config.StochRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
-
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 var method = {};
 method.init = function() {
@@ -88,7 +88,7 @@ method.check = function() {
 		if(this.trend.duration >= this.settings.thresholds.persistence)
 			this.trend.persisted = true;
 
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100) {this.trend.adviced = true;this.advice('short');}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100) {this.trend.adviced = true;this.advice('short');sleep(900000);}
 		else{this.advice();}
 
 	} else if(this.stochRSI < this.settings.thresholds.low) {
@@ -100,7 +100,7 @@ method.check = function() {
 
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.thresholds.persistence){this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0) {this.trend.adviced = true;this.advice('long');}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0) {this.trend.adviced = true;this.advice('long');sleep(900000);}
 		else {this.advice();}
 
 	} else {
