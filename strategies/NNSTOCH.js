@@ -1,5 +1,4 @@
 /* */
-
 const { spawn } = require('node:child_process');
 var log = require('../core/log.js');
 var util= require('../core/util.js')
@@ -14,6 +13,7 @@ var math = require('mathjs');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 var method = {
   priceBuffer : [],
@@ -186,7 +186,7 @@ var method = {
      this.learn();this.brain();
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))           
      this.priceBuffer.shift();
-//CSV Log Book
+//log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
@@ -216,12 +216,12 @@ var method = {
     'high',adviced: this.trend.adviced};
     this.trend.duration++;
     log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
-    default:
-    this.advice();
+	default:
+	this.advice();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-    }
+	}
 	
-    switch (true){
+	switch (true){
 	case(this.trend.duration >= this.settings.thresholds.persistence):
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
@@ -258,12 +258,16 @@ var method = {
     log.info('===========================================');
     
     if ((this.trend.persisted && this.stochRSI != 0 && meanAlpha > 1))
-    {this.advice('long');sleep(30);this.brain();
+    {
+    this.advice('long');this.brain();
+    sleep(900000);
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
     }
     
     if ((this.trend.persisted && this.stochRSI != 100 && meanAlpha < -1 ))
-    {this.advice('short');sleep(30);this.brain();
+    {
+    this.advice('short');this.brain();
+    sleep(900000);
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
     }
     //stoploss as Reinforcement Learning

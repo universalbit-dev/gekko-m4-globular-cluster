@@ -30,7 +30,7 @@ var tulind = require('../core/tulind');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var stoploss = require('./indicators/StopLoss.js');
-
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 /*
 
 Method INVERTER:
@@ -123,7 +123,7 @@ lastLongPrice:0.0,lastShortPrice:0.0};
 this.trend = trend;
 },
 
-//CSV Log Book
+//CSV
 update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
@@ -300,7 +300,7 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
         }
         
         //Stoploss 
-	if ('stoploss' === this.indicators.stoploss.action){this.advice('short');sleep(30);}
+	if ('stoploss' === this.indicators.stoploss.action){this.advice('short');}
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
@@ -308,14 +308,22 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 //LONG
 long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
-  {this.resetTrend();this.advice('short');sleep(30);this.trend.duration++;}
+  {
+  this.resetTrend();this.advice('long');
+  sleep(900000);
+  this.trend.duration++;
+  }
   if (this.debug) {log.info('|Bolt Up|');}
  
 },
 //SHORT
 short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
-  {this.resetTrend();this.advice('long');sleep(30);this.trend.duration++;}
+  {
+  this.resetTrend();this.advice('short');
+  sleep(900000);
+  this.trend.duration++;
+  }
   if (this.debug) {log.info('|Bolt Down|');}
  
 },

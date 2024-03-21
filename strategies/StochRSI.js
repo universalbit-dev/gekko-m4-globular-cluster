@@ -4,6 +4,7 @@
   (updated by askmike) @ 30/07/2016
 
 */
+const { spawn } = require('node:child_process');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
@@ -42,7 +43,7 @@ startTime = new Date();
 // what happens on every new candle?
 method.update = function(candle) {
 rsi=this.tulipIndicators.rsi.result.result;
-	this.rsi=rsi;
+this.rsi=rsi;
 this.RSIhistory.push(this.rsi);
 if(_.size(this.RSIhistory) > this.interval)
 // remove oldest RSI value
@@ -51,7 +52,6 @@ this.lowestRSI = _.min(this.RSIhistory);
 this.highestRSI = _.max(this.RSIhistory);
 this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
 
-//CSV Log Book
 	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
 	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
@@ -62,7 +62,7 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 // calculated parameters.
 method.log = function() {var digits = 8;
   log.debug('calculated StochRSI properties for candle:');
-  log.debug('\t', 'rsi:', this.rsi);
+  log.debug('\t', 'rsi:', rsi);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
