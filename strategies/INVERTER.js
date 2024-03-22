@@ -215,7 +215,7 @@ ADX Value 	Trend Strength
 		log.info('|NUT|DX|',dx);
 		log.info('=======================');
 	}
-	
+
 	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull')) 
 	{this.trend.state = 'long';
 	log.info('=================================================');
@@ -304,14 +304,19 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
+zzzsleep: async function () {
+  const x= await sleep(900000);
+  log.info('zzz...');
+  },
+
+
 //Screw & Bolt
 //LONG
 long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
   this.resetTrend();this.advice('long');
-  sleep(900000);
-  this.trend.duration++;
+  this.trend.duration++;zzzsleep();
   }
   if (this.debug) {log.info('|Bolt Up|');}
  
@@ -321,11 +326,10 @@ short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
   this.resetTrend();this.advice('short');
-  sleep(900000);
-  this.trend.duration++;
+  this.trend.duration++;zzzsleep();
   }
   if (this.debug) {log.info('|Bolt Down|');}
- 
+
 },
 
 //PingPong Function

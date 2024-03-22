@@ -13,6 +13,7 @@ var math = require('mathjs');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 var method = {
@@ -30,7 +31,7 @@ var method = {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
-    
+
     this.trend = {
     direction: 'none',
     duration: 0,
@@ -198,6 +199,11 @@ var method = {
     var prediction = this.nn.forward(vol);
     return prediction.w[0];
   },
+  
+  zzzsleep: async function () {
+  const x= await sleep(900000);
+  log.info('zzz...');
+  },
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check :function(candle){
@@ -260,15 +266,15 @@ var method = {
     if ((this.trend.persisted && this.stochRSI != 0 && meanAlpha > 1))
     {
     this.advice('long');this.brain();
-    sleep(900000);
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
+    zzzsleep();
     }
-    
+
     if ((this.trend.persisted && this.stochRSI != 100 && meanAlpha < -1 ))
     {
     this.advice('short');this.brain();
-    sleep(900000);
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
+    zzzsleep();
     }
     //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
@@ -276,9 +282,9 @@ var method = {
     log.info('Reinforcement Learning');this.brain();
     this.prevAction='sell';signal=false;
     }
-    
+
   },
-  
+
   end : function() {log.info('THE END');}
 };
 module.exports = method;
