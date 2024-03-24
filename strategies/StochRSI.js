@@ -5,6 +5,7 @@
 
 */
 const { spawn } = require('node:child_process');
+const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
