@@ -16,13 +16,13 @@
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4.git
 ```
+* [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
 ```
 Meta debug info:
 Gekko version: v0.6.8-m4
 Nodejs version: v20.11.0
 ```
-* [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
 
 
