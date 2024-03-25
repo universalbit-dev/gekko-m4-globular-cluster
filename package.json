@@ -27,13 +27,12 @@
   "express": "^4.18.3",
   "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
-  "humanize-duration": "^3.31.0",
   "kraken-api": "^1.0.1",
   "lodash": "^4.17.21",
   "lodash-migrate": "^0.3.16",
   "mathjs": "^12.4.0",
   "moment": "^2.29.4",
-  "opn": "^6.0.0",
+  "open": "^10.1.0",
   "path": "^0.12.7",
   "promisify-node": "^0.5.0",
   "prompt-lite": "^0.1.1",
@@ -43,13 +42,14 @@
   "semver": "^7.6.0",
   "sqlite": "^5.1.1",
   "sqlite3": "^5.1.7",
-  "stats-lite": "^2.0.4",
+  "stats-lite": "^2.2.0",
+  "stream": "^0.0.2",
   "tulind": "^0.8.20",
-  "underscore": "^1.13.6",
+  "util": "^0.12.5",
   "uuid": "^9.0.1"
  },
  "engines": {
-  "node": ">=16"
+  "node": ">=20"
  },
  "keywords": [
   "gekko-m4",
