@@ -220,9 +220,6 @@ log : function(candle) {
 
     log.info('calculated CCI properties for candle:');
     log.info('\t', 'Price:\t\t', candle.close);
-    log.info('\t', 'CCI tp:\t', cci.tp);
-    log.info('\t', 'CCI tp/n:\t', cci.avgtp);
-    log.info('\t', 'CCI md:\t', cci.mean);
 
 
     if (typeof(cci) == 'boolean' )
