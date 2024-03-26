@@ -23,24 +23,9 @@
 | Importer | Import Exchange Data      | enabled        |
 | TradingAdvisor | Advice Buy-Sell Orders      | disabled        |
 
-
-
 ```bash
 node gekko -c import.js -i
 ```
-
-##### *Terminal OutPut:
----
-```bash
-(INFO):	Setting up Gekko in importer mode
-(INFO):
-(INFO):	Setting up:
-(INFO):		 Candle writer
-(INFO):		 Store candles in a database
-(INFO):
-```
-
-* import [mode]
 
 import.js
 
