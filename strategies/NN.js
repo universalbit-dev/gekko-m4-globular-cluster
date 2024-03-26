@@ -31,7 +31,7 @@ var method = {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
-    
+
     this.trend = {
     direction: 'none',
     duration: 0,
@@ -46,7 +46,7 @@ var method = {
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:9});
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:9});
-    
+
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
@@ -185,7 +185,7 @@ var method = {
     if (2 > _.size(this.priceBuffer)) return;
      for (i=0;i<3;++i)
      this.learn();this.brain();
-     while (this.settings.price_buffer_len < _.size(this.priceBuffer))           
+     while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
@@ -202,7 +202,7 @@ var method = {
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {
-  
+
     emaFast=this.tulipIndicators.emaFast.result.result;
     rsi=this.tulipIndicators.rsi.result.result;
     this.rsi=rsi;
@@ -244,9 +244,9 @@ var method = {
 		this.trend.duration = 0;
 		log.debug('In no trend');this.advice();
 	}
-	
-   
-  
+
+
+
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
@@ -263,20 +263,20 @@ var method = {
     this.advice('long');sleep(900000);
     this.brain();
     }
-    if ((this.trend.adviced && this.stoch.stochRSI != 100 &&'sell' !== this.prevAction)&&
-    ('sell' !== this.prevAction && signal === true && meanAlpha < -1  && 
+    if ((this.trend.adviced && this.stochRSI != 100 &&'sell' !== this.prevAction)&&
+    ('sell' !== this.prevAction && signal === true && meanAlpha < -1  &&
     signalSell === true)){
     this.advice('short');sleep(900000);
     this.brain();}
-    
+
     if ('stoploss' === this.indicators.stoploss.action)
     {
     this.stoplossCounter++;log.info(':',this.indicators.stoploss.action);
     this.brain();this.prevAction='sell';signal=false;
     }
-    
+
   },
-  
+
   end : function() {log.info('THE END');}
 };
 module.exports = method;
