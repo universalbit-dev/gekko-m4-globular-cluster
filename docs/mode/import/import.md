@@ -1,6 +1,6 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/gif/import.gif" width="auto" />
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/images/gif/import.gif" width="auto" />
 
 * data import completed when you see a message like this
 ```bash
