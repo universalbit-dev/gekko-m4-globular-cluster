@@ -27,6 +27,7 @@
   "express": "^4.18.3",
   "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
+  "humanize-duration": "^3.31.0",
   "kraken-api": "^1.0.1",
   "lodash": "^4.17.21",
   "lodash-migrate": "^0.3.16",
