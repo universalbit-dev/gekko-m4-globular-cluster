@@ -1,5 +1,6 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
+<img src="" width="auto" />
 
 * import mode
 
