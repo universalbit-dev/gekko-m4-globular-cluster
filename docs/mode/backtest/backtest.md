@@ -1,5 +1,7 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/images/gif/backtest.gif" width="auto" />
+
 * backtest mode
 
 | Plugin         | description     | enable  |
@@ -12,24 +14,6 @@
 
 ```bash
 node gekko -c backtest.js -b
-```
-
-* ##### Terminal OutPut:
----
-```bash
-(INFO):	Setting up Gekko in backtest mode
-(INFO):	Setting up:
-(INFO):		 Trading Advisor
-(INFO):		 Calculate trading advice
-(INFO):		 Using the strategy: INVERTER
-(INFO):	Setting up:
-(INFO):		 Paper Trader
-(INFO):		 Paper trader that simulates fake trades.
-(INFO):	Setting up:
-(INFO):		 Performance Analyzer
-(INFO):		 Analyzes performances of trades
-(INFO):		WARNING: BACKTESTING FEATURE NEEDS PROPER TESTING
-(INFO):		WARNING: ACT ON THESE NUMBERS AT YOUR OWN RISK!
 ```
 
 * #### [backtest mode ] configuration file
