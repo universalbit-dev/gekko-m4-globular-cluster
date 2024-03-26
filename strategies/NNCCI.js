@@ -5,6 +5,8 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
 const fs = require('node:fs');
+var math = require('mathjs');
+
 var settings = config.CCI;this.settings=settings;
 
 var convnetjs = require('../core/convnet.js');
@@ -26,8 +28,15 @@ init : function() {
    log.info('================================================');
    log.info('keep calm and make somethig of amazing');
    log.info('================================================');
+
    this.currentTrend;
    this.age = 0;
+   //Date
+   startTime = new Date();
+   //Info Messages
+   		log.info("=====================================");
+   		log.info('Running', this.name);
+   		log.info('=====================================');
   this.trend = {
     direction: 'undefined',
     duration: 0,
@@ -45,7 +54,7 @@ init : function() {
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: 14 });
   //DEMA
   this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
-  
+
   this.name = 'NNCCI';
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
@@ -127,6 +136,11 @@ init : function() {
   this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
 
+  zzzsleep: async function () {
+  const x= await sleep(900000);
+  log.info('zzz...');
+  },
+
   resetnet: function(){
   this.nn = new convnetjs.Net();
 },
@@ -140,7 +154,7 @@ init : function() {
       this.predictionCount++;
     }
   },
-  
+
   setNormalizeFactor : function() {
     this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
     log.debug('Set normalization factor to',this.settings.scale);
@@ -163,7 +177,7 @@ init : function() {
 
   var action = brain.forward([this.priceBuffer[k + 1]]);
   },
-  
+
 
 update : function(candle) {
 if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
@@ -176,9 +190,9 @@ if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
     if (2 > _.size(this.priceBuffer)) return;
      for (i=0;i<3;++i)
      this.learn();this.brain();
-     while (this.settings.price_buffer_len < _.size(this.priceBuffer))           
+     while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
-     
+
 //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
@@ -205,26 +219,26 @@ log : function(candle) {
     }
 
     log.info('calculated CCI properties for candle:');
-    log.info('\t', 'Price:\t\t', candle.close.toFixed(8));
-    log.info('\t', 'CCI tp:\t', cci.tp.toFixed(8));
-    log.info('\t', 'CCI tp/n:\t', cci.avgtp.toFixed(8));
-    log.info('\t', 'CCI md:\t', cci.mean.toFixed(8));
+    log.info('\t', 'Price:\t\t', candle.close);
+    log.info('\t', 'CCI tp:\t', cci.tp);
+    log.info('\t', 'CCI tp/n:\t', cci.avgtp);
+    log.info('\t', 'CCI md:\t', cci.mean);
 
-    
+
     if (typeof(cci) == 'boolean' )
         log.debug('\t In sufficient data available.');
     else
-        log.debug('\t', 'CCI:\t\t', cci.toFixed(2));
+        log.debug('\t', 'CCI:\t\t', cci);
 },
 
 check : function(candle) {
     var lastPrice = candle.close;this.age++;
     var cci = this.tulipIndicators.cci.result.result;
-    
+
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
-      var currentPrice = candle.close; 
+      var currentPrice = candle.close;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
@@ -232,15 +246,15 @@ check : function(candle) {
       (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;log.info('\t', 'meanAlpha:\t',meanAlpha);
     }
-    
-    
+
+
     if (typeof(cci) == 'number') {
     //overbought?
     if (cci >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'overbought' && meanAlpha < 0) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('short');zzzsleep();
-        } 
+            this.advice('short');
+        }
         else if (cci >= this.uplevel && this.trend.direction != 'overbought') {
             this.trend.duration = 1;
             this.trend.direction = 'overbought';
@@ -248,20 +262,20 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('short');zzzsleep();
+                this.advice('short');
             }
-        } 
+        }
         else if (cci >= this.uplevel) {
             this.trend.duration++;
             if (this.trend.duration >= this.persisted) {
                 this.trend.persisted = true;
             }
-        } 
+        }
         else if (cci <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'oversold' && meanAlpha > 0) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('long');zzzsleep();
-        } 
+            this.advice('long');
+        }
         else if (cci <= this.downlevel && this.trend.direction != 'oversold') {
             this.trend.duration = 1;
             this.trend.direction = 'oversold';
@@ -269,15 +283,15 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('long');zzzsleep();
+                this.advice('long');
             }
-        } 
+        }
         else if (cci <= this.downlevel) {
             this.trend.duration++;
             if (this.trend.duration >= this.persisted) {
                 this.trend.persisted = true;
             }
-        } 
+        }
         else {
             if( this.trend.direction != 'nodirection') {
                 this.trend = {
@@ -286,7 +300,7 @@ check : function(candle) {
                     persisted: false,
                     adviced: false
                 };
-            } 
+            }
         else {
                 this.trend.duration++;
             }
@@ -297,7 +311,7 @@ check : function(candle) {
         this.advice();
     }
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
-    
+
 },
 end : function() {log.info('THE END');}
 };
