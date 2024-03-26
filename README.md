@@ -34,11 +34,14 @@ Nodejs version: v20.11.0
 
 #### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (backtest mode)
 ```bash
-npm i pm2 -g
+npm i pm2 --save
 ```
+
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2-advanced-process-manager.gif" width="auto"></img>
+
 ```bash
-pm2 start gekko-m4.js
-pm2 monit 
+pm2 start m4.js
+pm2 status 
 ```
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
