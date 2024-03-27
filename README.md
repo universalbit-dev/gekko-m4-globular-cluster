@@ -50,7 +50,7 @@ ecosystem.config.js
 ```bash
 pm2 start ecosystem.config.js 
 ```
-<img src="" width="auto"></img>
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/ecosystem/images/gif/ecosystem.gif" width="auto"></img>
 
 
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
