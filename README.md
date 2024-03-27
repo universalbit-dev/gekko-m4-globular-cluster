@@ -43,6 +43,16 @@ npm i pm2 --save
 pm2 start m4.js
 pm2 status 
 ```
+* ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
+  
+ecosystem.config.js
+
+```bash
+pm2 start ecosystem.config.js 
+```
+<img src="" width="auto"></img>
+
+
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
