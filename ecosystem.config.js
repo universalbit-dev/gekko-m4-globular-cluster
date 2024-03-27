@@ -15,7 +15,7 @@ module.exports = {
       repo : 'https://github.com/universalbit-dev/gekko-m4',
       path : '',
       'pre-deploy-local': '',
-      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production',
+      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env development',
       'pre-setup': ''
     }
   }
