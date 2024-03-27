@@ -51,7 +51,7 @@ ecosystem.config.js
 pm2 start ecosystem.config.js 
 ```
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/ecosystem/images/gif/ecosystem.gif" width="auto"></img>
-
+backtest directory: /gekko-m4/logs/json/
 
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
