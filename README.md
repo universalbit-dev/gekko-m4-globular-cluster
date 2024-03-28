@@ -46,7 +46,8 @@ pm2 status
 * ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
   
 ecosystem.config.js
-before run ecosystem file [import]() exchange data
+before run ecosystem file 
+* [import]() exchange data
 ```bash
 pm2 start ecosystem.config.js 
 ```
