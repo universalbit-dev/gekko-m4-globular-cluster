@@ -27,17 +27,6 @@ threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:1,
 hodl_threshold:1,scale:5,batch_size:1,interval:3};
 config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
-
-//Adapter
-config.adapter='sqlite';
-
-//Trader
-config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
-
-config.candleWriter={enabled:false,adapter:'sqlite'};
-
-config.adviceLogger={enabled:true};
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,6 +38,16 @@ config.backtest = {
 
    batchSize: 60
 };
+//Adapter
+config.adapter='sqlite';
+
+//Trader
+config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
+
+config.candleWriter={enabled:false,adapter:'sqlite'};
+
+config.adviceLogger={enabled:true};
+
 
 config.backtestResultExporter = {
   enabled: true,

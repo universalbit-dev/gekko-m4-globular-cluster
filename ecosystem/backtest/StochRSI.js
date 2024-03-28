@@ -24,16 +24,6 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:5};
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'StochRSI'};
 config.StochRSI={interval:14,threshold:1};
 config.StochRSI.thresholds={low:30,high:70,persistence:5};
-//Adapter
-config.adapter='sqlite';
-
-//Trader
-config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
-
-config.candleWriter={enabled:false,adapter:'sqlite'};
-
-config.adviceLogger={enabled:true};
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,6 +35,17 @@ config.backtest = {
 
    batchSize: 60
 };
+//Adapter
+config.adapter='sqlite';
+
+//Trader
+config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
+
+config.candleWriter={enabled:false,adapter:'sqlite'};
+
+config.adviceLogger={enabled:true};
+
+
 
 config.backtestResultExporter = {
   enabled: true,
