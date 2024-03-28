@@ -2,6 +2,11 @@
 
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/images/gif/import.gif" width="auto" />
 
+* import.js and backtest.js files must have same date like this:
+  ```bash
+  from: "2022-01-02",to: "2022-03-01"
+```
+  
 * data import completed when you see a message like this
 ```bash
 2024-03-26 13:00:20 (DEBUG):	Processing 980 new trades. From 2022-02-18 08:01:04 UTC to 2022-02-19 23:06:29 UTC. (2 days)
