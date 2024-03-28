@@ -47,7 +47,7 @@ pm2 status
   
 ecosystem.config.js
 before run ecosystem file 
-* [import]() exchange data
+* [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) exchange data
 ```bash
 pm2 start ecosystem.config.js 
 ```
