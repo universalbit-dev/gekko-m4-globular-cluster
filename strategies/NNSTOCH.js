@@ -47,7 +47,7 @@ var method = {
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:14});
-    
+
     this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
@@ -186,7 +186,7 @@ var method = {
     if (2 > _.size(this.priceBuffer)) return;
      for (i=0;i<3;++i)
      this.learn();this.brain();
-     while (this.settings.price_buffer_len < _.size(this.priceBuffer))           
+     while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
@@ -200,7 +200,7 @@ var method = {
     var prediction = this.nn.forward(vol);
     return prediction.w[0];
   },
-  
+
   zzzsleep: async function () {
   const x= await sleep(900000);
   log.info('zzz...');
@@ -208,10 +208,10 @@ var method = {
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check :function(candle){
-  
+
     emaFast=this.tulipIndicators.emaFast.result.result;
     rsi=this.tulipIndicators.rsi.result.result;
-    
+
     switch (true)
     {
     case((this.trend.duration >= this.settings.thresholds.persistence)):
@@ -227,7 +227,7 @@ var method = {
 	this.advice();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
-	
+
 	switch (true){
 	case(this.trend.duration >= this.settings.thresholds.persistence):
 	this.trend.persisted = true;
@@ -242,11 +242,11 @@ var method = {
 	this.advice();
 	this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
-	
+
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
-      var currentPrice = candle.close; 
+      var currentPrice = candle.close;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
@@ -254,7 +254,7 @@ var method = {
       (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
-    
+
     log.info('calculated StochRSI properties for candle:');
     log.info('\t', 'rsi:', rsi);
     log.info("StochRSI min:\t\t" + this.lowestRSI);
@@ -263,15 +263,15 @@ var method = {
     log.info("calculated NeuralNet candle prediction:");
     log.info("Alpha:\t\t\t" + meanAlpha);
     log.info('===========================================');
-    
-    if ((this.trend.persisted && this.stochRSI != 0 && meanAlpha > 1))
+
+    if ((this.trend.persisted && this.stochRSI != 0 && meanAlpha > 0))
     {
     this.advice('long');this.brain();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
     zzzsleep();
     }
 
-    if ((this.trend.persisted && this.stochRSI != 100 && meanAlpha < -1 ))
+    if ((this.trend.persisted && this.stochRSI != 100 && meanAlpha < 0 && signalSell))
     {
     this.advice('short');this.brain();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
