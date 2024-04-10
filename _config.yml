@@ -1,7 +1,7 @@
 title: Gekko-M4
 description: keep calm and make something of amazing
 logo: docs/assets/images/logo.png
-show_downloads: true
+show_downloads: false
 google_analytics: G-MN27QKSXPR
 theme: jekyll-theme-minimal
 remote_theme: pages-themes/minimal@v0.2.0
