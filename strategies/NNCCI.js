@@ -28,7 +28,7 @@ init : function() {
    log.info('================================================');
    log.info('keep calm and make somethig of amazing');
    log.info('================================================');
-
+   this.name = 'NNCCI';
    this.currentTrend;
    this.age = 0;
    //Date
@@ -55,7 +55,7 @@ init : function() {
   //DEMA
   this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
 
-  this.name = 'NNCCI';
+  
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
