@@ -49,7 +49,7 @@ init : function() {
   this.downlevel = this.settings.thresholds.down;
   this.persisted = this.settings.thresholds.persistence;
   //CCI
-  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 14 });
+  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 20 });
   //SMA
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: 14 });
   //DEMA
