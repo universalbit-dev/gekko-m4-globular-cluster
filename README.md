@@ -46,9 +46,10 @@ pm2 status
 ```
 * ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
   
-ecosystem.config.js
-before run ecosystem file 
+
+...before run ecosystem file 
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) exchange data
+* [backtest date must match](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md)
 ```bash
 pm2 start ecosystem.config.js 
 ```
