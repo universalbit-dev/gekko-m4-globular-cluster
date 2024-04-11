@@ -4,16 +4,13 @@
 
 File Contents:
 
-### Backtest Mode 
-* [read](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md)
+### [Backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) Mode 
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/images/gif/backtest.gif" width="auto" />
 
-### Import Mode 
-* [read](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
+### [Import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) Mode 
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/images/gif/import.gif" width="auto" />
 
-### Trade Mode 
-* [read](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md)
+### [Trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) Mode 
 <img src="" width="auto" />
 
 ##### gekko-m4.js file contents
