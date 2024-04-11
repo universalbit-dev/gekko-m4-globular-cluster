@@ -2,22 +2,23 @@
 
 * [Pm2 Process Management](https://pm2.io/docs/runtime/guide/process-management/)
 
-### Backtest Mode 
-<img src="" width="auto" />
+File Contents:
 
-### Import Mode
-<img src="" width="auto" />
+### Backtest Mode 
+* [read](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md)
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/images/gif/backtest.gif" width="auto" />
+
+### Import Mode 
+* [read](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/images/gif/import.gif" width="auto" />
 
 ### Trade Mode 
+* [read](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md)
 <img src="" width="auto" />
 
-
-
-
-
-
-
 ##### gekko-m4.js file contents
+<img src="" width="auto" />
+
 ```
 var pm2 = require('pm2');
 pm2.connect(function(err) {
