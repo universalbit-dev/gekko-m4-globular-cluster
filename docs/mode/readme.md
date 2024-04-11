@@ -1,14 +1,23 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
+* [Pm2 Process Management](https://pm2.io/docs/runtime/guide/process-management/)
 
-* [import mode]()
-* [trade mode]()
+### Backtest Mode 
+<img src="" width="auto" />
 
-[Pm2 Process Management](https://pm2.io/docs/runtime/guide/process-management/)
+### Import Mode
+<img src="" width="auto" />
 
-* ##### backtest mode
-run gekko-m4 using pm2 process management
+### Trade Mode 
+<img src="" width="auto" />
 
+
+
+
+
+
+
+##### gekko-m4.js file contents
 ```
 var pm2 = require('pm2');
 pm2.connect(function(err) {
