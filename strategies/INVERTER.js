@@ -305,15 +305,13 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
-keepcalm: function () {const x= sleep(900000);log.info('...make something of amazing');},
-
 //Screw & Bolt
 //LONG
 long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
   this.resetTrend();
-  this.trend.duration++;this.advice();this.keepcalm();
+  this.trend.duration++;this.advice();sleep(900000);log.info('...make something of amazing');
   }
   if (this.debug) {log.info('|Bolt Up|');}
 
@@ -323,7 +321,7 @@ short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
   this.resetTrend();
-  this.trend.duration++;this.advice();this.keepcalm();
+  this.trend.duration++;this.advice();sleep(900000);log.info('...make something of amazing');
   }
   if (this.debug) {log.info('|Bolt Down|');}
 

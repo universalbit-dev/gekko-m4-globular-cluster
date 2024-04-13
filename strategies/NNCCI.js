@@ -55,7 +55,7 @@ init : function() {
   //DEMA
   this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
 
-  
+
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
@@ -135,15 +135,7 @@ init : function() {
 
   this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
-
-  zzzsleep: async function () {
-  const x= await sleep(900000);
-  log.info('zzz...');
-  },
-
-  resetnet: function(){
-  this.nn = new convnetjs.Net();
-},
+  resetnet: function(){this.nn = new convnetjs.Net();},
 
  learn : function () {
     for (var i = 0; i < _.size(this.priceBuffer) - 1; i++) {
@@ -206,12 +198,7 @@ if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
     return prediction.w[0];
   },
 
-zzzsleep: async function () {
-  const x= await sleep(900000);
-  log.info('zzz...');
-  },
-
-log : function(candle) {
+  log : function(candle) {
     var cci = this.tulipIndicators.cci.result.result;
     if (typeof(cci) == 'boolean') {
         log.debug('Insufficient data available. Age: ', cci.size, ' of ', cci.maxSize);
@@ -250,7 +237,7 @@ check : function(candle) {
     if (cci >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'overbought' && meanAlpha < 0) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('short');
+            this.advice('short');sleep(900000);log.info('...make something of amazing');
         }
         else if (cci >= this.uplevel && this.trend.direction != 'overbought') {
             this.trend.duration = 1;
@@ -259,7 +246,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('short');
+                this.advice('short');sleep(900000);log.info('...make something of amazing');
             }
         }
         else if (cci >= this.uplevel) {
@@ -271,7 +258,7 @@ check : function(candle) {
         else if (cci <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'oversold' && meanAlpha > 0) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('long');
+            this.advice('long');sleep(900000);log.info('...make something of amazing');
         }
         else if (cci <= this.downlevel && this.trend.direction != 'oversold') {
             this.trend.duration = 1;
@@ -280,7 +267,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('long');
+                this.advice('long');sleep(900000);log.info('...make something of amazing');
             }
         }
         else if (cci <= this.downlevel) {

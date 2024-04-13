@@ -1,4 +1,3 @@
-/* */
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -12,7 +11,7 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
 var fs = require('node:fs');
-var settings = config.NN;this.settings=settings;
+var settings = config.NNTMA;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -24,31 +23,25 @@ var method = {
   prevPrice : 0,
   prevAction : 'none',
   hodl_threshold : 1,
-
-  init : function() {
-
+init : function() {
     this.requiredHistory = 40;
-    this.RSIhistory = [];
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
 
-    this.trend = {
-    direction: 'none',
-    duration: 0,
-    persisted: false,
-    adviced: false
-  };
+    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
+    this.addTulipIndicator('short', 'tema', {optInTimePeriod:7});
+    this.addTulipIndicator('medium', 'tema',{optInTimePeriod:25});
+    this.addTulipIndicator('long', 'tema', {optInTimePeriod:99});
     //Date
     startTime = new Date();
-    //indicators
+
+    //Indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
-    //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:14});
+    this.name = 'NNTMA';
 
-    this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
@@ -125,7 +118,6 @@ var method = {
         l1_decay: 0.001
       });
     }
-
   this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
 
@@ -167,19 +159,14 @@ var method = {
 
   update : function(candle)
   {
-  rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-  this.RSIhistory.push(rsi);
-  if(_.size(this.RSIhistory) > this.interval)
-  //remove oldest RSI value
-  this.RSIhistory.shift();
-  this.lowestRSI = _.min(this.RSIhistory);
-  this.highestRSI = _.max(this.RSIhistory);
-  this.stochRSI = ((rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
-
-  if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
-  //remove oldest priceBuffer value
-  this.priceBuffer.shift();
+    long=this.tulipIndicators.long.result.result;
+    medium=this.tulipIndicators.medium.result.result;
+    short=this.tulipIndicators.short.result.result;
     emaFast=this.tulipIndicators.emaFast.result.result;
+
+    if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
+    //remove oldest priceBuffer value
+    this.priceBuffer.shift();
     if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
     this.setNormalizeFactor();
     this.priceBuffer.push(emaFast / this.settings.scale );
@@ -190,54 +177,24 @@ var method = {
      this.priceBuffer.shift();
 //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-  	if (err) {return console.log(err);}
-  	});
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
   },
 
-  predictCandle : function(candle) {
-    var vol = new convnetjs.Vol(this.priceBuffer);
-    var prediction = this.nn.forward(vol);
+  predictCandle : function() {
+    let vol = new convnetjs.Vol(this.priceBuffer);
+    let prediction = this.nn.forward(vol);
     return prediction.w[0];
   },
-  //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
-  check :function(candle){
 
+check : function(candle) {
     emaFast=this.tulipIndicators.emaFast.result.result;
-    rsi=this.tulipIndicators.rsi.result.result;
+    short = this.tulipIndicators.short.result.result;
+    medium = this.tulipIndicators.medium.result.result;
+    long = this.tulipIndicators.long.result.result;
 
-    switch (true)
-    {
-    case((this.trend.duration >= this.settings.thresholds.persistence)):
-    this.trend.persisted = true;
-    case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
-    this.trend.adviced = true;
-    case (this.stochRSI > 70):
-    this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:
-    'high',adviced: this.trend.adviced};
-    this.trend.duration++;
-    log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
-	default:
-	this.advice();
-    this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-	}
+  var lastPrice = candle.close;this.age++;
 
-	switch (true){
-	case(this.trend.duration >= this.settings.thresholds.persistence):
-	this.trend.persisted = true;
-	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
-	this.trend.adviced = true;
-	case(this.stochRSI < 30):
-	this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:
-	'low',adviced:this.trend.adviced};
-	this.trend.duration++;
-	log.debug('\t','In low since',this.trend.duration,'candle(s)');break;
-	default:
-	this.advice();
-	this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-	}
-
-    if(this.predictionCount > this.settings.min_predictions)
+  if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
       var currentPrice = candle.close;
@@ -249,37 +206,25 @@ var method = {
       var signal = meanp < currentPrice;
     }
 
-    log.info('calculated StochRSI properties for candle:');
-    log.info('\t', 'rsi:', rsi);
-    log.info("StochRSI min:\t\t" + this.lowestRSI);
-    log.info("StochRSI max:\t\t" + this.highestRSI);
-    log.info("StochRSI Value:\t\t" + this.stochRSI);
+  switch (true){
+  case((short > medium) && (medium > long) && (meanAlpha > 0)):
+  this.advice('long');this.brain();sleep(900000);log.info('...make something of amazing');break;
+  case((short < medium) && (medium > long) && (meanAlpha < 0 && signalSell)):
+  this.advice('short');this.brain();sleep(900000);log.info('...make something of amazing');break;
+  case((short > medium) && (medium < long) && (meanAlpha < 0 && signalSell)):
+  this.advice('short');this.brain();sleep(900000);log.info('...make something of amazing');break;
+  default : {this.advice();}
+  }
+
+    log.info('calculated TMA properties for candle:');
+    log.info("TMA long:\t\t" + long);
+    log.info("TMA short:\t\t" + short);
+    log.info("TMA medium:\t\t" + medium);
     log.info("calculated NeuralNet candle prediction:");
     log.info("Alpha:\t\t\t" + meanAlpha);
     log.info('===========================================');
 
-    if ((this.trend.persisted && this.stochRSI != 0 && meanAlpha > 0))
-    {
-    this.advice('long');this.brain();
-    this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-    sleep(900000);log.info('...make something of amazing');
-    }
-
-    if ((this.trend.persisted && this.stochRSI != 100 && meanAlpha < 0 && signalSell))
-    {
-    this.advice('short');this.brain();
-    this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-    sleep(900000);log.info('...make something of amazing');
-    }
-    //stoploss as Reinforcement Learning
-    if ('stoploss' === this.indicators.stoploss.action)
-    {
-    log.info('Reinforcement Learning');this.brain();
-    this.prevAction='sell';signal=false;
-    }
-
-  },
-
+},
   end : function() {log.info('THE END');}
 };
 module.exports = method;
