@@ -48,6 +48,8 @@ hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:90};
 
 config.NNCCI.thresholds={up:100,down:-100,persistence:3};
 
+config.NOOP={};
+
 //Adapter
 config.adapter='sqlite';
 
