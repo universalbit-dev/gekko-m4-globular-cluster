@@ -316,7 +316,7 @@ zzzsleep: async function () {
 long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
-  this.resetTrend();this.advice('short');
+  this.resetTrend();
   this.trend.duration++;zzzsleep();
   }
   if (this.debug) {log.info('|Bolt Up|');}
@@ -326,7 +326,7 @@ long: function(){
 short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
-  this.resetTrend();this.advice('long');
+  this.resetTrend();
   this.trend.duration++;zzzsleep();
   }
   if (this.debug) {log.info('|Bolt Down|');}
