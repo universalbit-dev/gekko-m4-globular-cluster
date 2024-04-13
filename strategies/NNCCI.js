@@ -13,6 +13,8 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+var sleeptime = 900000;
+
 var method = {
  priceBuffer : [],
   predictionCount : 0,
@@ -237,7 +239,7 @@ check : function(candle) {
     if (cci >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'overbought' && meanAlpha < 0) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('short');sleep(900000);log.info('...make something of amazing');
+            this.advice('short');sleep(sleeptime);log.info('...make something of amazing');
         }
         else if (cci >= this.uplevel && this.trend.direction != 'overbought') {
             this.trend.duration = 1;
@@ -246,7 +248,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('short');sleep(900000);log.info('...make something of amazing');
+                this.advice('short');sleep(sleeptime);log.info('...make something of amazing');
             }
         }
         else if (cci >= this.uplevel) {
@@ -258,7 +260,7 @@ check : function(candle) {
         else if (cci <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'oversold' && meanAlpha > 0) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('long');sleep(900000);log.info('...make something of amazing');
+            this.advice('long');sleep(sleeptime);log.info('...make something of amazing');
         }
         else if (cci <= this.downlevel && this.trend.direction != 'oversold') {
             this.trend.duration = 1;
@@ -267,7 +269,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('long');sleep(900000);log.info('...make something of amazing');
+                this.advice('long');sleep(sleeptime);log.info('...make something of amazing');
             }
         }
         else if (cci <= this.downlevel) {

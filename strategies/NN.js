@@ -15,7 +15,8 @@ var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-
+//...make something of amazing
+var sleeptime = 900000;
 var method = {
   priceBuffer : [],
   predictionCount : 0,
@@ -258,13 +259,13 @@ var method = {
     }
     if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction)&&
     ('buy' !== this.prevAction && signal === false  && meanAlpha > 1)){
-    this.advice('long');sleep(900000);log.info('...make something of amazing');
+    this.advice('long');sleep(sleeptime);log.info('...make something of amazing');
     this.brain();
     }
     if ((this.trend.adviced && this.stochRSI != 100 &&'sell' !== this.prevAction)&&
     ('sell' !== this.prevAction && signal === true && meanAlpha < -1  &&
     signalSell === true)){
-    this.advice('short');sleep(900000);log.info('...make something of amazing');
+    this.advice('short');sleep(sleeptime);log.info('...make something of amazing');
     this.brain();}
 
     if ('stoploss' === this.indicators.stoploss.action)

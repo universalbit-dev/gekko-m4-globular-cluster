@@ -32,6 +32,8 @@ const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var stoploss = require('./indicators/StopLoss.js');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+var sleeptime = 900000;
+
 /*
 
 Method INVERTER:
@@ -165,13 +167,13 @@ switch (true) {
 	case (rsi > 68 && rsi < 72):
 	log.info('=========================');
 	log.info('|NUT|RSI|Overbought|SELL|');
-	log.info('=========================');this.advice('short');
+	log.info('=========================');this.advice();
 	break;
 	//rsi low  - buy above '30'
 	case (rsi > 28 && rsi < 32):
 	log.info('======================');
 	log.info('|NUT|RSI|Oversold|BUY|');
-	log.info('======================');this.advice('long');
+	log.info('======================');this.advice();
 	break;
     //weak
 	case (rsi > 40 && rsi < 60):
@@ -311,7 +313,7 @@ long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
   this.resetTrend();
-  this.trend.duration++;this.advice();sleep(900000);log.info('...make something of amazing');
+  this.trend.duration++;this.advice();sleep(sleeptime);log.info('...make something of amazing');
   }
   if (this.debug) {log.info('|Bolt Up|');}
 
@@ -321,7 +323,7 @@ short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
   this.resetTrend();
-  this.trend.duration++;this.advice();sleep(900000);log.info('...make something of amazing');
+  this.trend.duration++;this.advice();sleep(sleeptime);log.info('...make something of amazing');
   }
   if (this.debug) {log.info('|Bolt Down|');}
 

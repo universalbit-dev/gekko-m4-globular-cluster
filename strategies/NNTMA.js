@@ -15,6 +15,7 @@ var settings = config.NNTMA;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+var sleeptime = 900000;
 
 var method = {
   priceBuffer : [],
@@ -208,11 +209,11 @@ check : function(candle) {
 
   switch (true){
   case((short > medium) && (medium > long) && (meanAlpha > 0)):
-  this.advice('long');this.brain();sleep(900000);log.info('...make something of amazing');break;
+  this.advice('long');this.brain();sleep(sleeptime);log.info('...make something of amazing');break;
   case((short < medium) && (medium > long) && (meanAlpha < 0 && signalSell)):
-  this.advice('short');this.brain();sleep(900000);log.info('...make something of amazing');break;
+  this.advice('short');this.brain();sleep(sleeptime);log.info('...make something of amazing');break;
   case((short > medium) && (medium < long) && (meanAlpha < 0 && signalSell)):
-  this.advice('short');this.brain();sleep(900000);log.info('...make something of amazing');break;
+  this.advice('short');this.brain();sleep(sleeptime);log.info('...make something of amazing');break;
   default : {this.advice();}
   }
 
