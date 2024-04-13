@@ -101,7 +101,7 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.adx});
 /* Outputs: dx */
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 9});
 
-//StopLoss as indicator 
+//StopLoss as indicator
 this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
 
 log.info('================================================');
@@ -217,14 +217,14 @@ ADX Value 	Trend Strength
 		log.info('=======================');
 	}
 
-	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull')) 
+	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull'))
 	{this.trend.state = 'long';
 	log.info('=================================================');
 	log.info('|NUT|DM|:',di_plus,di_minus);
 	log.info('=================================================');
 	}
 
-	if((di_minus > di_plus < this.settings.diminus)&&(this.trend.bb=='bear'))   
+	if((di_minus > di_plus < this.settings.diminus)&&(this.trend.bb=='bear'))
 	{this.trend.state = 'short';
 	log.info('=================================================');
 	log.info('|NUT|DM|:',di_plus,di_minus);
@@ -236,7 +236,7 @@ ADX Value 	Trend Strength
 When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend.
 
 When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend.
-	
+
 */
 	switch (true)
 	{
@@ -245,37 +245,37 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	log.info('=================================================');
 	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
 	log.info('=================================================');break;
-	
+
 	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
 	log.info('=================================================');
 	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
 	log.info('=================================================');break;
-	
+
 	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
 	log.info('=================================================');
 	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
 	log.info('=================================================');break;
-	
+
 	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
 	log.info('=================================================');
 	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
 	log.info('=================================================');break;
-	
+
 	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
 	log.info('=================================================');
 	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
 	log.info('=================================================');break;
-	
+
 	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
 	log.info('=================================================');
 	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
 	log.info('=================================================');break;
-	
+
 	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
 	log.info('=================================================');
@@ -286,7 +286,7 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	log.info('|NUT|DI|WAIT|DATA|');
 	log.info('=================================================');
 	}
-	
+
         //BEAR TREND
         if (longema < shortema)
         {
@@ -299,17 +299,13 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
         this.trend.bb ='bull';
         log.info('|BULL-TREND|');
         }
-        
-        //Stoploss 
-	if ('stoploss' === this.indicators.stoploss.action){this.advice('short');}
+
+        //Stoploss
+	if ('stoploss' === this.indicators.stoploss.action){this.advice();}
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
-zzzsleep: async function () {
-  const x= await sleep(900000);
-  log.info('zzz...');
-  },
-
+keepcalm: function () {const x= sleep(900000);log.info('...make something of amazing');},
 
 //Screw & Bolt
 //LONG
@@ -317,17 +313,17 @@ long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
   this.resetTrend();
-  this.trend.duration++;zzzsleep();
+  this.trend.duration++;this.advice();this.keepcalm();
   }
   if (this.debug) {log.info('|Bolt Up|');}
- 
+
 },
 //SHORT
 short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
   this.resetTrend();
-  this.trend.duration++;zzzsleep();
+  this.trend.duration++;this.advice();this.keepcalm();
   }
   if (this.debug) {log.info('|Bolt Down|');}
 
