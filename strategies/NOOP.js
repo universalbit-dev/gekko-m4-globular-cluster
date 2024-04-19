@@ -10,20 +10,20 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
 var fs = require('node:fs');
+
 var settings = config.NOOP;this.settings=settings;
 
-// Let's create our own method
 // This method is a noop (it doesn't do anything)
 
 var method = {
+init : function(){this.name = 'NOOP';
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
+},
 
-init : function(){this.name = 'NOOP';},
-
-update : function(){_.noop},
+update : function(candle){_.noop},
 log : function(){_.noop},
-check : function(){_.noop},
+check : function(candle){_.noop},
 end : function() {_.noop}
-
 };
 
 module.exports = method;
