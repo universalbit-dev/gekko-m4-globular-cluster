@@ -33,8 +33,8 @@ hodl_threshold:1,scale:5,batch_size:1};
 config.INVERTER={rsi:14,adx:14,dema:5,diplus:25.5,diminus:25,
 longema:240,shortema:50,threshold:3};
 
-config.StochRSI={interval:14,threshold:1};
-config.StochRSI.thresholds={low:20,high:80,persistence:5};
+config.STOCHRSI={interval:14,threshold:1};
+config.STOCHRSI.thresholds={low:20,high:80,persistence:5};
 
 config.NNSTOCH={
 threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
