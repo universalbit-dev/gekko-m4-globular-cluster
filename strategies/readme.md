@@ -68,7 +68,7 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod:9} );
 this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: 2,optInNbStdDevs:2,optInTimePeriod:20});
 ```
 
-#### Assign indicator result to a variable. 
+#### Assign indicator 
 ```
 rsi=this.tulipIndicators.rsi.result.result;
 sma=this.tulipIndicators.sma.result.result;
@@ -77,7 +77,7 @@ dema=this.tulipIndicators.dema.result.result;
 bbands = this.tulipIndicators.bbands.result;
 ```
 
-#### Display results in console
+#### Display results
 ```
 if(rsi != undefined)log.info('RSI:',rsi);
 if(sma != undefined)log.info('SMA:',sma);
