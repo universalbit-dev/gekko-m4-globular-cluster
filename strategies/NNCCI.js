@@ -1,9 +1,9 @@
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
-var _ = require('../core/lodash');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
+const _ = require('../core/lodash');
 const fs = require('node:fs');
 var math = require('mathjs');
 
@@ -13,7 +13,12 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-var sleeptime = 900000;
+async function wait() {
+  console.log('keep calm...');await sleep(2000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++) 
+  {if (i === 3) await sleep(90000);}
+};
 
 var method = {
  priceBuffer : [],
@@ -25,7 +30,7 @@ var method = {
 
 
 init : function() {
-   this.requiredHistory = 40;
+   this.requiredHistory = this.settings.historySize;
    this.RSIhistory = [];
    log.info('================================================');
    log.info('keep calm and make somethig of amazing');
@@ -36,34 +41,32 @@ init : function() {
    //Date
    startTime = new Date();
    //Info Messages
-   		log.info("=====================================");
+   		
    		log.info('Running', this.name);
-   		log.info('=====================================');
   this.trend = {
     direction: 'undefined',
     duration: 0,
     persisted: false,
     adviced: false
   };
-  this.historySize = this.settings.history;
+  
   this.ppoadv = 'none';
   this.uplevel = this.settings.thresholds.up;
   this.downlevel = this.settings.thresholds.down;
   this.persisted = this.settings.thresholds.persistence;
   //CCI
-  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 20 });
+  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 5 });
   //SMA
-  this.addTulipIndicator('sma', 'sma', {optInTimePeriod: 14 });
+  this.addTulipIndicator('sma', 'sma', {optInTimePeriod: 5 });
   //DEMA
-  this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
-
-
-    this.nn = new convnetjs.Net();
-    //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+  this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod: 1 });
+  
+  this.nn = new convnetjs.Net();
+  //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
       {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:10, activation: 'relu'},
-      {type:'fc', num_neurons:10, activation:'sigmoid'},
+      {type:'fc', num_neurons:100, activation: 'relu'},
+      {type:'fc', num_neurons:100, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -157,7 +160,7 @@ init : function() {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
 
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 2);
+  var brain = new deepqlearn.Brain(1, 1);
   var state = [Math.random(), Math.random(), Math.random()];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
@@ -230,25 +233,28 @@ check : function(candle) {
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
       var signalSell = (candle.close > this.prevPrice) || (candle.close <
       (this.prevPrice * this.settings.hodl_threshold));
-      var signal = meanp < currentPrice;log.info('\t', 'meanAlpha:\t',meanAlpha);
+      var signal = meanp < currentPrice;
+      log.info('\t', 'meanAlpha:\t',meanAlpha);
     }
 
 
     if (typeof(cci) == 'number') {
     //overbought?
-    if (cci >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'overbought' && meanAlpha < 0) {
+    if (cci >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction ==  'overbought' && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)) 
+    {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('short');sleep(sleeptime);log.info('...make something of amazing');
-        }
-        else if (cci >= this.uplevel && this.trend.direction != 'overbought') {
+            this.advice('short');wait();
+    }
+        else if (cci >= this.uplevel && this.trend.direction != 'overbought' && ('sell' !== this.prevAction && 
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)) {
             this.trend.duration = 1;
             this.trend.direction = 'overbought';
             this.trend.persisted = false;
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('short');sleep(sleeptime);log.info('...make something of amazing');
+                this.advice('short');wait();
             }
         }
         else if (cci >= this.uplevel) {
@@ -257,19 +263,21 @@ check : function(candle) {
                 this.trend.persisted = true;
             }
         }
-        else if (cci <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'oversold' && meanAlpha > 0) {
+        else if (cci <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'oversold' && ('buy' !== this.prevAction && 
+  signal === false  && meanAlpha > this.settings.threshold_buy)) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('long');sleep(sleeptime);log.info('...make something of amazing');
+            this.advice('long');wait();
         }
-        else if (cci <= this.downlevel && this.trend.direction != 'oversold') {
+        else if (cci <= this.downlevel && this.trend.direction != 'oversold' && ('buy' !== this.prevAction && 
+  signal === false  && meanAlpha > this.settings.threshold_buy)) {
             this.trend.duration = 1;
             this.trend.direction = 'oversold';
             this.trend.persisted = false;
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('long');sleep(sleeptime);log.info('...make something of amazing');
+                this.advice('long');wait();
             }
         }
         else if (cci <= this.downlevel) {
@@ -278,25 +286,17 @@ check : function(candle) {
                 this.trend.persisted = true;
             }
         }
-        else {
-            if( this.trend.direction != 'nodirection') {
-                this.trend = {
-                    direction: 'nodirection',
-                    duration: 0,
-                    persisted: false,
-                    adviced: false
-                };
-            }
-        else {
-                this.trend.duration++;
-            }
+        else 
+        {
+            if( this.trend.direction != 'nodirection') 
+            {this.trend = {direction: 'nodirection',duration: 0,persisted: false,adviced: false};}
+            else {this.trend.duration++;}
             this.advice();
         }
 
-    } else {
-        this.advice();
-    }
+    } else {this.advice();}
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
+    
 
 },
 end : function() {log.info('THE END');}

@@ -5,18 +5,23 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
-var _ = require('../core/lodash3');
+const _ = require('../core/lodash');
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
 var fs = require('node:fs');
-var settings = config.NN;this.settings=settings;
+var settings = config.NNSTOCH;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-var sleeptime = 900000;
+async function wait() {
+  console.log('keep calm...');await sleep(2000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++) 
+  {if (i === 3) await sleep(200000);}
+};
 
 var method = {
   priceBuffer : [],
@@ -27,8 +32,7 @@ var method = {
   hodl_threshold : 1,
 
   init : function() {
-
-    this.requiredHistory = 40;
+    this.requiredHistory = this.settings.historySize;
     this.RSIhistory = [];
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
@@ -47,15 +51,16 @@ var method = {
     //DEMA
     this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:14});
-
+    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:5});
+    
+    this.requiredHistory = this.settings.historySize;
     this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
       {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:10, activation: 'relu'},
-      {type:'fc', num_neurons:10, activation:'sigmoid'},
+      {type:'fc', num_neurons:100, activation: 'relu'},
+      {type:'fc', num_neurons:100, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -151,7 +156,7 @@ var method = {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
 
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 2);//1input,2output
+  var brain = new deepqlearn.Brain(1, 1);
   var state = [Math.random(), Math.random(), Math.random()];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
@@ -214,8 +219,7 @@ var method = {
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
     case (this.stochRSI > 70):
-    this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:
-    'high',adviced: this.trend.adviced};
+    this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'high',adviced: this.trend.adviced};
     this.trend.duration++;
     log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
 	default:
@@ -237,40 +241,42 @@ var method = {
 	this.advice();
 	this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
-
-    if(this.predictionCount > this.settings.min_predictions)
+	
+	if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
       var currentPrice = candle.close;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
-      var signalSell = (candle.close > this.prevPrice) || (candle.close <
-      (this.prevPrice * this.settings.hodl_threshold));
-      var signal = meanp < currentPrice;
+      var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
+      var signal = meanp < currentPrice; 
     }
 
     log.info('calculated StochRSI properties for candle:');
     log.info('\t', 'rsi:', rsi);
-    log.info("StochRSI min:\t\t" + this.lowestRSI);
-    log.info("StochRSI max:\t\t" + this.highestRSI);
-    log.info("StochRSI Value:\t\t" + this.stochRSI);
+    log.info("StochRSI min:" + this.lowestRSI);
+    log.info("StochRSI max:" + this.highestRSI);
+    log.info("StochRSI Value:" + this.stochRSI);
     log.info("calculated NeuralNet candle prediction:");
-    log.info("Alpha:\t\t\t" + meanAlpha);
+    log.info('meanAlpha:',meanAlpha);
     log.info('===========================================');
 
-    if ((this.trend.persisted && this.stochRSI != 0 && meanAlpha > 0))
+    if ((this.trend.persisted && this.stochRSI != 0 )&&
+    ('buy' !== this.prevAction && signal === false   && 
+    meanAlpha > this.settings.threshold_buy))
     {
-    this.advice('long');this.brain();
+    this.advice('long');wait();this.brain();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-    sleep(sleeptime);log.info('...make something of amazing');
     }
 
-    if ((this.trend.persisted && this.stochRSI != 100 && meanAlpha < 0 && signalSell))
+    if ((this.trend.persisted && this.stochRSI != 100)&&
+    ('sell' !== this.prevAction &&  signal === true && 
+    meanAlpha < this.settings.threshold_sell && signalSell === true)) 
+    
     {
-    this.advice('short');this.brain();
+    this.advice('short');wait();this.brain();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
-    sleep(sleeptime);log.info('...make something of amazing');
     }
     //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)

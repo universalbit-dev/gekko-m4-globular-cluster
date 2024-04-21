@@ -28,11 +28,18 @@ const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
+const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var stoploss = require('./indicators/StopLoss.js');
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-var sleeptime = 900000;
+async function wait() {
+  console.log('keep calm...');await sleep(2000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++) 
+  {if (i === 3) await sleep(200000);}
+};
 
 /*
 
@@ -48,11 +55,8 @@ var method = {
  prevAction : 'wait',
 init: function()
 {
-//Strategy Name
 this.name = 'INVERTER';
-log.info('============================================');
-log.info('Start INVERTER');
-log.info('============================================');
+log.info('Start' , this.name);
 //Init
 this.resetTrend();
 this.debug = true;
@@ -64,9 +68,9 @@ this.debug = true;
 /* Inputs: real */
 /* Options: period */
 /* Outputs: dema */
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.dema});
-this.addTulipIndicator('longema', 'dema', {optInTimePeriod: this.settings.longema});
-this.addTulipIndicator('shortema', 'dema', {optInTimePeriod: this.settings.shortema});
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 5});
+this.addTulipIndicator('longema', 'dema', {optInTimePeriod: 100});
+this.addTulipIndicator('shortema', 'dema', {optInTimePeriod: 50});
 
 /* Relative Strength Index */
 /* Type: indicator */
@@ -74,7 +78,7 @@ this.addTulipIndicator('shortema', 'dema', {optInTimePeriod: this.settings.short
 /* Inputs: real */
 /* Options: period */
 /* Outputs: rsi */
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : this.settings.rsi});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 14});
 
 //DI+ DI -
 /* Directional Indicator */
@@ -83,7 +87,7 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : this.settings.rsi});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: plus_di, minus_di */
-this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.adx});
+this.addTulipIndicator('di', 'di', {optInTimePeriod : 14});
 
 //ADX
 /* Average Directional Movement Index */
@@ -92,7 +96,7 @@ this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.adx});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.adx});
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 14});
 
 //DX
 /* Directional Movement Index */
@@ -104,21 +108,21 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.adx});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 9});
 
 //StopLoss as indicator
-this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
+this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
+
 //Date
 startTime = new Date();
-//Info Messages
-		log.info("=====================================");
-		log.info('Running', this.name);
-		log.info('=====================================');
-	},
+this.requiredHistory = this.settings.historySize;
+log.info('Running', this.name);
+},
 
 //Trend
+
 resetTrend: function()
 {
 trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:false,
@@ -135,7 +139,7 @@ update: function(candle) {
 },
 
 check: function(candle)
-{log.info('=======');log.info('|CHECK|');log.info('=======');
+{log.info('|Check|');
 
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
@@ -150,41 +154,34 @@ dema = this.tulipIndicators.dema.result.result;
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 
-log.info('=============');
-log.info('|INDICATORS:|');
-log.info('==============================');
-log.info('|RSI|',rsi);
-log.info('|DX|',dx);
-log.info('|EMA_long|',longema);
-log.info('|EMA_short|',shortema);
-log.info('|DEMA||',dema);
-log.info('==============================');
+
+log.info('|Indicators:|');
+log.info('|Rsi|',rsi);
+log.info('|Dx|',dx);
+log.info('|Ema_long|',longema);
+log.info('|Ema_short|',shortema);
+log.info('|Dema||',dema);
 
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
 	//rsi high - sell above '70'
 	case (rsi > 68 && rsi < 72):
-	log.info('=========================');
-	log.info('|NUT|RSI|Overbought|SELL|');
-	log.info('=========================');this.advice();
+	log.info('|Nut|Rsi|Overbought|Sell|');
+	this.advice();
 	break;
 	//rsi low  - buy above '30'
 	case (rsi > 28 && rsi < 32):
-	log.info('======================');
-	log.info('|NUT|RSI|Oversold|BUY|');
-	log.info('======================');this.advice();
+	log.info('|Nut|Rsi|Oversold|Buy|');
+	this.advice();
 	break;
     //weak
 	case (rsi > 40 && rsi < 60):
-	log.info('==============');
-	log.info('|NUT|RSI|WEAK|');
-	log.info('==============');this.pingPong();
+	log.info('|Nut|Rsi|Weak|');
+	this.pingPong();
 	break;
 	default:
-	log.info('========================');
-	log.info('|NUT|RSI||',rsi);
-	log.info('========================');
+	log.info('|Nut|Rsi||',rsi);
 	}
 
 /*
@@ -214,23 +211,17 @@ ADX Value 	Trend Strength
 		log.info('');adxstrength='extremestrong';break;
 
 		default:
-		log.info('=======================');
-		log.info('|NUT|DX|',dx);
-		log.info('=======================');
+		log.info('|Nut|Dx|',dx);
 	}
 
 	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull'))
 	{this.trend.state = 'long';
-	log.info('=================================================');
-	log.info('|NUT|DM|:',di_plus,di_minus);
-	log.info('=================================================');
+	log.info('|Nut|Dm|:',di_plus,di_minus);
 	}
 
 	if((di_minus > di_plus < this.settings.diminus)&&(this.trend.bb=='bear'))
 	{this.trend.state = 'short';
-	log.info('=================================================');
-	log.info('|NUT|DM|:',di_plus,di_minus);
-	log.info('=================================================');
+	log.info('|Nut|Dm|:',di_plus,di_minus);
 	}
 
 /*
@@ -244,62 +235,46 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	{
 	case (adxstrength == 'nut_weak'):
 	this.trend.direction = 'weak';this.pingPong();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
-	log.info('=================================================');
-	log.info('|NUT|DI|:',adxstrength,this.trend.direction);
-	log.info('=================================================');break;
+	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 	default:
-	log.info('=================================================');
-	log.info('|NUT|DI|WAIT|DATA|');
-	log.info('=================================================');
+	log.info('|Nut|Di|...Wait Data');
 	}
 
         //BEAR TREND
         if (longema < shortema)
         {
         this.trend.bb ='bear';
-        log.info('|BEAR-TREND|');
+        log.info('|Bear-Trend|');
         }
         //BULL TREND
         else if (longema > shortema)
         {
         this.trend.bb ='bull';
-        log.info('|BULL-TREND|');
+        log.info('|Bull-Trend|');
         }
 
         //Stoploss
@@ -313,7 +288,7 @@ long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
   this.resetTrend();
-  this.trend.duration++;this.advice();sleep(sleeptime);log.info('...make something of amazing');
+  this.trend.duration++;this.advice();wait();
   }
   if (this.debug) {log.info('|Bolt Up|');}
 
@@ -323,7 +298,7 @@ short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
   this.resetTrend();
-  this.trend.duration++;this.advice();sleep(sleeptime);log.info('...make something of amazing');
+  this.trend.duration++;this.advice();wait();
   }
   if (this.debug) {log.info('|Bolt Down|');}
 
@@ -347,11 +322,11 @@ pingPong: function(){
 	this.trend.longPos = false;
 	break;
 	default:
-	log.info('==========');log.info('|PINGPONG|');log.info('==========');
+	log.info('|PingPong|');
 	}
 },
 
-end: function(){log.info('|THE END|');}
+end: function(){log.info('|The End|');}
 
 };
 module.exports = method;

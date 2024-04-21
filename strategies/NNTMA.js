@@ -4,7 +4,7 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
-var _ = require('../core/lodash3');
+const _ = require('../core/lodash');
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
@@ -15,7 +15,12 @@ var settings = config.NNTMA;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-var sleeptime = 900000;
+async function wait() {
+  console.log('keep calm...');await sleep(2000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++) 
+  {if (i === 3) await sleep(200000);}
+};
 
 var method = {
   priceBuffer : [],
@@ -25,7 +30,7 @@ var method = {
   prevAction : 'none',
   hodl_threshold : 1,
 init : function() {
-    this.requiredHistory = 40;
+    this.requiredHistory = this.settings.historySize;
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
@@ -39,16 +44,14 @@ init : function() {
 
     //Indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
-    //DEMA
-    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     this.name = 'NNTMA';
-
+    this.requiredHistory = this.settings.historySize;
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
       {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:10, activation: 'relu'},
-      {type:'fc', num_neurons:10, activation:'sigmoid'},
+      {type:'fc', num_neurons:100, activation: 'relu'},
+      {type:'fc', num_neurons:100, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -143,7 +146,7 @@ init : function() {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
 
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 2);//1input,2output
+  var brain = new deepqlearn.Brain(1, 1);
   var state = [Math.random(), Math.random(), Math.random()];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
@@ -202,19 +205,25 @@ check : function(candle) {
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
-      var signalSell = (candle.close > this.prevPrice) || (candle.close <
-      (this.prevPrice * this.settings.hodl_threshold));
+      var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
 
   switch (true){
-  case((short > medium) && (medium > long) && (meanAlpha > 0)):
-  this.advice('long');this.brain();sleep(sleeptime);log.info('...make something of amazing');break;
-  case((short < medium) && (medium > long) && (meanAlpha < 0 && signalSell)):
-  this.advice('short');this.brain();sleep(sleeptime);log.info('...make something of amazing');break;
-  case((short > medium) && (medium < long) && (meanAlpha < 0 && signalSell)):
-  this.advice('short');this.brain();sleep(sleeptime);log.info('...make something of amazing');break;
+  case((short > medium)&&(medium > long)&&('buy' !== this.prevAction && 
+  signal === false  && meanAlpha > this.settings.threshold_buy)):
+  this.advice('long');wait();this.brain();break;
+
+  case((short < medium)&&(medium > long)&&('sell' !== this.prevAction && 
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  this.advice('short');wait();this.brain();break;
+  
+  case((short > medium)&&(medium < long)&&('sell' !== this.prevAction && 
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  this.advice('short');wait();this.brain();break;
+
   default : {this.advice();}
+  
   }
 
     log.info('calculated TMA properties for candle:');
@@ -222,7 +231,7 @@ check : function(candle) {
     log.info("TMA short:\t\t" + short);
     log.info("TMA medium:\t\t" + medium);
     log.info("calculated NeuralNet candle prediction:");
-    log.info("Alpha:\t\t\t" + meanAlpha);
+    log.info("meanAlpha:\t\t\t" + meanAlpha);
     log.info('===========================================');
 
 },

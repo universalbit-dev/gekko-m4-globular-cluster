@@ -7,16 +7,23 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
-var _ = require('lodash');
+const _ = require('../core/lodash');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-//...make something of amazing
-var sleeptime = 900000;
+async function wait() {
+  console.log('keep calm...');await sleep(2000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++) 
+  {if (i === 3) await sleep(200000);}
+};
+
+
 var method = {
   priceBuffer : [],
   predictionCount : 0,
@@ -27,8 +34,8 @@ var method = {
 
   init : function() {
 
-    this.requiredHistory = 40;
-      this.RSIhistory = [];
+    this.requiredHistory = this.settings.historySize;
+    this.RSIhistory = [];
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
@@ -42,19 +49,19 @@ var method = {
     //Date
     startTime = new Date();
     //indicators
-    this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.threshold});
+    this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
-    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:9});
+    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
     //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:9});
+    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:5});
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     const layers = [
       {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:10, activation: 'relu'},
-      {type:'fc', num_neurons:10, activation:'sigmoid'},
+      {type:'fc', num_neurons:100, activation: 'relu'},
+      {type:'fc', num_neurons:100, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -259,13 +266,13 @@ var method = {
     }
     if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction)&&
     ('buy' !== this.prevAction && signal === false  && meanAlpha > 1)){
-    this.advice('long');sleep(sleeptime);log.info('...make something of amazing');
+    this.advice('long');wait();
     this.brain();
     }
     if ((this.trend.adviced && this.stochRSI != 100 &&'sell' !== this.prevAction)&&
     ('sell' !== this.prevAction && signal === true && meanAlpha < -1  &&
     signalSell === true)){
-    this.advice('short');sleep(sleeptime);log.info('...make something of amazing');
+    this.advice('short');wait();
     this.brain();}
 
     if ('stoploss' === this.indicators.stoploss.action)

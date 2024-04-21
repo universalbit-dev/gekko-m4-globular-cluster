@@ -4,7 +4,7 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 var tulind = require('../core/tulind');
-var _ = require('../core/lodash');
+const _ = require('../core/lodash');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
