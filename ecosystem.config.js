@@ -4,7 +4,7 @@ module.exports = {
   {script: 'node gekko -c ecosystem/backtest/NN.js -b'},
   {script: 'node gekko -c ecosystem/backtest/INVERTER.js -b'},
   {script: 'node gekko -c ecosystem/backtest/NNCCI.js -b'},
-  {script: 'node gekko -c ecosystem/backtest/StochRSI.js -b'}
+  {script: 'node gekko -c ecosystem/backtest/STOCHRSI.js -b'}
 ],
 
   deploy : {
