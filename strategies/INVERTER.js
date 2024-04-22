@@ -69,7 +69,7 @@ this.debug = true;
 /* Options: period */
 /* Outputs: dema */
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 5});
-this.addTulipIndicator('longema', 'dema', {optInTimePeriod: 100});
+this.addTulipIndicator('longema', 'dema', {optInTimePeriod: 240});
 this.addTulipIndicator('shortema', 'dema', {optInTimePeriod: 50});
 
 /* Relative Strength Index */
