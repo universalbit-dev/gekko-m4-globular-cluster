@@ -69,8 +69,15 @@ this.debug = true;
 /* Options: period */
 /* Outputs: dema */
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 5});
-this.addTulipIndicator('longema', 'dema', {optInTimePeriod: 240});
-this.addTulipIndicator('shortema', 'dema', {optInTimePeriod: 50});
+
+/* Exponential Moving Average */
+/* Type: overlay */
+/* Input arrays: 1    Options: 1    Output arrays: 1 */
+/* Inputs: real */
+/* Options: period */
+/* Outputs: ema */
+this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 240});
+this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 50});
 
 /* Relative Strength Index */
 /* Type: indicator */
