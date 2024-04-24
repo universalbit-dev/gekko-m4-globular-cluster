@@ -5,7 +5,6 @@ const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var tulind = require('../core/tulind');
 const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.STOCHRSI;this.settings=settings;
