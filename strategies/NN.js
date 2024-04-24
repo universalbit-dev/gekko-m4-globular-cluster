@@ -51,7 +51,7 @@ var method = {
     //indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
-    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
+    this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:5});
 
@@ -186,10 +186,10 @@ var method = {
   if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   // remove oldest priceBuffer value
   this.priceBuffer.shift();
-    emaFast=this.tulipIndicators.emaFast.result.result;
+    dema=this.tulipIndicators.dema.result.result;
     if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
     this.setNormalizeFactor();
-    this.priceBuffer.push(emaFast / this.settings.scale );
+    this.priceBuffer.push(dema / this.settings.scale );
     if (2 > _.size(this.priceBuffer)) return;
      for (i=0;i<3;++i)
      this.learn();this.brain();
@@ -211,7 +211,7 @@ var method = {
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {
 
-    emaFast=this.tulipIndicators.emaFast.result.result;
+    dema=this.tulipIndicators.dema.result.result;
     rsi=this.tulipIndicators.rsi.result.result;
     this.rsi=rsi;
 	if(this.stochRSI > 70) {

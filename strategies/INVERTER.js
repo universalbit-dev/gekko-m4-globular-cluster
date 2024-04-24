@@ -85,7 +85,7 @@ this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 50});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: rsi */
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 14});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 5});
 
 //DI+ DI -
 /* Directional Indicator */
@@ -94,7 +94,7 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 14});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: plus_di, minus_di */
-this.addTulipIndicator('di', 'di', {optInTimePeriod : 14});
+this.addTulipIndicator('di', 'di', {optInTimePeriod : 5});
 
 //ADX
 /* Average Directional Movement Index */
@@ -103,7 +103,7 @@ this.addTulipIndicator('di', 'di', {optInTimePeriod : 14});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 14});
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 5});
 
 //DX
 /* Directional Movement Index */
@@ -112,7 +112,7 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 14});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 9});
+this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 5});
 
 //StopLoss as indicator
 this.addIndicator('stoploss', 'StopLoss', {threshold : 3});

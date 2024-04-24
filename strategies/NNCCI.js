@@ -56,10 +56,8 @@ init : function() {
   this.persisted = this.settings.thresholds.persistence;
   //CCI
   this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 5 });
-  //SMA
-  this.addTulipIndicator('sma', 'sma', {optInTimePeriod: 5 });
   //DEMA
-  this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod: 1 });
+  this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1 });
   
   this.nn = new convnetjs.Net();
   //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
@@ -180,10 +178,10 @@ update : function(candle) {
 if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   //remove oldest priceBuffer value
   this.priceBuffer.shift();
-    emaFast=this.tulipIndicators.emaFast.result.result;
+    dema=this.tulipIndicators.dema.result.result;
     if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
     this.setNormalizeFactor();
-    this.priceBuffer.push(emaFast / this.settings.scale );
+    this.priceBuffer.push(dema / this.settings.scale );
     if (2 > _.size(this.priceBuffer)) return;
      for (i=0;i<3;++i)
      this.learn();this.brain();
