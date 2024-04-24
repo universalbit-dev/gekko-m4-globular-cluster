@@ -41,7 +41,7 @@ const Trader = function(next) {
     log.info('\t', 'Exposed:');
     log.info('\t\t',
       this.exposed ? 'yes' : 'no',
-      `(${(this.exposure * 100).toFixed(50)}%)`
+      `(${(this.exposure * 100).toFixed(2)}%)`
     );
     next();
   });
