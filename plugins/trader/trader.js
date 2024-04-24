@@ -5,10 +5,9 @@ const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
 
-const log = require(dirs.core + 'log');
-const Broker = require(dirs.broker + '/gekkoBroker');
-
-require(dirs.gekko + '/exchange/dependencyCheck');
+const log = require('../../core/log');
+const Broker = require('../../exchange/gekkoBroker');
+require('../../exchange/dependencyCheck');
 
 const Trader = function(next) {
 
@@ -42,7 +41,7 @@ const Trader = function(next) {
     log.info('\t', 'Exposed:');
     log.info('\t\t',
       this.exposed ? 'yes' : 'no',
-      `(${(this.exposure * 100).toFixed(2)}%)`
+      `(${(this.exposure * 100).toFixed(50)}%)`
     );
     next();
   });
