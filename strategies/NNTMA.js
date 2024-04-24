@@ -35,7 +35,7 @@ init : function() {
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
 
-    this.addTulipIndicator('emaFast', 'dema', {optInTimePeriod:1});
+    this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     this.addTulipIndicator('short', 'tema', {optInTimePeriod:7});
     this.addTulipIndicator('medium', 'tema',{optInTimePeriod:25});
     this.addTulipIndicator('long', 'tema', {optInTimePeriod:99});
@@ -166,14 +166,14 @@ init : function() {
     long=this.tulipIndicators.long.result.result;
     medium=this.tulipIndicators.medium.result.result;
     short=this.tulipIndicators.short.result.result;
-    emaFast=this.tulipIndicators.emaFast.result.result;
+    dema=this.tulipIndicators.dema.result.result;
 
     if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
     //remove oldest priceBuffer value
     this.priceBuffer.shift();
     if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
     this.setNormalizeFactor();
-    this.priceBuffer.push(emaFast / this.settings.scale );
+    this.priceBuffer.push(dema / this.settings.scale );
     if (2 > _.size(this.priceBuffer)) return;
      for (i=0;i<3;++i)
      this.learn();this.brain();
@@ -191,7 +191,7 @@ init : function() {
   },
 
 check : function(candle) {
-    emaFast=this.tulipIndicators.emaFast.result.result;
+    dema=this.tulipIndicators.dema.result.result;
     short = this.tulipIndicators.short.result.result;
     medium = this.tulipIndicators.medium.result.result;
     long = this.tulipIndicators.long.result.result;
