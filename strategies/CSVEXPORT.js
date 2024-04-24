@@ -16,7 +16,7 @@ var method = {
   /* INIT */
   init: function() {
     
-    this.name = 'CSVExport';
+    this.name = 'CSVEXPORT';
     this.requiredHistory = this.settings.historySize;
     this.startTime = new Date();
     this.debug = true;
