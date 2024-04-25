@@ -5,9 +5,10 @@ const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
 
-const log = require('../../core/log');
-const Broker = require('../../exchange/gekkoBroker');
-require('../../exchange/dependencyCheck');
+const log = require(dirs.core + 'log');
+const Broker = require(dirs.broker + '/gekkoBroker');
+
+require(dirs.gekko + '/exchange/dependencyCheck');
 
 const Trader = function(next) {
 
