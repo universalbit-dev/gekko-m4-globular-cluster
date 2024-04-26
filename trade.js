@@ -24,7 +24,7 @@ secret:'000000-000000-000000',
 tickrate:60};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40};
 config.tradingAdvisor.method= 'NNSTOCH';
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
