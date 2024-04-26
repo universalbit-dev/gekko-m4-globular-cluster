@@ -33,11 +33,11 @@ init : function() {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
-
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
-    this.addTulipIndicator('short', 'tema', {optInTimePeriod:7});
-    this.addTulipIndicator('medium', 'tema',{optInTimePeriod:25});
-    this.addTulipIndicator('long', 'tema', {optInTimePeriod:99});
+    this.addTulipIndicator('short', 'tema', {optInTimePeriod:8});
+    this.addTulipIndicator('medium', 'tema',{optInTimePeriod:21});
+    this.addTulipIndicator('long', 'tema', {optInTimePeriod:89});
     //Date
     startTime = new Date();
 
@@ -230,7 +230,7 @@ check : function(candle) {
     log.info("TMA short:\t\t" + short);
     log.info("TMA medium:\t\t" + medium);
     log.info("calculated NeuralNet candle prediction:");
-    log.info("meanAlpha:\t\t\t" + meanAlpha);
+    log.info("meanAlpha:" + meanAlpha);
     log.info('===========================================');
 
 },
