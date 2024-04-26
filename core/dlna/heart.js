@@ -8,8 +8,7 @@ var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
 var moment = require('moment');
-
-if (config.watch.tickrate){var TICKRATE = config.watch.tickrate;}
+var TICKRATE = config.watch.tickrate;
 
 var Heart = function() {
   this.lastTick = false;
