@@ -87,7 +87,6 @@ config.candleWriter={enabled:true,adapter:'sqlite'};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING DB
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
