@@ -60,6 +60,8 @@ log.info('Start' , this.name);
 this.resetTrend();
 this.debug = true;
 
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
+
 //Indicators overview
 /* Double Exponential Moving Average */
 /* Type: overlay */
@@ -67,7 +69,7 @@ this.debug = true;
 /* Inputs: real */
 /* Options: period */
 /* Outputs: dema */
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 5});
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
 
 /* Exponential Moving Average */
 /* Type: overlay */
@@ -75,8 +77,8 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 5});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: ema */
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 240});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 50});
+this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233});
+this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
 
 /* Relative Strength Index */
 /* Type: indicator */
@@ -84,7 +86,7 @@ this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 50});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: rsi */
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 5});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 13});
 
 //DI+ DI -
 /* Directional Indicator */
@@ -93,7 +95,7 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 5});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: plus_di, minus_di */
-this.addTulipIndicator('di', 'di', {optInTimePeriod : 5});
+this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
 
 //ADX
 /* Average Directional Movement Index */
@@ -102,7 +104,7 @@ this.addTulipIndicator('di', 'di', {optInTimePeriod : 5});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 5});
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 13});
 
 //DX
 /* Directional Movement Index */
@@ -111,7 +113,7 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 5});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 5});
+this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 13});
 
 //StopLoss as indicator
 this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
