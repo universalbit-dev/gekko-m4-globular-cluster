@@ -22,8 +22,8 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
-config.INVERTER={rsi:14,adx:14,dema:1,diplus:25.5,diminus:25,
-longema:240,shortema:50,threshold:3};
+config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
