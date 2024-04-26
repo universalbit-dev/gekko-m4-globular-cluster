@@ -29,10 +29,8 @@ config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.backtest = {
   enabled:true,
-  daterange: {
-    from: "2022-01-02",to: "2022-03-01"
-  },
-   batchSize: 60
+  daterange: {from: "2022-01-02",to: "2022-03-01"},
+  batchSize: 60
 };
 
 //Adapter
@@ -56,7 +54,6 @@ config.backtestResultExporter = {
     trades: true
   }
 };
-
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
