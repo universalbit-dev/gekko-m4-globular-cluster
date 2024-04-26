@@ -17,12 +17,11 @@ var config = {};
 //General Settings
 config.debug =true;
 
-//import kraken exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:5};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:false,candleSize:1,historySize:40};
-config.tradingAdvisor.method= 'INVERTER';
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
+config.INVERTER={rsi:13,adx:13,dema:1,diplus:21,diminus:34,longema:233,shortema:55,threshold:3};
 //Adapter
 config.adapter='sqlite';
 
@@ -38,7 +37,7 @@ config.adviceLogger={enabled:false};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.importer = {
   enabled:true,
-  daterange:{from:"2022-01-01",to:"2022-03-01"}
+  daterange:{from:"2022-01-02",to:"2022-03-01"},
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,10 +45,8 @@ config.importer = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.backtest = {
   enabled:false,
-  daterange: {
-    from: "2021-01-01",to: "2021-03-01"
-  },
-batchSize: 60
+  daterange:{from:"2022-01-02",to:"2022-03-01"},
+  batchSize: 60
 };
 
 config.backtestResultExporter = {
