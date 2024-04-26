@@ -50,7 +50,7 @@ var method = {
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:5});
+    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:13});
     
     this.requiredHistory = this.settings.historySize;
     this.name = 'NNSTOCH';
@@ -257,7 +257,7 @@ var method = {
     log.info("StochRSI min:" + this.lowestRSI);
     log.info("StochRSI max:" + this.highestRSI);
     log.info("StochRSI Value:" + this.stochRSI);
-    log.info("calculated NeuralNet candle prediction:");
+    log.info("calculated NeuralNet candle hypothesis:");
     log.info('meanAlpha:',meanAlpha);
     log.info('===========================================');
 
