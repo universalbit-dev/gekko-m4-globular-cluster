@@ -113,7 +113,6 @@ var util = {
       importers: ROOT + 'importers/exchanges/',
       tools: ROOT + 'core/tools/',
       workers: ROOT + 'core/workers/',
-      ui: ROOT + 'ui/',
       broker: ROOT + 'exchange/'
     }
   },
@@ -171,7 +170,6 @@ program
   .option('-c, --config <file>', 'Config file')
   .option('-b, --backtest', 'backtesting mode')
   .option('-i, --import', 'importer mode')
-  .option('--ui', 'launch a web UI')
   .parse(process.argv);
 
 // make sure the current node version is recent enough
