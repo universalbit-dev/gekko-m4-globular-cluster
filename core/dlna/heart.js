@@ -3,18 +3,17 @@
 */
 
 const _ = require('../lodash3');require('lodash-migrate');
+const EventEmitter = require('node:events');
 var util = require('../util');
+var config = util.getConfig();
 var log = require('../log');
-var config = require('../../core/util.js').getConfig();
 var moment = require('moment');
 
-if (util.getConfig().watch.tickrate){var TICKRATE = util.getConfig().watch.tickrate;}
-else if(util.getConfig().watch.exchange !== 'kraken'){var TICKRATE = 5;}
-else {var TICKRATE = 10;}
+if (config.watch.tickrate){var TICKRATE = config.watch.tickrate;}
 
 var Heart = function() {
   this.lastTick = false;
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this, _.functions(this));
 }
 util.makeEventEmitter(Heart);
 
