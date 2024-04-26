@@ -66,10 +66,8 @@ config.adviceLogger={enabled:true};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.backtest = {
   enabled:true,
-  daterange: {
-    from: "2021-01-02",to: "2021-03-01"
-  },
-   batchSize: 60
+  daterange:{from:"2022-01-02",to:"2022-03-01"},
+  batchSize: 60
 };
 
 config.backtestResultExporter = {
@@ -83,7 +81,6 @@ config.backtestResultExporter = {
     trades: true
   }
 };
-
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING PAPERTRADER
