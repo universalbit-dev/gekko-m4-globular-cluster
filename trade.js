@@ -28,8 +28,7 @@ config.tradingAdvisor = {enabled:true,candleSize:1,historySize:60};
 config.tradingAdvisor.method= 'NNSTOCH';
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
-config.INVERTER={rsi:13,adx:13,dema:1,diplus:21,diminus:34,
-longema:233,shortema:55,threshold:3};
+config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
 config.NN={
