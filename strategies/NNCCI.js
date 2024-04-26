@@ -56,7 +56,7 @@ init : function() {
   
   //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
   //CCI
-  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 5 });
+  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 13 });
   //DEMA
   this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1 });
   
