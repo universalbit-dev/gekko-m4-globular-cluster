@@ -30,10 +30,7 @@ config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.backtest = {
   enabled:true,
-  daterange: {
-    from: "2022-01-02",to: "2022-03-01"
-  },
-
+  daterange:{from:"2022-01-02",to:"2022-03-01"},
    batchSize: 60
 };
 
@@ -76,12 +73,15 @@ config.paperTrader = {enabled: true,
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING IMPORTER
+//                       IMPORTER
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 config.importer = {
-  enabled:false,
-  daterange:{from:"2021-01-01",to:"2021-03-01"}
-};
+  enabled:true,
+  daterange:{from:"2022-01-02",to:"2022-03-01"}
+}
+
+config.candleWriter={enabled:true,adapter:'sqlite'};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING DB
