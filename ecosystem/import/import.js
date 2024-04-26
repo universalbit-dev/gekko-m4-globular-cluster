@@ -21,7 +21,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
-config.INVERTER={rsi:13,adx:13,dema:1,diplus:21,diminus:34,longema:233,shortema:55,threshold:3};
+config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
 //Adapter
 config.adapter='sqlite';
 
@@ -43,11 +43,7 @@ config.importer = {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       CONFIGURING BACKTESTING
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.backtest = {
-  enabled:false,
-  daterange:{from:"2022-01-02",to:"2022-03-01"},
-  batchSize: 60
-};
+config.backtest = {enabled:false};
 
 config.backtestResultExporter = {
   enabled: false,
