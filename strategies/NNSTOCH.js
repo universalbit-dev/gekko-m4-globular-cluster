@@ -45,6 +45,7 @@ var method = {
   };
     //Date
     startTime = new Date();
+    //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
     //indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
