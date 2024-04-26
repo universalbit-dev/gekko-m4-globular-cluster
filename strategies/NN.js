@@ -47,12 +47,14 @@ var method = {
   };
     //Date
     startTime = new Date();
+	  
+    //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
     //indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:5});
+    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:13});
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
