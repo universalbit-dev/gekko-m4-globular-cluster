@@ -78,7 +78,7 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.importer = {
   enabled:false,
-  daterange:{from:"2021-01-01",to:"2021-03-01"}
+  daterange:{from:"2022-01-02",to:"2022-03-01"}
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
