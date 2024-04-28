@@ -13,7 +13,7 @@ var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
-
+var async = require('async');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
