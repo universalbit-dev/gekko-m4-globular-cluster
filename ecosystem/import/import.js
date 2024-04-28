@@ -1,3 +1,50 @@
+var config = {};
+//General Settings
+config.debug =true;
+
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+//Strategies
+
+//Trading Advisor
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
+
+//Backtest
+config.backtest = {enabled:false};
+
+//DataBase
+config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
+dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
+
+//Trader
+config.trader={enabled:false};
+
+//Candle Writer
+config.candleWriter={enabled:true,adapter:'sqlite'};
+
+//Advice Logger
+config.adviceLogger={enabled:false};
+
+//Export BackTest Result
+config.backtestResultExporter = {enabled: false};
+
+//PaperTrader
+config.paperTrader = {enabled: false};
+
+//Performance Analyzer
+config.performanceAnalyzer = {enabled: false};
+
+//Import
+config.importer = {enabled:true,
+daterange:{from:"2022-01-02",to:"2022-03-01"}
+};
+
+config.candleWriter={enabled:true,adapter:'sqlite'};
+config['I understand that Gekko only automates MY OWN trading strategies']=true;
+module.exports = config;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
@@ -12,70 +59,3 @@ or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
 */
-
-var config = {};
-//General Settings
-config.debug =true;
-
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
-
-//Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
-config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
-//Adapter
-config.adapter='sqlite';
-
-//Trader
-config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
-
-config.candleWriter={enabled:true,adapter:'sqlite'};
-
-config.adviceLogger={enabled:false};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING IMPORTER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.importer = {
-  enabled:true,
-  daterange:{from:"2022-01-02",to:"2022-03-01"},
-}
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING BACKTESTING
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.backtest = {enabled:false};
-
-config.backtestResultExporter = {
-  enabled: false,
-  writeToDisk: true,
-  data: {
-    stratUpdates: false,
-    portfolioValues: true,
-    stratCandles: false,
-    roundtrips: true,
-    trades: true
-  }
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING PAPERTRADER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.paperTrader = {enabled: false,
-  reportInCurrency: true,
-  simulationBalance: {asset: 100,currency: 1},
-  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
-  slippage: 0.05
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING PERFORMANCE ANALYZER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.performanceAnalyzer = {enabled: false,riskFreeReturn: 5};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING DB
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
-config['I understand that Gekko only automates MY OWN trading strategies']=true;
-module.exports = config;
