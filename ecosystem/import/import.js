@@ -8,7 +8,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //Strategies
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
+config.tradingAdvisor = {enabled:false};
 
 //Backtest
 config.backtest = {enabled:false};
