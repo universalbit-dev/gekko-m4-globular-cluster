@@ -207,15 +207,20 @@ check : function(candle) {
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
-
+  
   switch (true){
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction && 
-  signal === true && meanAlpha < this.settings.threshold_buy)):
+  signal === false  && meanAlpha > this.settings.threshold_buy)):
   this.advice('long');wait();this.brain();break;
-  
-  case((short > medium)&&(medium > long)&&('sell' !== this.prevAction && 
-  signal === false  && meanAlpha >  this.settings.threshold_sell && signalSell === true)):
+
+  case((short > medium)&&(medium < long)&&('sell' !== this.prevAction && 
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
   this.advice('short');wait();this.brain();break;
+  
+  case((short < medium)&&(medium < long)&&('sell' !== this.prevAction && 
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  this.advice('short');wait();this.brain();break;
+
   default : {this.advice();}
   }
 
