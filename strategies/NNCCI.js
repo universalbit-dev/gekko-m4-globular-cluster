@@ -10,7 +10,7 @@ var settings = config.CCI;this.settings=settings;
 
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
-
+var async = require('async');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
