@@ -1,4 +1,87 @@
+var config = {};
+//General Settings
+config.debug =true;
+
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+//Strategies
+config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
+
+config.STOCHRSI={interval:13,threshold:1};
+config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
+
+config.NN={
+threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+hodl_threshold:1,scale:5,batch_size:1};
+
+config.NNSTOCH={
+threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:1, 
+hodl_threshold:1,scale:5,batch_size:1,interval:3};
+config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
+
+config.NNCCI={
+threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89};
+config.NNCCI.thresholds={up:100,down:-100,persistence:3};
+
+config.NNTMA={
+threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,
+short : 8,medium: 21,long:89};
+
+config.NOOP={};
+
+//Trading Advisor
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
+
+//Backtest
+config.backtest = {enabled:true,
+  daterange:{from:"2022-01-02",to:"2022-03-01"},
+  batchSize: 60
+};
+
+//DataBase
+config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
+dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
+
+//Trader
+config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
+
+//Candle Writer
+config.candleWriter={enabled:false};
+
+//Advice Logger
+config.adviceLogger={enabled:true};
+
+//Export BackTest Result
+config.backtestResultExporter = {enabled: true,writeToDisk: true,
+  data: {stratUpdates: false,portfolioValues: true,stratCandles: false,roundtrips: true,trades: true}
+};
+
+//PaperTrader
+config.paperTrader = {enabled: true,reportInCurrency: true,
+  simulationBalance: {asset: 100,currency: 1},
+  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',slippage: 0.05
+};
+
+//Performance Analyzer
+config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
+
+//Import                       
+config.importer = {enabled:false}
+
+config.candleWriter={enabled:true,adapter:'sqlite'};
+config['I understand that Gekko only automates MY OWN trading strategies']=true;
+module.exports = config;
+
 /*
+
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -11,110 +94,5 @@ by this software. There can be bugs and the bot may not perform as expected
 or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
+
 */
-
-var config = {};
-//General Settings
-config.debug =true;
-
-//import exchange data
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
-
-//Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NNCCI'};
-
-//https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
-config.NN={
-threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:1000,min_predictions:3,
-hodl_threshold:1,scale:5,batch_size:1};
-
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
-config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
-
-config.STOCHRSI={interval:14,threshold:1};
-config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
-
-config.NNSTOCH={
-threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:1000,min_predictions:1, 
-hodl_threshold:1,scale:5,batch_size:1,interval:3};
-config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
-
-config.NNCCI={
-threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:1000,min_predictions:3,
-hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:90};
-config.NNCCI.thresholds={up:100,down:-100,persistence:3};
-
-config.NNTMA={
-threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:1000,min_predictions:3,
-hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,
-short : 8,medium: 21,long:89};
-
-config.NOOP={};
-
-//Adapter
-config.adapter='sqlite';
-
-//Trader
-config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
-
-config.candleWriter={enabled:false,adapter:'sqlite'};
-
-config.adviceLogger={enabled:true};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING BACKTESTING
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.backtest = {
-  enabled:true,
-  daterange:{from:"2022-01-02",to:"2022-03-01"},
-  batchSize: 60
-};
-
-config.backtestResultExporter = {
-  enabled: true,
-  writeToDisk: true,
-  data: {
-    stratUpdates: false,
-    portfolioValues: true,
-    stratCandles: false,
-    roundtrips: true,
-    trades: true
-  }
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING PAPERTRADER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.paperTrader = {enabled: true,
-  reportInCurrency: true,
-  simulationBalance: {asset: 100,currency: 1},
-  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
-  slippage: 0.05
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING PERFORMANCE ANALYZER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING IMPORTER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.importer = {
-  enabled:false,
-  daterange:{from:"2021-01-01",to:"2021-03-01"}
-};
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       CONFIGURING DB
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
-
-config['I understand that Gekko only automates MY OWN trading strategies']=true;
-module.exports = config;
-
-    
