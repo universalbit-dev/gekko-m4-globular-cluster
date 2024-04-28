@@ -1,11 +1,22 @@
-const _ = require('../lodash3');require('lodash-migrate');
+const { spawn } = require('node:child_process');
+const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
+var config = util.getConfig();
+const _ = require('../lodash');
 const fs = require('node:fs');
 
 var moment = require('moment');
 var util = require('../util');
-var config = util.getConfig();
+
 var dirs = util.dirs();
 var log = require('../log');
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function wait() {
+  console.log('keep calm...');await sleep(2000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++) 
+  {if (i === 3) await sleep(200000);}
+};
 
 var batchSize = 60;
 var adapter = config[config.adapter];
@@ -29,7 +40,7 @@ if(!to.isValid())
 
 let iterator = {
   from: from.clone(),
-  to: from.clone().add(batchSize, 'm').subtract(1, 's')
+  to: from.clone().add(batchSize, 's').subtract(1, 's')
 }
 
 var DONE = false;
@@ -65,8 +76,8 @@ const getBatch = () => {
 
 const shiftIterator = () => {
   iterator = {
-    from: iterator.from.clone().add(batchSize, 'm'),
-    to: iterator.from.clone().add(batchSize * 2, 'm').subtract(1, 's')
+    from: iterator.from.clone().add(batchSize, 's'),
+    to: iterator.from.clone().add(batchSize * 2, 's').subtract(1, 's')
   }
 }
 
@@ -84,7 +95,6 @@ const handleCandles = (err, data) => {
 
   if(DONE) {
     reader.close();
-
     setTimeout(doneFn, 100);
 
   } else {
