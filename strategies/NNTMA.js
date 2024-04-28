@@ -209,20 +209,14 @@ check : function(candle) {
     }
 
   switch (true){
-  case((short > medium)&&(medium > long)&&('buy' !== this.prevAction && 
-  signal === false  && meanAlpha > this.settings.threshold_buy)):
+  case((short < medium)&&(medium < long)&&('buy' !== this.prevAction && 
+  signal === true && meanAlpha < this.settings.threshold_buy)):
   this.advice('long');wait();this.brain();break;
-
-  case((short < medium)&&(medium > long)&&('sell' !== this.prevAction && 
-  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
   
-  case((short > medium)&&(medium < long)&&('sell' !== this.prevAction && 
-  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  case((short > medium)&&(medium > long)&&('sell' !== this.prevAction && 
+  signal === false  && meanAlpha >  this.settings.threshold_sell && signalSell === true)):
   this.advice('short');wait();this.brain();break;
-
   default : {this.advice();}
-  
   }
 
     log.info('calculated TMA properties for candle:');
