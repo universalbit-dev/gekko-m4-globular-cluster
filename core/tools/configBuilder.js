@@ -1,29 +1,18 @@
-const _ = require('../lodash3');require('lodash-migrate');
-const fs = require('node:fs');
+const _ = require('../lodash');
 var util = require('../util');
-var config = require('../core/util.js').getConfig();
-var dirs = util.dirs();
+var config = require('../util.js').getConfig();
 
-// build a config object out of a directory of JS files
 module.exports = function() {
-  const configDir = util.dirs().config;
-
-  // attach the proper adapter
-  let adapter = config.adapter;
-
-  if(config.tradingAdvisor.enabled) {
-    // also load the strat
-    let strat = config.tradingAdvisor.method;
-    let stratFile = configDir + 'strategies/conf/' + strat + '_conf' + '.js';
-    if(!fs.existsSync(stratFile))
-      util.die('Cannot find the strategy config file for ' + strat);
-  }
-
   const mode = util.gekkoMode();
 
-  if(mode === 'backtest')
-  return config;
-}
+  switch(mode){
+  case(mode === 'backtest'):return config;break;
+  case (mode === 'importer'):return config;break;
+  case(mode === 'realtime'):return config;break;
+  default:util.die('cannot find configuration file');
+  }  
+
+};
 
 /*
 
