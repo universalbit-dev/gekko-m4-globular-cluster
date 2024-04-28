@@ -2,83 +2,59 @@ var config = {};
 //General Settings
 config.debug =true;
 
-//import kraken exchange data
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
-//Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40};
-config.tradingAdvisor.method= 'NNTMA';
-
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+//Strategies
 config.NNTMA={
 threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:100,min_predictions:3,
-hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:90,
-short : 7,medium: 25,long:99};
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,
+short:8,medium:21,long:89};
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       BACKTESTING
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.backtest = {
-  enabled:true,
+//Trading Advisor
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NNTMA'};
+
+//Backtest
+config.backtest = {enabled:true,
   daterange:{from:"2022-01-02",to:"2022-03-01"},
   batchSize: 60
 };
 
-config.backtestResultExporter = {
-  enabled: true,
-  writeToDisk: true,
-  data: {
-    stratUpdates: false,
-    portfolioValues: true,
-    stratCandles: false,
-    roundtrips: true,
-    trades: true
-  }
-};
-
-//Adapter
-config.adapter='sqlite';
+//DataBase
+config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
+dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
 
 //Trader
 config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 
 //Candle Writer
-config.candleWriter={enabled:false,adapter:'sqlite'};
+config.candleWriter={enabled:false};
 
 //Advice Logger
 config.adviceLogger={enabled:true};
 
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       PAPERTRADER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.paperTrader = {enabled: true,
-  reportInCurrency: true,
-  simulationBalance: {asset: 100,currency: 1},
-  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
-  slippage: 0.05
+//Export BackTest Result
+config.backtestResultExporter = {enabled: true,writeToDisk: true,
+  data: {stratUpdates: false,portfolioValues: true,stratCandles: false,roundtrips: true,trades: true}
 };
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       PERFORMANCE ANALYZER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//PaperTrader
+config.paperTrader = {enabled: true,reportInCurrency: true,
+  simulationBalance: {asset: 100,currency: 1},
+  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',slippage: 0.05
+};
+
+//Performance Analyzer
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       IMPORTER
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.importer = {
-  enabled:false,
-  daterange:{from:"2021-01-01",to:"2021-03-01"}
-};
+//Import                       
+config.importer = {enabled:false}
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       DATABASE
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
+config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
-
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
@@ -93,5 +69,3 @@ or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
 */
-
-    
