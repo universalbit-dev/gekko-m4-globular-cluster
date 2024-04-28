@@ -9,7 +9,7 @@ const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.STOCHRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
-
+var async = require('async');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
