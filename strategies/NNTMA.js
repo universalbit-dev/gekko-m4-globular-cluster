@@ -208,7 +208,7 @@ check : function(candle) {
       var signal = meanp < currentPrice;
     }
   
-  switch (true){
+  switch (long != 'undefined'){
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction && 
   signal === false  && meanAlpha > this.settings.threshold_buy)):
   this.advice('long');wait();this.brain();break;
