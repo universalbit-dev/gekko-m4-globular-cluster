@@ -12,7 +12,7 @@ var math = require('mathjs');
 var fs = require('node:fs');
 var settings = config.NNTMA;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
-
+var async = require('async');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
