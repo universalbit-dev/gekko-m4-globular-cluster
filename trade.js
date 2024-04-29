@@ -9,9 +9,6 @@ config.NOOP={};
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NOOP'};
 
-//Adapter
-config.adapter='sqlite';
-
 //Trader
 config.trader={
 enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',
@@ -28,6 +25,11 @@ config.adviceLogger={enabled:true};
 config.backtest = {enabled:false};
 config.backtestResultExporter = {enabled: false};
 
+//DataBase
+config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
+dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
+
 //PaperTrader
 config.paperTrader = {enabled: false};
 
@@ -37,8 +39,6 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 //Import
 config.importer = {enabled:false};
 
-//DataBase
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 
