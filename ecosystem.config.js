@@ -1,12 +1,12 @@
 module.exports = {
   apps : [
-  {script: 'node gekko -c ecosystem/backtest/NNSTOCH.js -b'},
-  {script: 'node gekko -c ecosystem/backtest/NN.js -b'},
-  {script: 'node gekko -c ecosystem/backtest/INVERTER.js -b'},
-  {script: 'node gekko -c ecosystem/backtest/NNCCI.js -b'},
-  {script: 'node gekko -c ecosystem/backtest/STOCHRSI.js -b'}
+  {script: 'node gekko -c ecosystem/backtest/backtest_nnstoch.js -b'},
+  {script: 'node gekko -c ecosystem/backtest/backtest_nn.js -b'},
+  {script: 'node gekko -c ecosystem/backtest/backtest_inverter.js -b'},
+  {script: 'node gekko -c ecosystem/backtest/backtest_nncci.js -b'},
+  {script: 'node gekko -c ecosystem/backtest/backtest_stochrsi.js -b'}
 ],
-
+  
   deploy : {
     development : {
       user : '',
