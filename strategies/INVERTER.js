@@ -246,32 +246,31 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
+	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
+	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
+	this.trend.direction = 'screw_down';this.trend.bb='bear';this.long();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
+	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
+	this.trend.direction = 'screw_down';this.trend.bb='bear';this.long();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 
 	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
+	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 	default:
 	log.info('|Nut|Di|...Wait Data');
 	}
-
         //BEAR TREND
         if (longema < shortema)
         {
