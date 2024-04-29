@@ -1,14 +1,13 @@
 var config = {};
 //General Settings
 config.debug =true;
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',key:'000000-000000-000000',secret:'000000-000000-000000',tickrate:20};
 
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',
-key:'000000-000000-000000',secret:'000000-000000-000000',tickrate:20};
+//Strategies
+config.NOOP={};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40};
-config.tradingAdvisor.method= 'NOOP';
-config.NOOP={};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NN'};
 
 //Adapter
 config.adapter='sqlite';
@@ -19,7 +18,10 @@ enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',
 key:'000000-000000-000000',secret:'000000-000000-000000'
 };
 
+//Candle Writer
 config.candleWriter={enabled:true,adapter:'sqlite'};
+
+//Advice Logger
 config.adviceLogger={enabled:true};
 
 //BackTest
