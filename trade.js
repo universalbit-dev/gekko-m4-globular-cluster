@@ -11,7 +11,7 @@ config.tradingAdvisor.method= 'NOOP';
 config.NOOP={};
 
 //Adapter
-config.adapter={'sqlite'};
+config.adapter='sqlite';
 
 //Trader
 config.trader={
@@ -41,7 +41,6 @@ config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 
 /*
-
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -54,7 +53,6 @@ by this software. There can be bugs and the bot may not perform as expected
 or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
-
 */
 
 
