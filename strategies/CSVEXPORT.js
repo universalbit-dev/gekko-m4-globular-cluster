@@ -1,8 +1,8 @@
 /*
+  Export data to .csv
 
-Export data to .csv
-(CC-BY-SA 4.0) Rowan Griffin
-https://creativecommons.org/licenses/by-sa/4.0/
+	(CC-BY-SA 4.0) Rowan Griffin
+	https://creativecommons.org/licenses/by-sa/4.0/
 
 */
 
@@ -16,12 +16,12 @@ var method = {
   /* INIT */
   init: function() {
     
-    this.name = 'CSVEXPORT';
+    this.name = 'CSVExport';
     this.requiredHistory = this.settings.historySize;
     this.startTime = new Date();
     this.debug = true;
   },
-	
+//called on each new candle, before check.
 update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
       if (err) {

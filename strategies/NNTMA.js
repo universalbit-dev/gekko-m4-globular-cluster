@@ -4,7 +4,7 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
-
+var async = require('async');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
@@ -12,12 +12,12 @@ var math = require('mathjs');
 var fs = require('node:fs');
 var settings = config.NNTMA;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
-var async = require('async');
+
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++) 
+  for (let i = 0; i < 5; i++)
   {if (i === 3) await sleep(200000);}
 };
 
@@ -33,10 +33,10 @@ init : function() {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
-    this.addTulipIndicator('short', 'tema', {optInTimePeriod:8});
-    this.addTulipIndicator('medium', 'tema',{optInTimePeriod:21});
+    this.addTulipIndicator('short', 'tema', {optInTimePeriod:13});
+    this.addTulipIndicator('medium', 'tema',{optInTimePeriod:34});
     this.addTulipIndicator('long', 'tema', {optInTimePeriod:89});
     //Date
     startTime = new Date();
@@ -47,10 +47,13 @@ init : function() {
     this.requiredHistory = this.settings.historySize;
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+    var x= Math.floor((Math.random() * 100) + 1);
+    var y=Math.floor((Math.random() * 100) + 10);
+    var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx: 1, out_sy:1, out_depth: 1},
-      {type:'fc', num_neurons:100, activation: 'relu'},
-      {type:'fc', num_neurons:100, activation:'sigmoid'},
+      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'conv', num_neurons:144, activation: 'relu'},
+      {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -207,28 +210,30 @@ check : function(candle) {
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
-  
+
   switch (long != 'undefined'){
-  case((short < medium)&&(medium < long)&&('buy' !== this.prevAction && 
+  
+  case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
   this.advice('long');wait();this.brain();break;
 
-  case((short > medium)&&(medium < long)&&('sell' !== this.prevAction && 
-  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
-  
-  case((short < medium)&&(medium < long)&&('sell' !== this.prevAction && 
+  case((short > medium)&&(medium < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
   this.advice('short');wait();this.brain();break;
 
-  default : {this.advice();}
+  case((short < medium)&&(medium < long)&&('sell' !== this.prevAction &&
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  this.advice('short');wait();this.brain();break;
+
+  default : {log.info('...WAIT DATA');}
+
   }
 
     log.info('calculated TMA properties for candle:');
     log.info("TMA long:\t\t" + long);
     log.info("TMA short:\t\t" + short);
     log.info("TMA medium:\t\t" + medium);
-    log.info("calculated NeuralNet candle prediction:");
+    log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
     log.info('===========================================');
 

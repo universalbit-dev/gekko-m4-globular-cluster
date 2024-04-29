@@ -60,7 +60,7 @@ log.info('Start' , this.name);
 this.resetTrend();
 this.debug = true;
 
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
 
 //Indicators overview
 /* Double Exponential Moving Average */
@@ -146,8 +146,14 @@ update: function(candle) {
     });
 },
 
+onTrade: function(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+  },
+
 check: function(candle)
-{log.info('|Check|');
+{
 
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
@@ -157,7 +163,7 @@ shortema = this.tulipIndicators.shortema.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
-
+var waitdata=false;
 
 var adxstrength ='none';
 this.adxstrength =adxstrength;
@@ -185,7 +191,7 @@ switch (true) {
 	break;
     //weak
 	case (rsi > 40 && rsi < 60):
-	log.info('|Nut|Rsi|Weak|');
+	log.info('|Nut|Rsi|...WAIT DATA|');
 	this.pingPong();
 	break;
 	default:
@@ -221,23 +227,20 @@ ADX Value 	Trend Strength
 		default:
 		log.info('|Nut|Dx|',dx);
 	}
-
+// + above - price up
 	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull'))
 	{this.trend.state = 'long';
-	log.info('|Nut|Dm|:',di_plus,di_minus);
+	log.info('|Nut|Dm|Price Up:',di_plus,di_minus);
 	}
-
+// - above + price down
 	if((di_minus > di_plus < this.settings.diminus)&&(this.trend.bb=='bear'))
 	{this.trend.state = 'short';
-	log.info('|Nut|Dm|:',di_plus,di_minus);
+	log.info('|Nut|Dm|Price Down:',di_plus,di_minus);
 	}
 
 /*
-
 When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend.
-
 When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend.
-
 */
 	switch (true)
 	{
@@ -269,20 +272,23 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 	default:
-	log.info('|Nut|Di|...Wait Data');
+	log.info('|Nut|Di|...WAIT DATA');
+	waitdata=true;
 	}
+
         //BEAR TREND
-        if (longema < shortema)
+        if ((longema < shortema)&&(waitdata != true))
         {
         this.trend.bb ='bear';
         log.info('|Bear-Trend|');
         }
         //BULL TREND
-        else if (longema > shortema)
+        else if ((longema > shortema)&&(waitdata !=true))
         {
         this.trend.bb ='bull';
         log.info('|Bull-Trend|');
         }
+        else log.info('|Trend|...WAIT DATA');
 
         //Stoploss
 	if ('stoploss' === this.indicators.stoploss.action){this.advice();}
@@ -318,12 +324,12 @@ short: function(){
 pingPong: function(){
 	switch (true)
 	{
-	case ((di_plus > this.settings.diplus)&&(this.trend.bb !== 'bull')):
+	case ((di_plus >= this.settings.diplus)&&(this.trend.bb !== 'bull')):
 	this.trend.direction = 'screw_up';
 	this.trend.lastLongPrice = this.candle;
 	this.trend.longPos = true;
 	break;
-	case ((di_minus > this.settings.diminus)&&(this.trend.bb !== 'bear')):
+	case ((di_minus >= this.settings.diminus)&&(this.trend.bb !== 'bear')):
 	this.trend.direction = 'screw_down';
 	this.trend.lastShortPrice = this.candle;
 	this.trend.longPos = false;

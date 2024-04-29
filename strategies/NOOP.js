@@ -9,7 +9,7 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
 var fs = require('node:fs');
-
+var async = require('async');
 var settings = config.NOOP;this.settings=settings;
 
 // This method is a noop (it doesn't do anything)
