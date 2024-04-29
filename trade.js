@@ -7,7 +7,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',key:'000000-000000
 config.NOOP={};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NN'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NOOP'};
 
 //Adapter
 config.adapter='sqlite';
