@@ -10,10 +10,7 @@ config.NOOP={};
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NOOP'};
 
 //Trader
-config.trader={
-enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',
-key:'000000-000000-000000',secret:'000000-000000-000000'
-};
+config.trader={enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',key:'000000-000000-000000',secret:'000000-000000-000000'};
 
 //Candle Writer
 config.candleWriter={enabled:true,adapter:'sqlite'};
