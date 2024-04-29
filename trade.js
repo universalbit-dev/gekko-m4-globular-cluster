@@ -11,7 +11,7 @@ config.tradingAdvisor.method= 'NOOP';
 config.NOOP={};
 
 //Adapter
-config.adapter='sqlite';
+config.adapter={'sqlite'};
 
 //Trader
 config.trader={
