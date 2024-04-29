@@ -12,25 +12,25 @@ config.STOCHRSI={interval:13,threshold:1};
 config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
 
 config.NN={
-threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
 hodl_threshold:1,scale:5,batch_size:1};
 
 config.NNSTOCH={
-threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:1, 
+threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89, 
 hodl_threshold:1,scale:5,batch_size:1,interval:3};
 config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 
 config.NNCCI={
-threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
 hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89};
 config.NNCCI.thresholds={up:100,down:-100,persistence:3};
 
 config.NNTMA={
-threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:3,
+threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
 hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,
 short : 8,medium: 21,long:89};
 
