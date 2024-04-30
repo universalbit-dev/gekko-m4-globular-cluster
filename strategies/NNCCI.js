@@ -290,15 +290,13 @@ check : function(candle) {
 
     } else {this.advice();}
 
-
+    log.info('===========================================');
     log.info('calculated CCI properties for candle:');
-    log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
+    log.info("Trend:\t\t", this.trend.direction, " for ", this.trend.duration);
     log.info('Price:\t\t', candle.close);
     log.info('CCI:\t\t', cci);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info("meanAlpha:\t\t" + meanAlpha);
-    log.info('===========================================');
-
+    log.info('meanAlpha:\t',meanAlpha);
 
 },
 end : function() {log.info('THE END');}
