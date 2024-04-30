@@ -41,7 +41,7 @@ module.exports = {
   name: 'nntma',
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_nntma.js -b',
-  name      : '|NNTMA|-backtetst-|',
+  name      : '|NNTMA|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
