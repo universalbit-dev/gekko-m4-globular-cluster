@@ -51,7 +51,7 @@ init : function() {
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
@@ -146,21 +146,20 @@ init : function() {
   },
   //Reinforcement Learning
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 1);
-  var state = [Math.random(), Math.random(), Math.random()];
+  var brain = new deepqlearn.Brain(this.x, this.z);
+  var state = [this.x, this.y, this.z];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
     var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? 1.0 : -1.0;
+    var reward = action === 0 ? -0.1 : 0.1;//?: threshold_buy and threshold_sell
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
   }
   brain.epsilon_test_time = 0.0;//don't make any more random choices
   brain.learning = true;
-
   var action = brain.forward([this.priceBuffer[k + 1]]);
+  if (brain.backward([reward]) != undefined){log.info(brain.backward([reward]));}
   },
 
   update : function(candle)
@@ -212,7 +211,7 @@ check : function(candle) {
     }
 
   switch (long != 'undefined'){
-  
+
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
   this.advice('long');wait();this.brain();break;
@@ -234,7 +233,7 @@ check : function(candle) {
     log.info("TMA short:\t\t" + short);
     log.info("TMA medium:\t\t" + medium);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info("meanAlpha:" + meanAlpha);
+    log.info("meanAlpha:\t\t" + meanAlpha);
     log.info('===========================================');
 
 },

@@ -36,7 +36,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++) 
+  for (let i = 0; i < 5; i++)
   {if (i === 3) await sleep(200000);}
 };
 
@@ -168,13 +168,13 @@ var waitdata=false;
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 
-
-log.info('|Indicators:|');
-log.info('|Rsi|',rsi);
-log.info('|Dx|',dx);
-log.info('|Ema_long|',longema);
-log.info('|Ema_short|',shortema);
-log.info('|Dema||',dema);
+log.info('================================================');
+log.info('|INVERTER INDICATORS:|');
+log.info("RSI:\t\t" + rsi);
+log.info("Dx:\t\t" + dx);
+log.info("Ema+:\t\t" + longema);
+log.info("Ema-:\t\t" + shortema);
+log.info("Dema:\t\t" + dema);
 
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
@@ -191,11 +191,11 @@ switch (true) {
 	break;
     //weak
 	case (rsi > 40 && rsi < 60):
-	log.info('|Nut|Rsi|...WAIT DATA|');
+  log.info("Nut RSI:\t"+'WAIT DATA');
 	this.pingPong();
 	break;
 	default:
-	log.info('|Nut|Rsi||',rsi);
+  log.info("");
 	}
 
 /*
@@ -211,21 +211,21 @@ ADX Value 	Trend Strength
 */
 	switch (true) {
 		case ((dx > 0)&&(dx < 25)):
-		log.info('');adxstrength='weak';this.pingPong();
+		adxstrength='weak';this.pingPong();
 		break;
 
 		case ((dx > 25)&&(dx < 50)):
-		log.info('');adxstrength='strong';
+		adxstrength='strong';
 		break;
 
 		case ((dx > 50)&&(dx < 75)):
-		log.info('');adxstrength='verystrong';break;
+		adxstrength='verystrong';break;
 
 		case ((dx > 75)&&(dx < 100)):
-		log.info('');adxstrength='extremestrong';break;
+		adxstrength='extremestrong';break;
 
 		default:
-		log.info('|Nut|Dx|',dx);
+    log.info("Nut Dx:\t\t" + dx);
 	}
 // + above - price up
 	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull'))
@@ -272,7 +272,7 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 	default:
-	log.info('|Nut|Di|...WAIT DATA');
+  log.info("Nut Di:\t\t" + 'WAIT DATA');
 	waitdata=true;
 	}
 
@@ -288,7 +288,7 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
         this.trend.bb ='bull';
         log.info('|Bull-Trend|');
         }
-        else log.info('|Trend|...WAIT DATA');
+        else log.info("Trend:\t\t" + 'WAIT DATA');
 
         //Stoploss
 	if ('stoploss' === this.indicators.stoploss.action){this.advice();}

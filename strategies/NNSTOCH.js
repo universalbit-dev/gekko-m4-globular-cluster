@@ -18,7 +18,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++) 
+  for (let i = 0; i < 5; i++)
   {if (i === 3) await sleep(200000);}
 };
 
@@ -51,7 +51,7 @@ var method = {
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:13});
-    
+
     this.requiredHistory = this.settings.historySize;
     this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
@@ -60,7 +60,7 @@ var method = {
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
@@ -158,18 +158,17 @@ var method = {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
 
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 1);
-  var state = [Math.random(), Math.random(), Math.random()];
+  var brain = new deepqlearn.Brain(this.x, this.z);
+  var state = [this.x, this.y, this.z];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
     var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? 1.0 : -1.0;
+    var reward = action === 0 ? -0.1 : 0.1;
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
   }
   brain.epsilon_test_time = 0.0;//don't make any more random choices
   brain.learning = true;
-
   var action = brain.forward([this.priceBuffer[k + 1]]);
   },
 
@@ -196,7 +195,7 @@ var method = {
      this.learn();this.brain();
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
-//log book
+  //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
@@ -243,7 +242,7 @@ var method = {
 	this.advice();
 	this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
-	
+
 	if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
@@ -252,20 +251,20 @@ var method = {
       //when alpha is the "excess" return over an index, what index are you using?
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
-      var signal = meanp < currentPrice; 
+      var signal = meanp < currentPrice;
     }
 
     log.info('calculated StochRSI properties for candle:');
-    log.info('\t', 'rsi:', rsi);
-    log.info("StochRSI min:" + this.lowestRSI);
-    log.info("StochRSI max:" + this.highestRSI);
-    log.info("StochRSI Value:" + this.stochRSI);
+    log.info('rsi:\t\t', rsi);
+    log.info("StochRSI min:\t\t" + this.lowestRSI);
+    log.info("StochRSI max:\t\t" + this.highestRSI);
+    log.info("StochRSI Value:\t\t" + this.stochRSI);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info('meanAlpha:',meanAlpha);
+    log.info('meanAlpha:\t\t',meanAlpha);
     log.info('===========================================');
 
     if ((this.trend.persisted && this.stochRSI != 0 )&&
-    ('buy' !== this.prevAction && signal === false   && 
+    ('buy' !== this.prevAction && signal === false   &&
     meanAlpha > this.settings.threshold_buy))
     {
     this.advice('long');wait();this.brain();
@@ -273,9 +272,9 @@ var method = {
     }
 
     if ((this.trend.persisted && this.stochRSI != 100)&&
-    ('sell' !== this.prevAction &&  signal === true && 
-    meanAlpha < this.settings.threshold_sell && signalSell === true)) 
-    
+    ('sell' !== this.prevAction &&  signal === true &&
+    meanAlpha < this.settings.threshold_sell && signalSell === true))
+
     {
     this.advice('short');wait();this.brain();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};

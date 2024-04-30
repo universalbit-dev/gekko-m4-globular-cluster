@@ -18,7 +18,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++) 
+  for (let i = 0; i < 5; i++)
   {if (i === 3) await sleep(200000);}
 };
 
@@ -61,7 +61,7 @@ var method = {
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
@@ -159,18 +159,17 @@ var method = {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
 
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 2);
-  var state = [Math.random(), Math.random(), Math.random()];
+  var brain = new deepqlearn.Brain(this.x, this.z);
+  var state = [this.x, this.y, this.z];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
     var action = brain.forward(state); // returns index of chosen action
-    var reward = action === 0 ? 1.0 : -1.0;
+    var reward = action === 0 ? -0.1 : 0.1;
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
   }
   brain.epsilon_test_time = 0.0; // don't make any more random choices
   brain.learning = true;
-
   var action = brain.forward([this.priceBuffer[k + 1]]);
   },
 

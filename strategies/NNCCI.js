@@ -65,7 +65,7 @@ init : function() {
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
@@ -159,20 +159,18 @@ init : function() {
   },
   //Reinforcement Learning
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-
   brain:function(){
-  var brain = new deepqlearn.Brain(1, 1);
-  var state = [Math.random(), Math.random(), Math.random()];
+  var brain = new deepqlearn.Brain(this.x, this.z);
+  var state = [this.x, this.y, this.z];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
-    var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? 1.0 : -1.0;
+    var action = brain.forward(state);//returns index of chosen action
+    var reward = action === 0 ? -0.1 : 0.1;
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
   }
   brain.epsilon_test_time = 0.0;//don't make any more random choices
   brain.learning = true;
-
   var action = brain.forward([this.priceBuffer[k + 1]]);
   },
 
@@ -213,7 +211,7 @@ if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
 
     if (typeof(cci) == 'boolean' )log.debug('\t In sufficient data available.');
 
-        
+
 },
 
 check : function(candle) {
@@ -230,7 +228,7 @@ check : function(candle) {
       var signalSell = (candle.close > this.prevPrice) || (candle.close <
       (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
-      
+
     }
 
 
@@ -292,13 +290,13 @@ check : function(candle) {
 
     } else {this.advice();}
 
-    
+
     log.info('calculated CCI properties for candle:');
     log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
-    log.info('Price:', candle.close);
-    log.info('CCI:', cci);
+    log.info('Price:\t\t', candle.close);
+    log.info('CCI:\t\t', cci);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info("meanAlpha:" + meanAlpha);
+    log.info("meanAlpha:\t\t" + meanAlpha);
     log.info('===========================================');
 
 

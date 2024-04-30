@@ -14,7 +14,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
   console.log('keep calm...');await sleep(2000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++) 
+  for (let i = 0; i < 5; i++)
   {if (i === 3) await sleep(200000);}
 };
 
@@ -62,8 +62,9 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 // for debugging purposes log the last
 // calculated parameters.
 method.log = function() {var digits = 8;
-  log.debug('calculated StochRSI properties:');
-  log.debug('\t', 'rsi:', rsi);
+  log.info('================================================');
+  log.debug('calculated STOCHRSI properties:');
+  log.debug('rsi:\t\t', rsi);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
@@ -89,13 +90,13 @@ method.check = function(candle) {
 		if(this.trend.duration >= this.settings.thresholds.persistence)
 	   {this.trend.persisted = true;}
 
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100) 
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 		{this.trend.adviced = true;this.advice('short');wait();}
 
 		else {this.advice();}
 	}
-	
-	else if(this.stochRSI < this.settings.thresholds.low) 
+
+	else if(this.stochRSI < this.settings.thresholds.low)
 	{
 		if(this.trend.direction !== 'low')
 		{
@@ -105,12 +106,12 @@ method.check = function(candle) {
 		}
 		if(this.trend.duration >= this.settings.thresholds.persistence)
 		{this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0) 
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;this.advice('long');wait();}
 
     else {this.advice();}
-	} 
-	
+	}
+
 	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}
 }
 
