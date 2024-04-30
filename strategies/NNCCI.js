@@ -161,19 +161,19 @@ init : function() {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   brain:function(){
   var brain = new deepqlearn.Brain(this.x, this.z);
-  var state = [this.x, this.y, this.z];
+  var state = [Math.random(), Math.random(), Math.random()];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
-    var action = brain.forward(state);//returns index of chosen action
-    var reward = action === 0 ? -0.1 : 0.1;
+    var action = brain.forward(state); //returns index of chosen action
+    var reward = action === 0 ? 1.0 : 0.0;
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
   }
   brain.epsilon_test_time = 0.0;//don't make any more random choices
-  brain.learning = true;
-  var action = brain.forward([this.priceBuffer[k + 1]]);
+  brain.learning = false;//
+  var action = brain.forward(this.priceBuffer);
+  if (brain.backward([reward]) != undefined){log.info(brain.backward([reward]));}
   },
-
 
 update : function(candle) {
 if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
@@ -192,7 +192,7 @@ if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
 //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-  	if (err) {return console.log(err);}
+    if (err) {return console.log(err);}
   	});
   },
 

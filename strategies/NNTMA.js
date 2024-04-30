@@ -152,13 +152,13 @@ init : function() {
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
     var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? -0.1 : 0.1;//?: threshold_buy and threshold_sell
+    var reward = action === 0 ? 1.0 : 0.0;
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
   }
   brain.epsilon_test_time = 0.0;//don't make any more random choices
-  brain.learning = true;
-  var action = brain.forward([this.priceBuffer[k + 1]]);
+  brain.learning = false;//
+  var action = brain.forward(this.priceBuffer);
   if (brain.backward([reward]) != undefined){log.info(brain.backward([reward]));}
   },
 
