@@ -158,8 +158,6 @@ init : function() {
   }
   brain.epsilon_test_time = 0.0;//don't make any more random choices
   brain.learning = false;//
-  var action = brain.forward(this.priceBuffer);
-  if (brain.backward([reward]) != undefined){log.info(brain.backward([reward]));}
   },
 
   update : function(candle)
