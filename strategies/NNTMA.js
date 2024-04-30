@@ -207,24 +207,22 @@ check : function(candle) {
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
+    
+  if(((short > medium) && (medium > long))&&
+  ('buy' !== this.prevAction && signal === false && meanAlpha > this.settings.threshold_buy))
+  {this.advice('long');} 
+  
+  else if(((short < medium) && (medium > long))&&
+  ('sell' !== this.prevAction &&  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
+  {this.advice('short');} 
+  
+  else if((((short > medium) && (medium < long)))&&
+  ('sell' !== this.prevAction &&  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
+  {this.advice('short');}
+  
+  else {this.advice();}
 
-  switch (long != 'undefined'){
-
-  case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
-  signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('long');wait();this.brain();break;
-
-  case((short > medium)&&(medium < long)&&('sell' !== this.prevAction &&
-  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
-
-  case((short < medium)&&(medium < long)&&('sell' !== this.prevAction &&
-  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
-
-  default : {log.info('...WAIT DATA');}
-
-  }
+  
 
     log.info('calculated TMA properties for candle:');
     log.info("TMA long:\t\t" + long);
