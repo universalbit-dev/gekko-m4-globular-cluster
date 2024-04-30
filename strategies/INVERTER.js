@@ -37,7 +37,7 @@ async function wait() {
   console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
   for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(2000);}
+  {if (i === 4) await sleep(2000);}
 };
 
 /*
@@ -170,11 +170,11 @@ this.adxstrength =adxstrength;
 
 log.info('================================================');
 log.info('|INVERTER INDICATORS:|');
-log.info("RSI:\t\t" + rsi);
-log.info("Dx:\t\t" + dx);
-log.info("Ema+:\t\t" + longema);
-log.info("Ema-:\t\t" + shortema);
-log.info("Dema:\t\t" + dema);
+log.info("RSI:\t" + rsi);
+log.info("Dx:\t" + dx);
+log.info("Ema+:\t" + longema);
+log.info("Ema-:\t" + shortema);
+log.info("Dema:\t" + dema);
 
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
@@ -272,7 +272,7 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
 	log.info('|Nut|Di|:',adxstrength,this.trend.direction);break;
 	default:
-  log.info("Nut Di:\t\t" + 'WAIT DATA');
+  log.info("Nut Di:\t" + 'WAIT DATA');
 	waitdata=true;
 	}
 
@@ -288,7 +288,7 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
         this.trend.bb ='bull';
         log.info('|Bull-Trend|');
         }
-        else log.info("Trend:\t\t" + 'WAIT DATA');
+        else log.info("Trend:\t" + 'WAIT DATA');
 
         //Stoploss
 	if ('stoploss' === this.indicators.stoploss.action){this.advice();}
@@ -300,18 +300,17 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
 long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {
-  this.resetTrend();
-  this.trend.duration++;this.advice();wait();
+  this.resetTrend();this.trend.duration++;
+  this.advice();wait();
   }
   if (this.debug) {log.info('|Bolt Up|');}
-
 },
 //SHORT
 short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {
-  this.resetTrend();
-  this.trend.duration++;this.advice();wait();
+  this.resetTrend();this.trend.duration++;
+  this.advice();wait();
   }
   if (this.debug) {log.info('|Bolt Down|');}
 
@@ -327,13 +326,12 @@ pingPong: function(){
 	case ((di_plus >= this.settings.diplus)&&(this.trend.bb !== 'bull')):
 	this.trend.direction = 'screw_up';
 	this.trend.lastLongPrice = this.candle;
-	this.trend.longPos = true;
-	break;
+	this.trend.longPos = true;break;
+	
 	case ((di_minus >= this.settings.diminus)&&(this.trend.bb !== 'bear')):
 	this.trend.direction = 'screw_down';
 	this.trend.lastShortPrice = this.candle;
-	this.trend.longPos = false;
-	break;
+	this.trend.longPos = false;break;
 	default:
 	log.info('|PingPong|');
 	}

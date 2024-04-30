@@ -1,6 +1,5 @@
 /*NeuralNetwork*/
 
-/* */
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -194,12 +193,23 @@ var method = {
      this.learn();this.brain();
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
-
+  
+  //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-  	if (err) {return console.log(err);}
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," +
+  	candle.volume + "," + candle.trades + "\n", function(err) 
+  	{if (err) {return console.log(err);}
   	});
+  
+  //stoploss as Reinforcement Learning
+    if ('stoploss' === this.indicators.stoploss.action)
+    {
+    log.info('Reinforcement Learning');this.brain();
+    this.prevAction='sell';signal=true;
+    }
+  
   },
+  
 
   predictCandle : function(candle) {
     let vol = new convnetjs.Vol(this.priceBuffer);

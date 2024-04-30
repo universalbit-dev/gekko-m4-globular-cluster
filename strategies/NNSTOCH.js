@@ -19,7 +19,7 @@ async function wait() {
   console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
   for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
+  {if (i === 3) await sleep(2000);}
 };
 
 var method = {
@@ -253,25 +253,23 @@ var method = {
     }
 
     log.info('calculated StochRSI properties for candle:');
-    log.info('rsi:\t\t', rsi);
-    log.info("StochRSI min:\t\t" + this.lowestRSI);
-    log.info("StochRSI max:\t\t" + this.highestRSI);
-    log.info("StochRSI Value:\t\t" + this.stochRSI);
+    log.info('rsi:\t', rsi);
+    log.info("StochRSI min:\t" + this.lowestRSI);
+    log.info("StochRSI max:\t" + this.highestRSI);
+    log.info("StochRSI Value:\t" + this.stochRSI);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info('meanAlpha:\t\t',meanAlpha);
+    log.info('meanAlpha:\t',meanAlpha);
     log.info('===========================================');
 
     if ((this.trend.persisted && this.stochRSI != 0 )&&
-    ('buy' !== this.prevAction && signal === false   &&
-    meanAlpha > this.settings.threshold_buy))
+    ('buy' !== this.prevAction && signal === false && meanAlpha > this.settings.threshold_buy))
     {
     this.advice('long');wait();this.brain();
     this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
     }
 
     if ((this.trend.persisted && this.stochRSI != 100)&&
-    ('sell' !== this.prevAction &&  signal === true &&
-    meanAlpha < this.settings.threshold_sell && signalSell === true))
+    ('sell' !== this.prevAction &&  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
 
     {
     this.advice('short');wait();this.brain();
@@ -281,7 +279,7 @@ var method = {
     if ('stoploss' === this.indicators.stoploss.action)
     {
     log.info('Reinforcement Learning');this.brain();
-    this.prevAction='sell';signal=false;
+    this.prevAction='sell';signal=true;
     }
 
   },

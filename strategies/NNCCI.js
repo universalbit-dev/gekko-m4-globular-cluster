@@ -54,6 +54,8 @@ init : function() {
   this.uplevel = this.settings.thresholds.up;
   this.downlevel = this.settings.thresholds.down;
   this.persisted = this.settings.thresholds.persistence;
+  //Indicators
+  this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
   //CCI
   this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 13 });
   //DEMA
@@ -187,11 +189,11 @@ if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 
-//log book
-    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-    if (err) {return console.log(err);}
-  	});
+  //log book
+  fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," +
+  	candle.volume + "," + candle.trades + "\n", function(err) 
+  	{if (err) {return console.log(err);}});
   },
 
   predictCandle : function(candle) {
@@ -287,12 +289,19 @@ check : function(candle) {
         }
 
     } else {this.advice();}
+    
+    //stoploss as Reinforcement Learning
+    if ('stoploss' === this.indicators.stoploss.action)
+    {
+    log.info('Reinforcement Learning');this.brain();
+    this.prevAction='sell';signal=true;
+    }
 
     log.info('===========================================');
     log.info('calculated CCI properties for candle:');
-    log.info("Trend:\t\t", this.trend.direction, " for ", this.trend.duration);
-    log.info('Price:\t\t', candle.close);
-    log.info('CCI:\t\t', cci);
+    log.info("Trend:\t", this.trend.direction, " for ", this.trend.duration);
+    log.info('Price:\t', candle.close);
+    log.info('CCI:\t', cci);
     log.info("calculated NeuralNet candle hypothesis:");
     log.info('meanAlpha:\t',meanAlpha);
 
