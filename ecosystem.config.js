@@ -50,7 +50,7 @@ module.exports = {
   name: 'nn',
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_nn.js -b',
-  name      : '|NN|-backtetst-|',
+  name      : '|NN|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   }
