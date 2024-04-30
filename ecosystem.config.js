@@ -32,7 +32,7 @@ module.exports = {
   name: 'nncci',
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_nncci.js -b',
-  name      : '|NNCCI|-backtest-',
+  name      : '|NNCCI|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
