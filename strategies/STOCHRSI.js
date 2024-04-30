@@ -12,10 +12,10 @@ var stoploss= require('./indicators/StopLoss.js');
 var async = require('async');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await sleep(2000);
+  console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
   for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(200000);}
+  {if (i === 3) await sleep(2000);}
 };
 
 var method = {};
@@ -64,14 +64,14 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 method.log = function() {var digits = 8;
   log.info('================================================');
   log.debug('calculated STOCHRSI properties:');
-  log.debug('rsi:\t\t', rsi);
+  log.debug('RSI:\t\t', rsi);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
 }
 
 method.check = function(candle) {
-    rsi=this.tulipIndicators.rsi.result.result;
+  rsi=this.tulipIndicators.rsi.result.result;
 	this.rsi=rsi;
 	if(this.stochRSI > this.settings.thresholds.high) {
 		// new trend detected
@@ -98,18 +98,14 @@ method.check = function(candle) {
 
 	else if(this.stochRSI < this.settings.thresholds.low)
 	{
-		if(this.trend.direction !== 'low')
-		{
-		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
-		this.trend.duration++;
-		log.debug('In low since', this.trend.duration, 'candle(s)');
-		}
-		if(this.trend.duration >= this.settings.thresholds.persistence)
-		{this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-		{this.trend.adviced = true;this.advice('long');wait();}
-
-    else {this.advice();}
+  if(this.trend.direction !== 'low')
+  {
+    this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
+    this.trend.duration++;log.debug('In low since', this.trend.duration, 'candle(s)');
+  }
+	else if(this.trend.duration >= this.settings.thresholds.persistence){this.trend.persisted = true;}
+	else if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('long');wait();}
+  else {this.advice();}
 	}
 
 	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}

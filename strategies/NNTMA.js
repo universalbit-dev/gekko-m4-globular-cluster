@@ -15,10 +15,10 @@ var stoploss=require('./indicators/StopLoss');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await sleep(2000);
+  console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
   for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(200000);}
+  {if (i === 4) await sleep(2000);}
 };
 
 var method = {
@@ -148,7 +148,7 @@ init : function() {
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   brain:function(){
   var brain = new deepqlearn.Brain(this.x, this.z);
-  var state = [this.x, this.y, this.z];
+  var state = [Math.random(), Math.random(), Math.random()];
   for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
   {
     var action = brain.forward(state); //returns index of chosen action

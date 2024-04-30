@@ -16,10 +16,10 @@ var settings = config.NN;this.settings=settings;
 var async = require('async');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await sleep(2000);
+  console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
   for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(200000);}
+  {if (i === 3) await sleep(2000);}
 };
 
 
