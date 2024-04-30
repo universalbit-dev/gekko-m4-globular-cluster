@@ -1,4 +1,9 @@
 var config = {};
+//General Settings
+config.debug =true;
+
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 //Strategies
 config.NNCCI={
@@ -28,7 +33,7 @@ config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 config.candleWriter={enabled:false};
 
 //Advice Logger
-config.adviceLogger={enabled:false};
+config.adviceLogger={enabled:true};
 
 //Export BackTest Result
 config.backtestResultExporter = {enabled: true,writeToDisk: true,
