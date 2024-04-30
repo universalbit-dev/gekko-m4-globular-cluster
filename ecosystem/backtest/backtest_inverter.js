@@ -29,7 +29,7 @@ config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 config.candleWriter={enabled:false};
 
 //Advice Logger
-config.adviceLogger={enabled:true};
+config.adviceLogger={enabled:false};
 
 //Export BackTest Result
 config.backtestResultExporter = {enabled: true,writeToDisk: true,
