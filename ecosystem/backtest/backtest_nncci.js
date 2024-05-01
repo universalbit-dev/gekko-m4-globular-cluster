@@ -13,7 +13,7 @@ hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89};
 config.NNCCI.thresholds={up:100,down:-100,persistence:0};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NNCCI'};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'NNCCI'};//candleSize (5 minutes)* historySize (40 minutes) == period
 
 //Previous Month
 var previous_month = new Date();
