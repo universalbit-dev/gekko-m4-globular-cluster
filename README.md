@@ -49,7 +49,7 @@ pm2 status
 
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/import_ecosystem.config.js) exchange data
 ```bash
-pm2 start ecosystem.config.js 
+pm2 start import_ecosystem.config.js 
 ```
 * [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem.config.js) strategies
 ```bash
