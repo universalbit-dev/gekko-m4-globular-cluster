@@ -26,9 +26,6 @@ Meta debug info:
 Gekko version: v0.6.8-m4
 Nodejs version: v20.11.0
 ```
-
-
-
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
 ---
@@ -47,14 +44,21 @@ pm2 status
 * ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
   
 
-#### ...before run ecosystem file [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) exchange data
-
+#### [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) exchange data
+```bash
+pm2 start ecosystem.config.js 
+```
+#### [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md)
 ```bash
 pm2 start ecosystem.config.js 
 ```
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/ecosystem/images/gif/ecosystem.gif" width="auto"></img>
-backtest directory: /gekko-m4/logs/json/
 
+##### NOTE:
+Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
+##### Ecosystem date range:  
+* [Import] Exchange Data  FROM first date previous month TO first date current month
+* [BackTest] Exchange Data  FROM first date previous month TO first date current month
 ---
 
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
