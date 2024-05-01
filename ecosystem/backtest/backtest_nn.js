@@ -12,7 +12,7 @@ l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:8
 hodl_threshold:1,scale:5,batch_size:1};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NN'};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'NN'};//candleSize (5 minutes)* historySize (40 minutes) == period
 
 //Previous Month
 var previous_month = new Date();
