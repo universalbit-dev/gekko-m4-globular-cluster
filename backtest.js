@@ -37,7 +37,7 @@ short : 8,medium: 21,long:89};
 config.NOOP={};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'INVERTER'};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'INVERTER'};//candleSize (5 minutes)* historySize (40 minutes) == period
 
 //Backtest
 config.backtest = {enabled:true,
