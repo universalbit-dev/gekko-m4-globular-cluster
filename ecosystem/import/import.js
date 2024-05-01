@@ -10,6 +10,20 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //Trading Advisor
 config.tradingAdvisor = {enabled:false};
 
+//Previous Month
+var previous_month = new Date();
+previous_month.setDate(1);
+previous_month.setMonth(previous_month.getMonth()-1);
+//Current Month
+var current_month = new Date();
+current_month.setDate(1);
+current_month.setMonth(current_month.getMonth());
+
+//Import Exchange Data  FROM first date previous month TO first date current month
+config.importer = {enabled:true,daterange:{from:previous_month ,to:current_month}};
+
+
+
 //Backtest
 config.backtest = {enabled:false};
 
@@ -35,11 +49,6 @@ config.paperTrader = {enabled: false};
 
 //Performance Analyzer
 config.performanceAnalyzer = {enabled: false};
-
-//Import
-config.importer = {enabled:true,
-daterange:{from:"2022-01-02",to:"2022-03-01"}
-};
 
 config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
