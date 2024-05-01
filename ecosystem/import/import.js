@@ -22,8 +22,6 @@ current_month.setMonth(current_month.getMonth());
 //Import Exchange Data  FROM first date previous month TO first date current month
 config.importer = {enabled:true,daterange:{from:previous_month ,to:current_month}};
 
-
-
 //Backtest
 config.backtest = {enabled:false};
 
