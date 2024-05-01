@@ -22,7 +22,6 @@ SOFTWARE.
 
 ---
 
-
 Gekko M4
 The MIT License (MIT)
 Copyright (c) 2023 UniversalBit BlockChain
@@ -45,12 +44,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 <https://en.wikipedia.org/wiki/MIT_License>
-  
+
 ---
-##### node_modules 
-a [huge work](https://github.com/askmike/gekko/graphs/contributors) behind a simple install command
 
-open [issue](https://github.com/universalbit-dev/gekko-m4/issues) 
-
------
 
