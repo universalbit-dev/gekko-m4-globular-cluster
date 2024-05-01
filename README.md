@@ -4,7 +4,7 @@
 
 <img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="5%"></img>
 ##### sustainable personal finance
-## Gekko-m4 only import simulate and trade exchange data?
+## Gekko-m4
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
 * [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
 * [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
@@ -47,9 +47,8 @@ pm2 status
 * ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
   
 
-...before run ecosystem file 
-* [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) exchange data
-* [backtest date must match](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md)
+#### ...before run ecosystem file [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md) exchange data
+
 ```bash
 pm2 start ecosystem.config.js 
 ```
