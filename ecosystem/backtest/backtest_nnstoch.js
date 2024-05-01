@@ -15,9 +15,17 @@ config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:1,historySize:40,method:'NNSTOCH'};
 
-//Backtest
+//Previous Month
+var previous_month = new Date();
+previous_month.setDate(1);
+previous_month.setMonth(previous_month.getMonth()-1);
+//Current Month
+var current_month = new Date();
+current_month.setDate(1);
+current_month.setMonth(current_month.getMonth());
+//Backtest Exchange Data  FROM first date previous month TO first date current month
 config.backtest = {enabled:true,
-  daterange:{from:"2022-01-02",to:"2022-03-01"},
+  daterange:{from:previous_month,to:current_month},
   batchSize: 60
 };
 
