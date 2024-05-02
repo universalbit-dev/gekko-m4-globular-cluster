@@ -3,24 +3,29 @@ var config = {};
 config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
-
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 //Strategies
+
+
+//Import Exchange Data  FROM previous month TO current month
+//Previous Month (date ISOString)
+var previous_month = new Date();
+previous_month.setDate(1);
+previous_month.setMonth(previous_month.getMonth()-1);
+var previous = previous_month.toString().slice(0, -14);
+
+//Current Month (date ISOString)
+var current_month = new Date();
+current_month.setDate(1);
+current_month.setMonth(current_month.getMonth());
+var current = current_month.toString().slice(0, -14);
+
+config.importer = {enabled:true,daterange:{from:previous_month ,to:current_month}};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false};
 
-//Previous Month
-var previous_month = new Date();
-previous_month.setDate(1);
-previous_month.setMonth(previous_month.getMonth()-1);
-//Current Month
-var current_month = new Date();
-current_month.setDate(1);
-current_month.setMonth(current_month.getMonth());
 
-//Import Exchange Data  FROM first date previous month TO first date current month
-config.importer = {enabled:true,daterange:{from:previous_month ,to:current_month}};
 
 //Backtest
 config.backtest = {enabled:false};
