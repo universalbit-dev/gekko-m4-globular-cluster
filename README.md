@@ -45,23 +45,19 @@ pm2 status
 ---
 
 ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
-  
-
-* [import](https://github.com/universalbit-dev/gekko-m4/blob/master/import_ecosystem.config.js) exchange data
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
+#### import exchange data
 ```bash
 pm2 start import_ecosystem.config.js 
 ```
-* [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem.config.js) strategies
+##### backtest strategies
 ```bash
 pm2 start ecosystem.config.js 
 ```
-<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/docs/ecosystem/images/gif/ecosystem.gif" width="auto"></img>
 
 ##### NOTE:
 Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
-##### Ecosystem date range:  
-* [Import] Exchange Data  FROM first date previous month TO first date current month
-* [BackTest] Exchange Data  FROM first date previous month TO first date current month
+
 ---
 
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
