@@ -15,15 +15,22 @@ config.NNCCI.thresholds={up:100,down:-100,persistence:0};
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'NNCCI'};//candleSize (5 minutes)* historySize (40 minutes) == period
 
+//Date.prototype.toISOString()
 //Previous Month
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
+previous_month.setDate(2); 
+var previous = previous_month.toString().slice(0, -14);
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
-//Backtest Exchange Data  FROM first date previous month TO first date current month
+current_month.setDate(2); 
+var current = current_month.toString().slice(0, -14);
+
+//Backtest Exchange Data  FROM previous month TO current month
+
 config.backtest = {enabled:true,
   daterange:{from:previous_month,to:current_month},
   batchSize: 60
