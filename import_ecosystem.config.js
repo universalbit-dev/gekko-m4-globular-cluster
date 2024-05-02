@@ -5,7 +5,7 @@ module.exports = {
     args      : '-c ecosystem/import/import.js -i',
     name      : '|- import exchange data -|',
     instances : "1",
-    cron_restart: '0 0 * * *',
+    autorestart: false,
     exec_mode : "cluster",
     env: {NODE_ENV: "development",},
     env_production: {NODE_ENV: "production",}
