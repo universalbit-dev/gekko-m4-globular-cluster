@@ -32,7 +32,7 @@ Nodejs version: v20.11.0
 
 #### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (backtest mode)
 ```bash
-npm i pm2 --save
+npm i pm2 -g --save
 ```
 ```bash
 pm2 start m4.js
