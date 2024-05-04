@@ -4,40 +4,12 @@ config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
 //Strategies
 config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'INVERTER'};//candleSize (5 minutes)* historySize (40 minutes) == period
-
-config.STOCHRSI={interval:13,threshold:1};
-config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
-
-config.NN={
-threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
-hodl_threshold:1,scale:5,batch_size:1};
-
-config.NNSTOCH={
-threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89, 
-hodl_threshold:1,scale:5,batch_size:1,interval:3};
-config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
-
-config.NNCCI={
-threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
-hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89};
-config.NNCCI.thresholds={up:100,down:-100,persistence:3};
-
-config.NNTMA={
-threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
-hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,
-short : 8,medium: 21,long:89};
-
-config.NOOP={};
 
 //Date.prototype.toISOString()
 //Previous Month
@@ -71,7 +43,7 @@ config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 config.candleWriter={enabled:false};
 
 //Advice Logger
-config.adviceLogger={enabled:true};
+config.adviceLogger={enabled:false};
 
 //Export BackTest Result
 config.backtestResultExporter = {enabled: true,writeToDisk: true,
@@ -93,9 +65,7 @@ config.importer = {enabled:false}
 config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
-
 /*
-
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -108,5 +78,4 @@ by this software. There can be bugs and the bot may not perform as expected
 or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
-
 */
