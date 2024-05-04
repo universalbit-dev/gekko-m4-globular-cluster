@@ -30,7 +30,7 @@ Nodejs version: v20.11.0
 
 ---
 
-#### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (backtest mode)
+#### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (ecosystem)
 ```bash
 npm i pm2 -g --save
 ```
