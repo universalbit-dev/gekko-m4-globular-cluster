@@ -16,6 +16,7 @@
 
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4.git
+npm i
 ```
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
 
