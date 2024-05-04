@@ -22,6 +22,8 @@ npm i
 
 * [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
+
+### [Nodejs20](https://nodejs.org/en/blog/release/v20.11.0)
 ```
 Meta debug info:
 Gekko version: v0.6.8-m4
