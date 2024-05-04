@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: "inverter",
+    name: "import",
     script    : 'gekko.js',
     args      : '-c ecosystem/import/import.js -i',
     name      : '|- import exchange data -|',
