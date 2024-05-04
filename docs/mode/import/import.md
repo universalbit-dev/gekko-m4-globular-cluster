@@ -24,7 +24,5 @@
 | TradingAdvisor | Advice Buy-Sell Orders      | disabled        |
 
 [import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/import/import.js)
-```bash
-node gekko -c import.js -i
-```
+
 
