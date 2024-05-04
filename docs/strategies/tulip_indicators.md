@@ -1,10 +1,11 @@
 # [Tulip indicators](https://tulipindicators.org/)
 
-When writing [your own strategy](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/creating_a_strategy.md) you can use all indicators offered by [the Tulip Indicators library](https://tulipindicators.org/). Gekko will pass the correct market data to Tulip and you only have to provide the `optIn` configurable parameters.
+#### When writing [your own strategy](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/creating_a_strategy.md) you can use all indicators offered by [the Tulip Indicators library](https://tulipindicators.org/). 
+* Gekko will pass the correct market data to Tulip and you only have to provide the `optIn` configurable parameters.
 
 ## Install
 
-### Bash on Windows, OSX or Linux
+### Bash on Windows, OSX and Linux
 
 Open your terminal. Then:
 ```
@@ -13,28 +14,21 @@ cd gekko-m4
 npm install tulind --build-from-source
 ```
 
-## Example
+## Example:
 
-If you want to use the MACD indicator from Tulip, you need to register it in your strategy like so:
+If you want to use the DEMA indicator from Tulip, you need to register it in your strategy like so:
+```js
+init : function() {    
+// add the indicator to the strategy
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
+}
 
-    method.init = function() {
-      var customMACDSettings = {
-        optInFastPeriod: 10,
-        optInSlowPeriod: 21,
-        optInSignalPeriod: 9
-      }
-
-      // add the indicator to the strategy
-      this.addTulipIndicator('mymacd', 'macd', customMACDSettings);
-    }
-
-    method.check = function() {
-      // use indicator results
-      var result = this.tulipIndicators.mymacd.result;
-      var macddiff = result['macd'] - result['macdSignal'];
-
-      // do something with macdiff
-    }
+    
+check : function(candle) {
+// use dema indicator results
+var dema = this.tulipIndicators.dema.result.result;
+}
+```
 
 ## Tulip Indicators
 
