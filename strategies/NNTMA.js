@@ -33,27 +33,26 @@ init : function() {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
-    //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
-    this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
-    this.addTulipIndicator('short', 'tema', {optInTimePeriod:13});
-    this.addTulipIndicator('medium', 'tema',{optInTimePeriod:34});
-    this.addTulipIndicator('long', 'tema', {optInTimePeriod:89});
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
+    this.addTulipIndicator('tema', 'tema', {optInTimePeriod:1});
+    this.addTulipIndicator('short', 'ema', {optInTimePeriod:this.settings.short});
+    this.addTulipIndicator('long', 'ema', {optInTimePeriod:this.settings.long});
     //Date
     startTime = new Date();
 
     //Indicators
-    this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+    this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.stoploss});
     this.name = 'NNTMA';
     this.requiredHistory = this.settings.historySize;
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
-    var x= Math.floor((Math.random() * 100) + 1);
+    var x=Math.floor((Math.random() * 100) + 1);
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
-      {type:'conv', num_neurons:144, activation: 'relu'},
-      {type:'fc', num_neurons:144, activation:'sigmoid'},
+      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'conv', num_neurons:233, activation: 'relu'},
+      {type:'fc', num_neurons:233, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -127,10 +126,6 @@ init : function() {
   this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
 
-  resetnet: function(){
-  this.nn = new convnetjs.Net();
-  },
-
   learn : function () {
     for (var i = 0; i < _.size(this.priceBuffer) - 1; i++) {
       var data = [this.priceBuffer[i]];
@@ -146,45 +141,40 @@ init : function() {
   },
   //Reinforcement Learning
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-  brain:function(){
-  var brain = new deepqlearn.Brain(this.x, this.z);
-  var state = [Math.random(), Math.random(), Math.random()];
-  for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
-  {
-    var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? 1.0 : 0.0;
-    brain.backward([reward]); // <-- learning magic happens here
-    state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
-  }
-  brain.epsilon_test_time = 0.0;//don't make any more random choices
-  brain.learning = false;//
-  },
-  
+    brain:function(){
+      var brain = new deepqlearn.Brain(this.x, this.z);
+      var state = [Math.random(), Math.random(), Math.random()];
+      for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
+      {
+        var action = brain.forward(state); //returns index of chosen action
+        var reward = action === 0 ? 1.0 : 0.0;
+        brain.backward([reward]); // <-- learning magic happens here
+        state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
+      }
+      brain.epsilon_test_time = 0.0;//don't make any more random choices
+      brain.learning = false;//
+    },
 
   update : function(candle)
   {
     long=this.tulipIndicators.long.result.result;
-    medium=this.tulipIndicators.medium.result.result;
     short=this.tulipIndicators.short.result.result;
-    dema=this.tulipIndicators.dema.result.result;
+    tema=this.tulipIndicators.tema.result.result;
 
     if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
     //remove oldest priceBuffer value
     this.priceBuffer.shift();
     if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
     this.setNormalizeFactor();
-    this.priceBuffer.push(dema / this.settings.scale );
+    this.priceBuffer.push(tema / this.settings.scale );
     if (2 > _.size(this.priceBuffer)) return;
-    
-    for (i=0;i<3;++i)this.learn();this.brain();
-    while (this.settings.price_buffer_len < _.size(this.priceBuffer))
-    this.priceBuffer.shift();
-    //log book
-    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + 
-    startTime +'.csv',candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + 
-    candle.close + "," + candle.vwp + "," + candle.volume + "," + 
-    candle.trades + "\n", function(err) 
-    {if (err) {return console.log(err);}});
+     for (i=0;i<3;++i)
+     this.learn();this.brain();
+     while (this.settings.price_buffer_len < _.size(this.priceBuffer))
+     this.priceBuffer.shift();
+//log book
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
   },
 
   predictCandle : function() {
@@ -193,10 +183,9 @@ init : function() {
     return prediction.w[0];
   },
 
-  check : function(candle) {
-    dema=this.tulipIndicators.dema.result.result;
+check : function(candle) {
+    tema=this.tulipIndicators.tema.result.result;
     short = this.tulipIndicators.short.result.result;
-    medium = this.tulipIndicators.medium.result.result;
     long = this.tulipIndicators.long.result.result;
 
   var lastPrice = candle.close;this.age++;
@@ -211,36 +200,23 @@ init : function() {
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
-    
-  if(((short > medium) && (medium > long))&&
-  ('buy' !== this.prevAction && signal === false && meanAlpha > this.settings.threshold_buy))
-  {this.advice('short');}
-  
-  else if(((short < medium) && (medium > long))&&
-  ('sell' !== this.prevAction &&  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
-  {this.advice('long');}
-  
-  else if((((short > medium) && (medium < long)))&&
-  ('sell' !== this.prevAction &&  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
-  {this.advice('long');}
-  
-  else {this.advice();}
-  
-    //stoploss as Reinforcement Learning
-    if ('stoploss' === this.indicators.stoploss.action)
-    {
-    log.info('Reinforcement Learning');this.brain();
-    this.prevAction='sell';signal=true;
-    }
 
-  
+  switch (long != 'undefined'&& short != 'undefined'){
+  case((short < long)&&('buy' !== this.prevAction &&
+  signal === false  && meanAlpha > this.settings.threshold_buy)):
+  this.advice('long');wait();this.brain();break;
+  case((short > long)&&('sell' !== this.prevAction &&
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  this.advice('short');wait();this.brain();break;
+  default : {log.info('...WAIT DATA');}
+
+  }
 
     log.info('calculated TMA properties for candle:');
-    log.info("TMA long:\t" + long);
-    log.info("TMA short:\t" + short);
-    log.info("TMA medium:\t" + medium);
+    log.info("TMA long:\t\t" + long);
+    log.info("TMA short:\t\t" + short);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info("meanAlpha:\t" + meanAlpha);
+    log.info("meanAlpha:" + meanAlpha);
     log.info('===========================================');
 
 },
