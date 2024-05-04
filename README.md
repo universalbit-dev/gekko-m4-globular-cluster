@@ -50,6 +50,12 @@ pm2 start ecosystem.config.js
 Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
 
 ---
+#### Https server OR nothing.
+* #### [...before run xor_ui.config.js](https://github.com/universalbit-dev/gekko-m4/tree/master/ssl)
+```bash
+pm2 start xor_ui.config.js 
+```
+---
 
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
