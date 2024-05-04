@@ -69,7 +69,7 @@ npm install tulind --build-from-source
 
 ---
 #### Resources:
-* Gekko-Quasar-UI [0.6.9-m4](https://github.com/universalbit-dev/gekko-quasar-ui)
+* [Gekko-Quasar-UI](https://github.com/H256/gekko-quasar-ui)
 * [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
 * [Forum](https://forum.gekko.wizb.it/)
 * [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
