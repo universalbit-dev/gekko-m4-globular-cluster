@@ -1,34 +1,69 @@
-var pm2 = require('pm2');
-pm2.connect(function(err) {
-  if (err) {
-    console.error(err)
-    process.exit(2)
-}
-
-pm2.start({
+module.exports = {
+  apps : [{
+    name: 'import',
+    script    : 'gekko.js',
+    args      : '-c ecosystem/import/import.js',
+    name      : '|- import exchange data -|',
+    instances : "1",
+    exec_mode : "cluster",
+    env: {NODE_ENV: "development",},
+    env_production: {NODE_ENV: "production",}
+  },
+          
+  {
+  name: 'inverter',
   script    : 'gekko.js',
-  args      : '-c backtest.js -b',
-  name      : 'BackTest',
+  args      : '-c ecosystem/backtest/backtest_inverter.js',
+  name      : '|INVERTER|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
-},
+  },
+  {
+  name: 'stochrsi',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_stochrsi.js',
+  name      : '|STOCHRSI|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+  
+  {
+  name: 'nnstoch',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_nnstoch.js',
+  name      : '|NNSTOCH|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
 
-function(err, apps) {
-  if (err) {
-    console.error(err)
-    return pm2.disconnect()
+
+  {
+  name: 'nncci',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_nncci.js',
+  name      : '|NNCCI|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+
+  {
+  name: 'nntma',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_nntma.js',
+  name      : '|NNTMA|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+
+  {
+  name: 'noop',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_noop.js',
+  name      : '|NOOP|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  }
+
+]
+
 }
-
-pm2.list((err, list) => {
-  console.log(err, list)
-})
-})
-})
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
