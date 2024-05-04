@@ -37,11 +37,8 @@ npm i pm2 -g --save
 ```
 ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
-#### import exchange data
-```bash
-pm2 start import_ecosystem.config.js 
-```
-##### backtest strategies
+
+##### import exchange data and backtest strategies
 ```bash
 pm2 start ecosystem.config.js 
 ```
