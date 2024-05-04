@@ -7,9 +7,9 @@ When writing [your own strategy](./creating_a_trading_method.md) you can use all
 ### Bash on Windows, OSX or Linux
 
 Open your terminal. Then:
-
 ```
-cd ~/gekko
+git clone https://github.com/universalbit-dev/gekko-m4.git
+cd gekko-m4
 npm install tulind --build-from-source
 ```
 
