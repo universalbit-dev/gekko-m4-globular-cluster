@@ -1,46 +1,37 @@
 module.exports = {
   apps : [{
-    name: 'import',
+    name: "inverter",
     script    : 'gekko.js',
-    args      : '-c ecosystem/import/import.js',
-    name      : '|- import exchange data -|',
+    args      : '-c ecosystem/backtest/backtest_inverter.js -b',
+    name      : '|INVERTER|-backtest-|',
     instances : "1",
     exec_mode : "cluster",
     env: {NODE_ENV: "development",},
     env_production: {NODE_ENV: "production",}
   },
-          
-  {
-  name: 'inverter',
-  script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_inverter.js',
-  name      : '|INVERTER|-backtest-|',
-  instances : "1",
-  exec_mode : "cluster"
-  },
+
   {
   name: 'stochrsi',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_stochrsi.js',
+  args      : '-c ecosystem/backtest/backtest_stochrsi.js -b',
   name      : '|STOCHRSI|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
-  
+
   {
   name: 'nnstoch',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nnstoch.js',
+  args      : '-c ecosystem/backtest/backtest_nnstoch.js -b',
   name      : '|NNSTOCH|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
 
-
   {
   name: 'nncci',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nncci.js',
+  args      : '-c ecosystem/backtest/backtest_nncci.js -b',
   name      : '|NNCCI|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
@@ -49,21 +40,20 @@ module.exports = {
   {
   name: 'nntma',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nntma.js',
+  args      : '-c ecosystem/backtest/backtest_nntma.js -b',
   name      : '|NNTMA|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
-
+  
   {
-  name: 'noop',
+  name: 'nn',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_noop.js',
-  name      : '|NOOP|-backtest-|',
+  args      : '-c ecosystem/backtest/backtest_nn.js -b',
+  name      : '|NN|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   }
 
-]
+]}
 
-}
