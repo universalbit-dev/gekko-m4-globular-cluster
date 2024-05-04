@@ -34,17 +34,6 @@ Nodejs version: v20.11.0
 ```bash
 npm i pm2 -g --save
 ```
-```bash
-pm2 start m4.js
-pm2 status 
-```
-
-<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2-advanced-process-manager.gif" width="auto"></img>
-
-
----
-
-
 ### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
 #### import exchange data
