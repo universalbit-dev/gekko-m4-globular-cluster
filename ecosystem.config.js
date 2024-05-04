@@ -2,7 +2,7 @@ module.exports = {
   apps : [{
     name: 'import',
     script    : 'gekko.js',
-    args      : '-c ecosystem/import/import.js',
+    args      : '-c ecosystem/import/import.js -i',
     name      : '|- import exchange data -|',
     instances : "1",
     exec_mode : "cluster",
@@ -13,7 +13,7 @@ module.exports = {
   {
   name: 'inverter',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_inverter.js',
+  args      : '-c ecosystem/backtest/backtest_inverter.js -b',
   name      : '|INVERTER|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
@@ -21,7 +21,7 @@ module.exports = {
   {
   name: 'stochrsi',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_stochrsi.js',
+  args      : '-c ecosystem/backtest/backtest_stochrsi.js -b',
   name      : '|STOCHRSI|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
@@ -30,7 +30,7 @@ module.exports = {
   {
   name: 'nnstoch',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nnstoch.js',
+  args      : '-c ecosystem/backtest/backtest_nnstoch.js -b',
   name      : '|NNSTOCH|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
@@ -40,7 +40,7 @@ module.exports = {
   {
   name: 'nncci',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nncci.js',
+  args      : '-c ecosystem/backtest/backtest_nncci.js -b',
   name      : '|NNCCI|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
@@ -49,7 +49,7 @@ module.exports = {
   {
   name: 'nntma',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nntma.js',
+  args      : '-c ecosystem/backtest/backtest_nntma.js -b',
   name      : '|NNTMA|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
@@ -58,7 +58,7 @@ module.exports = {
   {
   name: 'noop',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_noop.js',
+  args      : '-c ecosystem/backtest/backtest_noop.js -b',
   name      : '|NOOP|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
