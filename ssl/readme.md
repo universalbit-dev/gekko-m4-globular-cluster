@@ -1,11 +1,8 @@
-
 [OpenSSL](https://github.com/openssl/openssl)
-#### ssl-certificate
-
+#### self-signed certificate with OpenSSL
 ```
 sudo apt install openssl
-```
-
-```
-openssl req -x509 -newkey rsa:4096 -nodes -out ssl/cert.pem -keyout ssl/key.pem -days 365
+openssl genrsa 2048 > host.key
+chmod 400 host.key
+openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert
 ```
