@@ -64,10 +64,10 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 // calculated parameters.
 method.log = function() {var digits = 8;
   log.debug('calculated StochRSI properties:');
-  log.debug('\t', 'rsi:', rsi);
-  log.debug("StochRSI min:\t\t" + this.lowestRSI);
-  log.debug("StochRSI max:\t\t" + this.highestRSI);
-  log.debug("StochRSI Value:\t\t" + this.stochRSI);
+  log.debug('RSI:', rsi);
+  log.debug('StochRSI min:' + this.lowestRSI);
+  log.debug('StochRSI max:' + this.highestRSI);
+  log.debug('StochRSI Value:' + this.stochRSI);
 }
 
 method.check = function(candle) {
