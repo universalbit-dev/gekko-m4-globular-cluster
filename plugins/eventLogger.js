@@ -1,6 +1,6 @@
 const _ = require('../core/lodash3');require('lodash-migrate');
 var util = require('../core/util');
-
+const makeEventEmitter = require('node:events');
 const subscriptions = require('../subscriptions');
 const config = require('../core/util').getConfig().eventLogger;
 var log = require('../core/log');

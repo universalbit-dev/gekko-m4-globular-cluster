@@ -9,7 +9,7 @@ const env = util.gekkoEnv();
 const config = util.getConfig();
 const moment = require('moment');
 const fs = require('node:fs');
-
+const makeEventEmitter = require('node:events');
 const BacktestResultExporter = function() {
   this.performanceReport;
   this.roundtrips = [];
