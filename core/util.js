@@ -1,11 +1,10 @@
 /*
 
-
 */
 
 var moment = require('moment');
 const _ = require('./lodash3');
-const EventEmitter = require('node:events');
+var EventEmitter = require('node:events');
 var fs = require('node:fs');
 var semver = require('semver');
 var program = require('commander');
@@ -16,20 +15,15 @@ var _package = false;
 var _nodeVersion = false;
 var _gekkoMode = false;
 var _gekkoEnv = false;
-
 var _args = false;
+
 var util = {
   getConfig: function() {
     // cache
-    if(_config)
-      return _config;
-
+    if(_config) return _config;
     if(!program.config)util.die('Please specify a config file.', true);
-
     if(!fs.existsSync(util.dirs().gekko + program.config))util.die('Cannot find the specified config file.', true);
-
-    _config = require(util.dirs().gekko + program.config);
-    return _config;
+    _config = require(util.dirs().gekko + program.config);return _config;
   },
   setConfig: function(config) {
     _config = config;
@@ -46,8 +40,6 @@ var util = {
   getPackage: function() {
     if(_package)
       return _package;
-
-
     _package = JSON.parse( fs.readFileSync(__dirname + '/../package.json', 'utf8') );
     return _package;
   },
@@ -117,13 +109,13 @@ var util = {
     }
   },
   inherit: function(dest, source) {
-    require('node:util').inherits(
+    require('util').inherits(
       dest,
       source
     );
   },
   makeEventEmitter: function(dest) {
-    util.inherit(dest, require('node:events').EventEmitter);
+    util.inherit(dest, require('events').EventEmitter);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
@@ -152,12 +144,7 @@ var util = {
   gekkoEnv: function() {
     return _gekkoEnv || 'standalone';
   },
-  launchUI: function() {
-    if(program['ui'])
-      return true;
-    else
-      return false;
-  },
+
   getStartTime: function() {
     return startTime;
   },
@@ -181,7 +168,9 @@ if(!util.recentNode())
     ' and you need atleast ',
     util.getRequiredNodeVersion()
   ].join(''), true);
+
 _.bindAll(this, _.functions(this));
+
 module.exports = util;
 
 /*
