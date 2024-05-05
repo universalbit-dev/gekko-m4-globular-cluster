@@ -1,5 +1,5 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-
+const makeEventEmitter = require('node:events');
 const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
