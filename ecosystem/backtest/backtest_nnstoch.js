@@ -13,7 +13,7 @@ hodl_threshold:1,scale:5,batch_size:1,interval:3};
 config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'NNSTOCH'};//candleSize (5 minutes)* historySize (40 minutes) == period
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NNSTOCH'};
 
 //Date.prototype.toISOString()
 //Previous Month
