@@ -1,31 +1,26 @@
-/*
-Custom event emitter.Turns sync events from LIFO into a FIFO stack based model
-(https://forum.gekko.wizb.it/thread-56579.html)
-*/
-const _ = require('./lodash');
-const trailingStop=require('../exchange/triggers/trailingStop');
+const util = require('util');
+const events = require('events');
+const NativeEventEmitter = events.EventEmitter;
 
-const util = require('node:util');
-const events = require('node:events');
-
-var NativeEventEmitter = events.EventEmitter;
-var GekkoEventEmitter = function() {
-  _.bindAll(_.functions(this));
+const GekkoEventEmitter = function() {
   NativeEventEmitter.call(this);
   this.defferedEvents = [];
 }
 
 util.inherits(GekkoEventEmitter, NativeEventEmitter);
 
-GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {this.defferedEvents.push({name, payload});}
+GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {
+  this.defferedEvents.push({name, payload});
+}
 
 GekkoEventEmitter.prototype.broadcastDeferredEmit = function() {
+  if(this.defferedEvents.length === 0)
+    return false;
 
-  if(this.defferedEvents.length === 0)return false;
-  var event = this.defferedEvents.shift();
+  const event = this.defferedEvents.shift();
 
-  this.emit(event.name, event.payload);return true;
-
+  this.emit(event.name, event.payload);
+  return true;
 }
 
 module.exports = GekkoEventEmitter;
