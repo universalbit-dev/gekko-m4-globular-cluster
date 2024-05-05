@@ -202,12 +202,12 @@ check : function(candle) {
     }
 
   switch (long != 'undefined'&& short != 'undefined'){
-  case((short < long)&&('buy' !== this.prevAction &&
+  case((short < long)&&('buy' != this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('long');wait();this.brain();break;
-  case((short > long)&&('sell' !== this.prevAction &&
-  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
   this.advice('short');wait();this.brain();break;
+  case((short > long)&&('sell' != this.prevAction &&
+  signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
+  this.advice('long');wait();this.brain();break;
   default : {log.info('...WAIT DATA');}
 
   }
