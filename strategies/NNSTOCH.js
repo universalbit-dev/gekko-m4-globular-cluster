@@ -13,14 +13,13 @@ var math = require('mathjs');
 var fs = require('node:fs');
 var settings = config.NNSTOCH;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
-
 var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function wait() {
-  console.log('keep calm...');await sleep(200000);
+  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
+  for (let i = 0; i < 3; i++)
+  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
 };
 
 var method = {

@@ -1,5 +1,3 @@
-/*NeuralNetwork*/
-
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -12,13 +10,14 @@ var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
+var stoploss= require('./indicators/StopLoss.js');
 var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function wait() {
-  console.log('keep calm...');await sleep(200000);
+  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(2000);}
+  for (let i = 0; i < 3; i++)
+  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
 };
 
 
@@ -44,6 +43,8 @@ var method = {
     persisted: false,
     adviced: false
   };
+  //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
+
     //Date
     startTime = new Date();
     //indicators
@@ -60,7 +61,7 @@ var method = {
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
+      {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
@@ -137,10 +138,6 @@ var method = {
     this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
 
-  resetnet: function(){
-  this.nn = new convnetjs.Net();
-  },
-
   learn : function () {
     for (let i = 0; i < _.size(this.priceBuffer) - 1; i++) {
       let data = [this.priceBuffer[i]];
@@ -154,20 +151,20 @@ var method = {
     this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
     log.debug('Set normalization factor to',this.settings.scale);
   },
-  //Reinforcement Learning
-  //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
+//Reinforcement Learning
+//https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   brain:function(){
-  var brain = new deepqlearn.Brain(this.x, this.z);
-  var state = [Math.random(), Math.random(), Math.random()];
-  for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
-  {
-    var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? 1.0 : 0.0;
-    brain.backward([reward]); // <-- learning magic happens here
-    state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
-  }
-  brain.epsilon_test_time = 0.0;//don't make any more random choices
-  brain.learning = false;//
+    var brain = new deepqlearn.Brain(this.x, this.z);
+    var state = [Math.random(), Math.random(), Math.random()];
+    for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
+    {
+      var action = brain.forward(state); //returns index of chosen action
+      var reward = action === 0 ? 1.0 : 0.0;
+      brain.backward([reward]); // <-- learning magic happens here
+      state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
+    }
+    brain.epsilon_test_time = 0.0;//don't make any more random choices
+    brain.learning = false;//
   },
 
   update : function(candle)
@@ -193,23 +190,12 @@ var method = {
      this.learn();this.brain();
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
-  
-  //log book
+
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," +
-  	candle.volume + "," + candle.trades + "\n", function(err) 
-  	{if (err) {return console.log(err);}
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+  	if (err) {return console.log(err);}
   	});
-  
-  //stoploss as Reinforcement Learning
-    if ('stoploss' === this.indicators.stoploss.action)
-    {
-    log.info('Reinforcement Learning');this.brain();
-    this.prevAction='sell';signal=true;
-    }
-  
   },
-  
 
   predictCandle : function(candle) {
     let vol = new convnetjs.Vol(this.priceBuffer);
@@ -284,6 +270,7 @@ var method = {
     this.advice('short');wait();
     this.brain();}
 
+//stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
     {
     this.stoplossCounter++;log.info(':',this.indicators.stoploss.action);

@@ -8,16 +8,16 @@ var math = require('mathjs');
 var async = require('async');
 
 var settings = config.CCI;this.settings=settings;
+var stoploss= require('./indicators/StopLoss.js');
 
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await sleep(200000);
+  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(2000);}
+  for (let i = 0; i < 3; i++)
+  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
 };
 
 var method = {
@@ -54,8 +54,8 @@ init : function() {
   this.uplevel = this.settings.thresholds.up;
   this.downlevel = this.settings.thresholds.down;
   this.persisted = this.settings.thresholds.persistence;
-  //Indicators
-  this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+  //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
+
   //CCI
   this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 13 });
   //DEMA
@@ -67,7 +67,7 @@ init : function() {
     var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
-      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
+      {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
@@ -143,7 +143,6 @@ init : function() {
 
   this.hodl_threshold = this.settings.hodl_threshold || 1;
   },
-  resetnet: function(){this.nn = new convnetjs.Net();},
 
  learn : function () {
     for (var i = 0; i < _.size(this.priceBuffer) - 1; i++) {
@@ -161,19 +160,20 @@ init : function() {
   },
   //Reinforcement Learning
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-  brain:function(){
-  var brain = new deepqlearn.Brain(this.x, this.z);
-  var state = [Math.random(), Math.random(), Math.random()];
-  for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
-  {
-    var action = brain.forward(state); //returns index of chosen action
-    var reward = action === 0 ? 1.0 : 0.0;
-    brain.backward([reward]); // <-- learning magic happens here
-    state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
-  }
-  brain.epsilon_test_time = 0.0;//don't make any more random choices
-  brain.learning = false;//
-  },
+    brain:function(){
+      var brain = new deepqlearn.Brain(this.x, this.z);
+      var state = [Math.random(), Math.random(), Math.random()];
+      for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
+      {
+        var action = brain.forward(state); //returns index of chosen action
+        var reward = action === 0 ? 1.0 : 0.0;
+        brain.backward([reward]); // <-- learning magic happens here
+        state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
+      }
+      brain.epsilon_test_time = 0.0;//don't make any more random choices
+      brain.learning = false;//
+    },
+
 
 update : function(candle) {
 if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
@@ -189,11 +189,11 @@ if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 
-  //log book
-  fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," +
-  	candle.volume + "," + candle.trades + "\n", function(err) 
-  	{if (err) {return console.log(err);}});
+//log book
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+  	if (err) {return console.log(err);}
+  	});
   },
 
   predictCandle : function(candle) {
@@ -289,21 +289,16 @@ check : function(candle) {
         }
 
     } else {this.advice();}
-    
-    //stoploss as Reinforcement Learning
-    if ('stoploss' === this.indicators.stoploss.action)
-    {
-    log.info('Reinforcement Learning');this.brain();
-    this.prevAction='sell';signal=true;
-    }
 
-    log.info('===========================================');
+
     log.info('calculated CCI properties for candle:');
-    log.info("Trend:\t", this.trend.direction, " for ", this.trend.duration);
-    log.info('Price:\t', candle.close);
-    log.info('CCI:\t', cci);
+    log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
+    log.info('Price:', candle.close);
+    log.info('CCI:', cci);
     log.info("calculated NeuralNet candle hypothesis:");
-    log.info('meanAlpha:\t',meanAlpha);
+    log.info("meanAlpha:" + meanAlpha);
+    log.info('===========================================');
+
 
 },
 end : function() {log.info('THE END');}

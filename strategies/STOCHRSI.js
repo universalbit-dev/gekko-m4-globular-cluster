@@ -1,21 +1,19 @@
-/*
-
-*/
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
+var async = require('async');
+
 var settings = config.STOCHRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
-var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function wait() {
-  console.log('keep calm...');await sleep(200000);
+  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
   console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 3) await sleep(2000);}
+  for (let i = 0; i < 3; i++)
+  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
 };
 
 var method = {};
@@ -29,6 +27,9 @@ method.init = function() {
     persisted: false,
     adviced: false
   };
+
+  //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
+
 
   this.requiredHistory = this.settings.historySize;
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13});
@@ -62,20 +63,19 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 // for debugging purposes log the last
 // calculated parameters.
 method.log = function() {var digits = 8;
-  log.info('================================================');
-  log.debug('calculated STOCHRSI properties:');
-  log.debug('RSI:\t\t', rsi);
+  log.debug('calculated StochRSI properties:');
+  log.debug('\t', 'rsi:', rsi);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
 }
 
 method.check = function(candle) {
-  rsi=this.tulipIndicators.rsi.result.result;
+    rsi=this.tulipIndicators.rsi.result.result;
 	this.rsi=rsi;
 	if(this.stochRSI > this.settings.thresholds.high) {
 		// new trend detected
-		if(this.trend.direction !== 'high')
+		if(this.trend.direction != 'high')
 			this.trend = {
 				duration: 0,
 				persisted: false,
@@ -98,14 +98,18 @@ method.check = function(candle) {
 
 	else if(this.stochRSI < this.settings.thresholds.low)
 	{
-  if(this.trend.direction !== 'low')
-  {
-    this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
-    this.trend.duration++;log.debug('In low since', this.trend.duration, 'candle(s)');
-  }
-	else if(this.trend.duration >= this.settings.thresholds.persistence){this.trend.persisted = true;}
-	else if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('long');wait();}
-  else {this.advice();}
+		if(this.trend.direction != 'low')
+		{
+		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
+		this.trend.duration++;
+		log.debug('In low since', this.trend.duration, 'candle(s)');
+		}
+		if(this.trend.duration >= this.settings.thresholds.persistence)
+		{this.trend.persisted = true;}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
+		{this.trend.adviced = true;this.advice('long');wait();}
+
+    else {this.advice();}
 	}
 
 	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}

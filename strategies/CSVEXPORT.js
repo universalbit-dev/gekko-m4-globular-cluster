@@ -15,7 +15,7 @@ var method = {
 
   /* INIT */
   init: function() {
-    
+
     this.name = 'CSVExport';
     this.requiredHistory = this.settings.historySize;
     this.startTime = new Date();
@@ -24,9 +24,7 @@ var method = {
 //called on each new candle, before check.
 update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-      if (err) {
-        return console.log(err);
-      }
+      if (err) {return console.log(err);}
     });
 
   },
