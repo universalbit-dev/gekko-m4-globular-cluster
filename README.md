@@ -66,9 +66,8 @@ pm2 start xor_ui.config.js
 * ##### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv) 
 * ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
 
-#### Indicators:
-#### [Tulip Node](https://www.npmjs.com/package/tulind)
-Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
+#### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
+Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
 ```
 npm install tulind --build-from-source
 ```
