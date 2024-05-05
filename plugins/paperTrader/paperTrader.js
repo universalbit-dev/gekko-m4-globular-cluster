@@ -7,7 +7,7 @@ var util = require('../../core/util.js');
 const ENV = util.gekkoEnv();
 var log = require('../../core/log.js');
 var config = util.getConfig();
-
+const makeEventEmitter = require('node:events');
 const calcConfig = config.paperTrader;
 const watchConfig = config.watch;
 const dirs = util.dirs();
