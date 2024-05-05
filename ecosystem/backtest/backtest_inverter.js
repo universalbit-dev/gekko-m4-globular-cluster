@@ -9,7 +9,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 config.INVERTER={rsi:13,adx:13,dema:1,diplus:34,diminus:21,longema:233,shortema:55,threshold:3};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'INVERTER'};//candleSize (5 minutes)* historySize (40 minutes) == period
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'INVERTER'};
 
 //Date.prototype.toISOString()
 //Previous Month
