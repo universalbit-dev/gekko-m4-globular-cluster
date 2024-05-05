@@ -1,11 +1,10 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-
-var fs = require('node:fs');
+var fs = require('fs-extra');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
 const log = require('../../core/log');
-
+const makeEventEmitter = require('node:events');
 const ENV = util.gekkoEnv();
 const mode = util.gekkoMode();
 const startTime = util.getStartTime();
@@ -30,6 +29,7 @@ const allowedIndicators = _.keys(Indicators);
 
 var Base = function(settings) {
   _.bindAll(this,_.functions(this));
+
 
   // properties
   this.age = 0;

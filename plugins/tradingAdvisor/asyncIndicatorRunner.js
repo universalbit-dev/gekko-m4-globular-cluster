@@ -1,23 +1,21 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-let fs = require('node:fs');
+const fs = require('fs-extra');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
 const tulind=require('../../core/tulind');
 const log = require('../../core/log');
 const allowedTulipIndicators = _.keys(tulind);
-
+const makeEventEmitter = require('node:events');
 const AsyncIndicatorRunner = function() {
   this.tulipIndicators = {};
   this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
-  this.candlePropsCacheSize = 100000;
+  this.candlePropsCacheSize = 10000;
   this.inflight = false;
   this.backlog = [];
   this.age = 0;
   _.bindAll(this,_.functions(this));
 }
-util.makeEventEmitter(AsyncIndicatorRunner);
-
 
 AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   if(this.inflight) {

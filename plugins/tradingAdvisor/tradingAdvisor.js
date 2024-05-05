@@ -1,6 +1,6 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const fs = require('node:fs');
-
+const makeEventEmitter = require('node:events');
 const util = require('../../core/util');
 var config = util.getConfig();
 
@@ -25,7 +25,6 @@ const Actor = function(done){ _.bindAll(this,_.functions(this));
 } else done();
 
 }
-util.makeEventEmitter(Actor);
 
 Actor.prototype.setupStrategy = function() {
   if(!fs.existsSync(dirs.methods + this.strategyName + '.js'))
