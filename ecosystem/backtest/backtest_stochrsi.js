@@ -10,7 +10,7 @@ config.STOCHRSI={interval:13,threshold:1};
 config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:40,method:'STOCHRSI'};//candleSize (5 minutes)* historySize (40 minutes) == period
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'STOCHRSI'};
 
 //Date.prototype.toISOString()
 //Previous Month
