@@ -7,12 +7,12 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 //Strategies
 config.NN={
-threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:89,
 hodl_threshold:1,scale:1,batch_size:1};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NN'};
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NN'};
 
 //Date.prototype.toISOString()
 //Previous Month
