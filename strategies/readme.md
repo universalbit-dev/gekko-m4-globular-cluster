@@ -48,7 +48,7 @@ Bollinger Bands are a type of statistical chart characterizing the prices and vo
 
 ##### bbands Sensible Values: {optInNbStdDevs:number,optInNbStdDevs:number,optInTimePeriod:number}
 ```
-this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: this.settings.nb,optInNbStdDevs:this.settings.nb,optInTimePeriod:this.settings.bbands});
+this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: this.settings.nbdevup,optInNbStdDevs:this.settings.nbdevdn,optInTimePeriod:this.settings.bbands});
 ```
 
 #### Useful info:
