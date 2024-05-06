@@ -27,19 +27,11 @@ const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var async = require('async');
 var stoploss = require('./indicators/StopLoss.js');
-
-async function wait() {
-  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
-  console.log('...make something of amazing');
-  for (let i = 0; i < 3; i++)
-  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
-};
-
+var waitdata=false;
 /*
 Method INVERTER:
 Process Exchange Data and make indicators data overview:|RSI| |SMA| |ADX| |DI| |DX| |DEMA| |StopLoss|
@@ -66,7 +58,8 @@ this.debug = true;
 /* Inputs: real */
 /* Options: period */
 /* Outputs: dema */
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.dema});
+this.addTulipIndicator('ema', 'ema', {optInTimePeriod: this.settings.dema});
 
 /* Exponential Moving Average */
 /* Type: overlay */
@@ -74,8 +67,8 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: ema */
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
+this.addTulipIndicator('longema', 'ema', {optInTimePeriod: this.settings.ema});
+this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: this.settings.ema});
 
 /* Relative Strength Index */
 /* Type: indicator */
@@ -83,7 +76,7 @@ this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: rsi */
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 13});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod :this.settings.rsi});
 
 //DI+ DI -
 /* Directional Indicator */
@@ -92,7 +85,7 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 13});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: plus_di, minus_di */
-this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
+this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.di});
 
 //ADX
 /* Average Directional Movement Index */
@@ -101,7 +94,7 @@ this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 13});
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.adx});
 
 //DX
 /* Directional Movement Index */
@@ -110,10 +103,10 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 13});
 /* Inputs: high, low, close */
 /* Options: period */
 /* Outputs: dx */
-this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 13});
+this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.dx});
 
 //StopLoss as indicator
-this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.stoploss});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');
@@ -127,20 +120,24 @@ log.info('Running', this.name);
 },
 
 //Trend
-
 resetTrend: function()
 {
 trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:false,
-lastLongPrice:0.0,lastShortPrice:0.0};
-this.trend = trend;
+lastLongPrice:0.0,lastShortPrice:0.0};this.trend = trend;
 },
 
-//CSV
+
 update: function(candle) {
-    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-    if (err) {return console.log(err);}
-    });
+//log book
+fs.appendFile('logs/csv/'
++ config.watch.asset + ':'
++ config.watch.currency + '_' + this.name + '_'
++ startTime + '.csv',candle.start
++ "," + candle.open + "," + candle.high + "," + candle.low + ","
++ candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades
++ "\n",
+function(err) {if (err) {return console.log(err);}}
+);
 },
 
 onTrade: function(event) {
@@ -148,6 +145,13 @@ onTrade: function(event) {
     this.prevAction = event.action;
     this.prevPrice = event.price;
   },
+
+wait :async function() {
+  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
+  console.log('...make something of amazing');
+  for (let i = 0; i < 3; i++)
+  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
+},
 
 check: function(candle)
 {
@@ -160,19 +164,19 @@ shortema = this.tulipIndicators.shortema.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
-var waitdata=false;
+ema= this.tulipIndicators.ema.result.result;
 
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 
 log.info('calculated INVERTER properties for candle:');
-log.info("Trend: ", this.trend.direction + this.trend.bb + this.trend.state);
-log.info('Price:', candle.close);
+log.info('Nut && Screw && Bolt');
+log.info("Direction:" + this.trend.direction);
+log.info('Price:', this.candle);
 log.info('RSI:', rsi);
-log.info('DX:', dx);
+log.info('ADX:', adx);
 log.info('EMA long:', longema);
 log.info('EMA short:', shortema);
-log.info('DEMA:', dema);
 log.info('===========================================');
 
 //RSI Indicator: Buy and Sell Signals
@@ -180,21 +184,20 @@ log.info('===========================================');
 switch (true) {
 	//rsi high - sell above '70'
 	case (rsi > 68 && rsi < 72):
-	log.info('nut RSI OVERBOUGHT sell');
-	this.advice();
+	log.info('RSI OVERBOUGHT sell');
+	this.advice('sell');
 	break;
 	//rsi low  - buy above '30'
 	case (rsi > 28 && rsi < 32):
-	log.info('nut RSI OVERSOLD buy');
-	this.advice();
+	log.info('RSI OVERSOLD buy');
+	this.advice('buy');
 	break;
-    //weak
+  //weak
 	case (rsi > 40 && rsi < 60):
-	log.info('nut RSI...WAIT DATA|');
-	this.pingPong();
+	log.info('nut RSI weak');this.pingPong();
 	break;
 	default:
-	log.info('nut RSI',rsi);
+  log.info('... wait data');
 	}
 
 /*
@@ -208,133 +211,82 @@ ADX Value 	Trend Strength
 75-100 	Extremely Strong Trend
 
 */
-	switch (true) {
-		case ((dx > 0)&&(dx < 25)):
-		log.info('');adxstrength='weak';this.pingPong();
-		break;
-
-		case ((dx > 25)&&(dx < 50)):
-		log.info('');adxstrength='strong';
-		break;
-
-		case ((dx > 50)&&(dx < 75)):
-		log.info('');adxstrength='verystrong';break;
-
-		case ((dx > 75)&&(dx < 100)):
-		log.info('');adxstrength='extremestrong';break;
-
-		default:
-		log.info('nut DX',dx);
-	}
-// + above - price up
-	if((di_plus > di_minus < this.settings.diplus)&&(this.trend.bb =='bull'))
-	{this.trend.state = 'long';
-	log.info('nut DM price Up:',di_plus,di_minus);
-	}
-// - above + price down
-	if((di_minus > di_plus < this.settings.diminus)&&(this.trend.bb=='bear'))
-	{this.trend.state = 'short';
-	log.info('nut DM Price Down:',di_plus,di_minus);
+	switch (adx != undefined) {
+		case ((adx > 0)&&(adx < 25)):adxstrength='weak';this.pingPong();break;
+		case ((adx > 25)&&(adx < 50)):adxstrength='strong';break;
+		case ((adx > 50)&&(adx < 75)):adxstrength='verystrong';break;
+		case ((adx > 75)&&(adx < 100)):adxstrength='extremestrong';break;
+		default:log.info('...wait data',adx);
 	}
 
-/*
-When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend.
-When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend.
-*/
-	switch (true)
+  /*
+  When the +diPlus is above the -diMinus, prices are moving up, and ADX measures the strength of the uptrend.
+  When the -diMinus above the +diPlus, prices are moving down, and ADX measures the strength of the downtrend.
+  */	if((di_plus > di_minus > this.settings.diplus)&&(this.trend.bb == 'bull'))
 	{
-	case (adxstrength == 'nut_weak'):
-	this.trend.direction = 'weak';this.pingPong();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-
-	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-
-	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_down';this.trend.bb='bear';this.long();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_down';this.trend.bb='bear';this.long();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_up';this.trend.bb='bull';this.short();
-	log.info('nut DI:',adxstrength,this.trend.direction);break;
-	default:
-	log.info('nut DI:...WAIT DATA');
-	waitdata=true;
+    this.trend.state = 'long';log.info('price moving up:',this.candle);
+	}
+	if((di_minus < di_plus < this.settings.diminus)&&(this.trend.bb == 'bear'))
+	{
+    this.trend.state = 'short';log.info('price moving down:',this.candle);
 	}
 
-        //BEAR TREND
-        if ((longema < shortema)&&(waitdata != true))
-        {
-        this.trend.bb ='bear';
+	switch (adx != undefined)
+	{
+	case (adxstrength === 'weak'):
+	this.trend.direction = 'weak';this.trend.bb='weak';this.pingPong();
+  log.info('strength: ',adxstrength,this.trend.direction);break;
 
-        }
-        //BULL TREND
-        else if ((longema > shortema)&&(waitdata !=true))
-        {
-        this.trend.bb ='bull';
+	case ((adxstrength === 'strong')&&(this.trend.state == 'long')):
+	this.trend.direction = 'screw_up';this.trend.bb='bull';this.long();
+  log.info('strength: ',adxstrength,this.trend.direction);break;
 
-        }
-        else log.info('...WAIT DATA');
+	case ((adxstrength === 'strong')&&(this.trend.state == 'short')):
+	this.trend.direction = 'screw_down';this.trend.bb='bear';this.short();
+  log.info('strength: ',adxstrength,this.trend.direction);break;
 
-        //Stoploss
-	if ('stoploss' === this.indicators.stoploss.action){this.advice();}
+	case ((adxstrength === 'verystrong')&&(this.trend.state == 'long')):
+	this.trend.direction = 'screw_up';this.trend.bb='bear';this.advice('buy');
+  log.info('strength: ',adxstrength,this.trend.direction);break;
+
+	case ((adxstrength === 'verystrong')&&(this.trend.state == 'short')):
+	this.trend.direction = 'screw_down';this.trend.bb='bull';this.advice('sell');
+  log.info('strength: ',adxstrength,this.trend.direction);break;
+
+	case ((adxstrength === 'extremestrong')&&(this.trend.state == 'long')):
+	this.trend.direction = 'screw_up';this.trend.bb='bull';this.advice('buy');
+  log.info('strength: ',adxstrength,this.trend.direction);break;
+
+	case ((adxstrength === 'extremestrong')&&(this.trend.state == 'short')):
+	this.trend.direction = 'screw_down';this.trend.bb='bear';this.advice('sell');
+  log.info('strength: ',adxstrength,this.trend.direction);break;
+	default:
+	log.info('...wait data',adxstrength,this.trend.direction);
+	}
+  //stoploss as pingPong function
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
 //Screw & Bolt
-//LONG
 long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
-  {
-  this.resetTrend();
-  this.trend.duration++;this.advice();wait();
-  }
-  if (this.debug) {log.info('|Bolt Up|');}
-
+  {this.advice('long');log.info('|Bolt Up|');this.wait();}
 },
-//SHORT
 short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
-  {
-  this.resetTrend();
-  this.trend.duration++;this.advice();wait();
-  }
-  if (this.debug) {log.info('|Bolt Down|');}
-
+  {this.advice('short');log.info('|Bolt Down|');this.wait();}
 },
 
 //PingPong Function
-/*
-|NUT|RSI|WEAK| |NUT|ADX|WEAK TREND|
-*/
 pingPong: function(){
-	switch (true)
+	switch (this.trend.bb !== 'weak')
 	{
-	case ((di_plus >= this.settings.diplus)&&(this.trend.bb !== 'bull')):
-	this.trend.direction = 'screw_up';
-	this.trend.lastLongPrice = this.candle;
-	this.trend.longPos = true;
-	break;
-	case ((di_minus >= this.settings.diminus)&&(this.trend.bb !== 'bear')):
-	this.trend.direction = 'screw_down';
-	this.trend.lastShortPrice = this.candle;
-	this.trend.longPos = false;
-	break;
+	case (this.trend.bb !== 'bull'):this.trend.direction = 'screw_up';
+  this.trend.lastLongPrice = this.candle;this.trend.longPos = true;break;
+	case (this.trend.bb !== 'bear'):this.trend.direction = 'screw_down';
+  this.trend.lastShortPrice = this.candle;this.trend.longPos = false;break;
 	default:
-	log.info('|PingPong|');
+	log.info('...wait data',this.trend.direction);
 	}
 },
 
