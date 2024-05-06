@@ -17,25 +17,31 @@ hodl_threshold:1,scale:1,batch_size:1,constant:0.015,history:89,cci:21,dema:1};
 config.NNCCI.thresholds={up:150,down:-30,persistence:3};
 
 //Date.prototype.toISOString()
-//Previous Month
+//Previous Month:
+/* */
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(2); 
+previous_month.setDate(2);
 var previous = previous_month.toString().slice(0, -14);
-//Current Month
+//Current Month:
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
-current_month.setDate(2); 
+current_month.setDate(2);
 var current = current_month.toString().slice(0, -14);
 
-//Backtest Exchange Data  FROM previous month TO current month
+/* today is a nice day */
+const today = new Date();
+var sunday = new Date(today.setDate(today.getDate() - today.getDay()),);
+var nice_sunday = sunday.toString().slice(0, -14);
+var saturday = new Date(today.setDate(today.getDate() - today.getDay() + 6),);
+var nice_saturday = saturday.toString().slice(0, -14);
+//Backtest Exchange Data  FROM sunday and last day saturday of the current week (backtest period ~ week)
+config.backtest = {enabled:true,daterange:{from:nice_sunday,to:nice_saturday},batchSize: 60};
 
-config.backtest = {enabled:true,
-  daterange:{from:previous_month,to:current_month},
-  batchSize: 60
-};
+//Backtest Exchange Data  FROM previous month to current month (backtest period ~ month)
+//config.backtest = {enabled:true,daterange:{from:previous,to:current},batchSize: 60};
 
 //DataBase
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
