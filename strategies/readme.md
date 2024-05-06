@@ -37,7 +37,6 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.dema} );
 ```
 
 #### [ADX](https://en.wikipedia.org/wiki/Average_directional_movement_index)
-[: wikipedia]
 The ADX is a combination of two other indicators developed by Wilder, the positive directional indicator (abbreviated +DI) and negative directional indicator (-DI).
 The ADX combines them and smooths the result with a smoothed moving average.
 ```
