@@ -33,7 +33,6 @@ current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
 current_month.setDate(2);
 var current = current_month.toString().slice(0, -14);
-//Import Exchange Data  FROM previous month to current month (import period ~ month)
 config.importer = {enabled:true,daterange:{from:previous ,to:current}};
 
 //Backtest
