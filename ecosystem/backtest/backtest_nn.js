@@ -12,7 +12,7 @@ l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:8
 hodl_threshold:1,scale:1,batch_size:1};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NN'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NN'};
 
 //Date.prototype.toISOString()
 //Previous Month
@@ -20,17 +20,19 @@ var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
 previous_month.setDate(2); 
-var previous = previous_month.toString().slice(0, -14);
+
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
 current_month.setDate(2); 
-var current = current_month.toString().slice(0, -14);
+
 
 //Backtest Exchange Data  FROM previous month TO current month
-
-config.backtest = {enabled:true,daterange:{from:previous_month,to:current_month},batchSize: 60};
+config.backtest = {enabled:true,
+  daterange:{from:previous_month,to:current_month},
+  batchSize: 1000
+};
 
 //DataBase
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
@@ -63,7 +65,6 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 //Import                       
 config.importer = {enabled:false}
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 /*

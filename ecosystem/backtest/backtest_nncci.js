@@ -5,7 +5,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
 //Strategies
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNCCI'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NNCCI'};
 //requiredHistory = candleSize 15 * historySize 10 = 150 minutes
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
@@ -13,26 +13,27 @@ config.NNCCI={
 threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:144,
 hodl_threshold:1,scale:1,batch_size:1,constant:0.015,history:89,cci:21,dema:1};
-//history:89, make same or smaller than requiredHistory (history:89 requiredHistory:150)
 config.NNCCI.thresholds={up:150,down:-30,persistence:3};
 
 //Date.prototype.toISOString()
-//Previous Month:
-/* */
+//Previous Month
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(2);
-var previous = previous_month.toString().slice(0, -14);
-//Current Month:
+previous_month.setDate(2); 
+
+//Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
-current_month.setDate(2);
-var current = current_month.toString().slice(0, -14);
+current_month.setDate(2); 
 
-//Backtest Exchange Data  FROM previous month to current month (backtest period ~ month)
-config.backtest = {enabled:true,daterange:{from:previous,to:current},batchSize: 60};
+
+//Backtest Exchange Data  FROM previous month TO current month
+config.backtest = {enabled:true,
+  daterange:{from:previous_month,to:current_month},
+  batchSize: 1000
+};
 
 //DataBase
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
@@ -65,7 +66,6 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 //Import                       
 config.importer = {enabled:false}
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 /*

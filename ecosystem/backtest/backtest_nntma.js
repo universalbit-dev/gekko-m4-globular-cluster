@@ -4,7 +4,7 @@ config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNTMA'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NNTMA'};
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NNTMA={
@@ -13,25 +13,24 @@ l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:1
 hodl_threshold:1,scale:1,batch_size:1,constant:0.015,history:89,stoploss:3,
 short:10,long:80,medium:45};
 
-
 //Date.prototype.toISOString()
 //Previous Month
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
 previous_month.setDate(2); 
-var previous = previous_month.toString().slice(0, -14);
+
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
 current_month.setDate(2); 
-var current = current_month.toString().slice(0, -14);
+
 
 //Backtest Exchange Data  FROM previous month TO current month
 config.backtest = {enabled:true,
   daterange:{from:previous_month,to:current_month},
-  batchSize: 60
+  batchSize: 1000
 };
 
 //DataBase
@@ -65,7 +64,6 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 //Import                       
 config.importer = {enabled:false}
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 /*

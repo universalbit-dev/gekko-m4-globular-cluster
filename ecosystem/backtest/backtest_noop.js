@@ -9,7 +9,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 config.NOOP={};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NOOP'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NOOP'};
 
 //Date.prototype.toISOString()
 //Previous Month
@@ -17,18 +17,17 @@ var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
 previous_month.setDate(2); 
-var previous = previous_month.toString().slice(0, -14);
+
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
 current_month.setDate(2); 
-var current = current_month.toString().slice(0, -14);
 
 //Backtest Exchange Data  FROM previous month TO current month
 config.backtest = {enabled:true,
   daterange:{from:previous_month,to:current_month},
-  batchSize: 60
+  batchSize: 1000
 };
 
 //DataBase
@@ -62,7 +61,6 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 //Import                       
 config.importer = {enabled:false}
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 /*

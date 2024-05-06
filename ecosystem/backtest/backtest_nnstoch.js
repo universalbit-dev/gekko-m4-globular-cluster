@@ -13,7 +13,7 @@ hodl_threshold:1,scale:1,batch_size:1,interval:3};
 config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNSTOCH'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NNSTOCH'};
 
 //Date.prototype.toISOString()
 //Previous Month
@@ -21,18 +21,18 @@ var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
 previous_month.setDate(2); 
-var previous = previous_month.toString().slice(0, -14);
+
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
 current_month.setDate(2); 
-var current = current_month.toString().slice(0, -14);
+
 
 //Backtest Exchange Data  FROM previous month TO current month
 config.backtest = {enabled:true,
   daterange:{from:previous_month,to:current_month},
-  batchSize: 60
+  batchSize: 1000
 };
 
 //DataBase
@@ -63,13 +63,14 @@ config.paperTrader = {enabled: true,reportInCurrency: true,
 //Performance Analyzer
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
-//Import                       
+//Import
 config.importer = {enabled:false}
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
+
 /*
+
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
