@@ -155,13 +155,13 @@ wait :async function() {
 check: function(candle)
 {
 //https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md
-rsi=this.tulipIndicators.rsi.result.result;
-adx=this.tulipIndicators.adx.result.result;
-dx=this.tulipIndicators.dx.result.result;
+rsi = this.tulipIndicators.rsi.result.result;
+adx = this.tulipIndicators.adx.result.result;
+dx = this.tulipIndicators.dx.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
-ema= this.tulipIndicators.ema.result.result;
+ema = this.tulipIndicators.ema.result.result;
 
 var adxstrength ='none';
 this.adxstrength =adxstrength;
@@ -195,7 +195,7 @@ switch (true) {
 	log.info('nut RSI weak');this.pingPong();
 	break;
 	default:
-  log.info('... wait rsi data:',rsi);
+  log.info('... wait RSI data:',rsi);
 	}
 
 /*
@@ -212,7 +212,7 @@ switch (adx != undefined) {
   case ((adx > 25)&&(adx < 50)):adxstrength='strong';break;
   case ((adx > 50)&&(adx < 75)):adxstrength='verystrong';break;
   case ((adx > 75)&&(adx < 100)):adxstrength='extremestrong';break;
-  default:log.info('...wait adx data',adx);
+  default:log.info('...wait ADX data',adx);
 	}
 
   /*
@@ -254,7 +254,7 @@ switch (adx != undefined) {
 	case ((adxstrength === 'extremestrong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.advice('sell');
   log.info('strength: ',adxstrength,this.trend.direction);break;
-	default:log.info('...wait strength data:',adxstrength,this.trend.direction);
+	default:log.info('...wait ADX strength data:',adxstrength,this.trend.direction);
 	}
   //stoploss as pingPong function
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
@@ -279,7 +279,7 @@ pingPong: function(){
   this.trend.lastLongPrice = this.candle;this.trend.longPos = true;break;
 	case (this.trend.bb !== 'bear'):this.trend.direction = 'screw_down';
   this.trend.lastShortPrice = this.candle;this.trend.longPos = false;break;
-	default:log.info('...wait direction data:',this.trend.direction);
+	default:log.info('...wait Direction data:',this.trend.direction);
 	}
 },
 
