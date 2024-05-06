@@ -9,13 +9,6 @@ var async = require('async');
 var settings = config.STOCHRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
-async function wait() {
-  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
-  console.log('...make something of amazing');
-  for (let i = 0; i < 3; i++)
-  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
-};
-
 var method = {};
 method.init = function() {
 
@@ -32,8 +25,8 @@ method.init = function() {
 
 
   this.requiredHistory = this.settings.historySize;
-  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13});
-  this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.rsi});
+  this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.stoploss});
 
   this.RSIhistory = [];
   log.info('================================================');
@@ -54,21 +47,33 @@ this.lowestRSI = _.min(this.RSIhistory);
 this.highestRSI = _.max(this.RSIhistory);
 this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
 
-	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-    if (err) {return console.log(err);}
-    });
+//log book
+fs.appendFile('logs/csv/'
++ config.watch.asset + ':'
++ config.watch.currency + '_' + this.name + '_'
++ startTime + '.csv',candle.start
++ "," + candle.open + "," + candle.high + "," + candle.low + ","
++ candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades
++ "\n",
+function(err) {if (err) {return console.log(err);}}
+);
+
 },
 
-// for debugging purposes log the last
-// calculated parameters.
-method.log = function() {var digits = 8;
+method.log = function() {
   log.debug('calculated StochRSI properties:');
   log.debug('RSI:', rsi);
   log.debug('StochRSI min:' + this.lowestRSI);
   log.debug('StochRSI max:' + this.highestRSI);
   log.debug('StochRSI Value:' + this.stochRSI);
-}
+},
+
+method.wait = async function() {
+  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
+  console.log('...make something of amazing');
+  for (let i = 0; i < 3; i++)
+  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
+},
 
 method.check = function(candle) {
     rsi=this.tulipIndicators.rsi.result.result;
@@ -91,7 +96,7 @@ method.check = function(candle) {
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-		{this.trend.adviced = true;this.advice('short');wait();}
+		{this.trend.adviced = true;this.advice('short');this.wait();}
 
 		else {this.advice();}
 	}
@@ -107,12 +112,15 @@ method.check = function(candle) {
 		if(this.trend.duration >= this.settings.thresholds.persistence)
 		{this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-		{this.trend.adviced = true;this.advice('long');wait();}
+		{this.trend.adviced = true;this.advice('long');this.wait();}
 
     else {this.advice();}
 	}
 
 	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}
+	//stoploss as Reinforcement Learning
+    if ('stoploss' === this.indicators.stoploss.action)
+    {log.info('Reinforcement Learning');this.brain();this.prevAction='sell';signal=false;}
 }
 
 module.exports = method;
