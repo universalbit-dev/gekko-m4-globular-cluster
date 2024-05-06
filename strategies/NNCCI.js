@@ -155,10 +155,12 @@ init : function() {
 
 
 update : function(candle) {
+  dema=this.tulipIndicators.dema.result.result;
+  cci=this.tulipIndicators.cci.result.result;
+
 if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   //remove oldest priceBuffer value
   this.priceBuffer.shift();
-  dema=this.tulipIndicators.dema.result.result;
   if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
   this.setNormalizeFactor();
   this.priceBuffer.push(dema / this.settings.scale );
