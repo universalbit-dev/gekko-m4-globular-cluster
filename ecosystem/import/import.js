@@ -34,16 +34,7 @@ current_month.setMonth(current_month.getMonth());
 current_month.setDate(2);
 var current = current_month.toString().slice(0, -14);
 //Import Exchange Data  FROM previous month to current month (import period ~ month)
-//config.importer = {enabled:true,daterange:{from:previous ,to:current}};
-
-/* today is a nice day */
-const today = new Date();
-var sunday = new Date(today.setDate(today.getDate() - today.getDay()),);
-var nice_sunday = sunday.toString().slice(0, -14);
-var saturday = new Date(today.setDate(today.getDate() - today.getDay() + 6),);
-var nice_saturday = saturday.toString().slice(0, -14);
-//Import Exchange Data FROM sunday and last day saturday of the current week (import period ~ week)
-config.importer = {enabled:true,daterange:{from:nice_sunday ,to:nice_saturday}};
+config.importer = {enabled:true,daterange:{from:previous ,to:current}};
 
 //Backtest
 config.backtest = {enabled:false};
