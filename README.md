@@ -71,6 +71,7 @@ Tulip Node provides 100+ technical analysis indicator functions, such as: simple
 ```
 npm install tulind --build-from-source
 ```
+* [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
 
 ---
 #### Resources:
