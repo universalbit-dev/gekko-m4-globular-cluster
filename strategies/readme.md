@@ -18,13 +18,13 @@ The relative strength index (RSI) is a technical indicator used in the analysis 
 
 #### optInTimePeriod Sensible Values: {optInTimePeriod : number}
 ```
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod :14 });
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod :this.settings.rsi });
 ```
 
 #### [SMA](https://en.wikipedia.org/wiki/Moving_average)
 simple moving average (SMA)...is normally taken from an equal number of data on either side of a central value. 
 ```
-this.addTulipIndicator('sma', 'sma', {optInTimePeriod :9 });
+this.addTulipIndicator('sma', 'sma', {optInTimePeriod :this.settings.sma });
 ```
 
 #### [DEMA](https://en.wikipedia.org/wiki/Double_exponential_moving_average)
@@ -33,7 +33,7 @@ in an article in the "Technical Analysis of Stocks & Commodities" magazine:
 "Smoothing Data with Faster Moving Averages".
 
 ```
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod:9} );
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.dema} );
 ```
 
 #### [ADX](https://en.wikipedia.org/wiki/Average_directional_movement_index)
@@ -41,7 +41,7 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod:9} );
 The ADX is a combination of two other indicators developed by Wilder, the positive directional indicator (abbreviated +DI) and negative directional indicator (-DI).
 The ADX combines them and smooths the result with a smoothed moving average.
 ```
-this.addTulipIndicator('adx', 'adx',{optInTimePeriod:14} );
+this.addTulipIndicator('adx', 'adx',{optInTimePeriod:this.settings.adx} );
 ```
 
 #### [BollingerBands](https://en.wikipedia.org/wiki/Bollinger_Bands)
@@ -49,7 +49,7 @@ Bollinger Bands are a type of statistical chart characterizing the prices and vo
 
 ##### bbands Sensible Values: {optInNbStdDevs:number,optInNbStdDevs:number,optInTimePeriod:number}
 ```
-this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: 2,optInNbStdDevs:2,optInTimePeriod:20});
+this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: this.settings.nb,optInNbStdDevs:this.settings.nb,optInTimePeriod:this.settings.bbands});
 ```
 
 #### Useful info:
@@ -61,14 +61,14 @@ this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: 2,optInNbStdDevs:2,o
 
 #### Add Indicator
 ```
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod :14 });
-this.addTulipIndicator('sma', 'sma', {optInTimePeriod :9 });
-this.addTulipIndicator('adx', 'adx',{optInTimePeriod:14} );
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod:9} );
-this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: 2,optInNbStdDevs:2,optInTimePeriod:20});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod :this.settings.rsi });
+this.addTulipIndicator('sma', 'sma', {optInTimePeriod :this.settings.sma });
+this.addTulipIndicator('adx', 'adx',{optInTimePeriod:this.settings.adx} );
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.dema} );
+this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: this.settings.nb,optInNbStdDevs:this.settings.nb,optInTimePeriod:this.settings.bbands});
 ```
 
-#### Assign indicator 
+#### Indicators result: 
 ```
 rsi=this.tulipIndicators.rsi.result.result;
 sma=this.tulipIndicators.sma.result.result;
