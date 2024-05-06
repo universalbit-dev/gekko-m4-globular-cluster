@@ -6,12 +6,15 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 
 //Strategies
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNCCI'};
+//requiredHistory = candleSize 15 * historySize 10 = 150 minutes
+
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NNCCI={
 threshold_buy:-0.1,threshold_sell:0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:377,
-hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,cci:13,dema:1};
-config.NNCCI.thresholds={up:70,down:30,persistence:3};
+hodl_threshold:1,scale:5,batch_size:1,constant:0.015,history:89,cci:21,dema:1};
+//history:89, make same or smaller than requiredHistory (history:89 requiredHistory:150)
+config.NNCCI.thresholds={up:150,down:-30,persistence:3};
 
 //Date.prototype.toISOString()
 //Previous Month
