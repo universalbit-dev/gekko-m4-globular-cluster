@@ -59,7 +59,6 @@ this.debug = true;
 /* Options: period */
 /* Outputs: dema */
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.dema});
-this.addTulipIndicator('ema', 'ema', {optInTimePeriod: this.settings.dema});
 
 /* Exponential Moving Average */
 /* Type: overlay */
@@ -67,8 +66,7 @@ this.addTulipIndicator('ema', 'ema', {optInTimePeriod: this.settings.dema});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: ema */
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod: this.settings.ema});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: this.settings.ema});
+this.addTulipIndicator('ema', 'ema', {optInTimePeriod: this.settings.ema});
 
 /* Relative Strength Index */
 /* Type: indicator */
@@ -159,8 +157,6 @@ check: function(candle)
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
 dx=this.tulipIndicators.dx.result.result;
-longema = this.tulipIndicators.longema.result.result;
-shortema = this.tulipIndicators.shortema.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
@@ -174,8 +170,9 @@ log.info('Nut && Screw && Bolt');
 log.info("Direction:" + this.trend.direction);
 log.info('RSI:', rsi);
 log.info('ADX:', adx);
-log.info('EMA long:', longema);
-log.info('EMA short:', shortema);
+log.info('DEMA:',dema);
+log.info('DX:',dx);
+log.info('EMA:', ema);
 log.info('===========================================');
 
 //RSI Indicator: Buy and Sell Signals
@@ -200,7 +197,6 @@ switch (true) {
 	}
 
 /*
-
 ADX trend Strength: https://www.investopedia.com/articles/trading/07/adx-trend-indicator.asp
 
 ADX Value 	Trend Strength
@@ -208,27 +204,24 @@ ADX Value 	Trend Strength
 25-50 	Strong Trend
 50-75 	Very Strong Trend
 75-100 	Extremely Strong Trend
-
 */
-	switch (adx != undefined) {
-		case ((adx > 0)&&(adx < 25)):adxstrength='weak';this.pingPong();break;
-		case ((adx > 25)&&(adx < 50)):adxstrength='strong';break;
-		case ((adx > 50)&&(adx < 75)):adxstrength='verystrong';break;
-		case ((adx > 75)&&(adx < 100)):adxstrength='extremestrong';break;
-		default:log.info('...wait adx data',adx);
+switch (adx != undefined) {
+  case ((adx > 0)&&(adx < 25)):adxstrength='weak';this.pingPong();break;
+  case ((adx > 25)&&(adx < 50)):adxstrength='strong';break;
+  case ((adx > 50)&&(adx < 75)):adxstrength='verystrong';break;
+  case ((adx > 75)&&(adx < 100)):adxstrength='extremestrong';break;
+  default:log.info('...wait adx data',adx);
 	}
 
   /*
   When the +diPlus is above the -diMinus, prices are moving up, and ADX measures the strength of the uptrend.
   When the -diMinus above the +diPlus, prices are moving down, and ADX measures the strength of the downtrend.
-  */	if((di_plus > di_minus > this.settings.diplus)&&(this.trend.bb == 'bull'))
-	{
-    this.trend.state = 'long';log.info('price moving up:',this.candle);
-	}
+  */
+
+  if((di_plus > di_minus > this.settings.diplus)&&(this.trend.bb == 'bull'))
+	{this.trend.state = 'long';log.info('price moving up:',this.candle);}
 	if((di_minus < di_plus < this.settings.diminus)&&(this.trend.bb == 'bear'))
-	{
-    this.trend.state = 'short';log.info('price moving down:',this.candle);
-	}
+	{this.trend.state = 'short';log.info('price moving down:',this.candle);}
 
 	switch (adx != undefined)
 	{
@@ -259,8 +252,7 @@ ADX Value 	Trend Strength
 	case ((adxstrength === 'extremestrong')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.advice('sell');
   log.info('strength: ',adxstrength,this.trend.direction);break;
-	default:
-	log.info('...wait strength data:',adxstrength,this.trend.direction);
+	default:log.info('...wait strength data:',adxstrength,this.trend.direction);
 	}
   //stoploss as pingPong function
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
