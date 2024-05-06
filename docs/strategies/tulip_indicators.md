@@ -47,7 +47,13 @@ Required parameters: - optInFastPeriod - optInSlowPeriod
 
 ### adx
 More information on the [**Average Directonal Movement Index**](https://en.wikipedia.org/wiki/Average_directional_movement_index)
-Required parameters: - optInTimePeriod
+```js
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.adx});
+adx=this.tulipIndicators.adx.result.result;
+```
+
+Required parameters: 
+* optInTimePeriod
 
 ### adxr
 The **Average Directional Movement Index Rating** is used as a risk indicator for a security in an [adx](#adx) system. It evaluates the risk (volatility) of a security by smoothing the amplitude readings of the trend function of the adx. It is calculated as follows
@@ -154,18 +160,26 @@ Required parameters:
 ### dema
 
 More information about the [DEMA](https://en.wikipedia.org/wiki/Double_exponential_moving_average)
+```javascript
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.dema});
+dema = this.tulipIndicators.dema.result.result;
+
+```
 
 Required parameters:
-
- - optInTimePeriod
+* optInTimePeriod
 
 ### di
 
 More information about the [Directional Indicator](https://en.wikipedia.org/wiki/Average_directional_movement_index)
 
-Required parameters:
-
- - optInTimePeriod
+```javascript
+this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.di});
+di_plus = this.tulipIndicators.di.result.diPlus;
+di_minus = this.tulipIndicators.di.result.diMinus;
+```
+Required parameters: 
+* optInTimePeriod
 
 ### dm
 
@@ -193,19 +207,15 @@ Required parameters:
 
 ### ema
 
-Exponential Moving Average (EMA) is similar to Simple Moving Average (SMA), measuring trend direction over a period of time. However, whereas SMA simply calculates an average of price data, EMA applies more weight to data that is more current. Because of its unique calculation, EMA will follow prices more closely than a corresponding SMA.
+Exponential Moving Average (EMA) is similar to Simple Moving Average (SMA), measuring trend direction over a period of time. However, whereas SMA simply calculates an average of price data, EMA applies more weight to data that is more current. Because of its unique calculation, EMA will follow prices more closely than a corresponding SMA. More information about the [Exponential Moving Average](https://www.investopedia.com/terms/e/ema.asp)
 
-    EMA = (K x (C - P)) + P
-
-Where:
-
- - C = Current Price 
- - P = Previous periods EMA (A SMA is used for the first periods calculations) 
- - K = Exponential smoothing constant
+```javascript
+this.addTulipIndicator('ema', 'ema', {optInTimePeriod: this.settings.ema});
+ema=this.tulipIndicators.ema.result.result;
+```
 
 Required parameters:
-
- - optInTimePeriod
+* optInTimePeriod
 
 ### emv
 
