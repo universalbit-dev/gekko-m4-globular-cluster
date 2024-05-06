@@ -1,41 +1,28 @@
 var config = {};
-//General Settings
 config.debug =true;
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',key:'000000-000000-000000',secret:'000000-000000-000000',tickrate:20};
+config.watch = {exchange:'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+config.trader={enabled:true,
+exchange:'kraken',currency:'XBT',asset:'LTC',
+key:'000000000-00000000000000-0000000000000000000',
+secret:'000000000-00000000000000-0000000000000000000',tickrate:20
+};
 
-//Strategies
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NOOP'};
+//requiredHistory = candleSize 15 * historySize 10 = 150 minutes
+
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NOOP={};
 
-//Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NOOP'};
-
-//Trader
-config.trader={enabled:true,exchange:'kraken',currency:'XBT',asset:'LTC',key:'000000-000000-000000',secret:'000000-000000-000000'};
-
-//Candle Writer
-config.candleWriter={enabled:true,adapter:'sqlite'};
-
-//Advice Logger
-config.adviceLogger={enabled:true};
-
-//BackTest
-config.backtest = {enabled:false};
-config.backtestResultExporter = {enabled: false};
-
-//DataBase
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
-
-//PaperTrader
+config.candleWriter={enabled:true,adapter:'sqlite'};
+config.adviceLogger={enabled:true};
+config.backtest = {enabled:false};
+config.backtestResultExporter = {enabled: false};
 config.paperTrader = {enabled: false};
-
-//Performance Analyzer
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
-
-//Import
 config.importer = {enabled:false};
-
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 
