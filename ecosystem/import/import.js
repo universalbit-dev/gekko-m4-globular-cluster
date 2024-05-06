@@ -10,30 +10,19 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //Trading Advisor
 config.tradingAdvisor = {enabled:false};
 
-//Previous Month
-var previous_month = new Date();
-previous_month.setDate(1);
-previous_month.setMonth(previous_month.getMonth()-1);
-//Current Month
-var current_month = new Date();
-current_month.setDate(1);
-current_month.setMonth(current_month.getMonth());
-
 //Date.prototype.toISOString()
 //Previous Month:
 /* */
 var previous_month = new Date();
-previous_month.setDate(1);
-previous_month.setMonth(previous_month.getMonth()-1);
 previous_month.setDate(2);
+previous_month.setMonth(previous_month.getMonth()-1);
 var previous = previous_month.toString().slice(0, -14);
 //Current Month:
 var current_month = new Date();
-current_month.setDate(1);
-current_month.setMonth(current_month.getMonth());
 current_month.setDate(2);
+current_month.setMonth(current_month.getMonth());
 var current = current_month.toString().slice(0, -14);
-config.importer = {enabled:true,daterange:{from:previous ,to:current}};
+config.importer = {enabled:true,daterange:{from:previous,to:current}};
 
 //Backtest
 config.backtest = {enabled:false};
