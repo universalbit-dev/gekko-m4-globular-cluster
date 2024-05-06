@@ -104,6 +104,7 @@ this.addTulipIndicator('adx', 'adx', {optInTimePeriod: this.settings.adx});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.dx});
 
 //StopLoss as indicator
+//https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/gekko_indicators.md
 this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.stoploss});
 
 log.info('================================================');
@@ -153,7 +154,7 @@ wait :async function() {
 
 check: function(candle)
 {
-
+//https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
 dx=this.tulipIndicators.dx.result.result;
@@ -167,6 +168,7 @@ this.adxstrength =adxstrength;
 
 log.info('calculated INVERTER properties for candle:');
 log.info('Nut && Screw && Bolt');
+log.info('===========================================');
 log.info("Direction:" + this.trend.direction);
 log.info('RSI:', rsi);
 log.info('ADX:', adx);
@@ -263,6 +265,7 @@ long: function(){
   if ((this.trend.direction !== 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'bull'))
   {this.advice('long');log.info('|Bolt Up|');this.wait();}
 },
+
 short: function(){
   if ((this.trend.direction !== 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'bear'))
   {this.advice('short');log.info('|Bolt Down|');this.wait();}
@@ -276,8 +279,7 @@ pingPong: function(){
   this.trend.lastLongPrice = this.candle;this.trend.longPos = true;break;
 	case (this.trend.bb !== 'bear'):this.trend.direction = 'screw_down';
   this.trend.lastShortPrice = this.candle;this.trend.longPos = false;break;
-	default:
-	log.info('...wait direction data:',this.trend.direction);
+	default:log.info('...wait direction data:',this.trend.direction);
 	}
 },
 
