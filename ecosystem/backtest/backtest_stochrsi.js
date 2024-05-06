@@ -8,7 +8,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'STOCHRSI'};
 //Strategies
-config.STOCHRSI={rsi:13,stoploss:3,interval:8,threshold:1};
+config.STOCHRSI={rsi:13,stoploss:3,interval:8};
 config.STOCHRSI.thresholds={low:30,high:70,persistence:3};
 
 //Date.prototype.toISOString()
