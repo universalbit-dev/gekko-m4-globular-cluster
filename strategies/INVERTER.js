@@ -172,7 +172,6 @@ this.adxstrength =adxstrength;
 log.info('calculated INVERTER properties for candle:');
 log.info('Nut && Screw && Bolt');
 log.info("Direction:" + this.trend.direction);
-log.info('Price:', this.candle);
 log.info('RSI:', rsi);
 log.info('ADX:', adx);
 log.info('EMA long:', longema);
