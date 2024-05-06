@@ -273,14 +273,15 @@ short: function(){
 
 //PingPong Function
 pingPong: function(){
-	switch (this.trend.bb !== 'weak')
-	{
+switch (this.trend.bb !== 'weak')
+{
 	case (this.trend.bb !== 'bull'):this.trend.direction = 'screw_up';
-  this.trend.lastLongPrice = this.candle;this.trend.longPos = true;break;
+		this.trend.lastLongPrice = this.candle;this.trend.longPos = true;break;
 	case (this.trend.bb !== 'bear'):this.trend.direction = 'screw_down';
-  this.trend.lastShortPrice = this.candle;this.trend.longPos = false;break;
+		this.trend.lastShortPrice = this.candle;this.trend.longPos = false;break;
 	default:log.info('...wait Direction data:',this.trend.direction);
-	}
+}
+
 },
 
 end: function(){log.info('|The End|');}
