@@ -37,10 +37,9 @@ startTime = new Date();
 }
 
 method.update = function(candle) {
-rsi=this.tulipIndicators.rsi.result.result;
-this.rsi=rsi;
+rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
 this.RSIhistory.push(this.rsi);
-if(_.size(this.RSIhistory) > this.interval)
+if(_.size(this.RSIhistory) > this.settings.interval)
 // remove oldest RSI value
 this.RSIhistory.shift();
 this.lowestRSI = _.min(this.RSIhistory);
