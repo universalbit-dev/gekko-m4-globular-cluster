@@ -184,12 +184,12 @@ log.info('===========================================');
 switch (true) {
 	//rsi high - sell above '70'
 	case (rsi > 68 && rsi < 72):
-	log.info('RSI OVERBOUGHT sell');
+	log.info('nut RSI OVERBOUGHT sell');
 	this.advice('sell');
 	break;
 	//rsi low  - buy above '30'
 	case (rsi > 28 && rsi < 32):
-	log.info('RSI OVERSOLD buy');
+	log.info('nut RSI OVERSOLD buy');
 	this.advice('buy');
 	break;
   //weak
@@ -197,7 +197,7 @@ switch (true) {
 	log.info('nut RSI weak');this.pingPong();
 	break;
 	default:
-  log.info('... wait data');
+  log.info('... wait rsi data:',rsi);
 	}
 
 /*
@@ -216,7 +216,7 @@ ADX Value 	Trend Strength
 		case ((adx > 25)&&(adx < 50)):adxstrength='strong';break;
 		case ((adx > 50)&&(adx < 75)):adxstrength='verystrong';break;
 		case ((adx > 75)&&(adx < 100)):adxstrength='extremestrong';break;
-		default:log.info('...wait data',adx);
+		default:log.info('...wait adx data',adx);
 	}
 
   /*
@@ -261,7 +261,7 @@ ADX Value 	Trend Strength
 	this.trend.direction = 'screw_down';this.trend.bb='bear';this.advice('sell');
   log.info('strength: ',adxstrength,this.trend.direction);break;
 	default:
-	log.info('...wait data',adxstrength,this.trend.direction);
+	log.info('...wait strength data:',adxstrength,this.trend.direction);
 	}
   //stoploss as pingPong function
 	if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
@@ -286,7 +286,7 @@ pingPong: function(){
 	case (this.trend.bb !== 'bear'):this.trend.direction = 'screw_down';
   this.trend.lastShortPrice = this.candle;this.trend.longPos = false;break;
 	default:
-	log.info('...wait data',this.trend.direction);
+	log.info('...wait direction data:',this.trend.direction);
 	}
 },
 
