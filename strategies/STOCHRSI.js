@@ -97,7 +97,7 @@ method.check = function(candle) {
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 		{this.trend.adviced = true;this.advice('short');this.wait();}
 
-		else {this.advice();}
+		else {log.info('...wait data');}
 	}
 
 	else if(this.stochRSI < this.settings.thresholds.low)
@@ -113,10 +113,10 @@ method.check = function(candle) {
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;this.advice('long');this.wait();}
 
-    else {this.advice();}
+    else {log.info('...wait data');}
 	}
 
-	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}
+	else {this.trend.duration = 0;log.debug('In no trend');log.info('...wait data');}
 	//stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
     {log.info('Reinforcement Learning');this.brain();this.prevAction='sell';signal=false;}
