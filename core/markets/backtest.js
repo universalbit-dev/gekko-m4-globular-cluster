@@ -3,7 +3,7 @@ var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
 var log = require(dirs.core + 'log');
-var moment = require('moment');
+var moment = require('../moment');
 
 var adapter = config[config.adapter];
 var Reader = require('../../plugins/sqlite/reader');
