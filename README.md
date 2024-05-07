@@ -15,9 +15,7 @@
 ---
 ### [Nodejs20](https://nodejs.org/en/blog/release/v20.11.0)
 ```
-Meta debug info:
-Gekko version: v0.6.8-m4
-Nodejs version: v20.11.0
+Now using node v20.12.2 (npm v10.5.0)
 ```
 ---
 
