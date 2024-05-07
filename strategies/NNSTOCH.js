@@ -32,7 +32,6 @@ var method = {
   hodl_threshold : 1,
 
   init : function() {
-    this.requiredHistory = this.settings.historySize;
     this.RSIhistory = [];
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
@@ -58,7 +57,7 @@ var method = {
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) + 10);
+    var y=Math.floor((Math.random() * 100) * 100);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
@@ -210,7 +209,7 @@ var method = {
 
     switch (true)
     {
-    case((this.trend.duration >= this.settings.thresholds.persistence)):
+    case((this.trend.duration >= 3)):
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
@@ -224,7 +223,7 @@ var method = {
 	}
 
 	switch (true){
-	case(this.trend.duration >= this.settings.thresholds.persistence):
+	case(this.trend.duration >= 3):
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
@@ -250,7 +249,7 @@ var method = {
     }
 
     log.info('calculated StochRSI properties for candle:');
-    log.info('\t', 'rsi:', rsi);
+    log.info('Rsi:'+ this.rsi);
     log.info("StochRSI min:" + this.lowestRSI);
     log.info("StochRSI max:" + this.highestRSI);
     log.info("StochRSI Value:" + this.stochRSI);
