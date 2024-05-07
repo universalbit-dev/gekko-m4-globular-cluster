@@ -14,6 +14,7 @@
 ##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 ---
 ### [Nodejs20](https://nodejs.org/en/blog/release/v20.11.0)
+* [node.js get started](https://github.com/nvm-sh/nvm)
 ```
 Now using node v20.12.2 (npm v10.5.0)
 ```
