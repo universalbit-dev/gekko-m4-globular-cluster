@@ -10,6 +10,7 @@
 */
 const _ = require('lodash');
 const util = require('./core/util');const async = require('async');
+var tulind = require('tulind');
 
 console.log('##########################################');
 console.log('UniversalBit Blockchain Powered by Gekko');
