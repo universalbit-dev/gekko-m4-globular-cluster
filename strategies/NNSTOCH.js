@@ -13,13 +13,14 @@ var math = require('mathjs');
 var fs = require('node:fs');
 var settings = config.NNSTOCH;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
-var async = require('async');
 
+var async = require('async');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
+  console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 3; i++)
-  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
+  for (let i = 0; i < 5; i++)
+  {if (i === 4) await sleep(2000);}
 };
 
 var method = {
@@ -43,8 +44,6 @@ var method = {
     persisted: false,
     adviced: false
   };
-  //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
-
     //Date
     startTime = new Date();
     //indicators
@@ -63,8 +62,8 @@ var method = {
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:233, activation: 'relu'},
-      {type:'fc', num_neurons:233, activation:'sigmoid'},
+      {type:'conv', num_neurons:144, activation: 'relu'},
+      {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
@@ -215,7 +214,7 @@ var method = {
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
-    case (this.stochRSI > this.settings.thresholds.high):
+    case (this.stochRSI > 70):
     this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'high',adviced: this.trend.adviced};
     this.trend.duration++;
     log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
@@ -229,7 +228,7 @@ var method = {
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
-	case(this.stochRSI < this.settings.thresholds.low):
+	case(this.stochRSI < 30):
 	this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:
 	'low',adviced:this.trend.adviced};
 	this.trend.duration++;

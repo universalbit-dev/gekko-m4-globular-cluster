@@ -6,10 +6,20 @@ const _ = require('../core/lodash');
 const fs = require('node:fs');
 var math = require('mathjs');
 var async = require('async');
+
 var settings = config.CCI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
+
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function wait() {
+  console.log('keep calm...');await sleep(200000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++)
+  {if (i === 4) await sleep(2000);}
+};
 
 var method = {
   priceBuffer : [],
@@ -45,9 +55,10 @@ init : function() {
   this.uplevel = this.settings.thresholds.up;
   this.downlevel = this.settings.thresholds.down;
   this.persisted = this.settings.thresholds.persistence;
-  //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
-  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: this.settings.cci });
-  this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.dema });
+  //CCI
+  this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 21 });
+  //DEMA
+  this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1 });
 
   this.nn = new convnetjs.Net();
   //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
@@ -56,17 +67,19 @@ init : function() {
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:233, activation: 'relu'},
-      {type:'fc', num_neurons:233, activation:'sigmoid'},
+      {type:'conv', num_neurons:144, activation: 'relu'},
+      {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
+
     this.nn.makeLayers(layers);
 
     if(this.settings.method == 'sgd')
     {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         learning_rate: this.settings.learning_rate,
-        momentum: 0.9,batch_size:8,
+        momentum: 0.9,
+        batch_size:8,
         l2_decay: this.settings.l2_decay,
         l1_decay: this.settings.l1_decay
       });
@@ -87,7 +100,8 @@ init : function() {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
-        eps: 1e-6,batch_size:8,
+        eps: 1e-6,
+        batch_size:8,
         l2_decay: this.settings.l2_decay
       });
     }
@@ -96,7 +110,8 @@ init : function() {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
-        momentum: 0.9,batch_size:8,
+        momentum: 0.9,
+        batch_size:8,
         l2_decay: this.settings.l2_decay
       });
     }
@@ -105,8 +120,10 @@ init : function() {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         method: this.settings.method,
         learning_rate: this.settings.learning_rate,
-        eps: 1e-6,ro:0.95,batch_size:8,
-        l2_decay: 0.001
+        eps: 1e-6,
+        ro:0.95,
+        batch_size:8,
+        l2_decay: this.settings.l2_decay
       });
     }
     else
@@ -115,8 +132,11 @@ init : function() {
         method: 'adadelta',
         learning_rate: 0.01,
         momentum: 0.0,
-        batch_size:1,eps: 1e-6,ro:0.95,
-        l2_decay: 0.001,l1_decay: 0.001
+        batch_size:1,
+        eps: 1e-6,
+        ro:0.95,
+        l2_decay: 0.001,
+        l1_decay: 0.001
       });
     }
 
@@ -155,28 +175,25 @@ init : function() {
 
 
 update : function(candle) {
-  dema=this.tulipIndicators.dema.result.result;
-  cci=this.tulipIndicators.cci.result.result;
-
 if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   //remove oldest priceBuffer value
   this.priceBuffer.shift();
-  if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
-  this.setNormalizeFactor();
-  this.priceBuffer.push(dema / this.settings.scale );
-  if (2 > _.size(this.priceBuffer)) return;
-  for (i=0;i<3;++i)this.learn();this.brain();
-  while (this.settings.price_buffer_len < _.size(this.priceBuffer))this.priceBuffer.shift();
+    dema=this.tulipIndicators.dema.result.result;
+    if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
+    this.setNormalizeFactor();
+    this.priceBuffer.push(dema / this.settings.scale );
+    if (2 > _.size(this.priceBuffer)) return;
+     for (i=0;i<3;++i)
+     this.learn();this.brain();
+     while (this.settings.price_buffer_len < _.size(this.priceBuffer))
+     this.priceBuffer.shift();
 
 //log book
-fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency
-+ '_' + this.name + '_' + startTime + '.csv',candle.start + "," + candle.open + ","
-+ candle.high + "," + candle.low + "," + candle.close + ","
-+ candle.vwp + "," + candle.volume + "," + candle.trades + "\n",
-function(err) {if (err) {return console.log(err);}
-});
-
-},
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+  	if (err) {return console.log(err);}
+  	});
+  },
 
   predictCandle : function(candle) {
     var vol = new convnetjs.Vol(this.priceBuffer);
@@ -196,18 +213,9 @@ function(err) {if (err) {return console.log(err);}
 
 },
 
-wait :async function() {
-  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
-  console.log('...make something of amazing');
-  for (let i = 0; i < 3; i++)
-  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
-},
-
 check : function(candle) {
     var lastPrice = candle.close;this.age++;
     var cci = this.tulipIndicators.cci.result.result;
-    var dema = this.tulipIndicators.dema.result.result;
-
 
     if(this.predictionCount > this.settings.min_predictions)
     {
@@ -219,6 +227,7 @@ check : function(candle) {
       var signalSell = (candle.close > this.prevPrice) || (candle.close <
       (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
+
     }
 
 
@@ -228,7 +237,7 @@ check : function(candle) {
     {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('short');this.wait();
+            this.advice('short');wait();
     }
         else if (cci >= this.uplevel && this.trend.direction != 'overbought' && ('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)) {
@@ -238,7 +247,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('short');this.wait();
+                this.advice('short');wait();
             }
         }
         else if (cci >= this.uplevel) {
@@ -251,7 +260,7 @@ check : function(candle) {
   signal === false  && meanAlpha > this.settings.threshold_buy)) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('long');this.wait();
+            this.advice('long');wait();
         }
         else if (cci <= this.downlevel && this.trend.direction != 'oversold' && ('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)) {
@@ -261,7 +270,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('long');this.wait();
+                this.advice('long');wait();
             }
         }
         else if (cci <= this.downlevel) {

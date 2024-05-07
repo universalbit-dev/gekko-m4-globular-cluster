@@ -11,13 +11,14 @@ var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
-var async = require('async');
 
+var async = require('async');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await new Promise(r => setTimeout(r, 1800000));//30'minutes'
+  console.log('keep calm...');await sleep(200000);
   console.log('...make something of amazing');
-  for (let i = 0; i < 3; i++)
-  {if (i === 3) await new Promise(r => setTimeout(r, 600000));}
+  for (let i = 0; i < 5; i++)
+  {if (i === 4) await sleep(2000);}
 };
 
 
@@ -43,8 +44,6 @@ var method = {
     persisted: false,
     adviced: false
   };
-  //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
-
     //Date
     startTime = new Date();
     //indicators
