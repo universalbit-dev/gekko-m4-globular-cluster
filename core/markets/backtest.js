@@ -43,7 +43,8 @@ var Market = function() {
   this.reader = new Reader();
 
 
-  log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', daterange.from, 'UTC');
+  log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', 
+  moment(from).format('DD-MM-YYYY'), 'and start backtest at', moment(daterange.from).format('DD-MM-YYYY'));
 
   this.batchSize = config.backtest.batchSize;
   this.iterator = {
@@ -94,7 +95,8 @@ Market.prototype.processCandles = function(err, candles) {
 
   if(!this.ended && amount < this.batchSize) {
     var d = function(ts) {
-      return moment.unix(ts).utc().format('YYYY-MM-DD');
+      return moment().unix(ts).utc().format('DD-MM-YYYY');
+      
     }
     var from = d(_.first(candles).start);
     var to = d(_.last(candles).start);
