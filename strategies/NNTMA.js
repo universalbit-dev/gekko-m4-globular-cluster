@@ -35,9 +35,9 @@ init : function() {
     log.info('================================================');
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
-    this.addTulipIndicator('short', 'ema', {optInTimePeriod:12});
-    this.addTulipIndicator('tema', 'tema',{optInTimePeriod:50});
-    this.addTulipIndicator('long', 'ema', {optInTimePeriod:26});
+    this.addTulipIndicator('short', 'ema', {optInTimePeriod:13});
+    this.addTulipIndicator('tema', 'tema',{optInTimePeriod:55});
+    this.addTulipIndicator('long', 'ema', {optInTimePeriod:21});
     //Date
     startTime = new Date();
 
@@ -48,12 +48,12 @@ init : function() {
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) + 10);
+    var y=Math.floor((Math.random() * 100) * 100);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:144, activation: 'relu'},
-      {type:'fc', num_neurons:144, activation:'sigmoid'},
+      {type:'conv', num_neurons:233, activation: 'relu'},
+      {type:'fc', num_neurons:233, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
     ];
 
