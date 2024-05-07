@@ -7,7 +7,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 config.NNSTOCH={threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:233,hodl_threshold:1,scale:1,batch_size:1};
 config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NNSTOCH'};
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNSTOCH'};
 
 //Date.prototype.toISOString()
 //Previous Month
