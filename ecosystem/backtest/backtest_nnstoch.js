@@ -5,7 +5,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NNSTOCH={threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:233,hodl_threshold:1,scale:1,batch_size:1};
-config.NNSTOCH.thresholds={low:30,high:70,persistence:3};
+
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNSTOCH'};
 
