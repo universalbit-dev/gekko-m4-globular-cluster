@@ -52,9 +52,9 @@ init : function() {
   };
 
   this.ppoadv = 'none';
-  this.uplevel = this.settings.thresholds.up;
-  this.downlevel = this.settings.thresholds.down;
-  this.persisted = this.settings.thresholds.persistence;
+  this.uplevel = 150;
+  this.downlevel = -30;
+  this.persisted = 3;
   //CCI
   this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 21 });
   //DEMA
@@ -63,7 +63,7 @@ init : function() {
   this.nn = new convnetjs.Net();
   //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) * 10);
+    var y=Math.floor((Math.random() * 100) + 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
