@@ -32,9 +32,7 @@ npm i
 * [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
 #### fix gyp ERR! stack Error: `gyp` failed with exit code: 1
-```bash
-sudo apt install python3-pip
-```
+[troubleshooter](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/error/troubleshooter.md)
 
 
 
