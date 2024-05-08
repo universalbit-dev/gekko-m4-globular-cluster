@@ -18,7 +18,9 @@
 ```
 Now using node v20.12.2 (npm v10.5.0)
 ```
+
 ---
+
 
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4.git
@@ -28,6 +30,14 @@ npm i
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
 
 * [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
+
+#### fix gyp ERR! stack Error: `gyp` failed with exit code: 1
+```bash
+sudo apt install python3-pip
+```
+
+
+
 
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
