@@ -1,5 +1,6 @@
 [OpenSSL](https://github.com/openssl/openssl)
-#### self-signed certificate with OpenSSL
+#### self-signed certificate with OpenSSL 
+
 ```
 sudo apt install openssl
 ```
@@ -16,5 +17,5 @@ openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert -co
 cd ~/gekko-m4
 pm2 start xor_ui.config.js
 ```
-
+* https:
 navigate to url: https://localhost:4421/
