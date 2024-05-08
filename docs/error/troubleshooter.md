@@ -14,7 +14,7 @@ npm i
  npm ERR! ModuleNotFoundError: No module named 'distutils'
 ```
 cause:required python3  installer program: [pip](https://docs.python.org/3/installing/index.html)
-fixed issue whit this command
+* fixed issue whit this command
 ```
 sudo apt install python3-pip
 ```
@@ -33,7 +33,7 @@ pm2 start ecosystem.config.js
 * Command 'pm2' not found, did you mean:
 ```
 cause:PM2 Process Manager must be installed globally within the project
-fixed issue whit this command
+* fixed issue whit this command
 ```
 npm i pm2 -g
 ```
