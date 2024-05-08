@@ -32,12 +32,7 @@ npm i
 * [Install](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/installation/installing_gekko.md)
 
 #### fix gyp ERR! stack Error: `gyp` failed with exit code: 1
-[troubleshooter](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/error/troubleshooter.md)
-
-
-
-
-[Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
+#### [troubleshooter](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/error/troubleshooter.md)
 
 ---
 
@@ -63,7 +58,7 @@ Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
 pm2 start xor_ui.config.js 
 ```
 ---
-
+* ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
