@@ -1,13 +1,15 @@
 ##### gekko-m4 troubleshooter file: 
 Troubleshoot known issues 
 
----
-#### * NPM gyp ERR!
+##### running....
 ```
 git clone https://github.com/universalbit-dev/gekko-m4.git
 cd gekko-m4
 npm i
+pm2 start ecosystem.config.js
 ```
+---
+#### * NPM gyp ERR!
 * NPM Returns Error
 ```
  gyp ERR! stack Error: `gyp` failed with exit code: 1
@@ -21,13 +23,17 @@ sudo apt install python3-pip
 ---
 ---
 
+#### * Gekko-m4 Folder not found
+cause: git package not installed
+* fixed issue with this command
+```
+sudo apt install git
+```
+---
+---
+
 #### * PM2 not found
-```
-git clone https://github.com/universalbit-dev/gekko-m4.git
-cd gekko-m4
-npm i
-pm2 start ecosystem.config.js
-```
+
 * PM2 Returns Error
 ```
 * Command 'pm2' not found, did you mean:
