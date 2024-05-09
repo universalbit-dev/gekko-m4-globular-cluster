@@ -211,7 +211,7 @@ check : function(candle) {
 
   case((short > medium)&&(medium < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
+  this.advice();wait();this.brain();break;
 
   case((short < medium)&&(medium < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
