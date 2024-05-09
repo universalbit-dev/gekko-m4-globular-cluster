@@ -6,7 +6,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 config.candleWriter={enabled:true,adapter:'sqlite'};
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
-//Strategies
+//Chart Maker
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false};
