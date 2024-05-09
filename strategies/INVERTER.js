@@ -220,15 +220,18 @@ ADX Value 	Trend Strength
 	}
 
 /*
-When the +DMI is above the -DMI, prices are moving up, and ADX measures the strength of the uptrend.
-When the -DMI is above the +DMI, prices are moving down, and ADX measures the strength of the downtrend.
+When the +DI is above the -DI, prices are moving up, and ADX measures the strength of the uptrend.
+When the -DI is above the +DI, prices are moving down, and ADX measures the strength of the downtrend.
 */
+
+//convergence
 	if(di_plus > di_minus < 21.5){this.trend.state = 'short';log.info('|Nut|Dm|Price Down:',di_plus,di_minus);}
 	if(di_minus > di_plus < 21){this.trend.state = 'long';log.info('|Nut|Dm|Price Up:',di_plus,di_minus);}
+//divergence
 
 	switch (true)
 	{
-	case (adxstrength == 'nut_weak'):
+	case (adxstrength == 'weak'):
 	this.trend.direction = 'weak';this.pingPong();
 	log.info('|Nut|Di|:',this.trend.direction);break;
 
@@ -262,12 +265,12 @@ When the -DMI is above the +DMI, prices are moving down, and ADX measures the st
         //short TREND
         if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined))
         {
-        this.trend.bb ='short';log.info('|Ema-|');
+        this.trend.bb ='short';log.info('|short|');
         }
         //long TREND
         else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined))
         {
-        this.trend.bb ='long';log.info('|Ema+|');
+        this.trend.bb ='long';log.info('|long|');
         }
         else log.info('|trend|...wait data');
 
