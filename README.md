@@ -22,6 +22,12 @@ Now using node v20.12.2 (npm v10.5.0)
 ---
 
 
+#### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (ecosystem)
+```bash
+npm i pm2 -g 
+```
+---
+
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4.git
 cd gekko-m4
@@ -36,10 +42,6 @@ npm i
 
 ---
 
-#### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (ecosystem)
-```bash
-npm i pm2 -g --save
-```
 ---
 ##### import exchange data and backtest strategies
 ```bash
