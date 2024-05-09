@@ -23,7 +23,7 @@ sudo apt install python3-pip
 ---
 ---
 
-#### * Gekko-m4 Folder not found
+#### * gekko-m4 folder not found
 cause: git package not installed
 * fixed issue with this command
 ```
