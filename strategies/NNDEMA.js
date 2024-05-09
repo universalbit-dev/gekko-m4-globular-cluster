@@ -37,7 +37,7 @@ init : function() {
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     this.addTulipIndicator('short', 'dema', {optInTimePeriod:55});
     this.addTulipIndicator('medium', 'dema',{optInTimePeriod:127});
-    this.addTulipIndicator('long', 'ema', {optInTimePeriod:144});
+    this.addTulipIndicator('long', 'dema', {optInTimePeriod:144});
     //Date
     startTime = new Date();
 
