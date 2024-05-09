@@ -223,7 +223,9 @@ ADX Value 	Trend Strength
 When the +DI is above the -DI, prices are moving up, and ADX measures the strength of the uptrend.
 When the -DI is above the +DI, prices are moving down, and ADX measures the strength of the downtrend.
 */
-
+	
+//https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
+	
 //convergence
 	if(di_plus > di_minus < 21.5){this.trend.state = 'short';log.info('|Nut|Dm|Price Down:',di_plus,di_minus);}
 	if(di_minus > di_plus < 21){this.trend.state = 'long';log.info('|Nut|Dm|Price Up:',di_plus,di_minus);}
