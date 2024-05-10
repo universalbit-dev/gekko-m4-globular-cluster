@@ -3,6 +3,7 @@
 */
 var _ = require('../lodash3');require('lodash-migrate');
 var async = require('async');
+const { EventEmitter } = require('events'); 
 var util = require('../util');
 var config = require('../../core/util.js').getConfig();
 var dirs = util.dirs();
@@ -10,6 +11,7 @@ var Heart = require(dirs.dlna + 'heart');
 var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');
 var CandleManager = require(dirs.dlna + 'candleManager');
 var Dlna = function(config) {
+  const emit = new EventEmitter();
   _.bindAll(this,_.functions(this));
   Readable.call(this, {objectMode: true});
 // Dlna internal modules:
