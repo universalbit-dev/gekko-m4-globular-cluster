@@ -32,9 +32,9 @@ init : function() {
     log.info('================================================');
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
+    this.addTulipIndicator('long', 'dema', {optInTimePeriod:144});
     this.addTulipIndicator('short', 'dema', {optInTimePeriod:55});
-    this.addTulipIndicator('medium', 'dema',{optInTimePeriod:127});
-    this.addTulipIndicator('long', 'ema', {optInTimePeriod:144});
+    this.addTulipIndicator('medium', 'ema',{optInTimePeriod:127});
     //Date
     startTime = new Date();
 
@@ -154,11 +154,8 @@ init : function() {
 
   update : function(candle)
   {
-    long=this.tulipIndicators.long.result.result;
-    medium=this.tulipIndicators.medium.result.result;
-    short=this.tulipIndicators.short.result.result;
     dema=this.tulipIndicators.dema.result.result;
-
+  
     if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
     //remove oldest priceBuffer value
     this.priceBuffer.shift();
@@ -182,11 +179,10 @@ init : function() {
   },
 
 check : function(candle) {
-    dema=this.tulipIndicators.dema.result.result;
-    short = this.tulipIndicators.short.result.result;
-    medium = this.tulipIndicators.medium.result.result;
-    long = this.tulipIndicators.long.result.result;
-
+ long=this.tulipIndicators.long.result.result;
+ short=this.tulipIndicators.short.result.result;
+ medium=this.tulipIndicators.medium.result.result;
+ 
   var lastPrice = candle.close;this.age++;
 
   if(this.predictionCount > this.settings.min_predictions)
@@ -200,7 +196,7 @@ check : function(candle) {
       var signal = meanp < currentPrice;
     }
 
-  switch (long != 'undefined'){
+  switch ((long != 'undefined')&&(short != 'undefined')){
 //Below-average values --
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
@@ -220,7 +216,7 @@ check : function(candle) {
 
     log.info('calculated DEMA properties for candle:');
     log.info("DEMA long:\t\t" + long);
-    log.info("DEMA medium:\t\t" + medium);
+    log.info("EMA medium:\t\t" + medium);
     log.info("DEMA short:\t\t" + short);
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
