@@ -155,9 +155,9 @@ init : function() {
   update : function(candle)
   {
     long=this.tulipIndicators.long.result.result;
-    dema=this.tulipIndicators.dema.result.result;
+    medium=this.tulipIndicators.medium.result.result;
     short=this.tulipIndicators.short.result.result;
-    medium=this.tulipIndicators.dema.result.result;
+    dema=this.tulipIndicators.dema.result.result;
 
     if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
     //remove oldest priceBuffer value
