@@ -15,10 +15,7 @@ var stoploss=require('./indicators/StopLoss');
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function wait() {
-  console.log('keep calm...');await sleep(200000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
+  console.log('keep calm...');await sleep(200000);console.log('...make something of amazing');
 };
 
 var method = {
@@ -37,7 +34,7 @@ init : function() {
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     this.addTulipIndicator('short', 'dema', {optInTimePeriod:55});
     this.addTulipIndicator('medium', 'dema',{optInTimePeriod:127});
-    this.addTulipIndicator('long', 'dema', {optInTimePeriod:144});
+    this.addTulipIndicator('long', 'ema', {optInTimePeriod:144});
     //Date
     startTime = new Date();
 
@@ -204,20 +201,20 @@ check : function(candle) {
     }
 
   switch (long != 'undefined'){
-
+//Below-average values --
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('long');wait();this.brain();break;
+  this.advice('sell');wait();this.brain();break;
 
   case((short > medium)&&(medium < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
   this.advice();wait();this.brain();break;
-
-  case((short < medium)&&(medium < long)&&('sell' !== this.prevAction &&
+//Above-average values ++
+  case((short > medium)&&(medium > long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
+  this.advice('buy');wait();this.brain();break;
 
-  default : {log.info('...WAIT DATA');}
+  default : {log.info('...wait data');}
 
   }
 
