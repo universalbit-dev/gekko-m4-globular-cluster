@@ -1,5 +1,5 @@
 const _ = require('../lodash3');
-const EventEmitter = require('node:events');
+const { EventEmitter } = require('events'); 
 var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
@@ -24,6 +24,7 @@ Heart.prototype.tick = function() {
   }
 
   this.lastTick = moment().unix();
+  const emit = new EventEmitter();
   this.emit('tick');
 }
 
