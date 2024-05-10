@@ -5,9 +5,10 @@
 //The CandleCreator creates candles based on trade batches.
 
 const _ = require('../lodash3');require('lodash-migrate');
+const { EventEmitter } = require('events');
 var moment = require('moment');
 var util = require('../../core/util');
-var config = require('../../core/util.js').getConfig();
+var config = util.getConfig();
 var CandleCreator = function() {
   _.bindAll(this,_.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
@@ -25,11 +26,11 @@ CandleCreator.prototype.write = function(batch) {
   var candles = this.calculateCandles();
 
   candles = this.addEmptyCandles(candles);
-
+  const emitter = new EventEmitter();
   if(_.isEmpty(candles))
     return;
   this.threshold = candles.pop().start;
-  this.emit('candles', candles);
+  emitter.emit('candles', candles);
 }
 
 CandleCreator.prototype.filter = function(trades) {
