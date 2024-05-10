@@ -1,5 +1,5 @@
-const util = require('util');
-const events = require('events');
+const util = require('node:util');
+const events = require('node:events');//
 const NativeEventEmitter = events.EventEmitter;
 
 const GekkoEventEmitter = function() {
@@ -16,10 +16,10 @@ GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {
 GekkoEventEmitter.prototype.broadcastDeferredEmit = function() {
   if(this.defferedEvents.length === 0)
     return false;
-
-  const event = this.defferedEvents.shift();
-
+  const emit=new events();
+  const event = this.defferedEvents.shift();//
   this.emit(event.name, event.payload);
+  
   return true;
 }
 
