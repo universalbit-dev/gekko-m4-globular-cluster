@@ -57,7 +57,7 @@ var method = {
     this.nn = new convnetjs.Net();
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) + 10);
+    var y=Math.floor((Math.random() * 100) * 10);
     var z=Math.floor((Math.random() * 100) + 1);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
@@ -256,7 +256,7 @@ var method = {
       var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
       var signalSell = candle.close > this.prevPrice || candle.close <
       (this.prevPrice*this.settings.hodl_threshold);
-      let signal = meanp < currentPrice;
+      var signal = meanp < currentPrice;
     }
     if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction)&&
     ('buy' !== this.prevAction && signal === false  && meanAlpha > 1)){
