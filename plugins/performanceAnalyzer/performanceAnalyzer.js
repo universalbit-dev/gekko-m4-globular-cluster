@@ -1,5 +1,5 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-const makeEventEmitter = require('node:events');
+const {EventEmitter} = require('node:events');
 const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
@@ -223,6 +223,7 @@ PerformanceAnalyzer.prototype.finalize = function(done) {
 
   const report = this.calculateReportStatistics();
   if(report) {
+    const emit= new EventEmitter();
     this.logger.finalize(report);
     this.emit('performanceReport', report);
   }
