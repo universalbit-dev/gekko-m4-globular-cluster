@@ -60,7 +60,6 @@ Actor.prototype.setupStrategy = function() {
     .on('candle', _candle => {
       const { id, ...candle } = _candle;
       this.deferredEmit('stratCandle', candle);
-      const emit = new EventEmitter();
       this.emitStratCandle(candle);
     });
 }
