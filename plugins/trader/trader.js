@@ -4,7 +4,7 @@ const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-const {EventEmitter} = require('events');
+const {EventEmitter} = require('node:events');
 const log = require(dirs.core + 'log');
 const Broker = require(dirs.broker + '/gekkoBroker');
 
