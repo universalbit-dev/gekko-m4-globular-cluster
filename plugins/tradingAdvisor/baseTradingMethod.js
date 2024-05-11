@@ -4,7 +4,7 @@ const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
 const log = require('../../core/log');
-const makeEventEmitter = require('node:events');
+const {EventEmitter} = require('node:events');
 const ENV = util.gekkoEnv();
 const mode = util.gekkoMode();
 const startTime = util.getStartTime();
@@ -89,7 +89,7 @@ util.makeEventEmitter(Base);
 
 Base.prototype.tick = function(candle, done) {
   this.age++;
-
+  const emit =new EventEmitter();
   const afterAsync = () => {this.calculateSyncIndicators(candle, done);}
 
   if(this.asyncTick) {
