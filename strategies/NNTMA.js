@@ -223,8 +223,8 @@ check : function(candle) {
   }
 
     log.info('calculated TMA properties for candle:');
-    log.info("TMA long:\t\t" + long);
-    log.info("TMA short:\t\t" + short);
+    log.info("EMA long:\t\t" + long);
+    log.info("EMA short:\t\t" + short);
     log.info("TMA tema:\t\t" + tema);
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
