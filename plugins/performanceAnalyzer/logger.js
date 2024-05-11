@@ -11,7 +11,7 @@ var config = util.getConfig();
 
 const dirs = util.dirs();
 const mode = util.gekkoMode();
-const makeEventEmitter = require('node:events');
+const {EventEmitter} = require('node:events');
 
 const Logger = function(watchConfig) {
   this.currency = watchConfig.currency;
