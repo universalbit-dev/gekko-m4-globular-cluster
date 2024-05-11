@@ -1,6 +1,6 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const fs = require('node:fs');
-const makeEventEmitter = require('node:events');
+const {EventEmitter} = require('node:events');
 const util = require('../../core/util');
 var config = util.getConfig();
 
@@ -60,6 +60,7 @@ Actor.prototype.setupStrategy = function() {
     .on('candle', _candle => {
       const { id, ...candle } = _candle;
       this.deferredEmit('stratCandle', candle);
+      const emit = new EventEmitter();
       this.emitStratCandle(candle);
     });
 }
