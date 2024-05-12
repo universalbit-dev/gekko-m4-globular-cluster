@@ -1,26 +1,23 @@
+/*
+
+
+*/
 const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util.js');
 var config = util.getConfig();
-const {EventEmitter} = require('node:events');
+const makeEventEmitter = require('node:events');
 
 var log = require(util.dirs().core + 'log');
 
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
-//Best way is to create a module and override all these methods that you need
-async function db_all(query){
-    return new Promise(function(resolve,reject){
-        db.all(query, function(err,rows){
-           if(err){return reject(err);}
-           resolve(rows);
-         });
-    });
-}
+
 var Reader = function() {
   _.bindAll(this,_.functions(this));
   this.db = sqlite.initDB(false);
 }
 util.makeEventEmitter(Reader);
+
 
 // returns the most recent window complete candle
 // windows within `from` and `to`
@@ -30,7 +27,7 @@ Reader.prototype.mostRecentWindow = function(from, to, next) {
 
   var maxAmount = to - from + 1;
 
-  db_all(`
+  this.db.all(`
     SELECT start from ${sqliteUtil.table('candles')}
     WHERE start <= ${to} AND start >= ${from}
     ORDER BY start DESC

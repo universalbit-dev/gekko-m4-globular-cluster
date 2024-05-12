@@ -5,7 +5,7 @@ const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util');
 var log = require('../../core/log');
 var config = util.getConfig();
-const {EventEmitter} = require('node:events');
+const makeEventEmitter = require('node:events');
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 
