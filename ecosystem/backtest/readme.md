@@ -13,7 +13,6 @@ cd ~/gekko-m4
 ```
 node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
 ```
-log file successfully written [yes]
 
 ---
 
@@ -21,7 +20,6 @@ log file successfully written [yes]
 ```
 node gekko.js -c ecosystem/backtest/backtest_stochrsi.js -b
 ```
-log file successfully written [yes]
 
 ---
 
