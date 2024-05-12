@@ -1,6 +1,17 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-<img src="" width="auto" />
+#### PM2 Ecosystem Backtest:
+```bash
+cd ~/gekko-m4
+pm2 start ecosystem.config.js
+```
+
+#### NodeJs :
+```bash
+cd ~/gekko-m4
+node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
+```
+
 * backtest mode
 
 | Plugin         | description     | enable  |
