@@ -13,6 +13,7 @@ cd ~/gekko-m4
 ```
 node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
 ```
+log file successfully written [yes]
 
 ---
 
@@ -20,6 +21,7 @@ node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_stochrsi.js -b
 ```
+log file successfully written [yes]
 
 ---
 
@@ -34,12 +36,14 @@ node gekko.js -c ecosystem/backtest/backtest_nnstoch.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_nntma.js -b
 ```
+
 ---
 
 * NNDEMA.js
 ```
 node gekko.js -c ecosystem/backtest/backtest_nndema.js -b
 ```
+
 ---
 
 * NNCCI.js
@@ -53,4 +57,17 @@ node gekko.js -c ecosystem/backtest/backtest_nncci.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_nn.js -b
 ```
+
 ---
+
+
+BackTest Strategy Name | logs/json | speed 1-10
+---|---|---
+INVERTER | yes | [9]
+STOCHRSI | yes | [9]
+NNSTOCH | [] | []
+NNTMA | [] | []
+NNDEMA | [] | []
+NN | [] | [6]
+NNCCI | [] | []
+NOOP | [] | []
