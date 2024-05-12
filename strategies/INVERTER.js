@@ -74,8 +74,8 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
 /* Inputs: real */
 /* Options: period */
 /* Outputs: ema */
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 26});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 12});
+this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233});
+this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
 
 /* Relative Strength Index */
 /* Type: indicator */
