@@ -8,6 +8,11 @@
 cd ~/gekko-m4
 node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
 ```
+* note: 
+written backtest to:  logs/json/
+
+---
+
 * STOCHRSI.js
 ```
 cd ~/gekko-m4
