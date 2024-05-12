@@ -63,7 +63,7 @@ BackTest Strategy Name | written logs/json | speed 1-10
 ---|---|---
 INVERTER | yes | [9] 
 STOCHRSI | yes | [9] 
-NNSTOCH | [] | [] 
+NNSTOCH | no | [9] 
 NNTMA | [] | []
 NNDEMA | [] | []
 NN | [under review] | [7] 
