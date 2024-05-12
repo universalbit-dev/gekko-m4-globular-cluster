@@ -57,7 +57,7 @@ node gekko.js -c ecosystem/backtest/backtest_nn.js -b
 ```
 
 ---
-BackTest Strategy Name | written logs/json | speed 1-10 
+BackTest Strategy Name | Written logs/json | Speed 1-10 (Time Frame 1Month)
 ---|---|---
 INVERTER | yes | [9] 
 STOCHRSI | yes | [9] 
