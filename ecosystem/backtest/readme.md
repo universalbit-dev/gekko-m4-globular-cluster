@@ -59,15 +59,13 @@ node gekko.js -c ecosystem/backtest/backtest_nn.js -b
 ```
 
 ---
-
-
-BackTest Strategy Name | logs/json | speed 1-10
+BackTest Strategy Name | written logs/json | speed 1-10 
 ---|---|---
-INVERTER | yes | [9]
-STOCHRSI | yes | [9]
-NNSTOCH | [] | []
+INVERTER | yes | [9] 
+STOCHRSI | yes | [9] 
+NNSTOCH | [] | [] 
 NNTMA | [] | []
 NNDEMA | [] | []
-NN | [] | [6]
+NN | [under review] | [7] 
 NNCCI | [] | []
 NOOP | [] | []
