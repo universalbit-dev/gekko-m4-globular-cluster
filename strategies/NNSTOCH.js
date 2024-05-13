@@ -248,7 +248,7 @@ init : function() {
       var signal = meanp < currentPrice;
     }
 
-    log.info('calculated StochRSI properties for candle:');
+    log.info('calculated NNStochRSI properties for candle:');
     log.info('Rsi:'+ this.rsi);
     log.info("StochRSI min:" + this.lowestRSI);
     log.info("StochRSI max:" + this.highestRSI);
