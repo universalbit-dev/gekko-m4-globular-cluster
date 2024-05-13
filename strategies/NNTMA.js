@@ -3,7 +3,7 @@ const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
-const _ = require('../core/lodash');
+const _ = require('../core/lodash3');
 var async = require('async');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
@@ -142,7 +142,7 @@ init : function() {
   },
   //Reinforcement Learning
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-    brain:function(){
+    brain:function(candle){
       var brain = new deepqlearn.Brain(this.x, this.z);
       var state = [Math.random(), Math.random(), Math.random()];
       for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
@@ -153,7 +153,7 @@ init : function() {
         state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
       }
       brain.epsilon_test_time = 0.0;//don't make any more random choices
-      brain.learning = false;//
+      brain.learning = true;
     },
 
   update : function(candle)
@@ -208,11 +208,11 @@ check : function(candle) {
 
   case((short < tema)&&(tema < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('long');wait();this.brain();break;
+  this.advice('long');wait();break;
 
   case((short > tema)&&(tema < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');wait();this.brain();break;
+  this.advice('short');wait();break;
 
   case((short < tema)&&(tema < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
