@@ -27,7 +27,7 @@ method.init = function() {
     persisted: false,
     adviced: false
   };
-
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13});
   this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
@@ -70,7 +70,7 @@ method.log = function() {var digits = 8;
 method.check = function(candle) {
     rsi=this.tulipIndicators.rsi.result.result;
 	this.rsi=rsi;
-	if(this.stochRSI > this.settings.thresholds.high) {
+	if(this.stochRSI > 70) {
 		// new trend detected
 		if(this.trend.direction != 'high')
 			this.trend = {
@@ -84,7 +84,7 @@ method.check = function(candle) {
 
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 
-		if(this.trend.duration >= this.settings.thresholds.persistence)
+		if(this.trend.duration >= 1)
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
@@ -93,7 +93,7 @@ method.check = function(candle) {
 		else {this.advice();}
 	}
 
-	else if(this.stochRSI < this.settings.thresholds.low)
+	else if(this.stochRSI < 30)
 	{
 		if(this.trend.direction != 'low')
 		{
@@ -101,7 +101,7 @@ method.check = function(candle) {
 		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		}
-		if(this.trend.duration >= this.settings.thresholds.persistence)
+		if(this.trend.duration >= 1)
 		{this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;this.advice('long');wait();}
