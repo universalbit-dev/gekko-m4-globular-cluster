@@ -152,7 +152,7 @@ init : function() {
   },
   //Reinforcement Learning
   //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-    brain:function(){
+    brain:function(candle){
       var brain = new deepqlearn.Brain(this.x, this.z);
       var state = [Math.random(), Math.random(), Math.random()];
       for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
@@ -163,7 +163,7 @@ init : function() {
         state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
       }
       brain.epsilon_test_time = 0.0;//don't make any more random choices
-      brain.learning = false;//
+      brain.learning = true;
     },
 
   update : function(candle)
@@ -209,7 +209,7 @@ init : function() {
 
     switch (true)
     {
-    case((this.trend.duration >= 1)):
+    case((this.trend.duration >= 2)):
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
@@ -223,7 +223,7 @@ init : function() {
 	}
 
 	switch (true){
-	case(this.trend.duration >= 1):
+	case(this.trend.duration >= 2):
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
@@ -258,9 +258,9 @@ init : function() {
     log.info('===========================================');
 
     if ((this.trend.persisted && this.stochRSI != 0 )&&('buy' != this.prevAction && signal === false && meanAlpha > 1))
-    {this.advice('long');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();this.brain();}
+    {this.advice('long');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}
     if ((this.trend.persisted && this.stochRSI != 100)&&('sell' != this.prevAction && signal === true && meanAlpha < -1 && signalSell === true))
-    {this.advice('short');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();this.brain();}
+    {this.advice('short');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}
     //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
     {log.info('Reinforcement Learning');this.brain();this.prevAction='sell';signal=false;}
