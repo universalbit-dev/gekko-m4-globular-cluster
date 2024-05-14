@@ -30,6 +30,7 @@ init : function() {
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
+    this.name = 'NNDEMA';
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987 , 1597 , 2584 , 4181
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     this.addTulipIndicator('long', 'dema', {optInTimePeriod:144});
@@ -37,7 +38,7 @@ init : function() {
     this.addTulipIndicator('medium', 'ema',{optInTimePeriod:127});
     //Date
     startTime = new Date();
-
+    log.info('Running', this.name);
     //Indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     this.nn = new convnetjs.Net();
