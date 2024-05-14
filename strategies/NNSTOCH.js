@@ -55,16 +55,19 @@ init : function() {
     this.requiredHistory = this.settings.historySize;
     this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
-    //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) * 100);
+    var y=Math.floor((Math.random() * 100) * 10);
     var z=Math.floor((Math.random() * 100) + 1);
+    console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
+      //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
+
 
     this.nn.makeLayers(layers);
 
@@ -150,21 +153,23 @@ init : function() {
     this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
     log.debug('Set normalization factor to',1);
   },
-  //Reinforcement Learning
-  //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-    brain:function(candle){
-      var brain = new deepqlearn.Brain(this.x, this.z);
-      var state = [Math.random(), Math.random(), Math.random()];
-      for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
-      {
-        var action = brain.forward(state); //returns index of chosen action
-        var reward = action === 0 ? 1.0 : 0.0;
-        brain.backward([reward]); // <-- learning magic happens here
-        state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
-      }
-      brain.epsilon_test_time = 0.0;//don't make any more random choices
-      brain.learning = true;
-    },
+  
+//Reinforcement Learning
+//https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
+  
+  brain:function(candle){
+    var brain = new deepqlearn.Brain(this.x, this.z);
+    var state = [Math.random(), Math.random(), Math.random()];
+    for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
+    {
+    var action = brain.forward(state); //returns index of chosen action
+    var reward = action === 0 ? 1.0 : 0.0;
+    brain.backward([reward]); // <-- learning magic happens here
+    state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
+    }
+    brain.epsilon_test_time = 0.0;
+    brain.learning = true;
+  },
 
   update : function(candle)
   {

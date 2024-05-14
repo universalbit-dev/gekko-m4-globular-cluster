@@ -44,18 +44,20 @@ init : function() {
     //Indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     this.name = 'NNTMA';
-    this.requiredHistory = this.settings.historySize;
     this.nn = new convnetjs.Net();
-    //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     var x= Math.floor((Math.random() * 100) + 1);
     var y=Math.floor((Math.random() * 100) * 10);
     var z=Math.floor((Math.random() * 100) + 1);
+    console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:233, activation: 'relu'},
-      {type:'fc', num_neurons:233, activation:'sigmoid'},
+      {type:'conv', num_neurons:144, activation: 'relu'},
+      {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
+      //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
+
 
     this.nn.makeLayers(layers);
 
@@ -140,9 +142,10 @@ init : function() {
     this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
     log.debug('Set normalization factor to',this.settings.scale);
   },
-  //Reinforcement Learning
-  //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-    brain:function(candle){
+  
+//Reinforcement Learning
+//https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
+  brain:function(candle){
       var brain = new deepqlearn.Brain(this.x, this.z);
       var state = [Math.random(), Math.random(), Math.random()];
       for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
@@ -204,7 +207,7 @@ check : function(candle) {
       var signal = meanp < currentPrice;
     }
 
-  switch (long != 'undefined'){
+  switch (long != undefined) {
 
   case((short < tema)&&(tema < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
