@@ -61,14 +61,17 @@ pm2 start xor_ui.config.js
 ```
 ---
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
+* ##### [NeuralNet Trainers](https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html)
+* ##### [MathJS](https://mathjs.org/docs/reference/functions/mean.html)
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
+* ##### [CS230 Convolutional Neural Networks](https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#)
 * ##### [Pm2 Process Manager](https://pm2.keymetrics.io/docs/usage/quick-start/)
 * ##### [Generating a Startup Script](https://pm2.keymetrics.io/docs/usage/startup/)
 * ##### Learning [Javascript](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/learning/javascript)
 * ##### Learning [Nodejs](https://nodejs.org/docs/latest-v20.x/api/synopsis.html)
 * ##### [NPM Security best practices](https://cheatsheetseries.owasp.org/cheatsheets/NPM_Security_Cheat_Sheet.html)
 * ##### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv) 
-* ##### [BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
+* ##### [Perl BackTest-Tool](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/backtest/backtest-tool.md)
 
 #### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
 Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
