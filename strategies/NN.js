@@ -53,15 +53,17 @@ var method = {
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
-    //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     var x= Math.floor((Math.random() * 100) + 1);
     var y=Math.floor((Math.random() * 100) * 10);
     var z=Math.floor((Math.random() * 100) + 1);
+    console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
       {type:'fc', num_neurons:144, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
+      //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
 
     this.nn.makeLayers(layers);
@@ -202,7 +204,6 @@ var method = {
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {
-
     dema=this.tulipIndicators.dema.result.result;
     rsi=this.tulipIndicators.rsi.result.result;
     this.rsi=rsi;
@@ -245,7 +246,7 @@ var method = {
 		log.debug('In no trend');this.advice();
 	}
 
-    if(this.predictionCount > 233)
+    if(this.predictionCount > 377)
     {
       var prediction = this.predictCandle() * 1;
       var currentPrice = candle.close;
