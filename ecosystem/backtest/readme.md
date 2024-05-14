@@ -66,4 +66,4 @@ NNTMA | [no] | [6]
 NNDEMA | [] | []
 NN | [yes] | [7] 
 NNCCI | [no] | [8]
-NOOP | [] | []
+NOOP | | 
