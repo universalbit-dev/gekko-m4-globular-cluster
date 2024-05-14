@@ -63,7 +63,7 @@ INVERTER | yes | [9]
 STOCHRSI | yes | [9] 
 NNSTOCH | yes | [7] 
 NNTMA | [no] | [6]
-NNDEMA | [] | []
+NNDEMA | [] | [8]
 NN | [yes] | [7] 
 NNCCI | [no] | [8]
 NOOP | | 
