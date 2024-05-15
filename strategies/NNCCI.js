@@ -62,9 +62,9 @@ init : function() {
   
   this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) * 10);
-    var z=Math.floor((Math.random() * 100) + 1);
+    var x= Math.floor((Math.random() * 100) + 1);this.x=x;
+    var y=Math.floor((Math.random() * 100) * 10);this.y=y;
+    var z=Math.floor((Math.random() * 100) + 1);this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
@@ -298,9 +298,10 @@ check : function(candle) {
     log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
     log.info('Price:', candle.close);
     log.info('CCI:', cci);
+    log.info("NeuralNet input layer of size: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
-    log.info('===========================================');
+    log.info('==================================================================');
 
 
 },
