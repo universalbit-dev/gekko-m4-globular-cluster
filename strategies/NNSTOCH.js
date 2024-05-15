@@ -1,4 +1,3 @@
-/* */
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -45,20 +44,20 @@ init : function() {
   };
     //Date
     startTime = new Date();
+    //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
     //indicators
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:21});
-
     this.requiredHistory = this.settings.historySize;
     this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) * 10);
-    var z=Math.floor((Math.random() * 100) + 1);
+    var x= Math.floor((Math.random() * 100) + 1);this.x=x;
+    var y=Math.floor((Math.random() * 100) * 10);this.y=y;
+    var z=Math.floor((Math.random() * 100) + 1);this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
@@ -258,6 +257,7 @@ init : function() {
     log.info("StochRSI min:" + this.lowestRSI);
     log.info("StochRSI max:" + this.highestRSI);
     log.info("StochRSI Value:" + this.stochRSI);
+    log.info("NeuralNet input layer of size: " + this.x +" "+ this.y +" "+ this.z + " ");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info('meanAlpha:',meanAlpha);
     log.info('===========================================');
