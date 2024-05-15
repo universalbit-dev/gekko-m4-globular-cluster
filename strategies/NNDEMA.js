@@ -43,9 +43,9 @@ init : function() {
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) * 10);
-    var z=Math.floor((Math.random() * 100) + 1);
+    var x= Math.floor((Math.random() * 100) + 1);this.x=x;
+    var y=Math.floor((Math.random() * 100) * 10);this.y=y;
+    var z=Math.floor((Math.random() * 100) + 1);this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
@@ -140,7 +140,7 @@ init : function() {
     log.debug('Set normalization factor to',this.settings.scale);
   },
  
- //Reinforcement Learning
+//Reinforcement Learning
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   
   brain:function(candle){
@@ -218,15 +218,14 @@ check : function(candle) {
   default : {log.info('...wait data');}
 
   }
-
     log.info('calculated DEMA properties for candle:');
     log.info("DEMA long:\t\t" + long);
     log.info("EMA medium:\t\t" + medium);
     log.info("DEMA short:\t\t" + short);
+    log.info("NeuralNet input layer of size: "+ this.x +" x "+ this.y +" x "+ this.z + " " + "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
-    log.info('===========================================');
-
+    log.info('==================================================================');
 },
   end : function() {log.info('THE END');}
 };
