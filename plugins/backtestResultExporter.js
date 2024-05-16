@@ -9,6 +9,7 @@ const env = util.gekkoEnv();
 const config = util.getConfig();
 const moment = require('moment');
 const fs = require('node:fs');
+var async = require("async");
 const {EventEmitter} = require('node:events');
 const BacktestResultExporter = function() {
   this.performanceReport;
@@ -114,6 +115,22 @@ BacktestResultExporter.prototype.writeToDisk = function(backtest, next) {
       next();
     }
   );
+  
+var obj = {dev: filename};
+var backtest_file= {};
+
+async.forEachOf(obj, (value, key, callback) => {
+    fs.readFile(__dirname + value, "utf8", (err, data) => {
+        if (err) return callback(err);
+        try {
+            backtest_file[key] = JSON.parse(data);
+        } catch (e) {return callback(e);}
+        callback();
+    });
+}, err => {
+    if (err) console.error(err.message);
+    //backtest_files is now a map of JSON data
+});
 }
 
 module.exports = BacktestResultExporter;
