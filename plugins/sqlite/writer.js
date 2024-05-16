@@ -1,27 +1,34 @@
-/*
-CandleWriter
-*/
 const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util');
 var log = require('../../core/log');
 var config = util.getConfig();
-const makeEventEmitter = require('node:events');
+const {EventEmitter} = require('node:events');
+
+const sqlite3 = require('sqlite3').verbose();
+var db;exports.db = db;
+
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
-
+//SQLite on Node.js with async/await
+exports.run=function(query, params) {
+    return new Promise(function(resolve, reject) {
+        if(params == undefined) params=[]
+        this.db.all(query, params, function(err, rows)  {
+            if(err) reject("Read error: " + err.message)
+            else {resolve(rows)}
+        })
+    }) 
+}
 
 var Store = function(done, pluginMeta) {
   _.bindAll(this,_.functions(this));
-  this.done = done;
-
+  this.done = done
   this.db = sqlite.initDB(false);
   this.db.serialize(this.upsertTables);
-
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
 util.makeEventEmitter(Store);
-
 
 Store.prototype.upsertTables = function() {
   var createQueries = [
@@ -39,12 +46,6 @@ Store.prototype.upsertTables = function() {
         trades INTEGER NOT NULL
       );
     `,
-
-    // TODO: create trades
-    // ``
-
-    // TODO: create advices
-    // ``
   ];
 
   var next = _.after(_.size(createQueries), this.done);
@@ -84,18 +85,13 @@ Store.prototype.writeCandles = function() {
         candle.trades
       );
     });
-
     stmt.finalize();
     this.db.run("COMMIT");
-    // TEMP: should fix https://forum.gekko.wizb.it/thread-57279-post-59194.html#pid59194
     this.db.run("pragma wal_checkpoint;");
-
     this.cache = [];
   }
-
   this.db.serialize(transaction);
 }
-
 var processCandle = function(candle, done) {
   this.cache.push(candle);
   if (!this.buffered || this.cache.length > 1000)
@@ -114,22 +110,6 @@ if(config.candleWriter.enabled) {
   Store.prototype.processCandle = processCandle;
   Store.prototype.finalize = finalize;
 }
-
-// TODO: add storing of trades / advice?
-
-// var processTrades = function(candles) {
-//   util.die('NOT IMPLEMENTED');
-// }
-
-// var processAdvice = function(candles) {
-//   util.die('NOT IMPLEMENTED');
-// }
-
-// if(config.tradeWriter.enabled)
-//  Store.prototype.processTrades = processTrades;
-
-// if(config.adviceWriter.enabled)
-//   Store.prototype.processAdvice = processAdvice;
 
 module.exports = Store;
 
