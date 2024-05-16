@@ -129,7 +129,7 @@ async.forEachOf(obj, (value, key, callback) => {
     });
 }, err => {
     if (err) console.error(err.message);
-    //backtest_files is now a map of JSON data
+    //backtest_file is now a map of JSON data
 });
 }
 
