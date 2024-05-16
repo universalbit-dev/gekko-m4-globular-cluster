@@ -196,7 +196,7 @@ check : function(candle) {
       var currentPrice = candle.close;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
-      var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
+      var meanAlpha = (meanp - currentPrice) / currentPrice * 10;
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * this.settings.hodl_threshold));
       var signal = meanp < currentPrice;
     }
