@@ -201,7 +201,7 @@ init : function() {
   },
 
   predictCandle : function(candle) {
-    var vol = new convnetjs.Vol(this.priceBuffer);
+    var vol = new convnetjs.Vol(this.priceBuffer[i]);
     var prediction = this.nn.forward(vol);
     return prediction.w[0];
   },
@@ -247,7 +247,7 @@ init : function() {
       var currentPrice = candle.close;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
-      var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
+      var meanAlpha =(meanp - currentPrice) / currentPrice * 10;
       var signalSell = (candle.close > this.prevPrice) || (candle.close < (this.prevPrice * 1));
       var signal = meanp < currentPrice;
     }
@@ -257,10 +257,10 @@ init : function() {
     log.info("StochRSI min:" + this.lowestRSI);
     log.info("StochRSI max:" + this.highestRSI);
     log.info("StochRSI Value:" + this.stochRSI);
-    log.info("NeuralNet input layer of size: " + this.x +" "+ this.y +" "+ this.z + " ");
+    log.info("NeuralNet input layer of size: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info('meanAlpha:',meanAlpha);
-    log.info('===========================================');
+    log.info('==================================================================');
 
     if ((this.trend.persisted && this.stochRSI != 0 )&&('buy' != this.prevAction && signal === false && meanAlpha > 1))
     {this.advice('long');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}

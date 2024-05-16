@@ -162,7 +162,6 @@ init : function() {
   
   //Reinforcement Learning
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-  
   brain:function(candle){
     var brain = new deepqlearn.Brain(this.x, this.z);
     var state = [Math.random(), Math.random(), Math.random()];
@@ -288,10 +287,10 @@ check : function(candle) {
             if( this.trend.direction != 'nodirection')
             {this.trend = {direction: 'nodirection',duration: 0,persisted: false,adviced: false};}
             else {this.trend.duration++;}
-            this.advice();
+            _.noop;
         }
 
-    } else {this.advice();}
+    } else {_.noop;}
 
 
     log.info('calculated CCI properties for candle:');

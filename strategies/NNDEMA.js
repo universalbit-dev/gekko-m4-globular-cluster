@@ -177,7 +177,7 @@ init : function() {
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
   },
 
-  predictCandle : function() {
+  predictCandle : function(candle) {
     let vol = new convnetjs.Vol(this.priceBuffer);
     let prediction = this.nn.forward(vol);
     return prediction.w[0];
@@ -205,15 +205,15 @@ check : function(candle) {
 //Below-average values --
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('sell');wait();this.brain();break;
+  this.advice('sell');wait();break;
 
   case((short > medium)&&(medium < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice();wait();this.brain();break;
+  _.noop;wait();break;
 //Above-average values ++
   case((short > medium)&&(medium > long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('buy');wait();this.brain();break;
+  this.advice('buy');wait();break;
 
   default : {log.info('...wait data');}
 

@@ -56,9 +56,9 @@ var method = {
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var x= Math.floor((Math.random() * 100) + 1);
-    var y=Math.floor((Math.random() * 100) * 10);
-    var z=Math.floor((Math.random() * 100) + 1);
+    var x= Math.floor((Math.random() * 100) + 1);this.x=x;
+    var y=Math.floor((Math.random() * 100) * 10);this.y=y;
+    var z=Math.floor((Math.random() * 100) + 1);this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
@@ -200,6 +200,7 @@ var method = {
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
   	});
+
   },
 
   predictCandle : function(candle) {
@@ -259,21 +260,15 @@ var method = {
       var currentPrice = candle.close;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
-      var meanAlpha = (meanp - currentPrice) / currentPrice * 100;
+      var meanAlpha = (meanp - currentPrice) / currentPrice * 10;
       var signalSell = candle.close > this.prevPrice || candle.close <
       (this.prevPrice*this.settings.hodl_threshold);
-      let signal = meanp < currentPrice;
+      var signal = meanp < currentPrice;
     }
-    if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction)&&
-    ('buy' !== this.prevAction && signal === false  && meanAlpha > 1)){
-    this.advice('long');wait();
-    this.brain();
-    }
-    if ((this.trend.adviced && this.stochRSI != 100 &&'sell' !== this.prevAction)&&
-    ('sell' !== this.prevAction && signal === true && meanAlpha < -1  &&
-    signalSell === true)){
-    this.advice('short');wait();
-    this.brain();}
+    if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > 1))
+    {this.advice('long');wait();}
+    if ((this.trend.adviced && this.stochRSI != 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < -1  && signalSell === true))
+    {this.advice('short');wait();}
 
 //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
@@ -281,7 +276,14 @@ var method = {
     this.stoplossCounter++;log.info(':',this.indicators.stoploss.action);
     this.brain();this.prevAction='sell';signal=false;
     }
-
+    
+    log.info('calculated NN properties for candle:');
+    log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
+    log.info('Price:', candle.close);
+    log.info("NeuralNet input layer of size: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
+    log.info("calculated NeuralNet candle hypothesis:");
+    log.info("meanAlpha:" + meanAlpha);
+    log.info('==================================================================');
   },
 
   end : function() {log.info('THE END');}
