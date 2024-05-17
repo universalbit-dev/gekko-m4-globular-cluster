@@ -1,12 +1,7 @@
 /*
-
-
 */
 const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util');
-var sqlite3 = require('sqlite3');
-var db = new sqlite3.Database(':memory:');
-const {EventEmitter} = require('node:events');
 
 var config = util.getConfig();
 var watch = config.watch;
