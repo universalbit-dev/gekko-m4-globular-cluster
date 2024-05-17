@@ -1,25 +1,30 @@
-/*
-
-
-*/
-
 const _ = require('../../core/lodash3');require('lodash-migrate');
 var util = require('../../core/util.js');
-
 const fs = require('node:fs');
 var config = util.getConfig();
-
 var dirs = util.dirs();
-var adapter = config[config.sqlite];
+const sqlite3 = require('sqlite3').verbose();
+var db;exports.db = db;
 
-// verify the correct dependencies are installed
+const {EventEmitter} = require('node:events');
+
+//SQLite on Node.js with async/await
+exports.run=function(query, params) {
+    return new Promise(function(resolve, reject) {
+        if(params == undefined) params=[]
+        this.db.run(query, params, function(err, rows)  {
+            if(err) reject("Read error: " + err.message)
+            else {resolve(rows)}
+        })
+    })
+}
+
+var adapter = config[config.sqlite];
 var pluginHelper = require(dirs.core + 'pluginUtil');
 var pluginMock = {};
 
 var cannotLoad = pluginHelper.cannotLoad(pluginMock);
 if (cannotLoad) util.die(cannotLoad);
-if (config.debug) var sqlite3 = require('sqlite3');
-else var sqlite3 = require('sqlite3');
 
 var plugins = require(util.dirs().gekko + 'plugins');
 var version = config.sqlite.version;
@@ -44,7 +49,7 @@ module.exports = {
   initDB: () => {
     var journalMode = config.sqlite.journalMode || 'PERSIST';
     var syncMode = journalMode === 'WAL' ? 'NORMAL' : 'FULL';
-
+    
     var db = new sqlite3.Database(fullPath);
     db.run('PRAGMA synchronous = ' + syncMode);
     db.run('PRAGMA journal_mode = ' + journalMode);

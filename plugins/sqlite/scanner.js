@@ -1,6 +1,4 @@
 /*
-
-
 */
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const util = require('../../core/util.js');
@@ -11,6 +9,18 @@ var config = util.getConfig();
 
 const dirs = util.dirs();
 var sqlite3 = require('sqlite3');
+
+//SQLite on Node.js with async/await
+exports.all=function(query, params) {
+    return new Promise(function(resolve, reject) {
+        if(params == undefined) params=[]
+        this.handle.all(query, params, function(err, rows)  {
+            if(err) reject("Read error: " + err.message)
+            else {resolve(rows)}
+        })
+    }) 
+}
+
 // todo: rewrite with generators or async/await..
 module.exports = done => {
   const dbDirectory = config.sqlite.dataDirectory;
