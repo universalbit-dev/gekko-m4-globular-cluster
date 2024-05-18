@@ -180,6 +180,29 @@ init : function() {
 //log book
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
+
+/* dlna comparison and logical operators  */
+function make(length) {
+var result = '';
+const operator=[];
+operator[0]="==";
+operator[1]="===";
+operator[2]="!=";
+operator[3]="&&";
+operator[4]="<=";
+operator[5]=">=";
+operator[6]=">";
+operator[7]="<";
+operator[8]="||";
+operator[9]="!";
+operator[10]="=";
+const operatorLength = operator.length;
+var counter = 0;
+while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
+return result;
+}
+log.info('================================================');
+log.info('',make(9));
   },
 
   predictCandle : function() {
