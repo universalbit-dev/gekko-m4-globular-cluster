@@ -119,7 +119,6 @@ log.info('================================================');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
-
 //Date
 startTime = new Date();
 this.requiredHistory = this.settings.historySize;
@@ -141,6 +140,30 @@ update: function(candle) {
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
     });
+
+/* dlna comparison and logical operators  */
+function make(length) {
+var result = '';
+const operator=[];
+operator[0]="==";
+operator[1]="===";
+operator[2]="!=";
+operator[3]="&&";
+operator[4]="<=";
+operator[5]=">=";
+operator[6]=">";
+operator[7]="<";
+operator[8]="||";
+operator[9]="!";
+operator[10]="=";
+const operatorLength = operator.length;
+var counter = 0;
+while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
+return result;
+}
+log.info('================================================');
+log.info('',make(9));
+
 },
 
 onTrade: function(event) {
@@ -278,19 +301,17 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
         if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
-//Reverse Screw & Bolt
 //LONG
 long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb == 'long'))
-  {this.resetTrend();this.trend.duration++;this.advice('short');wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('long');wait();}
   if (this.debug) {log.info('|Bolt Up|');}
-
 },
 //Reverse Screw & Bolt  
 //SHORT
 short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb == 'short'))
-  {this.resetTrend();this.trend.duration++;this.advice('long');wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('short');wait();}
   if (this.debug) {log.info('|Bolt Down|');}
 },
 
@@ -303,12 +324,9 @@ pingPong: function(){
 	
 	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
-	
 	default:log.info('|PingPong|');
 	}
 },
-
 end: function(){log.info('|The End|');}
-
 };
 module.exports = method;
