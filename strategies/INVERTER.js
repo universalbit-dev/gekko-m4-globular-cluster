@@ -184,10 +184,8 @@ di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
 
-
 var adxstrength ='none';
 this.adxstrength =adxstrength;
-
 
 log.info('|Indicators:|');
 log.info('|Rsi|',rsi);
@@ -215,7 +213,7 @@ switch (true) {
 	this.pingPong();
 	break;
 	default:
-	log.info('|Nut|Rsi||',rsi);
+	_.noop;
 	}
 
 /*
@@ -239,7 +237,7 @@ ADX Value 	Trend Strength
 		case ((dx > 75)&&(dx < 100)):
 		adxstrength='extremestrong';break;
 		default:
-		log.info('...wait data',dx);
+		_.noop;
 	}
 
 /*
@@ -282,7 +280,7 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
 	this.trend.direction = 'screw_up';this.trend.bb='long';this.long();
 	log.info('|Nut|Di|:',this.trend.direction);break;
 	default:
-	log.info('|Nut|Di|...wait data');
+	_.noop;
 	}
 
         //short TREND
@@ -295,7 +293,7 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
         {
         this.trend.bb ='long';log.info('|long|');
         }
-        else log.info('|trend|...wait data');
+        else _.noop;
 
         //Stoploss
         if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
