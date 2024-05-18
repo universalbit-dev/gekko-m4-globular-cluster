@@ -189,8 +189,7 @@ init : function() {
     this.setNormalizeFactor();
     this.priceBuffer.push(dema / 1 );
     if (2 > _.size(this.priceBuffer)) return;
-     for (i=0;i<3;++i)
-     this.learn();this.brain();
+     for (i=0;i<3;++i)this.learn();
      while (987 < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 //log book
@@ -198,13 +197,33 @@ init : function() {
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
   	});
+
+/* dlna comparison and logical operators  */
+function makeoperators(length) {
+var result = '';
+const operator=[];
+operator[0]="==";
+operator[1]="===";
+operator[2]="!=";
+operator[3]="&&";
+operator[4]="<=";
+operator[5]=">=";
+operator[6]=">";
+operator[7]="<";
+operator[8]="||";
+operator[9]="!";
+operator[10]="=";
+const operatorLength = operator.length;
+var counter = 0;
+while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
+return result;
+}
+console.log(makeoperators(1));
+
   },
 
-  predictCandle : function(candle) {
-    var vol = new convnetjs.Vol(this.priceBuffer[i]);
-    var prediction = this.nn.forward(vol);
-    return prediction.w[0];
-  },
+  predictCandle : function(candle) 
+  {var vol = new convnetjs.Vol(this.priceBuffer[i]);var prediction = this.nn.forward(vol);return prediction.w[0];},
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check :function(candle){
 
@@ -219,11 +238,9 @@ init : function() {
     this.trend.adviced = true;
     case (this.stochRSI > 70):
     this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'high',adviced: this.trend.adviced};
-    this.trend.duration++;
-    log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
+    this.trend.duration++;log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
 	default:
-	this.advice();
-    this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
+	this.advice();this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
 	switch (true){
@@ -232,13 +249,10 @@ init : function() {
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
 	case(this.stochRSI < 30):
-	this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:
-	'low',adviced:this.trend.adviced};
-	this.trend.duration++;
-	log.debug('\t','In low since',this.trend.duration,'candle(s)');break;
+	this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'low',adviced:this.trend.adviced};
+	this.trend.duration++;log.debug('\t','In low since',this.trend.duration,'candle(s)');break;
 	default:
-	this.advice();
-	this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
+	this.advice();this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
 	if(this.predictionCount > 233)
@@ -266,7 +280,7 @@ init : function() {
     {this.advice('long');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}
     if ((this.trend.persisted && this.stochRSI != 100)&&('sell' != this.prevAction && signal === true && meanAlpha < -1 && signalSell === true))
     {this.advice('short');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}
-    //stoploss as Reinforcement Learning
+    //stoploss indicator as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
     {log.info('Reinforcement Learning');this.brain();this.prevAction='sell';signal=false;}
   },
