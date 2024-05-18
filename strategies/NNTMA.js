@@ -244,7 +244,7 @@ check : function(candle) {
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
   this.advice('short');wait();this.brain();break;
 
-  default : {log.info('...WAIT DATA');}
+  default : _.noop;
 
   }
 
