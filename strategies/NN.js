@@ -21,7 +21,6 @@ async function wait() {
   {if (i === 4) await sleep(2000);}
 };
 
-
 var method = {
   priceBuffer : [],
   predictionCount : 0,
@@ -67,8 +66,6 @@ var method = {
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
-
-    
 
     this.nn.makeLayers(layers);
 
@@ -256,7 +253,7 @@ log.info('',make(9));
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 		{this.trend.adviced = true;}
-		else{this.advice();}
+		else{_.noop;}
 
 	} else if(this.stochRSI < 30) {
 
@@ -269,12 +266,12 @@ log.info('',make(9));
 		if(this.trend.duration >= 3){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;}
-		else {this.advice();}
+		else {_.noop;}
 
 	} else {
 		// trends must be on consecutive candles
 		this.trend.duration = 0;
-		log.debug('In no trend');this.advice();
+		log.debug('In no trend');_.noop;
 	}
 
     if(this.predictionCount > this.settings.min_predictions)
