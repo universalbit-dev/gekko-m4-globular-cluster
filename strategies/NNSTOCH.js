@@ -240,7 +240,7 @@ console.log(makeoperators(1));
     this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'high',adviced: this.trend.adviced};
     this.trend.duration++;log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
 	default:
-	this.advice();this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
+	_.noop;this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
 	switch (true){
@@ -252,7 +252,7 @@ console.log(makeoperators(1));
 	this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'low',adviced:this.trend.adviced};
 	this.trend.duration++;log.debug('\t','In low since',this.trend.duration,'candle(s)');break;
 	default:
-	this.advice();this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
+	_.noop;this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
 	if(this.predictionCount > 233)
