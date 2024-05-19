@@ -177,7 +177,7 @@ init : function() {
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
 
 /* dlna comparison and logical operators  */
-function make(length) {
+function makeoperators(length) {
 var result = '';
 const operator=[];
 operator[0]="==";
@@ -196,9 +196,7 @@ var counter = 0;
 while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
 return result;
 }
-log.info('================================================');
-log.info('',make(9));
-
+console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 },
 
   predictCandle : function(candle) {
