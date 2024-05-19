@@ -57,7 +57,7 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
     });
 
 /* dlna comparison and logical operators  */
-function make(length) {
+function makeoperators(length) {
 var result = '';
 const operator=[];
 operator[0]="==";
@@ -76,9 +76,7 @@ var counter = 0;
 while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
 return result;
 }
-log.info('================================================');
-log.info('',make(9));
-
+console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 },
 
 // for debugging purposes log the last
