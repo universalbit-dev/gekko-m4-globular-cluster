@@ -218,9 +218,8 @@ var counter = 0;
 while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
 return result;
 }
-console.log(makeoperators(1));
-
-  },
+console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
+},
 
   predictCandle : function(candle) 
   {var vol = new convnetjs.Vol(this.priceBuffer[i]);var prediction = this.nn.forward(vol);return prediction.w[0];},
