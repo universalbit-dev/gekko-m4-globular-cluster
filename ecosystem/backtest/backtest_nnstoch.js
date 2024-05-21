@@ -6,7 +6,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
-config.NNSTOCH={method:'adadelta'};
+config.NNSTOCH={method:'alltrainers'};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNSTOCH'};
