@@ -91,16 +91,6 @@ init : function() {
         l2_decay: 0.001
       });
     }
-    else if(this.settings.method == 'adagrad')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: 'adagrad',
-        learning_rate: 0.01,
-        eps: 1e-6,
-        batch_size:8,
-        l2_decay: 0.001
-      });
-    }
     else if(this.settings.method == 'nesterov')
     {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
@@ -135,6 +125,42 @@ init : function() {
         l1_decay: 0.001
       });
     }
+    
+    if(this.settings.method == 'alltrainers')
+    {
+      this.trainer_sgd = new convnetjs.SGDTrainer(this.nn, {
+        method: 'sgd',
+        learning_rate: 0.01,
+        eps: 1e-6,
+        ro:0.95,
+        batch_size:1,
+        l2_decay: 0.001
+      });
+    
+      this.trainer_adadelta = new convnetjs.Trainer(this.nn, {
+        method: 'adadelta',
+        learning_rate: 0.01,
+        eps: 1e-6,
+        ro:0.95,
+        batch_size:1,
+        l2_decay: 0.001
+      });
+      this.trainer_nesterov = new convnetjs.Trainer(this.nn, {
+        method: 'nesterov',
+        learning_rate: 0.01,
+        momentum: 0.9,
+        batch_size:8,
+        l2_decay: 0.001
+      });
+      this.trainer_windowgrad = new convnetjs.Trainer(this.nn, {
+        method: 'windowgrad',
+        learning_rate: 0.01,
+        eps: 1e-6,
+        ro:0.95,
+        batch_size:8,
+        l2_decay: 0.001
+      });    
+}
 
   this.hodl_threshold = 1 || 1;
   },
@@ -144,7 +170,11 @@ init : function() {
       var data = [this.priceBuffer[i]];
       var current_price = [this.priceBuffer[i + 1]];
       var vol = new convnetjs.Vol(data);
-      this.trainer.train(vol, current_price);
+      this.trainer_sgd.train(vol, current_price);
+      this.trainer_adadelta.train(vol, current_price);
+      this.trainer_windowgrad.train(vol, current_price);
+      this.trainer_nesterov.train(vol, current_price);
+
       this.predictionCount++;
     }
   },
