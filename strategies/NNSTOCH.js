@@ -59,6 +59,7 @@ init : function() {
     var y=Math.floor((Math.random() * 100) * 10);this.y=y;
     var z=Math.floor((Math.random() * 100) + 1);this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
+
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
@@ -66,11 +67,11 @@ init : function() {
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
-
-
     this.nn.makeLayers(layers);
 
-    if(this.settings.method == 'sgd')
+switch(this.settings.method != undefined) {
+
+    case(this.settings.method == 'sgd'):
     {
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         learning_rate: 0.01,
@@ -80,8 +81,9 @@ init : function() {
         l1_decay: 0.001
       });
     }
-    else if(this.settings.method == 'adadelta')
-    {
+
+case(this.settings.method == 'adadelta'):
+{
       this.trainer = new convnetjs.SGDTrainer(this.nn, {
         method: 'adadelta',
         learning_rate: 0.01,
@@ -90,80 +92,89 @@ init : function() {
         batch_size:1,
         l2_decay: 0.001
       });
-    }
-    else if(this.settings.method == 'nesterov')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: 'nesterov',
-        learning_rate: 0.01,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: 0.001
-      });
-    }
-    else if(this.settings.method == 'windowgrad')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: 'windowgrad',
-        learning_rate: 0.01,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:8,
-        l2_decay: 0.001
-      });
-    }
-    else
-    {
-      this.trainer = new convnetjs.Trainer(this.nn, {
-        method: 'adadelta',
-        learning_rate: 0.01,
-        momentum: 0.0,
-        batch_size:1,
-        eps: 1e-6,
-        ro:0.95,
-        l2_decay: 0.001,
-        l1_decay: 0.001
-      });
-    }
-    
-    if(this.settings.method == 'alltrainers')
-    {
-      this.trainer_sgd = new convnetjs.SGDTrainer(this.nn, {
-        method: 'sgd',
-        learning_rate: 0.01,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:1,
-        l2_decay: 0.001
-      });
-    
-      this.trainer_adadelta = new convnetjs.Trainer(this.nn, {
-        method: 'adadelta',
-        learning_rate: 0.01,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:1,
-        l2_decay: 0.001
-      });
-      this.trainer_nesterov = new convnetjs.Trainer(this.nn, {
-        method: 'nesterov',
-        learning_rate: 0.01,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: 0.001
-      });
-      this.trainer_windowgrad = new convnetjs.Trainer(this.nn, {
-        method: 'windowgrad',
-        learning_rate: 0.01,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:8,
-        l2_decay: 0.001
-      });    
+}
+
+case(this.settings.method == 'nesterov'):
+{
+  this.trainer = new convnetjs.SGDTrainer(this.nn, {
+    method: 'nesterov',
+    learning_rate: 0.01,
+    momentum: 0.9,
+    batch_size:8,
+    l2_decay: 0.001
+  });
+}
+
+case(this.settings.method == 'windowgrad'):
+{
+  this.trainer = new convnetjs.SGDTrainer(this.nn, {
+    method: 'windowgrad',
+    learning_rate: 0.01,
+    eps: 1e-6,
+    ro:0.95,
+    batch_size:8,
+    l2_decay: 0.001
+  });
+}
+
+
+case(this.settings.method == 'alltrainers'):
+{
+  this.trainer_sgd = new convnetjs.SGDTrainer(this.nn, {
+    method: 'sgd',
+    learning_rate: 0.01,
+    eps: 1e-6,
+    ro:0.95,
+    batch_size:1,
+    l2_decay: 0.001
+  });
+
+  this.trainer_adadelta = new convnetjs.Trainer(this.nn, {
+    method: 'adadelta',
+    learning_rate: 0.01,
+    eps: 1e-6,
+    ro:0.95,
+    batch_size:1,
+    l2_decay: 0.001
+  });
+
+  this.trainer_nesterov = new convnetjs.Trainer(this.nn, {
+    method: 'nesterov',
+    learning_rate: 0.01,
+    momentum: 0.9,
+    batch_size:8,
+    l2_decay: 0.001
+  });
+
+  this.trainer_windowgrad = new convnetjs.Trainer(this.nn, {
+    method: 'windowgrad',
+    learning_rate: 0.01,
+    eps: 1e-6,
+    ro:0.95,
+    batch_size:8,
+    l2_decay: 0.001
+  });
+}
+
+default:
+{
+  this.trainer_adadelta = new convnetjs.Trainer(this.nn, {
+    method: 'adadelta',
+    learning_rate: 0.01,
+    momentum: 0.0,
+    batch_size:1,
+    eps: 1e-6,
+    ro:0.95,
+    l2_decay: 0.001,
+    l1_decay: 0.001
+  });
+}
+
 }
 
   this.hodl_threshold = 1 || 1;
-  },
+
+},
 
   learn : function () {
     for (var i = 0; i < _.size(this.priceBuffer) - 1; i++) {
@@ -182,10 +193,10 @@ init : function() {
     this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
     log.debug('Set normalization factor to',1);
   },
-  
+
 //Reinforcement Learning
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
-  
+
   brain:function(candle){
     var brain = new deepqlearn.Brain(this.x, this.z);
     var state = [Math.random(), Math.random(), Math.random()];
@@ -251,7 +262,7 @@ return result;
 console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 },
 
-  predictCandle : function(candle) 
+  predictCandle : function(candle)
   {var vol = new convnetjs.Vol(this.priceBuffer[i]);var prediction = this.nn.forward(vol);return prediction.w[0];},
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check :function(candle){
