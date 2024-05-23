@@ -31,14 +31,10 @@ const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 
 var stoploss = require('./indicators/StopLoss.js');
+
 var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function wait() {
-  console.log('keep calm...');await sleep(200000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
-};
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
 
 /*
 Method INVERTER:
@@ -119,6 +115,7 @@ log.info('================================================');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
+
 //Date
 startTime = new Date();
 this.requiredHistory = this.settings.historySize;
@@ -134,7 +131,7 @@ lastLongPrice:0.0,lastShortPrice:0.0};
 this.trend = trend;
 },
 
-//CSV
+//general purpose log  {data}
 update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
@@ -161,7 +158,8 @@ var counter = 0;
 while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
 return result;
 }
-console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
+console.log(makeoperators(1));
+
 },
 
 onTrade: function(event) {
@@ -182,8 +180,10 @@ di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
 
+
 var adxstrength ='none';
 this.adxstrength =adxstrength;
+
 
 log.info('|Indicators:|');
 log.info('|Rsi|',rsi);
@@ -211,7 +211,7 @@ switch (true) {
 	this.pingPong();
 	break;
 	default:
-	_.noop;
+	log.info('|Nut|Rsi||',rsi);
 	}
 
 /*
@@ -235,7 +235,7 @@ ADX Value 	Trend Strength
 		case ((dx > 75)&&(dx < 100)):
 		adxstrength='extremestrong';break;
 		default:
-		_.noop;
+		log.info('...wait data',dx);
 	}
 
 /*
@@ -278,7 +278,7 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
 	this.trend.direction = 'screw_up';this.trend.bb='long';this.long();
 	log.info('|Nut|Di|:',this.trend.direction);break;
 	default:
-	_.noop;
+	log.info('|Nut|Di|...wait data');
 	}
 
         //short TREND
@@ -291,7 +291,7 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
         {
         this.trend.bb ='long';log.info('|long|');
         }
-        else _.noop;
+        else log.info('|trend|...wait data');
 
         //Stoploss
         if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
@@ -303,7 +303,6 @@ long: function(){
   {this.resetTrend();this.trend.duration++;this.advice('long');wait();}
   if (this.debug) {log.info('|Bolt Up|');}
 },
-//Reverse Screw & Bolt  
 //SHORT
 short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb == 'short'))
@@ -320,9 +319,12 @@ pingPong: function(){
 	
 	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')):
 	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
+	
 	default:log.info('|PingPong|');
 	}
 },
+
 end: function(){log.info('|The End|');}
+
 };
 module.exports = method;

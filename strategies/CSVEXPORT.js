@@ -21,7 +21,8 @@ var method = {
     this.startTime = new Date();
     this.debug = true;
   },
-//called on each new candle, before check.
+ 
+//general purpose log  {data}
 update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
       if (err) {return console.log(err);}

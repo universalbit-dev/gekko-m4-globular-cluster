@@ -13,13 +13,9 @@ var settings = config.NN;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function wait() {
-  console.log('keep calm...');await sleep(200000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
-};
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
+
 
 var method = {
   priceBuffer : [],
@@ -66,6 +62,8 @@ var method = {
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
+
+    
 
     this.nn.makeLayers(layers);
 
@@ -193,11 +191,12 @@ var method = {
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 
+//general purpose log  {data}
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
   	});
-  	
+
 /* dlna comparison and logical operators  */
 function makeoperators(length) {
 var result = '';
@@ -218,7 +217,7 @@ var counter = 0;
 while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
 return result;
 }
-console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
+console.log(makeoperators(1));
 },
 
   predictCandle : function(candle) {
@@ -251,7 +250,7 @@ console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 		{this.trend.adviced = true;}
-		else{_.noop;}
+		else{this.advice();}
 
 	} else if(this.stochRSI < 30) {
 
@@ -264,12 +263,12 @@ console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 		if(this.trend.duration >= 3){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;}
-		else {_.noop;}
+		else {this.advice();}
 
 	} else {
 		// trends must be on consecutive candles
 		this.trend.duration = 0;
-		log.debug('In no trend');_.noop;
+		log.debug('In no trend');this.advice();
 	}
 
     if(this.predictionCount > this.settings.min_predictions)

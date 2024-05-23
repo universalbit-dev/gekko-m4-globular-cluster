@@ -13,13 +13,9 @@ var fs = require('node:fs');
 var settings = config.NNTMA;this.settings=settings;
 var stoploss=require('./indicators/StopLoss');
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function wait() {
-  console.log('keep calm...');await sleep(200000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
-};
+var async = require('async');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
 
 var method = {
   priceBuffer : [],
@@ -177,10 +173,11 @@ init : function() {
      this.learn();this.brain();
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
-//log book
+     
+//general purpose log  {data}
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
-
+  
 /* dlna comparison and logical operators  */
 function makeoperators(length) {
 var result = '';
@@ -201,8 +198,9 @@ var counter = 0;
 while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
 return result;
 }
-console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
-},
+console.log(makeoperators(1));
+
+  },
 
   predictCandle : function() {
     let vol = new convnetjs.Vol(this.priceBuffer);
@@ -243,7 +241,7 @@ check : function(candle) {
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
   this.advice('short');wait();this.brain();break;
 
-  default : _.noop;
+  default : {log.info('...WAIT DATA');}
 
   }
 

@@ -8,13 +8,8 @@ var settings = config.STOCHRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function wait() {
-  console.log('keep calm...');await sleep(200000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
-};
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
 
 var method = {};
 method.init = function() {
@@ -51,32 +46,11 @@ this.lowestRSI = _.min(this.RSIhistory);
 this.highestRSI = _.max(this.RSIhistory);
 this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
 
+//general purpose log  {data}
 	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
 	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
     });
-
-/* dlna comparison and logical operators  */
-function makeoperators(length) {
-var result = '';
-const operator=[];
-operator[0]="==";
-operator[1]="===";
-operator[2]="!=";
-operator[3]="&&";
-operator[4]="<=";
-operator[5]=">=";
-operator[6]=">";
-operator[7]="<";
-operator[8]="||";
-operator[9]="!";
-operator[10]="=";
-const operatorLength = operator.length;
-var counter = 0;
-while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
-return result;
-}
-console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 },
 
 // for debugging purposes log the last
@@ -112,7 +86,7 @@ method.check = function(candle) {
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 		{this.trend.adviced = true;this.advice('short');wait();}
 
-		else {_.noop;}
+		else {this.advice();}
 	}
 
 	else if(this.stochRSI < 30)
@@ -128,10 +102,10 @@ method.check = function(candle) {
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;this.advice('long');wait();}
 
-    else {_.noop;}
+    else {this.advice();}
 	}
 
-	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
+	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}
 }
 
 module.exports = method;
