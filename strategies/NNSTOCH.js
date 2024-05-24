@@ -211,7 +211,7 @@ console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 	_.noop;this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
-	if(this.predictionCount > 89)// <== prediction counter before advice buy or sell
+	if(this.predictionCount > 89) // <== prediction counter before advice buy or sell
     {
       var prediction = this.predictCandle() * 1;
       var currentPrice = candle.close;
