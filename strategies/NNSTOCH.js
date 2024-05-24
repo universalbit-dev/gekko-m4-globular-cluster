@@ -66,13 +66,13 @@ init : function() {
 
 switch(this.settings.method != undefined) {
 case(this.settings.method == 'sgd'):
-{this.trainer = new convnetjs.SGDTrainer(this.nn, {learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001,l1_decay: 0.001});}
+{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'sgd',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001,l1_decay: 0.001});}
 case(this.settings.method == 'adadelta'):
-{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'adadelta',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});}
+{this.trainer = new convnetjs.Trainer(this.nn, {method: 'adadelta',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});}
 case(this.settings.method == 'nesterov'):
-{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'nesterov',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001});}
+{this.trainer = new convnetjs.Trainer(this.nn, {method: 'nesterov',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001});}
 case(this.settings.method == 'windowgrad'):
-{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'windowgrad',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: 0.001});}
+{this.trainer = new convnetjs.Trainer(this.nn, {method: 'windowgrad',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: 0.001});}
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 case(this.settings.method == 'alltrainers'):
