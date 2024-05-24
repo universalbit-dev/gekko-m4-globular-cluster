@@ -65,105 +65,25 @@ init : function() {
     this.nn.makeLayers(layers);
 
 switch(this.settings.method != undefined) {
-
-    case(this.settings.method == 'sgd'):
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        learning_rate: 0.01,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: 0.001,
-        l1_decay: 0.001
-      });
-    }
-
+case(this.settings.method == 'sgd'):
+{this.trainer = new convnetjs.SGDTrainer(this.nn, {learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001,l1_decay: 0.001});}
 case(this.settings.method == 'adadelta'):
-{
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: 'adadelta',
-        learning_rate: 0.01,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:1,
-        l2_decay: 0.001
-      });
-}
-
+{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'adadelta',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});}
 case(this.settings.method == 'nesterov'):
-{
-  this.trainer = new convnetjs.SGDTrainer(this.nn, {
-    method: 'nesterov',
-    learning_rate: 0.01,
-    momentum: 0.9,
-    batch_size:8,
-    l2_decay: 0.001
-  });
-}
-
+{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'nesterov',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001});}
 case(this.settings.method == 'windowgrad'):
-{
-  this.trainer = new convnetjs.SGDTrainer(this.nn, {
-    method: 'windowgrad',
-    learning_rate: 0.01,
-    eps: 1e-6,
-    ro:0.95,
-    batch_size:8,
-    l2_decay: 0.001
-  });
-}
+{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'windowgrad',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: 0.001});}
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
 case(this.settings.method == 'alltrainers'):
 {
-  this.trainer_sgd = new convnetjs.SGDTrainer(this.nn, {
-    method: 'sgd',
-    learning_rate: 0.01,
-    eps: 1e-6,
-    ro:0.95,
-    batch_size:1,
-    l2_decay: 0.001
-  });
-
-  this.trainer_adadelta = new convnetjs.Trainer(this.nn, {
-    method: 'adadelta',
-    learning_rate: 0.01,
-    eps: 1e-6,
-    ro:0.95,
-    batch_size:1,
-    l2_decay: 0.001
-  });
-
-  this.trainer_nesterov = new convnetjs.Trainer(this.nn, {
-    method: 'nesterov',
-    learning_rate: 0.01,
-    momentum: 0.9,
-    batch_size:8,
-    l2_decay: 0.001
-  });
-
-  this.trainer_windowgrad = new convnetjs.Trainer(this.nn, {
-    method: 'windowgrad',
-    learning_rate: 0.01,
-    eps: 1e-6,
-    ro:0.95,
-    batch_size:8,
-    l2_decay: 0.001
-  });
+  this.trainer_sgd = new convnetjs.SGDTrainer(this.nn, {method: 'sgd',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});
+  this.trainer_adadelta = new convnetjs.Trainer(this.nn, {method: 'adadelta',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});
+  this.trainer_nesterov = new convnetjs.Trainer(this.nn, {method: 'nesterov',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001});
+  this.trainer_windowgrad = new convnetjs.Trainer(this.nn, {method: 'windowgrad',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: 0.001});
 }
-
 default:
-{
-  this.trainer_adadelta = new convnetjs.Trainer(this.nn, {
-    method: 'adadelta',
-    learning_rate: 0.01,
-    momentum: 0.0,
-    batch_size:1,
-    eps: 1e-6,
-    ro:0.95,
-    l2_decay: 0.001,
-    l1_decay: 0.001
-  });
-}
+{this.trainer_adadelta = new convnetjs.Trainer(this.nn, {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});}
 
 }
   this.hodl_threshold = 1 || 1;
@@ -268,11 +188,11 @@ console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 
     switch (true)
     {
-    case((this.trend.duration >= 2)): // <== trend : duration (2) before taking the value (trend: persisted) 
+    case((this.trend.duration >= 2)): // <== trend : duration (2) before taking the value (trend: persisted)
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
-    case (this.stochRSI > 70): 
+    case (this.stochRSI > 70):
     this.trend = {duration: this.trend.duration,persisted: this.trend.persisted,direction:'high',adviced: this.trend.adviced};
     this.trend.duration++;log.debug('\t','In high since',this.trend.duration,'candle(s)');break;
 	default:
@@ -280,7 +200,7 @@ console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 	}
 
 	switch (true){
-	case(this.trend.duration >= 2): // <== trend : duration (2) before taking the value (trend: persisted) 
+	case(this.trend.duration >= 2): // <== trend : duration (2) before taking the value (trend: persisted)
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
@@ -316,7 +236,7 @@ console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
     {this.advice('long');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}
     if ((this.trend.persisted && this.stochRSI != 100)&&('sell' != this.prevAction && signal === true && meanAlpha < -1 && signalSell === true))
     {this.advice('short');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};wait();}
-    
+
     //stoploss indicator as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
     {log.info('Reinforcement Learning');this.brain();this.prevAction='sell';signal=false;}
