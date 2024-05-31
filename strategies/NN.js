@@ -51,10 +51,15 @@ var method = {
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var x= Math.floor((Math.random() * 100) + 1);this.x=x;
-    var y=Math.floor((Math.random() * 100) * 10);this.y=y;
-    var z=Math.floor((Math.random() * 100) + 1);this.z=z;
-    console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
+    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+    var x = Math.floor(Math.random() * fibonacci_sequence.length);
+    x = fibonacci_sequence[x];this.x=x;
+    var y = Math.floor(Math.random() * fibonacci_sequence.length);
+    y = fibonacci_sequence[y];this.y=y;
+    var z = Math.floor(Math.random() * fibonacci_sequence.length);
+    z = fibonacci_sequence[z];this.z=z;
+    console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
+    
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
@@ -197,27 +202,12 @@ var method = {
   	if (err) {return console.log(err);}
   	});
 
-/* dlna comparison and logical operators  */
-function makeoperators(length) {
-var result = '';
-const operator=[];
-operator[0]="==";
-operator[1]="===";
-operator[2]="!=";
-operator[3]="&&";
-operator[4]="<=";
-operator[5]=">=";
-operator[6]=">";
-operator[7]="<";
-operator[8]="||";
-operator[9]="!";
-operator[10]="=";
-const operatorLength = operator.length;
-var counter = 0;
-while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
-return result;
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
-console.log(makeoperators(1));
+
 },
 
   predictCandle : function(candle) {
