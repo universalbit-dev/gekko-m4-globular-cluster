@@ -273,9 +273,9 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
       var signal = meanp < currentPrice;
     }
     if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > 1))
-    {this.advice('long');wait();}
+    {this.advice('long');makeoperators();wait();}
     if ((this.trend.adviced && this.stochRSI != 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < -1  && signalSell === true))
-    {this.advice('short');wait();}
+    {this.advice('short');makeoperators();wait();}
 
 //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
