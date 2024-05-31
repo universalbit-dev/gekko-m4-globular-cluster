@@ -229,14 +229,13 @@ check : function(candle) {
 
     }
 
-
     if (typeof(cci) == 'number') {
     //overbought?
     if (cci >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction ==  'overbought' && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
     {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('short');wait();
+            this.advice('short');makeoperators();wait();
     }
         else if (cci >= this.uplevel && this.trend.direction != 'overbought' && ('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)) {
@@ -246,7 +245,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('short');wait();
+                this.advice('short');makeoperators();wait();
             }
         }
         else if (cci >= this.uplevel) {
@@ -259,7 +258,7 @@ check : function(candle) {
   signal === false  && meanAlpha > this.settings.threshold_buy)) {
             this.trend.adviced = true;
             this.trend.duration++;
-            this.advice('long');wait();
+            this.advice('long');makeoperators();wait();
         }
         else if (cci <= this.downlevel && this.trend.direction != 'oversold' && ('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)) {
@@ -269,7 +268,7 @@ check : function(candle) {
             this.trend.adviced = false;
             if (this.persisted == 0) {
                 this.trend.adviced = true;
-                this.advice('long');wait();
+                this.advice('long');makeoperators();wait();
             }
         }
         else if (cci <= this.downlevel) {
