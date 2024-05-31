@@ -138,27 +138,11 @@ update: function(candle) {
     if (err) {return console.log(err);}
     });
 
-/* dlna comparison and logical operators  */
-function makeoperators(length) {
-var result = '';
-const operator=[];
-operator[0]="==";
-operator[1]="===";
-operator[2]="!=";
-operator[3]="&&";
-operator[4]="<=";
-operator[5]=">=";
-operator[6]=">";
-operator[7]="<";
-operator[8]="||";
-operator[9]="!";
-operator[10]="=";
-const operatorLength = operator.length;
-var counter = 0;
-while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
-return result;
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
-console.log(makeoperators(1));
 
 },
 
@@ -300,13 +284,13 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
 //LONG
 long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb == 'long'))
-  {this.resetTrend();this.trend.duration++;this.advice('long');wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('long');makeoperators();wait();}
   if (this.debug) {log.info('|Bolt Up|');}
 },
 //SHORT
 short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb == 'short'))
-  {this.resetTrend();this.trend.duration++;this.advice('short');wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('short');makeoperators();wait();}
   if (this.debug) {log.info('|Bolt Down|');}
 },
 
