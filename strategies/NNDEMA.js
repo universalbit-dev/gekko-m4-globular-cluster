@@ -25,7 +25,7 @@ var method = {
   prevAction : 'none',
   hodl_threshold : 1,
 init : function() {
-    this.requiredHistory = config.tradingAdvisor.historySize;
+    this.requiredHistory = this.settings.historySize;
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
@@ -34,7 +34,7 @@ init : function() {
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
     this.addTulipIndicator('long', 'dema', {optInTimePeriod:144});
     this.addTulipIndicator('short', 'dema', {optInTimePeriod:55});
-    this.addTulipIndicator('medium', 'ema',{optInTimePeriod:127});
+    this.addTulipIndicator('medium', 'ema',{optInTimePeriod:89});
     //Date
     startTime = new Date();
     log.info('Running', this.name);
@@ -42,10 +42,15 @@ init : function() {
     this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var x= Math.floor((Math.random() * 100) + 1);this.x=x;
-    var y=Math.floor((Math.random() * 100) * 10);this.y=y;
-    var z=Math.floor((Math.random() * 100) + 1);this.z=z;
-    console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
+    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+    var x = Math.floor(Math.random() * fibonacci_sequence.length);
+    x = fibonacci_sequence[x];this.x=x;
+    var y = Math.floor(Math.random() * fibonacci_sequence.length);
+    y = fibonacci_sequence[y];this.y=y;
+    var z = Math.floor(Math.random() * fibonacci_sequence.length);
+    z = fibonacci_sequence[z];this.z=z;
+    console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
+    
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:144, activation: 'relu'},
@@ -53,7 +58,6 @@ init : function() {
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
-
 
     this.nn.makeLayers(layers);
 
@@ -156,8 +160,8 @@ init : function() {
     brain.learning = true;
   },
 
-  update : function(candle)
-  {
+update : function(candle)
+{
     dema=this.tulipIndicators.dema.result.result;
   
     if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
@@ -176,27 +180,11 @@ init : function() {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
 
-/* dlna comparison and logical operators  */
-function makeoperators(length) {
-var result = '';
-const operator=[];
-operator[0]="==";
-operator[1]="===";
-operator[2]="!=";
-operator[3]="&&";
-operator[4]="<=";
-operator[5]=">=";
-operator[6]=">";
-operator[7]="<";
-operator[8]="||";
-operator[9]="!";
-operator[10]="=";
-const operatorLength = operator.length;
-var counter = 0;
-while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
-return result;
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
-console.log(makeoperators(1));
 
 },
 
