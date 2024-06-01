@@ -1,1 +1,1 @@
-custom: ['https://blockchair.com/litecoin/address/MDDJiGnmwcRjcvWWErbw5awn4HH2usUCyM','https://blockchair.com/bitcoin/address/3BzG4VUnKAKVcw44r6XG3EjPqipUzi42AA']
+custom: ['https://api.blockchair.com/','https://api.blockchair.com/bitcoin/addresses','https://api.blockchair.com/litecoin/addresses']
