@@ -138,12 +138,12 @@ update: function(candle) {
     if (err) {return console.log(err);}
     });
 
-function makeoperators() {
+},
+
+makeoperators: function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-}
-
 },
 
 onTrade: function(event) {
