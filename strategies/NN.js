@@ -201,20 +201,19 @@ var method = {
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
   	});
+},
 
-function makeoperators() {
+makeoperators:function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-}
-
 },
 
-  predictCandle : function(candle) {
-    let vol = new convnetjs.Vol(this.priceBuffer);
-    let prediction = this.nn.forward(vol);
-    return prediction.w[0];
-  },
+predictCandle : function(candle) {
+let vol = new convnetjs.Vol(this.priceBuffer);
+let prediction = this.nn.forward(vol);
+return prediction.w[0];
+},
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {

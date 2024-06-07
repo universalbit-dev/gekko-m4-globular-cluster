@@ -181,14 +181,13 @@ init : function() {
 //general purpose log  {data}
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {if (err) {return console.log(err);}});
- 
-function makeoperators() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);
-console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-}
-
 },
+
+  makeoperators: function() {
+   var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+   var result = Math.floor(Math.random() * operator.length);
+   console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+  },
 
   predictCandle : function() {
     let vol = new convnetjs.Vol(this.priceBuffer);
