@@ -6,7 +6,7 @@
       "pair": ["XBT","LTC"],
       "prefixed": ["XXBT","XLTC"],
       "book": "XLTCXXBT",
-      "minimalOrder": {"amount": "0.1","unit": "asset"},
+      "minimalOrder": {"amount": "0.0001","unit": "currencies"},
       "pricePrecision": 6,
       "amountPrecision": 8
     }
