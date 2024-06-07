@@ -112,7 +112,7 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
   });
 
   while(start < end) {
-    start.add(1000, 'ms');
+    start.add(500, 'ms');
     i = +start;
     j++;
 
