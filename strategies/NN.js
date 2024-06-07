@@ -272,9 +272,9 @@ return prediction.w[0];
       var signal = meanp < currentPrice;
     }
     if ((this.trend.adviced && this.stochRSI != 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > 1))
-    {this.advice('long');makeoperators();wait();}
+    {this.advice('long');this.makeoperators();wait();}
     if ((this.trend.adviced && this.stochRSI != 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < -1  && signalSell === true))
-    {this.advice('short');makeoperators();wait();}
+    {this.advice('short');this.makeoperators();wait();}
 
 //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)

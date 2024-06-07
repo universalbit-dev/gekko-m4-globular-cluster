@@ -218,15 +218,15 @@ check : function(candle) {
 
   case((short < tema)&&(tema < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('long');makeoperators();wait();break;
+  this.advice('long');this.makeoperators();wait();break;
 
   case((short > tema)&&(tema < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');makeoperators();wait();break;
+  this.advice('short');this.makeoperators();wait();break;
 
   case((short < tema)&&(tema < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('short');makeoperators();wait();this.brain();break;
+  this.advice('short');this.makeoperators();wait();this.brain();break;
 
   default : {log.info('...WAIT DATA');}
 
