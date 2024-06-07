@@ -284,13 +284,13 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
 //LONG
 long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb == 'long'))
-  {this.resetTrend();this.trend.duration++;this.advice('long');makeoperators();wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('long');this.makeoperators();wait();}
   if (this.debug) {log.info('|Bolt Up|');}
 },
 //SHORT
 short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb == 'short'))
-  {this.resetTrend();this.trend.duration++;this.advice('short');makeoperators();wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('short');this.makeoperators();wait();}
   if (this.debug) {log.info('|Bolt Down|');}
 },
 
