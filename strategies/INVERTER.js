@@ -195,7 +195,7 @@ switch (true) {
 	this.pingPong();
 	break;
 	default:
-	log.info('|Nut|Rsi||',rsi);
+	log.info(rsi);
 	}
 
 /*
@@ -220,6 +220,7 @@ ADX Value 	Trend Strength
 		adxstrength='extremestrong';break;
 		default:
 		log.info('...wait data',dx);
+		adxstrength='weak';
 	}
 
 /*
@@ -263,6 +264,7 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
 	log.info('|Nut|Di|:',this.trend.direction);break;
 	default:
 	log.info('|Nut|Di|...wait data');
+	this.trend.direction = 'none';
 	}
 
         //short TREND
@@ -298,10 +300,10 @@ short: function(){
 pingPong: function(){
 	switch (true)
 	{
-	case ((this.trend.bb == 'long')&&(this.trend.state == 'long')):
+	case ((this.trend.bb == 'long')&&(this.trend.state == 'long')&&(this.trend.direction != 'none')):
 	this.trend.direction = 'screw_up';this.trend.lastLongPrice = this.candle;break;
 	
-	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')):
+	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')&&(this.trend.direction != 'none')):
 	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
 	
 	default:log.info('|PingPong|');
