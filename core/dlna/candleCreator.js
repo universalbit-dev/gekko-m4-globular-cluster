@@ -8,6 +8,8 @@ const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
+
+
 var CandleCreator = function() {
   _.bindAll(this,_.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss.ms");
@@ -55,8 +57,7 @@ CandleCreator.prototype.calculateCandles = function() {
   var seconds = _.size(this.buckets);
   if (this.lastTrade !== undefined)
     // create a string referencing the minute this trade happened in
-    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss.ms');
-
+    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss.ms'); 
   var candles = _.map(this.buckets, function(bucket, name) {
     var candle = this.calculateCandle(bucket);
     if(name !== lastSecond)
@@ -73,7 +74,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
 
   var f = parseFloat;
   var candle = {
-    start: first.date.clone().startOf('millisecond'),
+    start: first.date.clone().startOf('second'),
     open: f(first.price),
     high: f(first.price),
     low: f(first.price),
