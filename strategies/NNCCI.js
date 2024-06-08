@@ -289,7 +289,7 @@ check : function(candle) {
     log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
     log.info('Price:', candle.close);
     log.info('CCI:', cci);
-    log.info("NeuralNet input layer of size: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
+    log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
     log.info('==================================================================');

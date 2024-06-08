@@ -213,7 +213,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
     log.info("StochRSI min:" + this.lowestRSI);
     log.info("StochRSI max:" + this.highestRSI);
     log.info("StochRSI Value:" + this.stochRSI);
-    log.info("NeuralNet input layer of size: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
+    log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info('meanAlpha:',meanAlpha);
     log.info('==================================================================');
