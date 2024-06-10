@@ -41,7 +41,7 @@ CandleCreator.prototype.filter = function(trades) {
 // put each trade in a per second bucket
 CandleCreator.prototype.fillBuckets = function(trades) {
   _.each(trades, function(trade) {
-    var second = trade.date.format('YYYY-MM-DD HH:mm:ss.ms');
+    var second = trade.date.format('YYYY-MM-DD HH:mm:ss:SSS');
 
     if(!(second in this.buckets))
       this.buckets[second] = [];
@@ -55,7 +55,7 @@ CandleCreator.prototype.calculateCandles = function() {
   var seconds = _.size(this.buckets);
   if (this.lastTrade !== undefined)
     // create a string referencing the minute this trade happened in
-    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss.ms'); 
+    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss:SSS'); 
   var candles = _.map(this.buckets, function(bucket, name) {
     var candle = this.calculateCandle(bucket);
     if(name !== lastSecond)
@@ -111,7 +111,7 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
   });
 
   while(start < end) {
-    start.add(500, 'ms');
+    start.add(500, 'S');
     i = +start;
     j++;
 
