@@ -142,9 +142,9 @@ pingPong: function(){
 	switch (true)
 	{
 	case ((this.trend.bb == 'long')&&(this.trend.state == 'long')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'long';this.trend.lastLongPrice = this.candle;break;
+	this.trend.direction = 'screw_up';this.trend.lastLongPrice = this.candle;break;
 	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'short';this.trend.lastShortPrice = this.candle;break;
+	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
 	default:_.noop;this.trend.direction = 'none';
 	}
 },
