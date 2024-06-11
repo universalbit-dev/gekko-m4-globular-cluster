@@ -9,7 +9,7 @@ var stoploss= require('./indicators/StopLoss.js');
 
 var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
+async function wait() {console.log('keep calm and make something of amazing');await sleep(20000);};
 
 var method = {};
 method.init = function() {
@@ -68,7 +68,7 @@ method.check = function(candle) {
 	this.rsi=rsi;
 	if(this.stochRSI > 70) {
 		// new trend detected
-		if(this.trend.direction != 'high')
+		if(this.trend.direction !== 'high')
 			this.trend = {
 				duration: 0,
 				persisted: false,
@@ -84,14 +84,14 @@ method.check = function(candle) {
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-		{this.trend.adviced = true;this.advice('long');wait();}
+		{this.trend.adviced = true;this.advice('short');wait();}
 
 		else {_.noop;}
 	}
 
 	else if(this.stochRSI < 30)
 	{
-		if(this.trend.direction != 'low') 
+		if(this.trend.direction !== 'low') 
 		{
 		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
 		this.trend.duration++;
@@ -99,7 +99,7 @@ method.check = function(candle) {
 		}
 		if(this.trend.duration >= 1)//<===
 		{this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('short');wait();}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('long');wait();}
 
     else {_.noop;}
 	}
