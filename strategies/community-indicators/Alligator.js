@@ -59,9 +59,7 @@ Indicator.prototype.update = function(candle) {
 	  return;
 	}
 
-*
-* Handle calculations
-*/
+//Handle calculations
 Indicator.prototype.calculate = function(candle) {
 //Bill Williams Alligator for Think or Swim
 //Mike Lapping 2010
