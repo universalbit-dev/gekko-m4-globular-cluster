@@ -9,7 +9,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 config.NOOP={};
 
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:1000,method:'NOOP'};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NOOP'};
 
 //Date.prototype.toISOString()
 //Previous Month
