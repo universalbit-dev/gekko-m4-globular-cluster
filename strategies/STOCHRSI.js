@@ -68,7 +68,7 @@ method.check = function(candle) {
 	this.rsi=rsi;
 	if(this.stochRSI > 70) {
 		// new trend detected
-		if(this.trend.direction !== 'high')
+		if(this.trend.direction !== 'low')
 			this.trend = {
 				duration: 0,
 				persisted: false,
@@ -80,7 +80,7 @@ method.check = function(candle) {
 
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 
-		if(this.trend.duration >= 1)// <===
+		if(this.trend.duration >= 5)// <===
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
@@ -91,13 +91,13 @@ method.check = function(candle) {
 
 	else if(this.stochRSI < 30)
 	{
-		if(this.trend.direction !== 'low') 
+		if(this.trend.direction !== 'high') 
 		{
 		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
 		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		}
-		if(this.trend.duration >= 1)//<===
+		if(this.trend.duration >= 5)//<===
 		{this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('long');wait();}
 
