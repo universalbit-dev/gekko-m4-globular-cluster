@@ -10,14 +10,6 @@ var util = require('../util');
 var dirs = util.dirs();
 var log = require('../log');
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function wait() {
-  console.log('keep calm...');await sleep(2000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++) 
-  {if (i === 3) await sleep(200000);}
-};
-
 var batchSize = 60;
 var adapter = config[config.adapter];
 var Reader = require(dirs.gekko + adapter.path + '/reader');
