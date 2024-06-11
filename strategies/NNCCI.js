@@ -7,7 +7,7 @@ const fs = require('node:fs');
 var math = require('mathjs');
 var async = require('async');
 
-var settings = config.CCI;this.settings=settings;
+var settings = config.NNCCI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 var convnetjs = require('../core/convnet.js');
