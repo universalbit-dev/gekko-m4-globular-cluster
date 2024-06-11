@@ -103,7 +103,6 @@ default:
       this.trainer_adadelta.train(vol, current_price);
       this.trainer_windowgrad.train(vol, current_price);
       this.trainer_nesterov.train(vol, current_price);
-
       this.predictionCount++;
     }
   },
@@ -172,9 +171,9 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
     dema=this.tulipIndicators.dema.result.result;
     rsi=this.tulipIndicators.rsi.result.result;
 
-    switch (true)
+    switch (this.trend.direction !== 'low')
     {
-    case((this.trend.duration >= 2)): // <== trend : duration (2) before taking the value (trend: persisted)
+    case((this.trend.duration >= 5)):
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
@@ -185,8 +184,8 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 	_.noop;this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
-	switch (true){
-	case(this.trend.duration >= 2): // <== trend : duration (2) before taking the value (trend: persisted)
+	switch (this.trend.direction !== 'high'){
+	case(this.trend.duration >= 5):
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
@@ -197,7 +196,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 	_.noop;this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
-	if(this.predictionCount > 89)
+	if(this.predictionCount > 34)
     {
       var prediction = this.predictCandle() * 1;
       var currentPrice = candle.close;

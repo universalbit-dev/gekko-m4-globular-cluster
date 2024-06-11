@@ -129,12 +129,12 @@ switch (true) {
 
 //LONG
 long: function(){
-  if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb == 'long'))
+  if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'short')&&(this.trend.bb !== 'short'))
   {this.resetTrend();this.trend.duration++;this.advice('long');this.makeoperators();wait();}
 },
 //SHORT
 short: function(){
-  if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb == 'short'))
+  if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'long')&&(this.trend.bb !== 'long'))
   {this.resetTrend();this.trend.duration++;this.advice('short');this.makeoperators();wait();}
 },
 
@@ -142,9 +142,9 @@ short: function(){
 pingPong: function(){
 	switch (true)
 	{
-	case ((this.trend.bb == 'long')&&(this.trend.state == 'long')&&(this.trend.direction != 'none')):
+	case ((this.trend.bb !== 'short')&&(this.trend.state !== 'short')&&(this.trend.direction != 'none')):
 	this.trend.direction = 'screw_up';this.trend.lastLongPrice = this.candle;break;
-	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')&&(this.trend.direction != 'none')):
+	case ((this.trend.bb !== 'long')&&(this.trend.state !== 'long')&&(this.trend.direction != 'none')):
 	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
 	default:_.noop;this.trend.direction = 'none';
 	}
