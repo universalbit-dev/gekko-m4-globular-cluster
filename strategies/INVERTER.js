@@ -1,27 +1,3 @@
-/*
-
--Source Code: [Gab0](https://github.com/Gab0/)
-https://github.com/Gab0/gekko-adapted-strategies
--Extra Indicators : https://github.com/Gab0/gekko-extra-indicators
-Gabriel Araujo (@Gab0)
-
-Authors: _RSI _ADX (@TommieHansen)
-PingPong Function for sideways market(@RafaelMart)
-(CC BY-SA 4.0:https://creativecommons.org/licenses/by-sa/4.0/)
-
-UniversalBit-dev
-https://github.com/universalbit-dev/gekko-m4/
-
-INVERTER:
--Switch Case
-
-RSI Overbought/Oversold
-ADX Trend Strength (DI+ DI-)
-StopLoss
-
-some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
-
-*/
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -29,19 +5,12 @@ var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
-
 var stoploss = require('./indicators/StopLoss.js');
 
 var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
-
-/*
-Method INVERTER:
-Process Exchange Data and make indicators data overview:|RSI| |EMA| |ADX| |DI| |DX| |DEMA| |StopLoss|
-*/
-
-// INIT
+//INIT
 var method = {
  prevPrice : 0,
  prevAction : 'wait',
@@ -52,60 +21,14 @@ log.info('Start' , this.name);
 //Init
 this.resetTrend();
 this.debug = true;
-
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
 
-//Indicators overview
-/* Double Exponential Moving Average */
-/* Type: overlay */
-/* Input arrays: 1    Options: 1    Output arrays: 1 */
-/* Inputs: real */
-/* Options: period */
-/* Outputs: dema */
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
-
-/* Exponential Moving Average */
-/* Type: overlay */
-/* Input arrays: 1    Options: 1    Output arrays: 1 */
-/* Inputs: real */
-/* Options: period */
-/* Outputs: ema */
 this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233});
 this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
-
-/* Relative Strength Index */
-/* Type: indicator */
-/* Input arrays: 1    Options: 1    Output arrays: 1 */
-/* Inputs: real */
-/* Options: period */
-/* Outputs: rsi */
 this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 13});
-
-//DI+ DI -
-/* Directional Indicator */
-/* Type: indicator */
-/* Input arrays: 3    Options: 1    Output arrays: 2 */
-/* Inputs: high, low, close */
-/* Options: period */
-/* Outputs: plus_di, minus_di */
 this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
-
-//ADX
-/* Average Directional Movement Index */
-/* Type: indicator */
-/* Input arrays: 3    Options: 1    Output arrays: 1 */
-/* Inputs: high, low, close */
-/* Options: period */
-/* Outputs: dx */
 this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 14});
-
-//DX
-/* Directional Movement Index */
-/* Type: indicator */
-/* Input arrays: 3    Options: 1    Output arrays: 1 */
-/* Inputs: high, low, close */
-/* Options: period */
-/* Outputs: dx */
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 13});
 
 //StopLoss as indicator
@@ -154,7 +77,6 @@ onTrade: function(event) {
 
 check: function(candle)
 {
-
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
 dx=this.tulipIndicators.dx.result.result;
@@ -163,123 +85,44 @@ shortema = this.tulipIndicators.shortema.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
-
-
 var adxstrength ='none';
 this.adxstrength =adxstrength;
-
-
-log.info('|Indicators:|');
-log.info('|Rsi|',rsi);
-log.info('|Dx|',dx);
-log.info('|Ema+|',longema);
-log.info('|Ema-|',shortema);
-log.info('|Dema||',dema);
-
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	//rsi high - sell above '70'
-	case (rsi > 68 && rsi < 72):
-	log.info('|Nut|Rsi|Overbought|Sell|');
-	this.advice('short');
-	break;
-	//rsi low  - buy above '30'
-	case (rsi > 28 && rsi < 32):
-	log.info('|Nut|Rsi|Oversold|Buy|');
-	this.advice('long');
-	break;
-    //weak
-	case (rsi > 40 && rsi < 60):
-	log.info('|Nut|Rsi|..wait data');
-	this.pingPong();
-	break;
-	default:
-	log.info(rsi);
+	case (rsi > 68 && rsi < 72):this.advice('short');wait();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');wait();break;
+	case (rsi > 40 && rsi < 60):this.pingPong();break;
+	default:_.noop;
 	}
 
-/*
-
-ADX trend Strength: https://www.investopedia.com/articles/trading/07/adx-trend-indicator.asp
-
-ADX Value 	Trend Strength
-0-25 	Absent or Weak Trend
-25-50 	Strong Trend
-50-75 	Very Strong Trend
-75-100 	Extremely Strong Trend
-
-*/
+/* ADX trend Strength: https://www.investopedia.com/articles/trading/07/adx-trend-indicator.asp */
 	switch (true) {
-		case ((dx > 0)&&(dx < 25)):
-		adxstrength='weak';this.pingPong();break;
-		case ((dx > 25)&&(dx < 50)):
-		adxstrength='strong';break;
-		case ((dx > 50)&&(dx < 75)):
-		adxstrength='verystrong';break;
-		case ((dx > 75)&&(dx < 100)):
-		adxstrength='extremestrong';break;
-		default:
-		log.info('...wait data',dx);
-		adxstrength='weak';
+		case ((dx > 0)&&(dx < 25)):adxstrength='weak';this.pingPong();break;
+		case ((dx > 25)&&(dx < 50)):adxstrength='strong';break;
+		case ((dx > 50)&&(dx < 75)):adxstrength='verystrong';break;
+		case ((dx > 75)&&(dx < 100)):adxstrength='extremestrong';break;
+		default:_.noop;this.trend.direction = 'none';adxstrength='weak';
 	}
-
-/*
-When the +DI is above the -DI, prices are moving up, and ADX measures the strength of the uptrend.
-When the -DI is above the +DI, prices are moving down, and ADX measures the strength of the downtrend.
-*/
 	
 //https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
 	
-	if(di_plus > di_minus < 21.5){this.trend.state = 'short';log.info('|Nut|Dm|Price Down:',di_plus,di_minus);}
-	if(di_minus > di_plus < 21){this.trend.state = 'long';log.info('|Nut|Dm|Price Up:',di_plus,di_minus);}
+	if(di_plus > di_minus < 21.5){this.trend.state = 'short';} else if(di_minus > di_plus < 21){this.trend.state = 'long';}
 
 	switch (true)
 	{
-	case (adxstrength == 'weak'):
-	this.trend.direction = 'weak';this.pingPong();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-
-	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_down';this.trend.bb='short';this.short();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-
-	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_up';this.trend.bb='long';this.long();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_down';this.trend.bb='short';this.short();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_up';this.trend.bb='long';this.long();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):
-	this.trend.direction = 'screw_down';this.trend.bb='short';this.short();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):
-	this.trend.direction = 'screw_up';this.trend.bb='long';this.long();
-	log.info('|Nut|Di|:',this.trend.direction);break;
-	default:
-	log.info('|Nut|Di|...wait data');
-	this.trend.direction = 'none';
+	case (adxstrength == 'weak'):this.trend.direction = 'weak';this.pingPong();break;
+	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_down';this.trend.bb='short';this.short();break;
+	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_up';this.trend.bb='long';this.long();break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_down';this.trend.bb='short';this.short();break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_up';this.trend.bb='long';this.long();break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_down';this.trend.bb='short';this.short();break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_up';this.trend.bb='long';this.long();break;
+	default:_.noop;this.trend.direction = 'none';
 	}
-
-        //short TREND
-        if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined))
-        {
-        this.trend.bb ='short';log.info('|short|');
-        }
-        //long TREND
-        else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined))
-        {
-        this.trend.bb ='long';log.info('|long|');
-        }
-        else log.info('|trend|...wait data');
-
-        //Stoploss
+        if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='short';}
+        else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='long';}
+        else _.noop;
         if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
 },
 
@@ -287,13 +130,11 @@ When the -DI is above the +DI, prices are moving down, and ADX measures the stre
 long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb == 'long'))
   {this.resetTrend();this.trend.duration++;this.advice('long');this.makeoperators();wait();}
-  if (this.debug) {log.info('|Bolt Up|');}
 },
 //SHORT
 short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb == 'short'))
   {this.resetTrend();this.trend.duration++;this.advice('short');this.makeoperators();wait();}
-  if (this.debug) {log.info('|Bolt Down|');}
 },
 
 //PingPong
@@ -301,12 +142,10 @@ pingPong: function(){
 	switch (true)
 	{
 	case ((this.trend.bb == 'long')&&(this.trend.state == 'long')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'screw_up';this.trend.lastLongPrice = this.candle;break;
-	
+	this.trend.direction = 'long';this.trend.lastLongPrice = this.candle;break;
 	case ((this.trend.bb == 'short')&&(this.trend.state == 'short')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
-	
-	default:log.info('|PingPong|');
+	this.trend.direction = 'short';this.trend.lastShortPrice = this.candle;break;
+	default:_.noop;this.trend.direction = 'none';
 	}
 },
 
@@ -314,3 +153,26 @@ end: function(){log.info('|The End|');}
 
 };
 module.exports = method;
+/*
+
+src: 
+[Gab0](https://github.com/Gab0/) https://github.com/Gab0/gekko-adapted-strategies
+Extra Indicators : https://github.com/Gab0/gekko-extra-indicators Gabriel Araujo (@Gab0)
+
+Authors: _RSI _ADX (@TommieHansen)
+PingPong Function for sideways market(@RafaelMart) 
+(CC BY-SA 4.0:https://creativecommons.org/licenses/by-sa/4.0/)
+
+universalBit-dev:
+https://github.com/universalbit-dev/gekko-m4-globular-cluster/
+
+INVERTER:
+Switch Case
+RSI Overbought/Oversold
+ADX Trend Strength (DI+ DI-)
+StopLoss
+
+resources:
+some copy and paste code from: https://github.com/xFFFFF/Gekko-Strategies
+
+*/

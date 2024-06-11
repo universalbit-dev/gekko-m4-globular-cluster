@@ -80,27 +80,26 @@ method.check = function(candle) {
 
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 
-		if(this.trend.duration >= 1)
+		if(this.trend.duration >= 1)// <===
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-		{this.trend.adviced = true;this.advice('sell');wait();}
+		{this.trend.adviced = true;this.advice('long');wait();}
 
 		else {_.noop;}
 	}
 
 	else if(this.stochRSI < 30)
 	{
-		if(this.trend.direction != 'low')
+		if(this.trend.direction != 'low') 
 		{
 		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
 		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		}
-		if(this.trend.duration >= 1)
+		if(this.trend.duration >= 1)//<===
 		{this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-		{this.trend.adviced = true;this.advice('buy');wait();}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('short');wait();}
 
     else {_.noop;}
 	}

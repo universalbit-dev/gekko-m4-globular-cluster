@@ -215,7 +215,7 @@ check : function(candle) {
 //Below-average values --
   case((short < medium)&&(medium < long)&&('buy' !== this.prevAction &&
   signal === false  && meanAlpha > this.settings.threshold_buy)):
-  this.advice('sell');this.makeoperators();wait();break;
+  this.advice('short');this.makeoperators();wait();break;
 
   case((short > medium)&&(medium < long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
@@ -223,7 +223,7 @@ check : function(candle) {
 //Above-average values ++
   case((short > medium)&&(medium > long)&&('sell' !== this.prevAction &&
   signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true)):
-  this.advice('buy');this.makeoperators();wait();break;
+  this.advice('long');this.makeoperators();wait();break;
 
   default : {log.info('...wait data');}
 
