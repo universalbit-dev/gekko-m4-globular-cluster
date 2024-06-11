@@ -23,13 +23,14 @@ this.resetTrend();
 this.debug = true;
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
 
+//indicator overview
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
 this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233});
 this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 13});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 8});
 this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
-this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 14});
-this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 13});
+this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 3});
+this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 3});
 
 //StopLoss as indicator
 this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
