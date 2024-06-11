@@ -84,7 +84,7 @@ method.check = function(candle) {
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-		{this.trend.adviced = true;this.advice('short');wait();}
+		{this.trend.adviced = true;this.advice('sell');wait();}
 
 		else {_.noop;}
 	}
@@ -100,7 +100,7 @@ method.check = function(candle) {
 		if(this.trend.duration >= 1)
 		{this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-		{this.trend.adviced = true;this.advice('long');wait();}
+		{this.trend.adviced = true;this.advice('buy');wait();}
 
     else {_.noop;}
 	}
