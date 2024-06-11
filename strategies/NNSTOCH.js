@@ -174,7 +174,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 
     switch (true)
     {
-    case((this.trend.duration >= 2)): // <== trend : duration (2) before taking the value (trend: persisted)
+    case((this.trend.duration >= 5)): // <== 
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
@@ -186,7 +186,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 	}
 
 	switch (true){
-	case(this.trend.duration >= 2): // <== trend : duration (2) before taking the value (trend: persisted)
+	case(this.trend.duration >= 5): // <== 
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;

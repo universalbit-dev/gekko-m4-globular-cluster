@@ -50,7 +50,7 @@ init : function() {
   this.ppoadv = 'none';
   this.uplevel = 150;
   this.downlevel = -30;
-  this.persisted = 3;
+  this.persisted = 5;
   //CCI
   this.addTulipIndicator('cci', 'cci', {optInTimePeriod: 21 });
   //DEMA
