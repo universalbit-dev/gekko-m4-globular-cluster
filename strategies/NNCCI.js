@@ -7,7 +7,7 @@ const fs = require('node:fs');
 var math = require('mathjs');
 var async = require('async');
 
-var settings = config.NNCCI;this.settings=settings;
+var settings = config.CCI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 var convnetjs = require('../core/convnet.js');
@@ -57,7 +57,7 @@ init : function() {
   this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1 });
   
   this.nn = new convnetjs.Net();
-  //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
+//https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
     var x = Math.floor(Math.random() * fibonacci_sequence.length);
     x = fibonacci_sequence[x];this.x=x;
@@ -65,104 +65,64 @@ init : function() {
     y = fibonacci_sequence[y];this.y=y;
     var z = Math.floor(Math.random() * fibonacci_sequence.length);
     z = fibonacci_sequence[z];this.z=z;
-    console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
-    
-    const layers = [
-      {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:144, activation: 'relu'},
-      {type:'fc', num_neurons:144, activation:'sigmoid'},
-      {type:'regression', num_neurons:1}
-      //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
-    ];
+    console.debug('\t\t\t\tNeuralNet Layer' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
 
-    this.nn.makeLayers(layers);
+const layers = [
+{type:'input', out_sx:x, out_sy:y, out_depth:z},
+{type:'conv', num_neurons:144, activation: 'relu'},
+{type:'fc', num_neurons:144, activation:'sigmoid'},
+{type:'regression', num_neurons:1}
+//https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
+];
 
-    if(this.settings.method == 'sgd')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        learning_rate: this.settings.learning_rate,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay,
-        l1_decay: this.settings.l1_decay
-      });
-    }
-    else if(this.settings.method == 'adadelta')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:1,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else if(this.settings.method == 'adagrad')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        eps: 1e-6,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else if(this.settings.method == 'nesterov')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else if(this.settings.method == 'windowgrad')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else
-    {
-      this.trainer = new convnetjs.Trainer(this.nn, {
-        method: 'adadelta',
-        learning_rate: 0.01,
-        momentum: 0.0,
-        batch_size:1,
-        eps: 1e-6,
-        ro:0.95,
-        l2_decay: 0.001,
-        l1_decay: 0.001
-      });
-    }
+this.nn.makeLayers(layers);
 
-  this.hodl_threshold = this.settings.hodl_threshold || 1;
-  },
+switch(this.settings.method != undefined) {
+case(this.settings.method == 'sgd'):
+{this.trainer = new convnetjs.SGDTrainer(this.nn, {method: 'sgd',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001,l1_decay: 0.001});}
+case(this.settings.method == 'adadelta'):
+{this.trainer = new convnetjs.Trainer(this.nn, {method: 'adadelta',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});}
+case(this.settings.method == 'nesterov'):
+{this.trainer = new convnetjs.Trainer(this.nn, {method: 'nesterov',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001});}
+case(this.settings.method == 'windowgrad'):
+{this.trainer = new convnetjs.Trainer(this.nn, {method: 'windowgrad',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: 0.001});}
 
- learn : function () {
+//https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
+case(this.settings.method == 'alltrainers'):
+{
+  this.trainer_sgd = new convnetjs.SGDTrainer(this.nn, {method: 'sgd',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});
+  this.trainer_adadelta = new convnetjs.Trainer(this.nn, {method: 'adadelta',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: 0.001});
+  this.trainer_nesterov = new convnetjs.Trainer(this.nn, {method: 'nesterov',learning_rate: 0.01,momentum: 0.9,batch_size:8,l2_decay: 0.001});
+  this.trainer_windowgrad = new convnetjs.Trainer(this.nn, {method: 'windowgrad',learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: 0.001});
+}
+default:
+{this.trainer_adadelta = new convnetjs.Trainer(this.nn, {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});}
+
+}
+  this.hodl_threshold = 1 || 1;
+
+},
+
+  learn : function () {
     for (var i = 0; i < _.size(this.priceBuffer) - 1; i++) {
       var data = [this.priceBuffer[i]];
       var current_price = [this.priceBuffer[i + 1]];
       var vol = new convnetjs.Vol(data);
-      this.trainer.train(vol, current_price);
+      this.trainer_sgd.train(vol, current_price);
+      this.trainer_adadelta.train(vol, current_price);
+      this.trainer_windowgrad.train(vol, current_price);
+      this.trainer_nesterov.train(vol, current_price);
       this.predictionCount++;
     }
   },
-
   setNormalizeFactor : function() {
     this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
-    log.debug('Set normalization factor to',this.settings.scale);
+    log.debug('Set normalization factor to',1);
   },
-  
+
 //Reinforcement Learning
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
+
   brain:function(candle){
     var brain = new deepqlearn.Brain(this.x, this.z);
     var state = [Math.random(), Math.random(), Math.random()];
@@ -170,12 +130,13 @@ init : function() {
     {
     var action = brain.forward(state); //returns index of chosen action
     var reward = action === 0 ? 1.0 : 0.0;
-    brain.backward([reward]); // <-- learning magic happens here
+    brain.backward([reward]); // <== learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
     }
     brain.epsilon_test_time = 0.0;
     brain.learning = true;
   },
+
 
 
 update : function(candle) {
