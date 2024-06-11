@@ -174,7 +174,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 
     switch (true)
     {
-    case((this.trend.duration >= 5)): // <== 
+    case((this.trend.duration >= 2)): // <== trend : duration (2) before taking the value (trend: persisted)
     this.trend.persisted = true;
     case (this.trend.persisted && !this.trend.adviced && this.stochRSI !=100):
     this.trend.adviced = true;
@@ -186,7 +186,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 	}
 
 	switch (true){
-	case(this.trend.duration >= 5): // <== 
+	case(this.trend.duration >= 2): // <== trend : duration (2) before taking the value (trend: persisted)
 	this.trend.persisted = true;
 	case(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0):
 	this.trend.adviced = true;
@@ -197,7 +197,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 	_.noop;this.trend = {duration: 0,persisted: false,direction: 'none',adviced: false};
 	}
 
-	if(this.predictionCount > 89) // <== prediction counter before advice buy or sell
+	if(this.predictionCount > 89)
     {
       var prediction = this.predictCandle() * 1;
       var currentPrice = candle.close;
@@ -218,9 +218,9 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
     log.info('meanAlpha:',meanAlpha);
     log.info('==================================================================');
 
-    if ((this.trend.persisted && this.stochRSI != 0 )&&('buy' !== this.prevAction && signal === false && meanAlpha > 1))
+    if ((this.trend.persisted && this.stochRSI !== 0 )&&('buy' !== this.prevAction && signal === false && meanAlpha >1))
     {this.advice('long');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};this.makeoperators();wait();}
-    if ((this.trend.persisted && this.stochRSI != 100)&&('sell' !== this.prevAction && signal === true && meanAlpha < -1 && signalSell === true))
+    if ((this.trend.persisted && this.stochRSI !== 100)&&('sell' !== this.prevAction && signal === true && meanAlpha < 1 && signalSell === true))
     {this.advice('short');this.trend ={duration: 0,persisted: false,direction: 'none',adviced: false};this.makeoperators();wait();}
 
     //stoploss indicator as Reinforcement Learning
