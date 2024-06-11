@@ -86,7 +86,7 @@ method.check = function(candle) {
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 		{this.trend.adviced = true;this.advice('short');wait();}
 
-		else {this.advice();}
+		else {_.noop;}
 	}
 
 	else if(this.stochRSI < 30)
@@ -102,10 +102,10 @@ method.check = function(candle) {
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 		{this.trend.adviced = true;this.advice('long');wait();}
 
-    else {this.advice();}
+    else {_.noop;}
 	}
 
-	else {this.trend.duration = 0;log.debug('In no trend');this.advice();}
+	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
 }
 
 module.exports = method;
