@@ -2,7 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 
 //Strategies
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10,method:'NNCCI'};
