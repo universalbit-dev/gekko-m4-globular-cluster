@@ -8,7 +8,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBULLBEARADX'};
 //requiredHistory = candleSize 5 * historySize 10 = 50 minutes
 
-config.RSIBULLBEARADX={SMA_long:50,SMA_short:10,RSI:14,BULL_RSI:10,
+config.RSIBULLBEARADX={SMA_long:10,SMA_short:5,RSI:14,BULL_RSI:10,
 BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
 BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:3,ADX_high:70,ADX_low:50};
 
