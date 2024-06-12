@@ -4,32 +4,30 @@ config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 
-//Strategies
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:100,method:'RSIBULLBEARADX'};
 //# BULL/BEAR is defined by the longer SMA trends {Make sure your warmup period(tradingAdvisor.historySize) matches SMA_long}
 config.RSIBULLBEARADX={SMA_long:100,SMA_short:55,RSI:14,BULL_RSI:10,
 BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
 BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:3,ADX_high:70,ADX_low:50};
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//                       BACKTESTING
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-config.backtest = {
-  enabled:true,
-  daterange:{from:"2022-01-02",to:"2022-03-01"},
-  batchSize: 60
-};
+//Date.prototype.toISOString()
+//Previous Month
+var previous_month = new Date();
+previous_month.setDate(1);
+previous_month.setMonth(previous_month.getMonth()-1);
+previous_month.setDate(2); 
 
-config.backtestResultExporter = {
-  enabled: true,
-  writeToDisk: true,
-  data: {
-    stratUpdates: false,
-    portfolioValues: true,
-    stratCandles: false,
-    roundtrips: true,
-    trades: true
-  }
+//Current Month
+var current_month = new Date();
+current_month.setDate(1);
+current_month.setMonth(current_month.getMonth());
+current_month.setDate(2); 
+
+
+//Backtest Exchange Data  FROM previous month TO current month
+config.backtest = {enabled:true,
+  daterange:{from:previous_month,to:current_month},
+  batchSize: 1000
 };
 
 //DataBase
@@ -38,7 +36,7 @@ config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1'
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
 
 //Trader
-config.trader={enabled:false};
+config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 
 //Candle Writer
 config.candleWriter={enabled:false};
@@ -47,8 +45,7 @@ config.candleWriter={enabled:false};
 config.adviceLogger={enabled:false};
 
 //Export BackTest Result
-config.backtestResultExporter = {
-  enabled: true,writeToDisk: true,
+config.backtestResultExporter = {enabled: true,writeToDisk: true,
   data: {stratUpdates: false,portfolioValues: true,stratCandles: false,roundtrips: true,trades: true}
 };
 
@@ -61,10 +58,9 @@ config.paperTrader = {enabled: true,reportInCurrency: true,
 //Performance Analyzer
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
-//Import
+//Import                       
 config.importer = {enabled:false}
 
-config.candleWriter={enabled:true,adapter:'sqlite'};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 /*
