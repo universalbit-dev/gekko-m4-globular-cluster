@@ -1,32 +1,13 @@
-/*
-	RSI Bull and Bear + ADX modifier
-	1. Use different RSI-strategies depending on a longer trend
-	2. But modify this slighly if shorter BULL/BEAR is detected
-	-
-	(CC-BY-SA 4.0) Tommie Hansen
-	https://creativecommons.org/licenses/by-sa/4.0/
-	-
-	NOTE: Requires custom indicators found here:
-	https://github.com/Gab0/Gekko-extra-indicators
-	(c) Gabriel Araujo
-	Howto: Download + add to gekko/strategies/indicators
-*/
-
-// req's
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 
-// strategy
 var method = {
-
   /* INIT */
   init: function() {
-    // core
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();
 
-    // debug? set to false to disable all logging/messages/stats (improves performance in backtests)
     this.debug = false;
     config.backtest.batchSize = 1000; // increase performance
     config.silent = true; // NOTE: You may want to set this to 'false' @ live
@@ -75,19 +56,14 @@ var method = {
     log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
     }
 
-  }, // init()
+  },
 
 
   /* RESET TREND */
   resetTrend: function() {
-    var trend = {
-      duration: 0,
-      direction: 'none',
-      longPos: false,
-    };
+    var trend = {duration: 0,direction: 'none',longPos: false,};
     this.trend = trend;
   },
-
 
   /* get low/high for backtest-period */
   lowHigh: function(val, type) {
@@ -138,7 +114,7 @@ var method = {
       rsi = this.tulipIndicators.BULL_RSI.result.result;
       let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
 
-      // ADX trend strength?
+      // ADX 
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
       else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
 
@@ -150,7 +126,7 @@ var method = {
     // add adx low/high if debug
     if (this.debug) this.lowHigh(adx, 'adx');
 
-  }, // check()
+  },
 
 
   /* LONG */
@@ -212,3 +188,17 @@ var method = {
 };
 
 module.exports = method;
+
+/*
+	RSI Bull and Bear + ADX modifier
+	1. Use different RSI-strategies depending on a longer trend
+	2. But modify this slighly if shorter BULL/BEAR is detected
+	-
+	(CC-BY-SA 4.0) Tommie Hansen
+	https://creativecommons.org/licenses/by-sa/4.0/
+	-
+	NOTE: Requires custom indicators found here:
+	https://github.com/Gab0/Gekko-extra-indicators
+	(c) Gabriel Araujo
+	Howto: Download + add to gekko/strategies/indicators
+*/
