@@ -121,7 +121,7 @@ var method = {
     if (maFast < maSlow) 
     {
     //bear rsi
-      rsi = ind.BEAR_RSI.result.result;
+      rsi = this.tulipIndicators.BEAR_RSI.result.result;
       let rsi_hi = this.settings.BEAR_RSI_high,rsi_low = this.settings.BEAR_RSI_low;
       // ADX trend strength?
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
@@ -135,7 +135,7 @@ var method = {
     else 
     {
     //bull rsi
-      rsi = ind.BULL_RSI.result.result;
+      rsi = this.tulipIndicators.BULL_RSI.result.result;
       let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
 
       // ADX trend strength?
