@@ -7,6 +7,8 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 //Strategies
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBULLBEARADX'};
 //requiredHistory = candleSize 5 * historySize 10 = 50 minutes
+//Make sure your warmup period matches SMA_long
+//(DEBUG):	Ignoring strategy's required history, using the "config.tradingAdvisor.historySize" instead.
 
 config.RSIBULLBEARADX={SMA_long:10,SMA_short:5,RSI:14,BULL_RSI:10,
 BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
