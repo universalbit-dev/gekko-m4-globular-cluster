@@ -5,14 +5,11 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 
 //Strategies
-config.tradingAdvisor = {enabled:true,candleSize:1,historySize:50,method:'RSIBULLBEARADX'};
-//requiredHistory = candleSize 1 * historySize 10 = 50 minutes
-//Make sure your warmup period matches SMA_long
-//(DEBUG):	Ignoring strategy's required history, using the "config.tradingAdvisor.historySize" instead.
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:100,method:'RSIBULLBEARADX'};
 
-config.RSIBULLBEARADX={SMA_long:10,SMA_short:5,RSI:14,BULL_RSI:10,
+config.RSIBULLBEARADX={SMA_long:100,SMA_short:55,RSI:14,BULL_RSI:10,
 BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
-BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:14,ADX_high:70,ADX_low:50};
+BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:3,ADX_high:70,ADX_low:50};
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //                       BACKTESTING
