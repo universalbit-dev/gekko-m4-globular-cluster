@@ -148,7 +148,6 @@ var method = {
 
   /* SHORT */
   short: function() {
-    // new trend? (else do things)
     if (this.trend.direction !== 'down') {
       this.resetTrend();
       this.trend.direction = 'down';
