@@ -1,22 +1,23 @@
-/*
-
-*/
-//The CandleCreator creates candles based on trade batches.
-
 const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
 
+var util = require(__dirname + '/../util');
+
 var CandleCreator = function() {
-  _.bindAll(this,_.functions(this));
-  this.threshold = moment("1970-01-01T22:57:36").valueOf();
+  _.bindAll(this);
+
+  this.threshold = moment("1970-01-01", "YYYY-MM-DD");
+
   this.buckets = {};
 }
+
 util.makeEventEmitter(CandleCreator);
 
 CandleCreator.prototype.write = function(batch) {
   var trades = batch.data;
+
   if(_.isEmpty(trades))
     return;
 
@@ -27,38 +28,48 @@ CandleCreator.prototype.write = function(batch) {
   candles = this.addEmptyCandles(candles);
 
   if(_.isEmpty(candles))
-    return;
+    return;  
+
   this.threshold = candles.pop().start;
+
   this.emit('candles', candles);
 }
 
 CandleCreator.prototype.filter = function(trades) {
+  // make sure we only include trades more recent
+  // than the previous emitted candle
   return _.filter(trades, function(trade) {
     return trade.date > this.threshold;
   }, this);
 }
 
-// put each trade in a per second bucket
 CandleCreator.prototype.fillBuckets = function(trades) {
   _.each(trades, function(trade) {
-    var second = trade.date.format('YYYY-MM-DD HH:mm:ss:SSS');
+    var minute = trade.date.format('YYYY-MM-DD HH:mm');
 
-    if(!(second in this.buckets))
-      this.buckets[second] = [];
+    if(!(minute in this.buckets))
+      this.buckets[minute] = [];
 
-    this.buckets[second].push(trade);
+    this.buckets[minute].push(trade);
   }, this);
 
   this.lastTrade = _.last(trades);
 }
+
 CandleCreator.prototype.calculateCandles = function() {
-  var seconds = _.size(this.buckets);
+  var minutes = _.size(this.buckets);
+
+  
   if (this.lastTrade !== undefined)
     // create a string referencing the minute this trade happened in
-    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss:SSS'); 
+    var lastMinute = this.lastTrade.date.format('YYYY-MM-DD HH:mm');
+
   var candles = _.map(this.buckets, function(bucket, name) {
     var candle = this.calculateCandle(bucket);
-    if(name !== lastSecond)
+
+    // clean all buckets, except the last one:
+    // this candle is not complete
+    if(name !== lastMinute)
       delete this.buckets[name];
 
     return candle;
@@ -71,8 +82,9 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   var first = _.first(trades);
 
   var f = parseFloat;
+
   var candle = {
-    start: first.date.clone().startOf('second'),
+    start: first.date.clone().startOf('minute'),
     open: f(first.price),
     high: f(first.price),
     low: f(first.price),
@@ -94,29 +106,28 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
-// Gekko expects a candle every 30 second, if nothing happened
-// during 30 seconds Gekko will add empty candles with:
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
   if(!amount)
     return candles;
 
-// iterator
+  // iterator
   var start = _.first(candles).start.clone();
   var end = _.last(candles).start;
   var i, j = -1;
 
-  var seconds = _.map(candles, function(candle) {
+  var minutes = _.map(candles, function(candle) {
     return +candle.start;
   });
 
   while(start < end) {
-    start.add(500, 'S');
+    start.add(1, 'm');
     i = +start;
     j++;
 
-    if(_.contains(seconds, i))
-      continue;
+    if(_.contains(minutes, i))
+      continue; // we have a candle for this minute
+
     var lastPrice = candles[j].close;
 
     candles.splice(j + 1, 0, {
@@ -134,11 +145,3 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
 }
 
 module.exports = CandleCreator;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
