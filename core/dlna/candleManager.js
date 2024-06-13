@@ -17,19 +17,13 @@ var Manager = function() {
   this.candleCreator = new CandleCreator;
   this.candleCreator
     .on('candles', this.relayCandles);
-};
-
-var CandleCreator_s = require(dirs.dlna + 'candleCreator_s');
-var Manager = function() {
-  _.bindAll(this);
+  
+  var CandleCreator_s = require(dirs.dlna + 'candleCreator_s');
   this.candleCreator_s = new CandleCreator_s;
   this.candleCreator_s
     .on('candles', this.relayCandles);
-};
-
-var CandleCreator_ms = require(dirs.dlna + 'candleCreator_ms');
-var Manager = function() {
-  _.bindAll(this);
+    
+  var CandleCreator_ms = require(dirs.dlna + 'candleCreator_ms');
   this.candleCreator_ms = new CandleCreator_ms;
   this.candleCreator_ms
     .on('candles', this.relayCandles);
