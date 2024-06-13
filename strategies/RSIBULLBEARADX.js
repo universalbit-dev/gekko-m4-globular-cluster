@@ -24,6 +24,7 @@ var method = {
 
     // ADX
     this.addTulipIndicator('adx', 'adx', {optInTimePeriod:this.settings.ADX});
+    this.addTulipIndicator('dx', 'dx', {optInTimePeriod:this.settings.ADX});
 
     // MOD (RSI modifiers)
     this.BULL_MOD_high = this.settings.BULL_MOD_high;
@@ -90,33 +91,40 @@ var method = {
     let ind = this.tulipIndicators,
     maSlow =  this.tulipIndicators.maSlow.result.result,
     maFast =  this.tulipIndicators.maFast.result.result,
-    adx =  this.tulipIndicators.adx.result.result,
+    adx =  this.tulipIndicators.adx.result.result,dx=this.tulipIndicators.dx.result.result,
     rsi =  this.tulipIndicators.rsi.result.result;
 
 
-    if (maFast < maSlow) 
+    if (maFast < maSlow)
     {
     //bear rsi
       rsi = this.tulipIndicators.BEAR_RSI.result.result;
       let rsi_hi = this.settings.BEAR_RSI_high,rsi_low = this.settings.BEAR_RSI_low;
-      // ADX trend strength?
+      //ADX
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
       else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
+      //DX
+      if (dx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
+      else if (dx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
 
       if (rsi > rsi_hi) this.short();
       else if (rsi < rsi_low) this.long();
       if (this.debug) this.lowHigh(rsi, 'bear');
     }
 
-    else 
+    else
     {
     //bull rsi
       rsi = this.tulipIndicators.BULL_RSI.result.result;
       let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
 
-      // ADX 
+      // ADX
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
       else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
+      // DX
+      if (dx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
+      else if (dx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
+
 
       if (rsi > rsi_hi) this.short();
       else if (rsi < rsi_low) this.long();
