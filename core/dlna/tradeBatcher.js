@@ -4,12 +4,13 @@ var moment = require('moment');
 var util = require('../../core/util.js');
 var config = require('../../core/util.js').getConfig();
 var log = require('../../core/log');
+const {EventEmitter} = require('node:events');
 
 var TradeBatcher = function(tid) {
   if(!_.isString(tid))
     throw new Error('tid is not a string');
 
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
   this.tid = tid;
   this.last = -1;
 }

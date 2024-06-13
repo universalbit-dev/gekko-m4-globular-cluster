@@ -8,6 +8,7 @@ var config = require('../../core/util.js').getConfig();
 var log = require(dirs.core + 'log');
 var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
 var TradeBatcher = require(util.dirs().dlna + 'tradeBatcher');
+const {EventEmitter} = require('node:events');
 
 var Fetcher = function(config) {
   if(!_.isObject(config))
@@ -15,7 +16,7 @@ var Fetcher = function(config) {
 
   var exchangeName = config.watch.exchange.toLowerCase();
   var DataProvider = require(util.dirs().gekko + 'exchange/wrappers/' + exchangeName);
-  _.bindAll(this,_.functions(this));
+
 
 // Create a public dataProvider object which can retrieve live
 // trade information from an exchange.
@@ -44,6 +45,7 @@ var Fetcher = function(config) {
   this.limit = 20;
   this.firstFetch = true;
   this.batcher.on('new batch', this.relayTrades);
+  _.bindAll(this);
 }
 util.makeEventEmitter(Fetcher);
 
