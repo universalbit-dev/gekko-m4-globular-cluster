@@ -18,10 +18,29 @@ var Manager = function() {
   this.candleCreator
     .on('candles', this.relayCandles);
 };
+
+var CandleCreator_second = require(dirs.dlna + 'candleCreator_second');
+var Manager = function() {
+  _.bindAll(this);
+  this.candleCreator_second = new CandleCreator_second;
+  this.candleCreator_second
+    .on('candles', this.relayCandles);
+};
+
+var CandleCreator_millisecond = require(dirs.dlna + 'candleCreator_millisecond');
+var Manager = function() {
+  _.bindAll(this);
+  this.candleCreator_millisecond = new CandleCreator_millisecond;
+  this.candleCreator_millisecond
+    .on('candles', this.relayCandles);
+};
+
 util.makeEventEmitter(Manager);
 
 Manager.prototype.processTrades = function(tradeBatch) {
   this.candleCreator.write(tradeBatch);
+  this.candleCreator_second.write(tradeBatch);
+  this.candleCreator_millisecond.write(tradeBatch);
 }
 
 Manager.prototype.relayCandles = function(candles) {
