@@ -11,6 +11,7 @@ const moment = require('moment');
 const fs = require('node:fs');
 var async = require("async");
 const {EventEmitter} = require('node:events');
+
 const BacktestResultExporter = function() {
   this.performanceReport;
   this.roundtrips = [];
@@ -24,7 +25,7 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.stratCandles)this.processStratCandles = null;
   if(!config.backtestResultExporter.data.portfolioValues)this.processPortfolioValueChange = null;
   if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
 }
 util.makeEventEmitter(BacktestResultExporter);
 
@@ -120,7 +121,7 @@ var obj = {dev: filename};
 var backtest_file= {};
 
 async.forEachOf(obj, (value, key, callback) => {
-    fs.readFile(__dirname + value, "utf8", (err, data) => {
+    fs.readFile('logs/json/' + value, "utf8", (err, data) => {
         if (err) return callback(err);
         try {
             backtest_file[key] = JSON.parse(data);
