@@ -2,6 +2,7 @@ const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
+const {EventEmitter} = require('node:events');
 
 var util = require(__dirname + '/../util');
 
@@ -36,8 +37,6 @@ CandleCreator.prototype.write = function(batch) {
 }
 
 CandleCreator.prototype.filter = function(trades) {
-  // make sure we only include trades more recent
-  // than the previous emitted candle
   return _.filter(trades, function(trade) {
     return trade.date > this.threshold;
   }, this);
@@ -61,14 +60,11 @@ CandleCreator.prototype.calculateCandles = function() {
 
   
   if (this.lastTrade !== undefined)
-    // create a string referencing the minute this trade happened in
     var lastMinute = this.lastTrade.date.format('YYYY-MM-DD HH:mm');
 
   var candles = _.map(this.buckets, function(bucket, name) {
     var candle = this.calculateCandle(bucket);
 
-    // clean all buckets, except the last one:
-    // this candle is not complete
     if(name !== lastMinute)
       delete this.buckets[name];
 
