@@ -30,7 +30,7 @@ var Manager = function() {
   this.candleCreator_ms = new CandleCreator_ms;
   this.candleCreator_ms
     .on('candles', this.relayCandles);
-};
+}
 
 util.makeEventEmitter(Manager);
 
