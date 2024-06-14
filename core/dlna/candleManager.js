@@ -9,6 +9,7 @@ var util = require('../../core/util');
 var dirs = util.dirs();
 var config = require('../../core/util.js').getConfig();
 var log = require('../../core/log');
+var $ = require('../../core/jquery-3.7.1.js');
 const {EventEmitter} = require('node:events');
 
 var CandleCreator = require(dirs.dlna + 'candleCreator');
