@@ -10,7 +10,7 @@ var dirs = util.dirs();
 var config = require('../../core/util.js').getConfig();
 var log = require('../../core/log');
 var $ = require('../../core/jquery-3.7.1.js');
-//.on( events [, selector ] [, data ], handler )
+//.on( events [, selector ] [, data ], handler )  https://api.jquery.com/on/
 
 const {EventEmitter} = require('node:events');
 
