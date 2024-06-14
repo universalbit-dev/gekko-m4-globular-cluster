@@ -61,6 +61,7 @@ pm2 start xor_ui.config.js
 ```
 ---
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
+* ##### [Gab0 strategy wrappers](https://github.com/Gab0/gekko-strategy-wrappers) -- [extra-indicators](https://github.com/Gab0/gekko-extra-indicators)
 * ##### [NeuralNet Trainers](https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html)
 * ##### [MathJS](https://mathjs.org/docs/reference/functions/mean.html)
 * ##### [Docs](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
