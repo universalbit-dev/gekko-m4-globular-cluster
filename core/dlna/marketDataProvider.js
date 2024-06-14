@@ -6,11 +6,9 @@ const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
 var config = require('../../core/util.js').getConfig();
 var MarketFetcher = require('./marketFetcher');
-const {EventEmitter} = require('node:events');
-
 var dirs = util.dirs();
 var Manager = function(config) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 // fetch trades
   this.source = new MarketFetcher(config);
 // relay newly fetched trades

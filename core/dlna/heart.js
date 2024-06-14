@@ -1,15 +1,14 @@
 const _ = require('../lodash3');
+const { EventEmitter } = require('events'); 
 var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
 var moment = require('moment');
-const {EventEmitter} = require('node:events');
-
 var TICKRATE = config.watch.tickrate;
 
 var Heart = function() {
   this.lastTick = false;
-  _.bindAll(this);
+  _.bindAll(this, _.functions(this));
 }
 util.makeEventEmitter(Heart);
 
