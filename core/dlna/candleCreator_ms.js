@@ -44,7 +44,7 @@ CandleCreator_ms.prototype.filter = function(trades) {
 
 CandleCreator_ms.prototype.fillBuckets = function(trades) {
   _.each(trades, function(trade) {
-    var millisecond = trade.date.format('YYYY-MM-DD HH:mm:ss:SSS');
+    var millisecond = trade.date.format('YYYY-MM-DD HH:mm:ss.SSS');
 
     if(!(millisecond in this.buckets))
       this.buckets[millisecond] = [];
@@ -60,7 +60,7 @@ CandleCreator_ms.prototype.calculateCandles = function() {
 
   
   if (this.lastTrade !== undefined)
-    var lastMilliSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss:SSS');
+    var lastMilliSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss.SSS');
 
   var candles = _.map(this.buckets, function(bucket, name) {
     var candle = this.calculateCandle(bucket);
