@@ -4,8 +4,6 @@ var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
 const {EventEmitter} = require('node:events');
 
-var util = require(__dirname + '/../util');
-
 var CandleCreator_s = function() {
   _.bindAll(this);
 
