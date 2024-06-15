@@ -56,27 +56,12 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
     if (err) {return console.log(err);}
     });
 
-/* dlna comparison and logical operators  */
-function makeoperators(length) {
-var result = '';
-const operator=[];
-operator[0]="==";
-operator[1]="===";
-operator[2]="!=";
-operator[3]="&&";
-operator[4]="<=";
-operator[5]=">=";
-operator[6]=">";
-operator[7]="<";
-operator[8]="||";
-operator[9]="!";
-operator[10]="=";
-const operatorLength = operator.length;
-var counter = 0;
-while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
-return result;
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
-console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
+
 },
 
 // for debugging purposes log the last
@@ -110,7 +95,7 @@ method.check = function(candle) {
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-		{this.trend.adviced = true;this.advice('short');wait();}
+		{this.trend.adviced = true;this.advice('short');this.makeoperators();wait();}
 
 		else {_.noop;}
 	}
@@ -126,7 +111,7 @@ method.check = function(candle) {
 		if(this.trend.duration >= 1)
 		{this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-		{this.trend.adviced = true;this.advice('long');wait();}
+		{this.trend.adviced = true;this.advice('long');this.makeoperators();wait();}
 
     else {_.noop;}
 	}
