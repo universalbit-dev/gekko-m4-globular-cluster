@@ -8,12 +8,17 @@ var settings = config.STOCHRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(20000);};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function wait() {
+  console.log('keep calm...');await sleep(200000);
+  console.log('...make something of amazing');
+  for (let i = 0; i < 5; i++)
+  {if (i === 4) await sleep(2000);}
+};
 
-var method = {
+var method = {};
+method.init = function() {
 
-init:function() {
   this.name = 'STOCHRSI';
   log.info('Start' ,this.name);
   this.trend = {
@@ -33,9 +38,9 @@ init:function() {
   log.info('================================================');
 //Date
 startTime = new Date();
-},
+}
 
-update: function(candle){
+method.update = function(candle) {
 rsi=this.tulipIndicators.rsi.result.result;
 this.rsi=rsi;
 this.RSIhistory.push(this.rsi);
@@ -46,27 +51,50 @@ this.lowestRSI = _.min(this.RSIhistory);
 this.highestRSI = _.max(this.RSIhistory);
 this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
 
-//general purpose log  {data}
 	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
 	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
     });
+
+/* dlna comparison and logical operators  */
+function makeoperators(length) {
+var result = '';
+const operator=[];
+operator[0]="==";
+operator[1]="===";
+operator[2]="!=";
+operator[3]="&&";
+operator[4]="<=";
+operator[5]=">=";
+operator[6]=">";
+operator[7]="<";
+operator[8]="||";
+operator[9]="!";
+operator[10]="=";
+const operatorLength = operator.length;
+var counter = 0;
+while (counter < operatorLength) {result += operator[counter].charAt(Math.random() * operatorLength);counter += 1;}
+return result;
+}
+console.log("\t\t\t\tcourtesy of... "+ makeoperators(1));
 },
 
-log: function(){
-  var digits = 8;
+// for debugging purposes log the last
+// calculated parameters.
+method.log = function() {var digits = 8;
   log.debug('calculated StochRSI properties:');
   log.debug('\t', 'rsi:', rsi);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
-},
+}
 
-check: function(candle) {
+method.check = function(candle) {
     rsi=this.tulipIndicators.rsi.result.result;
 	this.rsi=rsi;
 	if(this.stochRSI > 70) {
-		if(this.trend.direction !== 'low')
+		// new trend detected
+		if(this.trend.direction != 'high')
 			this.trend = {
 				duration: 0,
 				persisted: false,
@@ -78,7 +106,7 @@ check: function(candle) {
 
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 
-		if(this.trend.duration >= 5)
+		if(this.trend.duration >= 1)
 	   {this.trend.persisted = true;}
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
@@ -89,22 +117,21 @@ check: function(candle) {
 
 	else if(this.stochRSI < 30)
 	{
-		if(this.trend.direction !== 'high') 
+		if(this.trend.direction != 'low')
 		{
 		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
 		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		}
-		if(this.trend.duration >= 5)
+		if(this.trend.duration >= 1)
 		{this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0){this.trend.adviced = true;this.advice('long');wait();}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
+		{this.trend.adviced = true;this.advice('long');wait();}
 
     else {_.noop;}
 	}
 
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
-},
+}
 
-end: function(){log.info('|The End|');}
-};
 module.exports = method;
