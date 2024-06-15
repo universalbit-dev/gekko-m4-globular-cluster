@@ -5,11 +5,14 @@ var method = {
 init : function() {
   // your code!
   this.name = 'SUPERTREND';
+  /* MESSAGES */
+
+  // message the user about required history
   log.info("====================================");
   log.info('Running', this.name);
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
-  this.addTulipIndicator('myAtr', 'atr', {optInTimePeriod: this.settings.atrEma});
+  this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.atr});
   this.bought = 0;
 
   this.supertrend = {upperBandBasic : 0,lowerBandBasic : 0,upperBand : 0,lowerBand : 0,supertrend : 0,};
@@ -23,7 +26,7 @@ update : function(candle) {
 
 check : function(candle) {
 
-  var atrResult =  this.tulipIndicators.myAtr.result.result;
+  var atrResult =  this.tulipIndicators.atr.result.result;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
 
