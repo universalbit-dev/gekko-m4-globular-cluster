@@ -2,68 +2,81 @@ var config = {};
 //General Settings
 config.debug =true;
 
+//import kraken exchange data
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
 
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
-//Strategies
-config.STOCHRSI={rsi:13,stoploss:3,interval:8};
-config.STOCHRSI.thresholds={low:30,high:70,persistence:3};
+config.tradingAdvisor = {enabled:true,candleSize:15,historySize:10};
+config.tradingAdvisor.method= 'STOCHRSI';
 
-//Date.prototype.toISOString()
-//Previous Month
-var previous_month = new Date();
-previous_month.setDate(1);
-previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(2); 
+config.STOCHRSI={interval:10,threshold:1};
+config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
 
-//Current Month
-var current_month = new Date();
-current_month.setDate(1);
-current_month.setMonth(current_month.getMonth());
-current_month.setDate(2); 
-
-
-//Backtest Exchange Data  FROM previous month TO current month
-config.backtest = {enabled:true,
-  daterange:{from:previous_month,to:current_month},
-  batchSize: 1000
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       BACKTESTING
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+config.backtest = {
+  enabled:true,
+  daterange:{from:"2022-01-02",to:"2022-03-01"},
+  batchSize: 60
 };
 
-//DataBase
-config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
-config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
-dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
+config.backtestResultExporter = {
+  enabled: true,
+  writeToDisk: true,
+  data: {
+    stratUpdates: false,
+    portfolioValues: true,
+    stratCandles: false,
+    roundtrips: true,
+    trades: true
+  }
+};
+
+//Adapter
+config.adapter='sqlite';
 
 //Trader
 config.trader={enabled:false,exchange:'',currency:'',asset:'',key:'',secret:''};
 
 //Candle Writer
-config.candleWriter={enabled:false};
+config.candleWriter={enabled:false,adapter:'sqlite'};
 
 //Advice Logger
-config.adviceLogger={enabled:false};
+config.adviceLogger={enabled:true};
 
-//Export BackTest Result
-config.backtestResultExporter = {enabled: true,writeToDisk: true,
-  data: {stratUpdates: false,portfolioValues: true,stratCandles: false,roundtrips: true,trades: true}
-};
 
-//PaperTrader
-config.paperTrader = {enabled: true,reportInCurrency: true,
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       PAPERTRADER
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+config.paperTrader = {enabled: true,
+  reportInCurrency: true,
   simulationBalance: {asset: 100,currency: 1},
-  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',slippage: 0.05
+  feeMaker: 0.15,feeTaker: 0.25,feeUsing: 'maker',
+  slippage: 0.05
 };
 
-//Performance Analyzer
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       PERFORMANCE ANALYZER
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 
-//Import                       
-config.importer = {enabled:false}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       IMPORTER
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+config.importer = {
+  enabled:false,
+  daterange:{from:"2021-01-01",to:"2021-03-01"}
+};
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//                       DATABASE
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'4.1.2',dependencies:[{module: 'sqlite3',version:'5.1.4'}] };
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
@@ -78,3 +91,5 @@ or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
 */
+
+    
