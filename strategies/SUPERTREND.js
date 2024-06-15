@@ -4,6 +4,13 @@ var method = {
 
 init : function() {
   // your code!
+  this.name = 'SUPERTREND';
+  /* MESSAGES */
+
+  // message the user about required history
+  log.info("====================================");
+  log.info('Running', this.name);
+  log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('myAtr', 'atr', {optInTimePeriod: this.settings.atrEma});
   this.bought = 0;
