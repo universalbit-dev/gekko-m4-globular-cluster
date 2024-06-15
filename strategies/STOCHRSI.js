@@ -55,14 +55,12 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
 	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
     });
-
-function makeoperators() {
+}
+method.makeoperators=function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
-
-},
 
 // for debugging purposes log the last
 // calculated parameters.
