@@ -5,9 +5,6 @@ var method = {
 init : function() {
   // your code!
   this.name = 'SUPERTREND';
-  /* MESSAGES */
-
-  // message the user about required history
   log.info("====================================");
   log.info('Running', this.name);
   log.info('====================================');
