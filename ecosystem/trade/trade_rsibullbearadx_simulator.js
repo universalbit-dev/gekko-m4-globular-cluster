@@ -19,7 +19,9 @@ config.candleWriter={enabled:true,adapter:'sqlite'};
 config.adviceLogger={enabled:true};
 config.backtest = {enabled:true};
 config.backtestResultExporter = {enabled: false};
-config.paperTrader = {enabled: true,reportInCurrency: false,simulationBalance: {asset: 1,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
+config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 0.00118267,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
+//[under review papertrader reportInCurrency (asset:currency)]
+
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 config.importer = {enabled:false};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
