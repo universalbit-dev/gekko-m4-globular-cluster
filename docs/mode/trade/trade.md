@@ -16,7 +16,5 @@ node gekko.js -c ecosystem/trade/rsibullbearadx.js -b
 ```
 ---
 
-Plugins to Enable/Disable: [backtest_inverter.js](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/backtest_inverter.js)
-
-
-* realtime mode []()
+[exchangesimulator](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/trade/rsibullbearadx.js)
+* realtime mode 
