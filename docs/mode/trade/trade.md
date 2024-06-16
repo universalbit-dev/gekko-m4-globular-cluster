@@ -6,6 +6,8 @@
 cd ~/gekko-m4-globular-cluster
 pm2 start trade.config.js
 ```
+<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/mode/trade/images/exchangesimulator.png" width="auto" />
+
 
 #### Gekko Realtime Mode:
 
