@@ -15,13 +15,13 @@ BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:3,ADX_high:
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(2); 
+previous_month.setDate(4); 
 
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
-current_month.setDate(2); 
+current_month.setDate(4); 
 
 
 //Backtest Exchange Data  FROM previous month TO current month
