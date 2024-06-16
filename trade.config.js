@@ -1,9 +1,9 @@
 module.exports = {
   apps : [{
-    name: 'noop',
+    name: 'rsibullbearadx',
     script    : 'gekko.js',
-    args      : '-c ecosystem/trade/trade_noop.js',
-    name      : '|NOOP|-realtime-|',
+    args      : '-c ecosystem/trade/rsibullbearadx.js',
+    name      : '|RSIBULLBEARADX|--realtime--|',
     instances : "1",
     exec_mode : "cluster",
     env: {NODE_ENV: "development",},
