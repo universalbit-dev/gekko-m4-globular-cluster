@@ -7,7 +7,7 @@ const TREND_DURATION = 50;
 const Trader = function() {
   this.name = 'ExchangeSimulator';
 
-  this.at = moment().subtract(1, 'second');
+  this.at = moment().subtract(1, 'minutes');
   // fake data
   this.price = 100;
   this.trend = 'up';
@@ -24,8 +24,8 @@ Trader.prototype.getTrades = function(since, cb) {
   else this.trend = 'up';
   }
   
-  if(this.trend === 'up')this.price += Math.floor(Math.random());
-  else this.price -=Math.floor(Math.random());
+  if(this.trend === 'up')this.price += Math.random();
+  else this.price -=Math.random();
   return {
   date: this.at.add(1, 'seconds').unix(),
   price: this.price,
@@ -72,4 +72,3 @@ backtesting on historical data. Also look at the code to see what how
 it is working.
 
 */
-
