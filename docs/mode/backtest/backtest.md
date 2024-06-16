@@ -1,14 +1,16 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-#### PM2 Ecosystem Backtest:
+#### PM2 Ecosystem Backtest: 
+Simulate all strategy
 ```bash
-cd ~/gekko-m4
+cd ~/gekko-m4-globular-cluster
 pm2 start ecosystem.config.js
 ```
 
-#### NodeJs :
+#### Gekko Backtest:
+Simulate your strategy 
 ```bash
-cd ~/gekko-m4
+cd ~/gekko-m4-globular-cluster
 node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
 ```
 
