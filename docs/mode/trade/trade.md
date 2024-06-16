@@ -13,7 +13,7 @@ pm2 start trade.config.js
 
 ```bash
 cd ~/gekko-m4-globular-cluster
-node gekko.js -c ecosystem/trade/rsibullbearadx.js -b
+node gekko.js -c globular/trade/trade_rsibullbearadx_simulator.js 
 ```
 ---
 
