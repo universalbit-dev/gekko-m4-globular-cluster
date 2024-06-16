@@ -22,8 +22,6 @@ node gekko -c ecosystem/import/import.js -i
 2024-03-26 13:00:32 (DEBUG):	Processing 722 new trades. From 2022-02-28 17:06:45 UTC to 2022-02-28 23:58:28 UTC. (7 hours)
 2024-03-26 13:00:32 (INFO):	Done importing!
 ```
-* data import completed
-
 
 ---
 Plugins to Enable/Disable:[import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/import/import.js)
