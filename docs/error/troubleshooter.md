@@ -3,8 +3,8 @@ Troubleshoot known issues
 
 ##### running....
 ```
-git clone https://github.com/universalbit-dev/gekko-m4.git
-cd gekko-m4
+git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
+cd gekko-m4-globular-cluster
 npm i
 pm2 start ecosystem.config.js
 ```
@@ -23,7 +23,7 @@ sudo apt install python3-pip
 ---
 ---
 
-#### * gekko-m4 folder not found
+#### * gekko-m4-globular-cluster folder not found
 cause: git package not installed
 * fixed issue with this command
 ```
