@@ -17,5 +17,5 @@ node gekko.js -c globular/trade/trade_rsibullbearadx_simulator.js
 ```
 ---
 
-[exchangesimulator](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/trade/rsibullbearadx.js)
+[exchangesimulator](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/trade/trade_rsibullbearadx_simulator.js)
 * realtime mode 
