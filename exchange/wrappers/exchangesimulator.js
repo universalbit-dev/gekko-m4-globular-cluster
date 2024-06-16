@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const moment = require('moment');
 
-const TREND_DURATION = 50;
+const TREND_DURATION = 1000;
 
 const Trader = function() {
   this.name = 'ExchangeSimulator';
@@ -72,3 +72,4 @@ backtesting on historical data. Also look at the code to see what how
 it is working.
 
 */
+
