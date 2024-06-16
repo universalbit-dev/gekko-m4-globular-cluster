@@ -20,7 +20,7 @@ pm2 start import.config.js
 
 
 ---
-List Plugins to Enable/Disable:
+Plugins to Enable/Disable:[import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/import/import.js)
 * import mode
 
 | Plugin         | description     | enable  |
@@ -31,6 +31,6 @@ List Plugins to Enable/Disable:
 | Importer | Import Exchange Data      | enabled        |
 | TradingAdvisor | Advice Buy-Sell Orders      | disabled        |
 
-[import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/import/import.js)
+
 
 
