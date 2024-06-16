@@ -29,8 +29,8 @@ npm i pm2 -g
 ---
 
 ```bash
-git clone https://github.com/universalbit-dev/gekko-m4.git
-cd gekko-m4
+git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
+cd gekko-m4-globular-cluster
 npm i
 ```
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
@@ -56,7 +56,6 @@ pm2 start ecosystem.config.js
 * [run individually](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/readme.md)
 ##### NOTE:
 Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
-
 
 ---
 #### Https server OR nothing.
