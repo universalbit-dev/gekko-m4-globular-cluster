@@ -20,11 +20,3 @@ Plugins to Enable/Disable: [backtest_inverter.js](https://github.com/universalbi
 
 
 * realtime mode []()
-
-| Plugin         | description     | enable  |
-|--------------|-----------|------------|
-| BackTest | Testing your strategy      | disabled        |
-| CandleWriter | Store Candle in a database      | enabled        |
-| PaperTrader      | Simulate Fake Trades  | disabled       |
-| Importer | Import Exchange Data      | disabled        |
-| TradingAdvisor | Advice Buy-Sell Orders      | enabled        |
