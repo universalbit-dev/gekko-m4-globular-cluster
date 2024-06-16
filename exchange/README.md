@@ -1,22 +1,7 @@
-## Gekko Broker
-```
-npm i 
-```
-
-
 [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 
-
-
-
 # Wrapper API
-
-
-
 Gekko Broker is a library that sits between trading applications and Gekko Broker Exchange Wrappers. Which means it has two APIs to communicate with other code:
-
-
-
 ![diagram describing Gekko Broker API interface](https://user-images.githubusercontent.com/969743/41892153-566293a0-7941-11e8-9998-7a5b5b554ffd.png)
 
 
