@@ -44,6 +44,8 @@ BackTest Strategy Name | Written logs/json | Speed 1-10 (Time Frame 1Month)
 ---|---|---
 INVERTER | yes | [9] 
 STOCHRSI | yes | [9] 
+RSIBULLBEARADX | | 
+SUPERTREND | | 
 NNSTOCH | yes | [7] 
 NNTMA | [no] | [6]
 NNDEMA | [] | [8]
