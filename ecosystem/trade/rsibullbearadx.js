@@ -43,7 +43,7 @@ config.candleWriter={enabled:false};
 config.adviceLogger={enabled:false};
 
 //Export BackTest Result
-config.backtestResultExporter = {enabled: true,writeToDisk: true,
+config.backtestResultExporter = {enabled: false,writeToDisk: true,
   data: {stratUpdates: false,portfolioValues: true,stratCandles: false,roundtrips: true,trades: true}
 };
 
