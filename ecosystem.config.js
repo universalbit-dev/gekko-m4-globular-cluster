@@ -1,5 +1,6 @@
 module.exports = {
-  apps : [{
+  apps : [
+  {
     name: 'import',
     script    : 'gekko.js',
     args      : '-c ecosystem/import/import.js -i',
@@ -9,57 +10,51 @@ module.exports = {
     env: {NODE_ENV: "development",},
     env_production: {NODE_ENV: "production",}
   },
-          
+  
   {
-  name: 'inverter',
-  script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_inverter.js -b',
-  name      : '|INVERTER|-backtest-|',
-  instances : "1",
-  exec_mode : "cluster"
+    name: 'inverter',
+    script    : 'gekko.js',
+    args      : '-c ecosystem/backtest/backtest_inverter.js',
+    name      : '|INVERTER|-backtest-|',
+    instances : "1",
+    exec_mode : "cluster",
+    env: {NODE_ENV: "development",},
+    env_production: {NODE_ENV: "production",}
   },
-          
+
   {
   name: 'stochrsi',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_stochrsi.js -b',
+  args      : '-c ecosystem/backtest/backtest_stochrsi.js',
   name      : '|STOCHRSI|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
-          
-  {
-  name: 'nnstoch',
+
+{
+  name: 'supetrend',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nnstoch.js -b',
-  name      : '|NNSTOCH|-backtest-|',
+  args      : '-c ecosystem/backtest/backtest_supertrend.js',
+  name      : '|SUPERTREND|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
-          
+
   {
-  name: 'nncci',
+  name: 'nndema',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nncci.js -b',
-  name      : '|NNCCI|-backtest-|',
+  args      : '-c ecosystem/backtest/backtest_nndema.js',
+  name      : '|NNDEMA|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
-          
+
+
   {
   name: 'rsibullbearadx',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_rsibullbearadx.js -b',
-  name      : '|RSIBULLBEARADX|-backtest-',
-  instances : "1",
-  exec_mode : "cluster"
-  },
-          
-  {
-  name: 'nntma',
-  script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nntma.js -b',
-  name      : '|NNTMA|-backtest-|',
+  args      : '-c ecosystem/backtest/backtest_rsibullbearadx.js',
+  name      : '|RSIBULLBEARADX|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
@@ -67,7 +62,7 @@ module.exports = {
   {
   name: 'noop',
   script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_noop.js -b',
+  args      : '-c ecosystem/backtest/backtest_noop.js',
   name      : '|NOOP|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
