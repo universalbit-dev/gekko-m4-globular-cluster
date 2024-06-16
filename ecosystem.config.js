@@ -1,17 +1,6 @@
 module.exports = {
   apps : [
   {
-    name: 'import',
-    script    : 'gekko.js',
-    args      : '-c ecosystem/import/import.js -i',
-    name      : '|- import exchange data -|',
-    instances : "1",
-    exec_mode : "cluster",
-    env: {NODE_ENV: "development",},
-    env_production: {NODE_ENV: "production",}
-  },
-  
-  {
     name: 'inverter',
     script    : 'gekko.js',
     args      : '-c ecosystem/backtest/backtest_inverter.js',
