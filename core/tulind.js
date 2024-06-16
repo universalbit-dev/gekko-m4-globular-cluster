@@ -1,7 +1,7 @@
 var semver = require("semver");
 var _ = require('lodash');
 
-// validate that talib is installed, if not we'll throw an exception which will
+// validate that tulind is installed, if not we'll throw an exception which will
 // prevent further loading or out outside this module
 try {
     var tulind = require("tulind");
@@ -27,7 +27,7 @@ var execute = function(callback, params) {
 }
 
 // Helper that makes sure all required parameters
-// for a specific talib indicator are present.
+// for a specific tulind indicator are present.
 var verifyParams = (methodName, params) => {
     var requiredParams = methods[methodName].requires;
 
