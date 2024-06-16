@@ -1,5 +1,8 @@
+require('../core/tulind');
 var log = require('../core/log.js');
-
+var async = require('async');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 var method = {
 
 init : function() {

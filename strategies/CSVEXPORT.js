@@ -5,7 +5,7 @@
 	https://creativecommons.org/licenses/by-sa/4.0/
 
 */
-
+require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 let _ = require('../core/lodash');

@@ -1,5 +1,10 @@
+require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
+
+var async = require('async');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
 var method = {
   /* INIT */
@@ -24,7 +29,6 @@ var method = {
 
     // ADX
     this.addTulipIndicator('adx', 'adx', {optInTimePeriod:this.settings.ADX});
-    this.addTulipIndicator('dx', 'dx', {optInTimePeriod:this.settings.ADX});
 
     // MOD (RSI modifiers)
     this.BULL_MOD_high = this.settings.BULL_MOD_high;
@@ -91,7 +95,7 @@ var method = {
     let ind = this.tulipIndicators,
     maSlow =  this.tulipIndicators.maSlow.result.result,
     maFast =  this.tulipIndicators.maFast.result.result,
-    adx =  this.tulipIndicators.adx.result.result,dx=this.tulipIndicators.dx.result.result,
+    adx =  this.tulipIndicators.adx.result.result,
     rsi =  this.tulipIndicators.rsi.result.result;
 
 
@@ -103,9 +107,6 @@ var method = {
       //ADX
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
       else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
-      //DX
-      if (dx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
-      else if (dx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
 
       if (rsi > rsi_hi) this.short();
       else if (rsi < rsi_low) this.long();
@@ -121,10 +122,6 @@ var method = {
       // ADX
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
       else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
-      // DX
-      if (dx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
-      else if (dx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
-
 
       if (rsi > rsi_hi) this.short();
       else if (rsi < rsi_low) this.long();
@@ -137,7 +134,7 @@ var method = {
   },
 
 
-  /* LONG */
+  /* LONG  */
   long: function() {
     if (this.trend.direction !== 'up') // new trend? (only act on new trends)
     {
@@ -154,7 +151,7 @@ var method = {
   },
 
 
-  /* SHORT */
+  /* SHORT  */
   short: function() {
     if (this.trend.direction !== 'down') {
       this.resetTrend();

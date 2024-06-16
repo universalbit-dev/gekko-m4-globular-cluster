@@ -1,3 +1,4 @@
+require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -8,13 +9,8 @@ var settings = config.STOCHRSI;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
 var async = require('async');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function wait() {
-  console.log('keep calm...');await sleep(200000);
-  console.log('...make something of amazing');
-  for (let i = 0; i < 5; i++)
-  {if (i === 4) await sleep(2000);}
-};
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
 var method = {};
 method.init = function() {

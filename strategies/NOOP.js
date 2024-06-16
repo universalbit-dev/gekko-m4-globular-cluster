@@ -1,3 +1,4 @@
+require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -12,8 +13,11 @@ var fs = require('node:fs');
 var async = require('async');
 var settings = config.NOOP;this.settings=settings;
 
-// This method is a noop (it doesn't do anything)
+var async = require('async');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
+// This method is a noop (it doesn't do anything)
 var method = {
 init : function(){this.name = 'NOOP';
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});

@@ -1,3 +1,4 @@
+require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -15,7 +16,7 @@ var deepqlearn= require('../core/deepqlearn');
 
 var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(20000);};
+async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
 var method = {
   priceBuffer : [],

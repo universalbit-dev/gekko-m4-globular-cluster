@@ -1,3 +1,4 @@
+require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
@@ -9,7 +10,7 @@ var stoploss = require('./indicators/StopLoss.js');
 
 var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(200000);};
+async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 //INIT
 var method = {
  prevPrice : 0,
