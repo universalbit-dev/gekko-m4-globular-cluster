@@ -1,9 +1,15 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-[PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Import Exchange Data:
+#### [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Import Exchange Data:
 ```bash
 cd ~/gekko-m4-globular-cluster
 pm2 start import.config.js
+```
+
+#### Gekko Import Exchange Data:
+```bash
+cd ~/gekko-m4-globular-cluster
+node gekko -c ecosystem/import/import.js -i
 ```
 
 ```bash
