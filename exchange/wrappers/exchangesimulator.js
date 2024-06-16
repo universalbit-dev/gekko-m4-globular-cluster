@@ -7,7 +7,7 @@ const TREND_DURATION = 1000;
 const Trader = function() {
   this.name = 'ExchangeSimulator';
 
-  this.at = moment().subtract(60, 'second');
+  this.at = moment().subtract(1, 'second');
   // fake data
   this.price = 100;
   this.trend = 'up';
