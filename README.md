@@ -47,11 +47,10 @@ npm i
 ```bash
 pm2 start import.config.js 
 ```
-##### and backtest multiple strategies  
+##### and start ecosystem   [backtest mode]
 ```bash
 pm2 start ecosystem.config.js 
 ```
-
 ### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
 * [run individually](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/readme.md)
