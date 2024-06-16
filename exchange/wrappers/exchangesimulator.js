@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const moment = require('moment');
 
-const TREND_DURATION = 1000;
+const TREND_DURATION = 50;
 
 const Trader = function() {
   this.name = 'ExchangeSimulator';
@@ -24,12 +24,12 @@ Trader.prototype.getTrades = function(since, cb) {
   else this.trend = 'up';
   }
   
-  if(this.trend === 'up')this.price += Math.random();
-  else this.price -= Math.random();
+  if(this.trend === 'up')this.price += Math.floor(Math.random());
+  else this.price -=Math.floor(Math.random());
   return {
   date: this.at.add(1, 'seconds').unix(),
   price: this.price,
-  amount: Math.random() * 100,
+  amount: Math.floor(Math.random() * 100),
   tid: this.tid
   }
   
@@ -46,7 +46,7 @@ Trader.getCapabilities = function(){
     assets: ['LTC'],
     maxTradesAge: 60,
     maxHistoryFetch: null,
-    markets: [{ pair: ['BTC', 'LTC'], minimalOrder: { amount: 0.1, unit: 'assets' } },],
+    markets: [{ pair: ['BTC', 'LTC'], minimalOrder: { amount: 0.01, unit: 'assets' } },],
     requires: ['key', 'secret', 'username'],
     fetchTimespan: 60,
     tid: 'tid',
