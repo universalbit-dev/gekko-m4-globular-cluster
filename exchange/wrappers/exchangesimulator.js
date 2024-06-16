@@ -24,8 +24,8 @@ Trader.prototype.getTrades = function(since, cb) {
   else this.trend = 'up';
   }
   
-  if(this.trend === 'up')this.price += Math.random();
-  else this.price -=Math.random();
+  if(this.trend === 'up')this.price += Math.random()*10;
+  else this.price -= Math.random()*10;
   return {
   date: this.at.add(1, 'seconds').unix(),
   price: this.price,
@@ -72,4 +72,3 @@ backtesting on historical data. Also look at the code to see what how
 it is working.
 
 */
-
