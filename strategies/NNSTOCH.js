@@ -62,8 +62,8 @@ init : function() {
 
 const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:55, activation: 'relu'},
-      {type:'fc', num_neurons:55, activation:'sigmoid'},
+      {type:'conv', num_neurons:8, activation: 'relu'},
+      {type:'fc', num_neurons:8, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
