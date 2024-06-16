@@ -43,9 +43,9 @@ npm i
 ---
 
 ---
-##### import exchange data and backtest strategies
+##### import exchange data
 ```bash
-pm2 start ecosystem.config.js 
+pm2 start import.config.js 
 ```
 ### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
