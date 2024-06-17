@@ -3,25 +3,25 @@ var config = {};
 config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
-config.NN={threshold_buy:1,threshold_sell:-1,method:'adadelta',learning_rate:0.01,momentum:0.0,l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:233,hodl_threshold:1,scale:1,batch_size:1};
 
-//Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};
+//TradingAdvisor
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};//50minute
+//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+config.NN={threshold_buy:1,threshold_sell:-1,method:'alltrainers',learning_rate:0.01,momentum:0.0,
+l1_decay:0.001,l2_decay:0.001,threshold:1,price_buffer_len:987,min_predictions:233,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1,SMMA:5,StopLoss:3};
 
 //Date.prototype.toISOString()
 //Previous Month
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(4); 
+previous_month.setDate(4);
 
 //Current Month
 var current_month = new Date();
 current_month.setDate(1);
 current_month.setMonth(current_month.getMonth());
-current_month.setDate(4); 
-
+current_month.setDate(4);
 
 //Backtest Exchange Data  FROM previous month TO current month
 config.backtest = {enabled:true,
@@ -77,4 +77,5 @@ by this software. There can be bugs and the bot may not perform as expected
 or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
 it is working.
+
 */
