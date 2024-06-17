@@ -20,7 +20,16 @@ module.exports = {
   exec_mode : "cluster"
   },
 
-{
+  {
+  name: 'dema',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_dema.js',
+  name      : '|DEMA|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+
+  {
   name: 'supetrend',
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_supertrend.js',
@@ -37,7 +46,6 @@ module.exports = {
   instances : "1",
   exec_mode : "cluster"
   },
-
 
   {
   name: 'rsibullbearadx',
