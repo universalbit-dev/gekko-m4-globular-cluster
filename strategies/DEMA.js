@@ -6,20 +6,30 @@ var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
+function AuxiliaryIndicators(){
+   var directory = 'indicators/';
+   var extension = '.js';
+   var files = ['SMA', 'DEMA'];  
+   for (var file of files){ 
+       var auxiliaryindicators = require('./' + directory + file + extension);
+       log.debug('added', auxiliaryindicators);
+   }
+ }
+ 
 
 var method = {
 init : function() {
+  AuxiliaryIndicators();
   this.name = 'DEMA';
   this.currentTrend;
   this.requiredHistory = config.tradingAdvisor.historySize;
-
   this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.DEMA});
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
 },
 
 update : function(candle) {  
-  var dema =  this.tulipIndicators.dema.result.result;
-  var sma =  this.tulipIndicators.sma.result.result;
+  var dema = this.tulipIndicators.dema.result.result;
+  var sma = this.tulipIndicators.sma.result.result;
   var diff= dema-sma;this.diff=diff.toFixed(6);
   var price = this.candle.close;this.price=price;
   log.debug('Calculated DEMA and SMA properties for candle:');
