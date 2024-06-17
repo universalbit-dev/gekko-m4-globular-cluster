@@ -17,6 +17,16 @@ var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
+function AuxiliaryIndicators(){
+   var directory = 'indicators/';
+   var extension = '.js';
+   var files = ['DEMA','StopLoss','RSI','SMMA'];  
+   for (var file of files){ 
+       var auxiliaryindicators = require('./' + directory + file + extension);
+       log.debug('added', auxiliaryindicators);
+   }
+ }
+
 var method = {
   priceBuffer : [],
   predictionCount : 0,
@@ -26,7 +36,7 @@ var method = {
   hodl_threshold : 1,
 
   init : function() {
-
+    AuxiliaryIndicators();
     this.requiredHistory = this.settings.historySize;
     this.RSIhistory = [];
     log.info('================================================');
