@@ -52,11 +52,11 @@ var method = {
     //Date
     startTime = new Date();
     //indicators
-    this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+    this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.StopLoss});
     //DEMA
-    this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1});
+    this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:13});
+    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
 
     this.name = 'NN';
     this.nn = new convnetjs.Net();
