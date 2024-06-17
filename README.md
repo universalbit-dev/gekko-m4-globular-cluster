@@ -43,7 +43,7 @@ npm i
 ---
 ### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 
-#### import exchange data
+#### import exchange data [import mode]
 ```bash
 pm2 start import.config.js 
 ```
