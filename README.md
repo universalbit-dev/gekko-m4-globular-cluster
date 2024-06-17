@@ -61,7 +61,7 @@ pm2 start trade.config.js
 Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
 
 ---
-#### Https server OR nothing.
+#### HTTPS server OR nothing.
 * #### [...before run xor_ui.config.js](https://github.com/universalbit-dev/gekko-m4/tree/master/ssl)
 ```bash
 pm2 start xor_ui.config.js 
