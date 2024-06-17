@@ -3,10 +3,21 @@ var log = require('../core/log.js');
 var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
+
+function AuxiliaryIndicators(){
+   var directory = 'indicators/';
+   var extension = '.js';
+   var files = ['ATR'];  
+   for (var file of files){ 
+       var auxiliaryindicators = require('./' + directory + file + extension);
+       log.debug('added', auxiliaryindicators);
+   }
+ }
+
 var method = {
 
 init : function() {
-  // your code!
+  AuxiliaryIndicators();
   this.name = 'SUPERTREND';
   /* MESSAGES */
 
@@ -23,9 +34,7 @@ init : function() {
   this.lastCandleClose = 0;
 },
 
-update : function(candle) {
-// your code!
-},
+update : function(candle) {},
 
 check : function(candle) {
 

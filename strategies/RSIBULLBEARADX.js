@@ -6,9 +6,20 @@ var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
+function AuxiliaryIndicators(){
+   var directory = 'indicators/';
+   var extension = '.js';
+   var files = ['SMA', 'RSI','ADX'];  
+   for (var file of files){ 
+       var auxiliaryindicators = require('./' + directory + file + extension);
+       log.debug('added', auxiliaryindicators);
+   }
+ }
+
 var method = {
   /* INIT */
   init: function() {
+    AuxiliaryIndicators();
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();

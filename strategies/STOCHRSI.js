@@ -12,9 +12,18 @@ var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
+function AuxiliaryIndicators(){
+   var directory = 'indicators/';
+   var extension = '.js';
+   var files = ['RSI','StopLoss'];  
+   for (var file of files){ 
+       var auxiliaryindicators = require('./' + directory + file + extension);
+       log.debug('added', auxiliaryindicators);
+   }
+ };
 var method = {};
 method.init = function() {
-
+  AuxiliaryIndicators();
   this.name = 'STOCHRSI';
   log.info('Start' ,this.name);
   this.trend = {
