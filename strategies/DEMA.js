@@ -14,9 +14,8 @@ function AuxiliaryIndicators(){
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
- }
+}
  
-
 var method = {
 init : function() {
   AuxiliaryIndicators();
