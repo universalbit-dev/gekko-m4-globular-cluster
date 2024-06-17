@@ -12,8 +12,8 @@
 
 Open your terminal. Then:
 ```
-git clone https://github.com/universalbit-dev/gekko-m4.git
-cd gekko-m4
+git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
+cd gekko-m4-globular-cluster
 npm install tulind --build-from-source 
 ```
 
