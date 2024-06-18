@@ -66,7 +66,15 @@ Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
 ```bash
 pm2 start xor_ui.config.js 
 ```
+#### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
+Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
+```
+npm install tulind --build-from-source
+```
+* [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
 ---
+
+#### Resources:
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 * ##### [Gab0 strategy wrappers](https://github.com/Gab0/gekko-strategy-wrappers) -- [extra-indicators](https://github.com/Gab0/gekko-extra-indicators)
 * ##### [NeuralNet Trainers](https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html)
@@ -80,31 +88,19 @@ pm2 start xor_ui.config.js
 * ##### [NPM Security best practices](https://cheatsheetseries.owasp.org/cheatsheets/NPM_Security_Cheat_Sheet.html)
 * ##### Virtual Environment [NodeEnv](https://github.com/universalbit-dev/gekko-m4/tree/master/docs/nodenv) 
 * ##### [Gekko BackTest Tool](https://github.com/xFFFFF/Gekko-BacktestTool)
-
-#### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
-Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
-```
-npm install tulind --build-from-source
-```
-* [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
-
----
-#### Resources:
-* [Gekko-Quasar-UI](https://github.com/H256/gekko-quasar-ui)
-* [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
-* [Forum](https://forum.gekko.wizb.it/)
-* [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
-* [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
-* [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
-* [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
-* Gekko-[M4](http://www.wikisky.org/starview?object_type=4&object_id=3)
-* [Perché gestiamo MALE il denaro?](https://www.youtube.com/watch?v=Y63fReR8vYA) con lo psichiatra @ValerioRosso
----
-#### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
-
-* [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
-* [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/README.md)
-* [Buy-Sell](https://github.com/universalbit-dev/gekko-m4/edit/master/README.md)
+* ##### [Gekko-Quasar-UI](https://github.com/H256/gekko-quasar-ui)
+* ##### [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
+* ##### [Forum](https://forum.gekko.wizb.it/)
+* ##### [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
+* ##### [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
+* ##### [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
+* ##### [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
+* ##### Gekko [M 4 	NGC 6121](https://www.wikisky.org/starview?object_type=4&object_id=3)
+* ##### [Perché gestiamo MALE il denaro?](https://www.youtube.com/watch?v=Y63fReR8vYA) con lo psichiatra @ValerioRosso
+* ##### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
+* ##### [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
+* ##### [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/README.md)
+* ##### [Buy-Sell](https://github.com/universalbit-dev/gekko-m4/edit/master/README.md)
 
 
 
