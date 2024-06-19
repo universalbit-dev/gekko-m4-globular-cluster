@@ -201,7 +201,7 @@ update : function(candle) {
 
 //general purpose log  {data}
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + this.candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
   	}); 
 },
@@ -274,11 +274,11 @@ check : function() {
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
-      var currentPrice = candle.close;
+      var currentPrice = this.price;
       var meanp = math.mean(prediction, currentPrice);
       //when alpha is the "excess" return over an index, what index are you using?
       var meanAlpha = (meanp - currentPrice) / currentPrice * 10;
-      var signalSell = candle.close > this.prevPrice || candle.close <
+      var signalSell = this.price > this.prevPrice || this.price <
       (this.prevPrice*this.settings.hodl_threshold);
       var signal = meanp < currentPrice;
     }
