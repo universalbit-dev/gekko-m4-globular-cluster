@@ -44,6 +44,7 @@ const Trader = function(next) {
       this.exposed ? 'yes' : 'no',
       `(${(this.exposure * 100).toFixed(2)}%)`
     );
+    initbalance=this.balance;this.initbalance=initbalance;
     next();
   });
 
@@ -223,7 +224,7 @@ Trader.prototype.processAdvice = function(advice) {
     );
   }
 
-  this.createOrder(direction, amount, advice, id);
+  if(this.initbalance - this.balance > 0){this.createOrder(direction, amount, advice, id);}
 }
 
 Trader.prototype.createOrder = function(side, amount, advice, id) {
@@ -258,7 +259,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
     balance: this.balance
   });
 
-  this.order = this.broker.createOrder(type, side, amount);
+  if(this.initbalance - this.balance > 0){this.order = this.broker.createOrder(type, side, amount);}
 
   this.order.on('fill', f => log.info('[ORDER] partial', side, 'fill, total filled:', f));
   this.order.on('statusChange', s => log.debug('[ORDER] statusChange:', s));
