@@ -72,8 +72,8 @@ var method = {
     
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:8, activation: 'relu'},
-      {type:'fc', num_neurons:8, activation:'sigmoid'},
+      {type:'conv', num_neurons:4, activation: 'relu'},
+      {type:'fc', num_neurons:4, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
@@ -281,9 +281,9 @@ return prediction.w[0];
       (this.prevPrice*this.settings.hodl_threshold);
       var signal = meanp < currentPrice;
     }
-    if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > 1))
+    if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
     {this.advice('long');this.makeoperators();wait();}
-    if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < -1  && signalSell === true))
+    if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
     {this.advice('short');this.makeoperators();wait();}
 
 //stoploss as Reinforcement Learning
