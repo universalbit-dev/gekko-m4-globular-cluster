@@ -51,7 +51,7 @@ init : function() {
     this.name = 'NNSTOCH';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21'];//'34','55','89','144','233','377','610','987','1597','2584','4181'
     var x = Math.floor(Math.random() * fibonacci_sequence.length);
     x = fibonacci_sequence[x];this.x=x;
     var y = Math.floor(Math.random() * fibonacci_sequence.length);
