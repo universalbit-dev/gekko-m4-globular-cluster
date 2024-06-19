@@ -1,9 +1,9 @@
 var config = {};
 //General Settings
 config.debug =true;
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 
-config.tradingAdvisor = {enabled:true,candleSize:10,historySize:10,method:'STOCHRSI'};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 config.STOCHRSI={interval:10,threshold:1};
 config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
 
