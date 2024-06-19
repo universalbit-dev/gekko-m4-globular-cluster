@@ -1,7 +1,7 @@
 var config = {};
 //General Settings
 config.debug =true;
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
 config.SUPERTREND={atr:7,bandFactor:3};
