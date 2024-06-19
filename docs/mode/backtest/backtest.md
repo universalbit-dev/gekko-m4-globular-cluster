@@ -19,6 +19,10 @@ Plugins to Enable/Disable: [backtest_inverter.js](https://github.com/universalbi
 
 
 * backtest mode
+* 
+NOTE:
+
+Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
 
 | Plugin         | description     | enable  |
 |--------------|-----------|------------|
