@@ -247,7 +247,7 @@ return prediction.w[0];
 
 		if(this.trend.duration >= 3)this.trend.persisted = true;
 
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100)
 		{this.trend.adviced = true;}
 		else{this.advice();}
 
@@ -260,7 +260,7 @@ return prediction.w[0];
 
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= 3){this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0)
 		{this.trend.adviced = true;}
 		else {this.advice();}
 
