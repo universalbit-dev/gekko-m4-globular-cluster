@@ -95,7 +95,7 @@ npm install tulind --build-from-source
 * ##### [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 * ##### [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 * ##### [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
-* ##### Gekko [M 4 	NGC 6121](https://www.wikisky.org/starview?object_type=4&object_id=3)
+* ##### Gekko [M 4 	NGC 6121](https://www.eso.org/public/videos/?search=M+4+NGC+6121)
 * ##### [Perché gestiamo MALE il denaro?](https://www.youtube.com/watch?v=Y63fReR8vYA) con lo psichiatra @ValerioRosso
 * ##### [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
 * ##### [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
