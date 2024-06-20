@@ -1,10 +1,10 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'kraken',currency:'XBT',asset:'LTC',tickrate:30};
+config.watch = {exchange:'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 config.trader={enabled:true,
 exchange:'kraken',currency:'XBT',asset:'LTC',
 key:'000000000-00000000000000-0000000000000000000',
-secret:'000000000-00000000000000-0000000000000000000',tickrate:30
+secret:'000000000-00000000000000-0000000000000000000',tickrate:60
 };
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NOOP'};
