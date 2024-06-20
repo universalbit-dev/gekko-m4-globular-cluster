@@ -197,7 +197,7 @@ Trader.prototype.processAdvice = function(advice) {
 
   let amount;
 
-  if(direction === 'buy') {
+  if((direction === 'buy')&&(this.balance - this.previousBalance > 0)) {
 
     if(this.exposed) {
       log.info('NOT buying, already exposed');
@@ -212,14 +212,11 @@ Trader.prototype.processAdvice = function(advice) {
     }
 
     amount = this.portfolio.currency / this.price * 0.95;
+    log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);
 
-    log.info(
-      'Trader',
-      'Received advice to go long.',
-      'Buying ', this.brokerConfig.asset
-    );
-
-  } else if(direction === 'sell') {
+  } 
+  
+  else if((direction === 'sell')&&(this.balance - this.previousBalance > 0)) {
 
     if(!this.exposed) {
       log.info('NOT selling, already no exposure');
@@ -235,26 +232,15 @@ Trader.prototype.processAdvice = function(advice) {
 
     // clean up potential old stop trigger
     if(this.activeStopTrigger) {
-      this.deferredEmit('triggerAborted', {
-        id: this.activeStopTrigger.id,
-        date: advice.date
-      });
-
+      this.deferredEmit('triggerAborted', {id: this.activeStopTrigger.id,date: advice.date});
       this.activeStopTrigger.instance.cancel();
-
       delete this.activeStopTrigger;
     }
-
     amount = this.portfolio.asset;
 
-    log.info(
-      'Trader',
-      'Received advice to go short.',
-      'Selling ', this.brokerConfig.asset
-    );
+    log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);
   }
-
-  if(this.balance - this.previousBalance > 0){this.createOrder(direction, amount, advice, id);}
+  this.createOrder(direction, amount, advice, id);
 }
 
 Trader.prototype.createOrder = function(side, amount, advice, id) {
@@ -285,7 +271,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
     portfolio: this.portfolio,balance: this.balance
   });
 
-  if(this.balance - this.previousBalance > 0){this.order = this.broker.createOrder(type, side, amount);}
+  this.order = this.broker.createOrder(type, side, amount);
 
   this.order.on('fill', f => log.info('[ORDER] partial', side, 'fill, total filled:', f));
   this.order.on('statusChange', s => log.debug('[ORDER] statusChange:', s));
