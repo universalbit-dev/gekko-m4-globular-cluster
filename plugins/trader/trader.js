@@ -1,5 +1,4 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
@@ -14,10 +13,40 @@ const Broker = require(dirs.broker + '/gekkoBroker');
 
 require(dirs.gekko + '/exchange/dependencyCheck');
 
+/* DEBUG AuxiliaryIntegration */
+function CoreAuxiliaryIntegration(){
+   var directory = '../../core/';
+   var extension = '.js';
+   var files = ['candleBatcher', 'convnet','deepqlearn','emitter','gekkoStream','jquery-3.7.1','lodash','lodash3','log','moment-timezone.min','pipeline','pluginUtil','prepareDateRange','rl','stats','tulind','util'];
+   for (var file of files){
+       var auxcore = require('./' + directory + file + extension);
+       log.debug('added', auxcore);
+   }
+ }
+
+ function DlnaAuxiliaryIntegration(){
+   var directory = '../../core/dlna/';
+   var extension = '.js';
+   var files = ['candleCreator', 'candleManager','dlna','dlna_operator','heart','marketDataProvider','marketFetcher','tradeBatcher'];
+   for (var file of files){
+       var auxdlna = require('./' + directory + file + extension);
+       log.debug('added', auxdlna);
+   }
+ }
+
+ function PluginAuxiliaryIntegration(){
+   var directory = '../../plugins/';
+   var extension = '.js';
+   var files = ['adviceLogger'];  
+   for (var file of files){var auxplugin = require('./' + directory + file + extension);log.debug('added', auxplugin);}
+ }
+
 const Trader = function(next) {
 
   _.bindAll(this,_.functions(this));
-
+  CoreAuxiliaryIntegration();
+  DlnaAuxiliaryIntegration();
+  PluginAuxiliaryIntegration();
   this.brokerConfig = {
     ...config.trader,
     ...config.watch,
@@ -44,11 +73,8 @@ const Trader = function(next) {
     log.info('\t', 'Balance:');
     log.info('\t\t', this.balance, this.brokerConfig.currency);
     log.info('\t', 'Exposed:');
-    log.info('\t\t',
-      this.exposed ? 'yes' : 'no',
-      `(${(this.exposure * 100).toFixed(2)}%)`
-    );
-    initbalance=this.balance;this.initbalance=initbalance;
+    log.info('\t\t',this.exposed ? 'yes' : 'no',`(${(this.exposure * 100).toFixed(2)}%)`);
+    initbalance=this.balance;
     next();
   });
 
@@ -228,7 +254,7 @@ Trader.prototype.processAdvice = function(advice) {
     );
   }
 
-  if(this.initbalance - this.previousBalance > 0){this.createOrder(direction, amount, advice, id);}
+  if(this.balance - this.previousBalance > 0){this.createOrder(direction, amount, advice, id);}
 }
 
 Trader.prototype.createOrder = function(side, amount, advice, id) {
@@ -244,11 +270,9 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
   if(!check.valid) {
     log.warn('NOT creating order! Reason:', check.reason);
     return this.deferredEmit('tradeAborted', {
-      id,
-      adviceId: advice.id,
+      id,adviceId: advice.id,
       action: side,
-      portfolio: this.portfolio,
-      balance: this.balance,
+      portfolio: this.portfolio,balance: this.balance,
       reason: check.reason
     });
   }
@@ -256,14 +280,12 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
   log.debug('Creating order to', side, amount, this.brokerConfig.asset);
 
   this.deferredEmit('tradeInitiated', {
-    id,
-    adviceId: advice.id,
+    id,adviceId: advice.id,
     action: side,
-    portfolio: this.portfolio,
-    balance: this.balance
+    portfolio: this.portfolio,balance: this.balance
   });
 
-  if(this.initbalance - this.previousBalance > 0){this.order = this.broker.createOrder(type, side, amount);}
+  if(this.balance - this.previousBalance > 0){this.order = this.broker.createOrder(type, side, amount);}
 
   this.order.on('fill', f => log.info('[ORDER] partial', side, 'fill, total filled:', f));
   this.order.on('statusChange', s => log.debug('[ORDER] statusChange:', s));
@@ -275,8 +297,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
     this.cancellingOrder = false;
 
     this.deferredEmit('tradeErrored', {
-      id,
-      adviceId: advice.id,
+      id,adviceId: advice.id,
       date: moment(),
       reason: e.message
     });
@@ -303,6 +324,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
       this.sync(() => {
 
         let cost;
+        const feePercent=0.1;//Exchange Fee Fixed to 0.1%
         if(_.isNumber(summary.feePercent)) {
           cost = summary.feePercent / 100 * summary.amount * summary.price;
         }
@@ -333,11 +355,8 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
           effectivePrice
         });
 
-        if(
-          side === 'buy' &&
-          advice.trigger &&
-          advice.trigger.type === 'trailingStop'
-        ) {
+        if(side === 'buy' && advice.trigger && advice.trigger.type === 'trailingStop')
+        {
           const trigger = advice.trigger;
           const triggerId = 'trigger-' + (++this.propogatedTriggers);
 
@@ -369,6 +388,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
           }
         }
       });
+
     })
   });
 }
