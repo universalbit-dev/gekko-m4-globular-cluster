@@ -310,7 +310,6 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
       this.sync(() => {
 
         let cost;
-        const feePercent=0.1;//Exchange Fee Fixed to 0.1%
         if(_.isNumber(summary.feePercent)) {
           cost = summary.feePercent / 100 * summary.amount * summary.price;
         }
