@@ -8,7 +8,7 @@ secret:'000000000-00000000000000-0000000000000000000',tickrate:60
 };
 
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NOOP'};
-//requiredHistory = candleSize 5 * historySize 10 = 50 minutes
+//requiredHistory = candleSize 15 * historySize 40 = 600 minutes
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NOOP={};
