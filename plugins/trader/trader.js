@@ -1,9 +1,14 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
+
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
 const {EventEmitter} = require('node:events');
+var async = require('async');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function wait() {await sleep(60000);};
+
 const log = require(dirs.core + 'log');
 const Broker = require(dirs.broker + '/gekkoBroker');
 
@@ -114,7 +119,7 @@ Trader.prototype.setBalance = function() {
 
 Trader.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
-  const previousBalance = this.balance;
+  var previousBalance = this.balance;this.previousBalance=previousBalance;
   this.setPortfolio();
   this.setBalance();
 
@@ -223,7 +228,7 @@ Trader.prototype.processAdvice = function(advice) {
     );
   }
 
-  if(this.initbalance - this.balance > 0){this.createOrder(direction, amount, advice, id);}
+  if(this.initbalance - this.previousBalance > 0){this.createOrder(direction, amount, advice, id);}
 }
 
 Trader.prototype.createOrder = function(side, amount, advice, id) {
@@ -258,7 +263,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
     balance: this.balance
   });
 
-  if(this.initbalance - this.balance > 0){this.order = this.broker.createOrder(type, side, amount);}
+  if(this.initbalance - this.previousBalance > 0){this.order = this.broker.createOrder(type, side, amount);}
 
   this.order.on('fill', f => log.info('[ORDER] partial', side, 'fill, total filled:', f));
   this.order.on('statusChange', s => log.debug('[ORDER] statusChange:', s));
@@ -409,10 +414,13 @@ Trader.prototype.cancelOrder = function(id, advice, next) {
 }
 
 module.exports = Trader;
+
 /*
+
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 */
