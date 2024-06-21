@@ -197,7 +197,7 @@ Trader.prototype.processAdvice = function(advice) {
 
   let amount;
 
-  if((direction === 'buy')&&(this.balance - this.previousBalance > 0)) {
+  if(direction === 'buy') {
 
     if(this.exposed) {
       log.info('NOT buying, already exposed');
@@ -212,11 +212,10 @@ Trader.prototype.processAdvice = function(advice) {
     }
 
     amount = this.portfolio.currency / this.price * 0.95;
-    log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);
-
+    if(this.balance < this.previousBalance){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
   } 
   
-  else if((direction === 'sell')&&(this.balance - this.previousBalance > 0)) {
+  else if(direction === 'sell') {
 
     if(!this.exposed) {
       log.info('NOT selling, already no exposure');
@@ -237,8 +236,7 @@ Trader.prototype.processAdvice = function(advice) {
       delete this.activeStopTrigger;
     }
     amount = this.portfolio.asset;
-
-    log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);
+    if(this.balance < this.previousBalance){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
   }
   this.createOrder(direction, amount, advice, id);
 }
