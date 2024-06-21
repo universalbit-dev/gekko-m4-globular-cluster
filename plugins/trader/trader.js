@@ -74,7 +74,6 @@ const Trader = function(next) {
     log.info('\t\t', this.balance, this.brokerConfig.currency);
     log.info('\t', 'Exposed:');
     log.info('\t\t',this.exposed ? 'yes' : 'no',`(${(this.exposure * 100).toFixed(2)}%)`);
-    initbalance=this.balance;
     next();
   });
 
@@ -157,7 +156,7 @@ Trader.prototype.processCandle = function(candle, done) {
     });
   }
 
-  if(this.balance !== previousBalance) {
+  if(this.balance !== this.previousBalance) {
     // this can happen because:
     // A) the price moved and we have > 0 asset
     // B) portfolio got changed
