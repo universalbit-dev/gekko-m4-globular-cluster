@@ -144,6 +144,7 @@ Trader.prototype.setBalance = function() {
 
 Trader.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
+  this.previousprice= candle.open;
   var previousBalance = this.balance;this.previousBalance=previousBalance;
   this.setPortfolio();
   this.setBalance();
@@ -211,7 +212,7 @@ Trader.prototype.processAdvice = function(advice) {
     }
 
     amount = this.portfolio.currency / this.price * 0.95;
-    if(this.balance < this.previousBalance){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
+    if(this.price < this.previousprice){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
   } 
   
   else if(direction === 'sell') {
@@ -235,7 +236,7 @@ Trader.prototype.processAdvice = function(advice) {
       delete this.activeStopTrigger;
     }
     amount = this.portfolio.asset;
-    if(this.balance < this.previousBalance){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
+    if(this.price > this.previousprice){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
   }
   this.createOrder(direction, amount, advice, id);
 }
