@@ -1,6 +1,82 @@
-# Gekko indicators
+#indicators 
 
-When [creating your own strategy](./creating_a_strategy.md) there are a few built in indicators you can use that ship with Gekko.
+```js
+/* Indicators Functions List:
+
+added {
+ad: { requires: [], create: [Function: create] },
+adosc: {requires: [ 'optInFastPeriod', 'optInSlowPeriod' ],create: [Function: create]},
+adx: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+adxr: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+ao: { requires: [], create: [Function: create] },
+apo: {requires: [ 'optInFastPeriod', 'optInSlowPeriod' ],create: [Function: create]},
+aroon: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+aroonosc: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+atr: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+avgprice: { requires: [], create: [Function: create] },
+bbands: {requires: [ 'optInTimePeriod', 'optInNbStdDevs' ],create: [Function: create]},
+bop: { requires: [], create: [Function: create] },
+cci: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+cmo: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+cvi: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+dema: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+di: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+dm: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+dpo: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+dx: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+ema: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+emv: { requires: [], create: [Function: create] },
+fisher: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+fosc: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+hma: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+kama: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+kvo: {requires: [ 'optInFastPeriod', 'optInSlowPeriod' ],create: [Function: create]},
+linreg: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+linregintercept: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+linregslope: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+macd: {requires: [ 'optInFastPeriod', 'optInSlowPeriod', 'optInSignalPeriod' ],create: [Function: create]},
+marketfi: { requires: [], create: [Function: create] },
+mass: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+medprice: { requires: [], create: [Function: create] },
+mfi: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+msw: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+natr: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+nvi: { requires: [], create: [Function: create] },
+obv: { requires: [], create: [Function: create] },
+ppo: {requires: [ 'optInFastPeriod', 'optInSlowPeriod' ],create: [Function: create]},
+psar: {requires: [ 'optInAcceleration', 'optInMaximum' ],create: [Function: create]},
+pvi: { requires: [], create: [Function: create] },
+qstick: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+roc: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+rocr: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+rsi: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+sma: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+stddev: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+stoch: {requires: [ 'optInFastKPeriod', 'optInSlowKPeriod', 'optInSlowDPeriod' ],create: [Function: create]},
+sum: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+tema: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+tr: { requires: [], create: [Function: create] },
+trima: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+trix: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+tsf: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+typprice: { requires: [], create: [Function: create] },
+ultosc: {requires: [ 'optInTimePeriod1', 'optInTimePeriod2', 'optInTimePeriod3' ],create: [Function: create]},
+vhf: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+vidya: {requires: [ 'optInFastPeriod', 'optInSlowPeriod', 'optInAlpha' ],create: [Function: create]},
+volatility: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+vosc: {requires: [ 'optInFastPeriod', 'optInSlowPeriod' ],create: [Function: create]},
+vwma: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+wad: { requires: [], create: [Function: create] },
+wcprice: { requires: [], create: [Function: create] },
+wilders: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+willr: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+wma: { requires: [ 'optInTimePeriod' ], create: [Function: create] },
+zlema: { requires: [ 'optInTimePeriod' ], create: [Function: create] }
+
+}
+
+/*
+```
 
 ## Example
 
