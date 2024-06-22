@@ -19,13 +19,13 @@ async function wait() {console.log('keep calm and make something of amazing');aw
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['SMA', 'DEMA','StopLoss','RSI','SMMA'];  
+   var files = ['SMA', 'DEMA','StopLoss','RSI','SMMA'];
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
  }
- 
+
 
 var method = {priceBuffer : [],predictionCount : 0,stoplossCounter : 0,prevPrice : 0,prevAction : 'none',hodl_threshold : 1,
 init : function() {
@@ -41,13 +41,13 @@ init : function() {
   this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
   startTime = new Date();
   this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.StopLoss});
-  this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.DEMA});
-  this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
+  this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.DEMA,optInFastPeriod:233,optInSlowPeriod:55});
+  this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA,optInFastPeriod:233,optInSlowPeriod:55});
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
-  
+
    this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21'];//'34','55','89','144','233','377','610','987','1597','2584','4181'
+    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21']; //'34','55','89','144','233','377','610','987','1597','2584','4181'
     var x = 1;
     x = fibonacci_sequence[x];this.x=x;
     var y = 1;
