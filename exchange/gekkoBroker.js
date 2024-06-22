@@ -5,7 +5,7 @@
   - the management of actual trades to "orders".
 */
 
-const _ = require('../core/lodash');
+const _ = require('lodash');
 const async = require('async');
 const EventEmitter = require('node:events');
 const moment = require('moment');
