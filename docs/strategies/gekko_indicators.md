@@ -3,13 +3,9 @@
 
 If you want to use the MACD indicator from Gekko, you need to register it in your strategy like so:
 
+```js
     method.init = function() {
-      var settings = {
-        short: 10,
-        long: 21,
-        signal: 9
-      };
-
+      var settings = {short: 10,long: 21,signal: 9};
       // add the indicator to the strategy
       this.addIndicator('mymacd', 'MACD', settings);
     }
@@ -17,9 +13,9 @@ If you want to use the MACD indicator from Gekko, you need to register it in you
     method.check = function() {
       // use indicator results
       var macdiff = this.indicators.mymacd.result;
-
       // do something with macdiff
     }
+```
 
 ## Indicators
 
