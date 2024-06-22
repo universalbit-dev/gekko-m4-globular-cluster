@@ -1,11 +1,9 @@
-##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)
-##### [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation)
-##### [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
+##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)   ##### [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation)   ##### [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html)
 
-<img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="3%"></img>
+<img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="3%"></img>   
 ##### sustainable personal finance
-## Gekko-m4-globular-cluster
 
+## Gekko-m4-globular-cluster
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
 * [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
 * [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
@@ -14,7 +12,7 @@
 
 ##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 ---
-### [Nodejs20](https://nodejs.org/en/blog/release/v20.11.0)
+##### [Nodejs20](https://nodejs.org/en/blog/release/v20.11.0)
 * [node.js get started](https://github.com/nvm-sh/nvm)
 ```
 Now using node v20.12.2 (npm v10.5.0)
