@@ -141,16 +141,13 @@ class Broker {
       api: this.api,
       marketConfig: this.marketConfig,
       capabilities: this.capabilities
-    });
-
-    // todo: figure out a smarter generic way
-    this.syncPrivateData(() => {
+    });this.syncPrivateData(() => {
       order.setData({
         balances: this.portfolio.balances,
         ticker: this.ticker,
       });
 
-      order.create(side, amount, parameters);
+      if(this.balance > this.previousBalance)order.create(side, amount, parameters);
     });
 
     order.on('completed', summary => {
