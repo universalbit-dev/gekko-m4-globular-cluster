@@ -11,26 +11,38 @@ var stoploss = require('./indicators/StopLoss.js');
 var async = require('async');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
+
+function AuxiliaryIndicators(){
+   var directory = 'indicators/';
+   var extension = '.js';
+   var files = ['DEMA','EMA','RSI','ADX','DX'];  
+   for (var file of files){ 
+       var auxiliaryindicators = require('./' + directory + file + extension);
+       log.debug('added', auxiliaryindicators);
+   }
+ }
+
 //INIT
 var method = {
  prevPrice : 0,
  prevAction : 'wait',
 init: function()
 {
+AuxiliaryIndicators();
 this.name = 'INVERTER';
 log.info('Start' , this.name);
+
 //Init
 this.resetTrend();
 this.debug = true;
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1,optInFastPeriod:233,optInSlowPeriod:55});
+this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233,optInFastPeriod:233,optInSlowPeriod:55});
+this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55,optInFastPeriod:233,optInSlowPeriod:55});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 8,optInFastPeriod:89,optInSlowPeriod:21});
 
-//indicator overview
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55});
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod : 8});
 this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
-this.addTulipIndicator('adx', 'adx', {optInTimePeriod: 3});
+this.addTulipIndicator('adx', 'adx',{optInTimePeriod: 3,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 3});
 
 //StopLoss as indicator
@@ -46,6 +58,7 @@ startTime = new Date();
 this.requiredHistory = this.settings.historySize;
 log.info('Running', this.name);
 },
+
 
 //Trend
 
@@ -67,9 +80,7 @@ update: function(candle) {
 
 makeoperators: function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);
-console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-},
+var result = Math.floor(Math.random() * operator.length);console.log("\t\t\t\tcourtesy of... "+ operator[result]);},
 
 onTrade: function(event) {
     if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
