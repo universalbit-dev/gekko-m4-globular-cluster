@@ -35,6 +35,7 @@ method.init = function() {
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13,optInFastPeriod:89,optInSlowPeriod:21});
+  this.addTulipIndicator('stoch', 'stoch', {optInFastKPeriod: 89,optInSlowKPeriod:21,optInSlowDPeriod:21});
   this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
 
   this.RSIhistory = [];
@@ -47,6 +48,7 @@ startTime = new Date();
 
 method.update = function(candle) {
 rsi=this.tulipIndicators.rsi.result.result;
+stoch=this.tulipIndicators.stoch.result.result;
 this.rsi=rsi;
 this.RSIhistory.push(this.rsi);
 if(_.size(this.RSIhistory) > this.interval)
@@ -72,6 +74,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 method.log = function() {var digits = 8;
   log.debug('calculated StochRSI properties:');
   log.debug('\t', 'rsi:', rsi);
+  log.debug('\t', 'stoch:', stoch);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
