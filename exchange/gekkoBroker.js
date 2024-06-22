@@ -1,4 +1,4 @@
-//https://github.com/universalbit-dev/gekko-m4/blob/master/docs/gekko-broker/introduction.md
+//https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/gekko-broker/introduction.md
 /*
   The broker manages all communicatinn with the exchange, delegating:
   - the management of the portfolio to the portfolioManager
