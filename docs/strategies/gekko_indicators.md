@@ -31,9 +31,9 @@ ADX -- AO --ATR -- BB -- BBANDS -- [CCI](#CCI) -- [DEMA](#DEMA) -- DI -- DMI -- 
 
 You can implement the EMA like so:
 
+```js
     method.init = function() {
       var weight = 10;
-
       // add the indicator to the strategy
       this.addIndicator('myema', 'EMA', weight);
     }
@@ -41,10 +41,10 @@ You can implement the EMA like so:
     method.check = function() {
       // use indicator results
       var ema = this.indicators.myema.result;
-
       // do something with macdiff
     }
 
+```
 
 ### PPO
 > **What is the 'Percentage Price Oscillator - PPO'**
