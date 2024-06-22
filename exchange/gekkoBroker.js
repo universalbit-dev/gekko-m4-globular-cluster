@@ -1,4 +1,4 @@
-//https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/gekko-broker/introduction.md
+//https://github.com/universalbit-dev/gekko-m4/blob/master/docs/gekko-broker/introduction.md
 /*
   The broker manages all communicatinn with the exchange, delegating:
   - the management of the portfolio to the portfolioManager
@@ -14,7 +14,7 @@ const errors = require('./exchangeErrors');
 const Portfolio = require('./portfolioManager');
 const util = require('../core/util');
 const config = util.getConfig();
-
+require('../plugins/trader/trader.js');
 const orders = require('./orders');
 const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
