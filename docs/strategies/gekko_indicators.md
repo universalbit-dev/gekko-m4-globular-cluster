@@ -24,17 +24,7 @@ If you want to use the MACD indicator from Gekko, you need to register it in you
 ## Indicators
 
 Here is a list of all supported indicators, click on them to read more about what they are and how to implement them in Gekko:
-
-- [EMA](#EMA)
-- [PPO](#PPO)
-- [CCI](#CCI)
-- [DEMA](#DEMA)
-- [LRC](#LRC)
-- [MACD](#MACD)
-- [RSI](#RSI)
-- [SMA](#SMA)
-- [TSI](#TSI)
-- [UO](#UO)
+ADX -- AO --ATR -- BB -- BBANDS -- [CCI](#CCI) -- [DEMA](#DEMA) -- DI -- DMI -- DPO -- DX -- [EMA](#EMA) -- EMV -- HMA -- [LRC](#LRC) -- [MACD](#MACD) -- MFI -- [PPO](#PPO) -- RMA -- ROC -- [RSI](#RSI) -- [SMA](#SMA) -- SMMA -- STC -- STOCH -- StopLoss -- TEMA -- TRANGE --TRIX -- [TSI](#TSI) -- TulipAsync --[UO](#UO) -- WMA
 
 ### EMA
 
