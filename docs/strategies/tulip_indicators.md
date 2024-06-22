@@ -1,5 +1,4 @@
 # [Tulip indicators](https://tulipindicators.org/) 
-* [gekko-indicator](https://github.com/universalbit-dev/gekko-m4/blob/master/strategies/readme.md)
 
 [[Built-in by default]]
 
@@ -710,3 +709,8 @@ Zero-Lag Exponential Moving Average modifies a Exponential Moving Average to gre
 Required parameters:
 
  - optInTimePeriod
+
+---
+
+* [gekko-indicator](https://github.com/universalbit-dev/gekko-m4/blob/master/strategies/readme.md)
+
