@@ -34,7 +34,7 @@ method.init = function() {
   };
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
-  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13});
+  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13,optInFastPeriod:89,optInSlowPeriod:21});
   this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
 
   this.RSIhistory = [];
