@@ -35,6 +35,15 @@ var plugins = [
     path: config => 'trader/trader.js',
   },
   {
+    name: 'Simulate Trade',
+    description: 'Simulate Trade before create real orders.',
+    slug: 'simulateTrade',
+    async: false,
+    modes: ['realtime'],
+    emits: true,
+    path: config => 'trader/simulateTrade.js',
+  },
+  {
     name: 'Paper Trader',
     description: 'Paper trader that simulates fake trades.',
     slug: 'paperTrader',
@@ -58,6 +67,14 @@ var plugins = [
     slug: 'eventLogger',
     async: false,
     modes: ['realtime', 'backtest'],
+    greedy: true
+  },
+  {
+    name: 'Child to parent',
+    description: 'Relays events from the child to the parent process',
+    slug: 'childToParent',
+    async: false,
+    modes: ['realtime'],
     greedy: true
   },
   {
