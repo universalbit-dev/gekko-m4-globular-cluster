@@ -1,6 +1,5 @@
-const _ = require('lodash');
+require('../../jquery-3.7.1.js');
 var fork = require('node:child_process').fork;
-
 module.exports = (mode, config, callback) => {
   var debug = typeof v8debug === 'object';
   if (debug) {
