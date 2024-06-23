@@ -1,32 +1,17 @@
-const _ = require('lodash');
-
+require('../../jquery-3.7.1.js');
 var start = (mode, config) => {
-var util = require(__dirname + '/../../util');
-
-  // force correct gekko env
-  util.setGekkoEnv('node:child_process');
-
-  var dirs = util.dirs();
-
-  // force correct gekko mode & config
+var util = require('../../util.js');util.setGekkoEnv('node:child_process');
+var dirs = util.dirs();
   util.setGekkoMode(mode);
   util.setConfig(config);
-
   var pipeline = require(dirs.core + 'pipeline');
-  pipeline({
-    config: config,
-    mode: mode
-  });
+  pipeline({config: config,mode: mode});
 }
 
 //process.send('ready');
-
 process.on('message', function(m) {
-  if(m.what === 'start')
-    start(m.mode, m.config);
-
-  if(m.what === 'exit')
-    process.exit(0);
+  if(m.what === 'start')start(m.mode, m.config);
+  if(m.what === 'exit')process.exit(0);
 });
 
 process.on('disconnect', function() {
