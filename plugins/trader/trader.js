@@ -6,6 +6,7 @@ const dirs = util.dirs();
 const moment = require('moment');
 const {EventEmitter} = require('node:events');
 var async = require('async');
+require('../../core/jquery-3.7.1.js');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function wait() {await sleep(60000);};
 
