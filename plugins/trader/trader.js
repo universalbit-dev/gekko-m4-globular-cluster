@@ -1,4 +1,4 @@
-require('../performanceAnalyzer/performanceAnalyzer.js');
+PerformanceAnalyzer=require('../performanceAnalyzer/performanceAnalyzer.js');
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const util = require('../../core/util.js');
 const config = util.getConfig();
@@ -213,7 +213,8 @@ Trader.prototype.processAdvice = function(advice) {
     }
 
     amount = this.portfolio.currency / this.price * 0.95;
-    if(this.price < this.previousprice){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
+    this.uProfit=PerformanceAnalyzer.uProfit;
+    if(this.uProfit > 0){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
   } 
   
   else if(direction === 'sell') {
@@ -237,7 +238,8 @@ Trader.prototype.processAdvice = function(advice) {
       delete this.activeStopTrigger;
     }
     amount = this.portfolio.asset;
-    if(this.price > this.previousprice){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
+    this.uProfit = PerformanceAnalyzer.uProfit;
+    if( this.uProfit > 0){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
   }
   this.createOrder(direction, amount, advice, id);
 }
@@ -252,7 +254,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
   // exchanges that have them.
   const check = this.broker.isValidOrder(amount, this.price);
 
-  if(!check.valid) {
+  if(!check) {
     log.warn('NOT creating order! Reason:', check.reason);
     return this.deferredEmit('tradeAborted', {
       id,adviceId: advice.id,
