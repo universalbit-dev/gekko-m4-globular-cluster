@@ -1,26 +1,15 @@
-const _ = require('../lodash3');require('lodash-migrate');
-
-module.exports = cb => {
-
-  return {
+return {
     message: message => {
-
-      if(message.type === 'error') {
-        cb(message.error);
-      }
-
-      else
-        cb(null, message);
-
+      if(message.type === 'error') {cb(message.error);}
+      else cb(null, message);
     },
+    
     exit: status => {
-      if(status !== 0)
-        cb('Child process has died.');
-      else
-        cb(null, { done: true });
+      if(status !== 0){cb('Child process has died.');}
+      else cb(null, { done: true });
     }
   }
-}
+
 
 /*
 The MIT License (MIT)
