@@ -1,3 +1,4 @@
+require('../performanceAnalyzer/performanceAnalyzer.js');
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const util = require('../../core/util.js');
 const config = util.getConfig();
