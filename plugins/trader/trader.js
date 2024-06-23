@@ -214,8 +214,8 @@ Trader.prototype.processAdvice = function(advice) {
     }
 
     amount = this.portfolio.currency / this.price * 0.95;
-    this.uProfit=PerformanceAnalyzer.uProfit;
-    if(this.uProfit > 0){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
+    log.debug('BALANCE:' + this.balance + '    PREVIOUS BALANCES:'+ this.previousBalance);
+    if((this.balance-this.previousBalance) > 0){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
   } 
   
   else if(direction === 'sell') {
@@ -239,8 +239,8 @@ Trader.prototype.processAdvice = function(advice) {
       delete this.activeStopTrigger;
     }
     amount = this.portfolio.asset;
-    this.uProfit = PerformanceAnalyzer.uProfit;
-    if( this.uProfit > 0){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
+    log.debug('BALANCE:' + this.balance + '    PREVIOUS BALANCES:'+ this.previousBalance);
+    if( (this.balance - this.previousBalance) > 0){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
   }
   this.createOrder(direction, amount, advice, id);
 }
