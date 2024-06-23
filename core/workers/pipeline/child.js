@@ -19,7 +19,7 @@ var util = require(__dirname + '/../../util');
   });
 }
 
-process.send('ready');
+//process.send('ready');
 
 process.on('message', function(m) {
   if(m.what === 'start')
