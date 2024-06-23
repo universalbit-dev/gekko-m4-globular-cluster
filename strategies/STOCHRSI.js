@@ -48,7 +48,8 @@ startTime = new Date();
 
 method.update = function(candle) {
 rsi=this.tulipIndicators.rsi.result.result;
-stoch=this.tulipIndicators.stoch.result.result;
+stoch=this.tulipIndicators.stoch;
+
 this.rsi=rsi;
 this.RSIhistory.push(this.rsi);
 if(_.size(this.RSIhistory) > this.interval)
@@ -69,12 +70,9 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
-// for debugging purposes log the last
-// calculated parameters.
 method.log = function() {var digits = 8;
   log.debug('calculated StochRSI properties:');
   log.debug('\t', 'rsi:', rsi);
-  log.debug('\t', 'stoch:', stoch);
   log.debug("StochRSI min:\t\t" + this.lowestRSI);
   log.debug("StochRSI max:\t\t" + this.highestRSI);
   log.debug("StochRSI Value:\t\t" + this.stochRSI);
