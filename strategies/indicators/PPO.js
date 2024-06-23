@@ -1,4 +1,4 @@
-// required indicators
+require('../../core/tulind');
 const util = require('../../core/util');
 var EMA = require('./EMA.js');
 

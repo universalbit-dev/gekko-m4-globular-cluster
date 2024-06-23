@@ -2,6 +2,7 @@
 // port by Gab0 - 2017
 // not exact results when compared to TA-Lib but GOOD ENOUGH;
 // Bollinger Bands implementation;
+require('../../core/tulind');
 const util = require('../../core/util');
 var SMA = require('./SMA.js');
 var Indicator = function(BBSettings) {

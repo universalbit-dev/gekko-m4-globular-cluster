@@ -2,6 +2,7 @@
 // for use on gekko trading bot. Same license as gekko.
 // "ported" from tulip: https://tulipindicators.org/dx
 // gab0 - 2018;
+require('../../core/tulind');
 const util=require('../../core/util');
 var ATR = require('./ATR.js');
 var Indicator = function (period)

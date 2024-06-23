@@ -2,6 +2,7 @@
 
 // INPUT SETTINGS:
 // optInTimePeriod: period for EMA
+require('../../core/tulind');
 const util=require('../../core/util');
 var SMA = require('./SMA');
 

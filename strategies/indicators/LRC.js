@@ -1,6 +1,7 @@
 /*
  * Linear regression curve
  */
+require('../../core/tulind');
 const util = require('../../core/util');
 var log = require('../../core/log');
 

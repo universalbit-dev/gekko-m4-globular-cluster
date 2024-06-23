@@ -8,6 +8,7 @@
 // * strategies, with custom candle size batching, where asyncIndicatorRunner
 // * is not available
 // ****************************************************************************
+require('../../core/tulind');
 const util = require('../../core/util');
 const _ = require('lodash');require('lodash-migrate');
 

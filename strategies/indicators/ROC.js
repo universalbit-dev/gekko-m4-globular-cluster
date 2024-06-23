@@ -1,5 +1,6 @@
 // ROC indicator, ported by Gab0
 // 10-april-2018 v1.0final
+require('../../core/tulind');
 const util=require('../../core/util');
 var Indicator = function(windowLength) {
     this.input = 'price';

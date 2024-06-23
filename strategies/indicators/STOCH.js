@@ -2,6 +2,7 @@
 // Ported by Gab0 march-2018
 // ref http://www.tadoc.org/indicator/STOCH.htm
 // state: badly coded, uncertain results;
+require('../../core/tulind');
 const util=require('../../core/util');
 var SMA = require('./SMA');
 var _ = require('lodash');

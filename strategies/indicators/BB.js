@@ -1,5 +1,6 @@
 // no required indicators
 // Bollinger Bands - Okibcn implementation 2018-01-02
+require('../../core/tulind');
 var util = require('../../core/util');
 var Indicator = function(BBSettings) {
     this.input = 'price';

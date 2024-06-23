@@ -1,3 +1,4 @@
+require('../../core/tulind');
 ﻿const util = require('../../core/util');
 var Indicator = function(weight) {
   this.input = 'price';

@@ -1,4 +1,5 @@
 //AO indicator by Gab0 - 04/jan/2019;
+require('../../core/tulind');
 const util=require('../../core/util');
 var SMA = require('./SMA');
 

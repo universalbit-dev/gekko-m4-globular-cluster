@@ -1,5 +1,6 @@
 //EMV indicator by Gab0 - 06/jan/2019;
 // Settings: NONE;
+require('../../core/tulind');
 const util=require('../../core/util');
 var Indicator = function(settings) {
     this.input = 'candle';

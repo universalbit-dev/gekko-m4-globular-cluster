@@ -1,4 +1,5 @@
 //TRIX indicator by Gab0 - 05/jan/2019;
+require('../../core/tulind');
 const util=require('../../core/util');
 var EMA = require('./EMA');
 

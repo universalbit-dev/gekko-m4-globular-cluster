@@ -3,6 +3,7 @@
 //sidlines are equivalent of plus_dm and minus_dm from TALib
 //    should maybe be like plus_di and minus_di?
 // that case just change dm_up to di_up on this code, also with _down;
+require('../../core/tulind');
 const util= require('../../core/util');
 var ADX = require('./ADX');
 var Indicator = function (period) {

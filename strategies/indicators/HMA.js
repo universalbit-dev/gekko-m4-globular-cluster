@@ -1,4 +1,5 @@
 // HMA ported by Gab0 03/29/2018;
+require('../../core/tulind');
 const util=require('../../core/util');
 var WMA = require('./WMA');
 

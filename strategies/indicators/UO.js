@@ -1,4 +1,5 @@
 // required indicators
+require('../../core/tulind');
 const util = require('../../core/util');
 var SMA = require('./SMA.js');
 

@@ -1,6 +1,7 @@
 ﻿// @link http://www.stockcharts.com/school/doku.php?id=chart_school:technical_indicators:average_true_range_atr
 // formula http://www.fmlabs.com/reference/default.htm?url=ATR.htm
 // Gab0 - 01/24/2018
+require('../../core/tulind');
 const util= require('../../core/util');
 var TRANGE = require('./TRANGE.js');
 var SMMA = require('./SMMA.js');

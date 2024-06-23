@@ -1,4 +1,4 @@
-// required indicators
+require('../../core/tulind');
 const util = require('../../core/util');
 var SMMA = require('./SMMA.js');
 
@@ -24,8 +24,7 @@ Indicator.prototype.update = function (candle) {
     this.lastClose = currentClose;
 
     // Do not calculate RSI for this reason - there's no change!
-    this.age++;
-    return;
+    this.age++;return;
   }
 
   if (currentClose > this.lastClose) {

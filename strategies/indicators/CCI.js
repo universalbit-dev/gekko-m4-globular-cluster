@@ -1,6 +1,7 @@
 /*
  * CCI
  */
+require('../../core/tulind');
 var log = require('../../core/log');
 var util = require('../../core/util');
 var Indicator = function(settings) {

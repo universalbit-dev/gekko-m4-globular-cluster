@@ -1,5 +1,6 @@
 // required indicators
 // Simple Moving Average - O(1) implementation 
+require('../../core/tulind');
 const util = require('../../core/util');
 var Indicator = function(windowLength) {
   this.input = 'price';

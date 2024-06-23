@@ -1,5 +1,6 @@
 // STC coded by Gab0 03/29/2018;
 //settings: short, long, signal, cycle, smooth;
+require('../../core/tulind');
 const util = require('../../core/util');
 var MACD = require('./MACD');
 var STOCH = require('./STOCH');

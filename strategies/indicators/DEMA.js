@@ -1,4 +1,5 @@
 // 引用上面的EMA代码
+require('../../core/tulind');
 const util=require('../../core/util');
 var EMA = require('./EMA.js');
 var Indicator = function(config) {
