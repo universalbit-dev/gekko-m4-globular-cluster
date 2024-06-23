@@ -1,3 +1,6 @@
+require('../../plugins/trader/trader.js');
+require('../../plugins/eventLogger.js');
+require('../../plugins/adviceLogger.js');
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const {EventEmitter} = require('node:events');
 const moment = require('moment');
@@ -62,7 +65,7 @@ PerformanceAnalyzer.prototype.processCandle = function(candle, done) {
     return done();
   }
 
-  this.price = candle.open;
+  this.price = candle.close;
   this.dates.end = candle.start.clone().add(1, 'second');
   if(!this.dates.start) {
     this.dates.start = candle.start;
