@@ -11,7 +11,6 @@ const moment = require('moment');
 const fs = require('node:fs');
 var async = require("async");
 const {EventEmitter} = require('node:events');
-
 const BacktestResultExporter = function() {
   this.performanceReport;
   this.roundtrips = [];
@@ -25,7 +24,7 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.stratCandles)this.processStratCandles = null;
   if(!config.backtestResultExporter.data.portfolioValues)this.processPortfolioValueChange = null;
   if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
 }
 util.makeEventEmitter(BacktestResultExporter);
 
@@ -98,34 +97,24 @@ BacktestResultExporter.prototype.finalize = function(done) {
 BacktestResultExporter.prototype.writeToDisk = function(backtest, next) {
   let filename;
 
-  if(config.backtestResultExporter.filename) {
-    filename = config.backtestResultExporter.filename;
-  } else {
-    const now = moment().format('YYYY-MM-DD HH:mm:ss');
-    filename = `backtest-${config.tradingAdvisor.method}-${now}.json`;
-  }
-
-  fs.writeFile('logs/json/' + filename,
-    JSON.stringify(backtest),
+  if(config.backtestResultExporter.filename) {filename = config.backtestResultExporter.filename;} 
+  else {const now = moment().format('YYYY-MM-DD HH:mm:ss');filename = `backtest-${config.tradingAdvisor.method}-${now}.json`;}
+  fs.writeFile('logs/json/' + filename,JSON.stringify(backtest),
     err => {
-      if(err) {
-        log.error('unable to write backtest result', err);
-      } else {
-        log.info('written backtest to: ', 'logs/json/' + filename);
-      }
+      if(err) {log.error('unable to write backtest result', err);} 
+      else {log.info('written backtest to: ', 'logs/json/' + filename);}
       next();
     }
   );
   
 var obj = {dev: filename};
 var backtest_file= {};
-
+var value=filename;
 async.forEachOf(obj, (value, key, callback) => {
-    fs.readFile('logs/json/' + value, "utf8", (err, data) => {
+    fs.readFile("logs/json/" + value, "utf8", (err, data) => {
         if (err) return callback(err);
-        try {
-            backtest_file[key] = JSON.parse(data);
-        } catch (e) {return callback(e);}
+        try {backtest_file[key] = JSON.parse(data);} 
+        catch (e) {return callback(e);}
         callback();
     });
 }, err => {
