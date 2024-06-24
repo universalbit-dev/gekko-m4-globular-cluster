@@ -19,6 +19,15 @@ module.exports = {
   instances : "1",
   exec_mode : "cluster"
   },
+    
+  {
+  name: 'nn',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_nn.js',
+  name      : '|NN|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
 
   {
   name: 'dema',
@@ -34,15 +43,6 @@ module.exports = {
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_supertrend.js',
   name      : '|SUPERTREND|-backtest-|',
-  instances : "1",
-  exec_mode : "cluster"
-  },
-
-  {
-  name: 'nndema',
-  script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_nndema.js',
-  name      : '|NNDEMA|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   },
