@@ -1,54 +1,19 @@
-PerformanceAnalyzer=require('../performanceAnalyzer/performanceAnalyzer.js');
 const _ = require('../../core/lodash3');require('lodash-migrate');
+
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
 const {EventEmitter} = require('node:events');
-var async = require('async');
-require('../../core/jquery-3.7.1.js');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {await sleep(60000);};
-
 const log = require(dirs.core + 'log');
 const Broker = require(dirs.broker + '/gekkoBroker');
 
 require(dirs.gekko + '/exchange/dependencyCheck');
 
-/* DEBUG AuxiliaryIntegration */
-function CoreAuxiliaryIntegration(){
-   var directory = '../../core/';
-   var extension = '.js';
-   var files = ['candleBatcher', 'convnet','deepqlearn','emitter','gekkoStream','jquery-3.7.1','lodash','lodash3','log','moment-timezone.min','pipeline','pluginUtil','prepareDateRange','rl','stats','tulind','util'];
-   for (var file of files){
-       var auxcore = require('./' + directory + file + extension);
-       log.debug('added', auxcore);
-   }
- }
-
- function DlnaAuxiliaryIntegration(){
-   var directory = '../../core/dlna/';
-   var extension = '.js';
-   var files = ['candleCreator', 'candleManager','dlna','dlna_operator','heart','marketDataProvider','marketFetcher','tradeBatcher'];
-   for (var file of files){
-       var auxdlna = require('./' + directory + file + extension);
-       log.debug('added', auxdlna);
-   }
- }
-
- function PluginAuxiliaryIntegration(){
-   var directory = '../../plugins/';
-   var extension = '.js';
-   var files = ['adviceLogger'];  
-   for (var file of files){var auxplugin = require('./' + directory + file + extension);log.debug('added', auxplugin);}
- }
-
 const Trader = function(next) {
 
   _.bindAll(this,_.functions(this));
-  CoreAuxiliaryIntegration();
-  DlnaAuxiliaryIntegration();
-  PluginAuxiliaryIntegration();
+
   this.brokerConfig = {
     ...config.trader,
     ...config.watch,
@@ -75,7 +40,10 @@ const Trader = function(next) {
     log.info('\t', 'Balance:');
     log.info('\t\t', this.balance, this.brokerConfig.currency);
     log.info('\t', 'Exposed:');
-    log.info('\t\t',this.exposed ? 'yes' : 'no',`(${(this.exposure * 100).toFixed(2)}%)`);
+    log.info('\t\t',
+      this.exposed ? 'yes' : 'no',
+      `(${(this.exposure * 100).toFixed(2)}%)`
+    );
     next();
   });
 
@@ -146,8 +114,7 @@ Trader.prototype.setBalance = function() {
 
 Trader.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
-  this.previousprice= candle.open;
-  var previousBalance = this.balance;this.previousBalance=previousBalance;
+  const previousBalance = this.balance;
   this.setPortfolio();
   this.setBalance();
 
@@ -159,7 +126,7 @@ Trader.prototype.processCandle = function(candle, done) {
     });
   }
 
-  if(this.balance !== this.previousBalance) {
+  if(this.balance !== previousBalance) {
     // this can happen because:
     // A) the price moved and we have > 0 asset
     // B) portfolio got changed
@@ -214,11 +181,14 @@ Trader.prototype.processAdvice = function(advice) {
     }
 
     amount = this.portfolio.currency / this.price * 0.95;
-    log.debug('BALANCE:' + this.balance + '    PREVIOUS BALANCE:'+ this.previousBalance);
-    if(this.balance >= this.previousBalance){log.info('Trader','Received advice to go long.','Buying ', this.brokerConfig.asset);}
-  } 
-  
-  else if(direction === 'sell') {
+
+    log.info(
+      'Trader',
+      'Received advice to go long.',
+      'Buying ', this.brokerConfig.asset
+    );
+
+  } else if(direction === 'sell') {
 
     if(!this.exposed) {
       log.info('NOT selling, already no exposure');
@@ -234,14 +204,25 @@ Trader.prototype.processAdvice = function(advice) {
 
     // clean up potential old stop trigger
     if(this.activeStopTrigger) {
-      this.deferredEmit('triggerAborted', {id: this.activeStopTrigger.id,date: advice.date});
+      this.deferredEmit('triggerAborted', {
+        id: this.activeStopTrigger.id,
+        date: advice.date
+      });
+
       this.activeStopTrigger.instance.cancel();
+
       delete this.activeStopTrigger;
     }
+
     amount = this.portfolio.asset;
-    log.debug('BALANCE:' + this.balance + '    PREVIOUS BALANCE:'+ this.previousBalance);
-    if(this.balance >= this.previousBalance){log.info('Trader','Received advice to go short.','Selling ', this.brokerConfig.asset);}
+
+    log.info(
+      'Trader',
+      'Received advice to go short.',
+      'Selling ', this.brokerConfig.asset
+    );
   }
+
   this.createOrder(direction, amount, advice, id);
 }
 
@@ -255,12 +236,14 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
   // exchanges that have them.
   const check = this.broker.isValidOrder(amount, this.price);
 
-  if(!check) {
+  if(!check.valid) {
     log.warn('NOT creating order! Reason:', check.reason);
     return this.deferredEmit('tradeAborted', {
-      id,adviceId: advice.id,
+      id,
+      adviceId: advice.id,
       action: side,
-      portfolio: this.portfolio,balance: this.balance,
+      portfolio: this.portfolio,
+      balance: this.balance,
       reason: check.reason
     });
   }
@@ -268,9 +251,11 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
   log.debug('Creating order to', side, amount, this.brokerConfig.asset);
 
   this.deferredEmit('tradeInitiated', {
-    id,adviceId: advice.id,
+    id,
+    adviceId: advice.id,
     action: side,
-    portfolio: this.portfolio,balance: this.balance
+    portfolio: this.portfolio,
+    balance: this.balance
   });
 
   this.order = this.broker.createOrder(type, side, amount);
@@ -285,7 +270,8 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
     this.cancellingOrder = false;
 
     this.deferredEmit('tradeErrored', {
-      id,adviceId: advice.id,
+      id,
+      adviceId: advice.id,
       date: moment(),
       reason: e.message
     });
@@ -342,8 +328,11 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
           effectivePrice
         });
 
-        if(side === 'buy' && advice.trigger && advice.trigger.type === 'trailingStop')
-        {
+        if(
+          side === 'buy' &&
+          advice.trigger &&
+          advice.trigger.type === 'trailingStop'
+        ) {
           const trigger = advice.trigger;
           const triggerId = 'trigger-' + (++this.propogatedTriggers);
 
@@ -375,7 +364,6 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
           }
         }
       });
-
     })
   });
 }
@@ -421,13 +409,10 @@ Trader.prototype.cancelOrder = function(id, advice, next) {
 }
 
 module.exports = Trader;
-
 /*
-
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 */
