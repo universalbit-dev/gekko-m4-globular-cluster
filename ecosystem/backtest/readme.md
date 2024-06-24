@@ -29,6 +29,10 @@ node gekko.js -c ecosystem/backtest/backtest_nn.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_supertrend.js -b
 ```
+* DEMA.js
+```
+node gekko.js -c ecosystem/backtest/backtest_dema.js -b
+```
 
 ---
 BackTest Strategy Name | Written logs/json | Speed 1-10 (Time Frame 1Month)
