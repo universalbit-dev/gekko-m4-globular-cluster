@@ -5,7 +5,7 @@
 * [tulip-indicator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
 * [gekko-indicator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/gekko_indicators.md)
 
-#### [Tulip Node](https://www.npmjs.com/package/tulind)
+#### Tulip Node
 Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
 
 ##### install [tulind npm package](https://www.npmjs.com/package/tulind) from source:
