@@ -39,3 +39,5 @@ RSIBULLBEARADX | |
 SUPERTREND | | 
 NN | [yes] | [7] 
 NOOP | | 
+DEMA | |  
+
