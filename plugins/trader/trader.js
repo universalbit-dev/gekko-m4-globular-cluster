@@ -1,5 +1,5 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-
+require('../../core/jquery-3.7.1.js');
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
