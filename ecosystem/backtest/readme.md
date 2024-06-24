@@ -38,5 +38,4 @@ STOCHRSI | yes | [9]
 RSIBULLBEARADX | | 
 SUPERTREND | | 
 NN | [yes] | [7] 
-NNCCI | [no] | [8]
 NOOP | | 
