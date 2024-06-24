@@ -16,10 +16,7 @@ node gekko.js -c ecosystem/backtest/backtest_inverter.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_stochrsi.js -b
 ```
-* NNDEMA.js
-```
-node gekko.js -c ecosystem/backtest/backtest_nndema.js -b
-```
+
 * RSIBULLBEARADX.js
 ```
 node gekko.js -c ecosystem/backtest/backtest_rsibullbearadx.js -b
@@ -40,9 +37,6 @@ INVERTER | yes | [9]
 STOCHRSI | yes | [9] 
 RSIBULLBEARADX | | 
 SUPERTREND | | 
-NNSTOCH | yes | [7] 
-NNTMA | [no] | [6]
-NNDEMA | [] | [8]
 NN | [yes] | [7] 
 NNCCI | [no] | [8]
 NOOP | | 
