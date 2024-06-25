@@ -232,7 +232,7 @@ return prediction.w[0];
 },
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
-  check : async function(candle) {
+  check : function(candle) {
 
     dema=this.tulipIndicators.dema.result.result;
     rsi=this.tulipIndicators.rsi.result.result;

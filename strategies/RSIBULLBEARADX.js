@@ -12,7 +12,7 @@ async function sequence() {console.log('');await sequence;};
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
-async function AuxiliaryIndicators(){
+function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
    var files = ['SMA', 'RSI','ADX'];
@@ -100,7 +100,7 @@ var method = {
   },
 
   /* CHECK */
-  check: function() {
+  check: function(candle) {
     // get all indicators
     let ind = this.tulipIndicators,
     maSlow =  this.tulipIndicators.maSlow.result.result,
@@ -146,8 +146,7 @@ var method = {
     if (this.trend.direction !== 'up') // new trend? (only act on new trends)
     {
       this.resetTrend();
-      this.trend.direction = 'up';
-      this.advice('long');
+      this.trend.direction = 'up';this.advice('long');
       if (this.debug) log.info('Going long');
     }
 
@@ -163,8 +162,7 @@ var method = {
   short: function() {
     if (this.trend.direction !== 'down') {
       this.resetTrend();
-      this.trend.direction = 'down';
-      this.advice('short');
+      this.trend.direction = 'down';this.advice('short');
       if (this.debug) log.info('Going short');
     }
 
