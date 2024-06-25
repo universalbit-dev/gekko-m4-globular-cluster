@@ -3,17 +3,30 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 
 var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
+
+/* async fibonacci sequence */
+var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function sequence() {console.log('');await sequence;};
+
+/* async keep calm and make something of amazing */ 
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['SMA', 'DEMA'];  
+   var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
+ }
+
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
  
 var method = {
@@ -26,7 +39,7 @@ init : function() {
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
 },
 
-update : function(candle) {  
+update : function(candle) {
   var dema = this.tulipIndicators.dema.result.result;
   var sma = this.tulipIndicators.sma.result.result;
   var diff= dema-sma;this.diff=diff.toFixed(6);
@@ -39,14 +52,16 @@ update : function(candle) {
 
 log : function() {},
 
-check : function() {
-  dema =  this.tulipIndicators.dema.result.result;sma = this.tulipIndicators.sma.result.result;
+check : function(candle) {
+  dema =  this.tulipIndicators.dema.result.result;
+  sma = this.tulipIndicators.sma.result.result;
   
   switch (true){
-  case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'): log.debug('we are currently in uptrend');this.advice('short');break;
-  case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'): log.debug('we are currently in a downtrend');this.advice('long');break;
+  case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'): log.debug('we are currently in uptrend');this.advice('short');amazing();makeoperators();break;
+  case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'): log.debug('we are currently in a downtrend');this.advice('long');amazing();makeoperators();break;
   default: log.debug('we are currently not in an up or down trend');
   } 
+  sequence();
 }
 
 };
