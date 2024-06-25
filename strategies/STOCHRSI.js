@@ -6,21 +6,34 @@ var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.STOCHRSI;this.settings=settings;
-var stoploss= require('./indicators/StopLoss.js');
-
 var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
+
+/* async fibonacci sequence */
+var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function sequence() {console.log('');await sequence;};
+
+/* async keep calm and make something of amazing */ 
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['RSI','StopLoss'];  
+   var files = ['ATR','StopLoss'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
- };
+ }
+ 
+ function onTrade(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+}
+ 
+ 
 var method = {};
 method.init = function() {
   AuxiliaryIndicators();
@@ -64,7 +77,7 @@ this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI
     if (err) {return console.log(err);}
     });
 }
-method.makeoperators=function() {
+method.makeoperators= function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
@@ -79,48 +92,32 @@ method.log = function() {var digits = 8;
 }
 
 method.check = function(candle) {
-    rsi=this.tulipIndicators.rsi.result.result;
-	this.rsi=rsi;
+    rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
 	if(this.stochRSI > 70) {
-		// new trend detected
-		if(this.trend.direction != 'high')
-			this.trend = {
-				duration: 0,
-				persisted: false,
-				direction: 'high',
-				adviced: false
-			};
-
-		this.trend.duration++;
-
-		log.debug('In high since', this.trend.duration, 'candle(s)');
-
-		if(this.trend.duration >= 1)
-	   {this.trend.persisted = true;}
-
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-		{this.trend.adviced = true;this.advice('short');this.makeoperators();wait();}
-
-		else {_.noop;}
+	if(this.trend.direction != 'high')this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
+	this.trend.duration++;
+	log.debug('In high since', this.trend.duration, 'candle(s)');
+	if(this.trend.duration >= 1){this.trend.persisted = true;}
+	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
+	{this.trend.adviced = true;this.advice('short');this.makeoperators();wait();}
+	else {_.noop;}
 	}
-
 	else if(this.stochRSI < 30)
 	{
-		if(this.trend.direction != 'low')
-		{
-		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
-		this.trend.duration++;
-		log.debug('In low since', this.trend.duration, 'candle(s)');
-		}
-		if(this.trend.duration >= 1)
-		{this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-		{this.trend.adviced = true;this.advice('long');this.makeoperators();wait();}
-
+	if(this.trend.direction != 'low')
+	{
+	this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
+	this.trend.duration++;
+	log.debug('In low since', this.trend.duration, 'candle(s)');
+	}
+	if(this.trend.duration >= 1)
+	{this.trend.persisted = true;}
+	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
+	{this.trend.adviced = true;this.advice('long');this.makeoperators();wait();}
     else {_.noop;}
 	}
-
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
+	sequence();
 }
 
 module.exports = method;
