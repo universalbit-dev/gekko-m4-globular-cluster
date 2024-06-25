@@ -104,7 +104,8 @@ check : function(candle) {
     upperBand : this.supertrend.upperBand,
     lowerBand : this.supertrend.lowerBand,
     supertrend : this.supertrend.supertrend,
-  };sequence();
+  };
+  sequence();
 }
 
 };
