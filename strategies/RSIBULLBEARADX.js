@@ -1,16 +1,22 @@
 require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-
 var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
 
-function AuxiliaryIndicators(){
+/* async fibonacci sequence */
+var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function sequence() {console.log('');await sequence;};
+
+/* async keep calm and make something of amazing */ 
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
+
+async function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['SMA', 'RSI','ADX'];  
-   for (var file of files){ 
+   var files = ['SMA', 'RSI','ADX'];
+   for (var file of files){
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
@@ -52,11 +58,7 @@ var method = {
 
     // add min/max if debug
     if (this.debug) {
-      this.stat = {
-        adx: {min: 1000,max: 0},
-        bear: {min: 1000,max: 0},
-        bull: {min: 1000,max: 0}
-      };
+      this.stat = {adx: {min: 1000,max: 0},bear: {min: 1000,max: 0},bull: {min: 1000,max: 0}};
     }
 
     /* MESSAGES */
@@ -70,10 +72,8 @@ var method = {
     // warn users
     if (this.requiredHistory < this.settings.SMA_long) {
     log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
-    }
-
+    }sequence();
   },
-
 
   /* RESET TREND */
   resetTrend: function() {
@@ -99,7 +99,6 @@ var method = {
     }
   },
 
-
   /* CHECK */
   check: function() {
     // get all indicators
@@ -108,8 +107,6 @@ var method = {
     maFast =  this.tulipIndicators.maFast.result.result,
     adx =  this.tulipIndicators.adx.result.result,
     rsi =  this.tulipIndicators.rsi.result.result;
-
-
     if (maFast < maSlow)
     {
     //bear rsi
@@ -141,9 +138,8 @@ var method = {
 
     // add adx low/high if debug
     if (this.debug) this.lowHigh(adx, 'adx');
-
+  sequence();
   },
-
 
   /* LONG  */
   long: function() {
@@ -159,6 +155,7 @@ var method = {
       this.trend.duration++;
       log.info('Long since', this.trend.duration, 'candle(s)');
     }
+    sequence();
   },
 
 
@@ -175,6 +172,7 @@ var method = {
       this.trend.duration++;
       log.info('Short since', this.trend.duration, 'candle(s)');
     }
+    sequence();
   },
 
 
@@ -212,7 +210,7 @@ module.exports = method;
 	(CC-BY-SA 4.0) Tommie Hansen
 	https://creativecommons.org/licenses/by-sa/4.0/
 	-
-	NOTE: Requires custom indicators found here:
+	NOTE: Requires custom indicators:
 	https://github.com/Gab0/Gekko-extra-indicators
 	(c) Gabriel Araujo
 	Howto: Download + add to gekko/strategies/indicators
