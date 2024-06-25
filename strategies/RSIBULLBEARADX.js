@@ -72,7 +72,7 @@ var method = {
     // warn users
     if (this.requiredHistory < this.settings.SMA_long) {
     log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
-    }sequence();
+    }
   },
 
   /* RESET TREND */
@@ -126,19 +126,18 @@ var method = {
     //bull rsi
       rsi = this.tulipIndicators.BULL_RSI.result.result;
       let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
-
       // ADX
       if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
       else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
-
+      
       if (rsi > rsi_hi) this.short();
       else if (rsi < rsi_low) this.long();
+      
       if (this.debug) this.lowHigh(rsi, 'bull');
     }
-
     // add adx low/high if debug
     if (this.debug) this.lowHigh(adx, 'adx');
-  sequence();
+sequence();
   },
 
   /* LONG  */
@@ -154,7 +153,6 @@ var method = {
       this.trend.duration++;
       log.info('Long since', this.trend.duration, 'candle(s)');
     }
-    sequence();
   },
 
 
@@ -166,11 +164,9 @@ var method = {
       if (this.debug) log.info('Going short');
     }
 
-    if (this.debug) {
-      this.trend.duration++;
+    if (this.debug) {this.trend.duration++;
       log.info('Short since', this.trend.duration, 'candle(s)');
     }
-    sequence();
   },
 
 
