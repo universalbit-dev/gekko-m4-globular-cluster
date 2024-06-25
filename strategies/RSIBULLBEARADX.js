@@ -34,7 +34,7 @@ var method = {
     config.backtest.batchSize = 1000; // increase performance
     config.silent = true; // NOTE: You may want to set this to 'false' @ live
     config.debug = false;
-    this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     // SMA
     this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.SMA_long});
     this.addTulipIndicator('maFast', 'sma', {optInTimePeriod:this.settings.SMA_short});
