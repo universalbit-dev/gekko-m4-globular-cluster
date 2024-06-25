@@ -36,7 +36,7 @@ method.init = function() {
   this.requiredHistory = this.settings.historySize;
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13,optInFastPeriod:89,optInSlowPeriod:21});
   this.addTulipIndicator('stoch', 'stoch', {optInFastKPeriod: 89,optInSlowKPeriod:21,optInSlowDPeriod:21});
-  this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+  this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.STOPLOSS});
 
   this.RSIhistory = [];
   log.info('================================================');
