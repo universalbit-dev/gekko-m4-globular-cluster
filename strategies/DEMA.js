@@ -41,7 +41,7 @@ init : function() {
   this.name = 'DEMA';
   this.currentTrend;
   this.requiredHistory = config.tradingAdvisor.historySize;
-  this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+  this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
   this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.DEMA});
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
 },
