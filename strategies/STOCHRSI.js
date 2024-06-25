@@ -47,8 +47,8 @@ method.init = function() {
   };
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
-  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 13,optInFastPeriod:89,optInSlowPeriod:21});
-  this.addTulipIndicator('stoch', 'stoch', {optInFastKPeriod: 89,optInSlowKPeriod:21,optInSlowDPeriod:21});
+  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFastPeriod:89,optInSlowPeriod:21});
+  this.addTulipIndicator('stoch', 'stoch', {optInFastKPeriod: 89,optInSlowKPeriod:21,optInSlowDPeriod:this.settings.STOCH});
   this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.STOPLOSS});
 
   this.RSIhistory = [];
@@ -61,7 +61,7 @@ startTime = new Date();
 
 method.update = function(candle) {
 rsi=this.tulipIndicators.rsi.result.result;
-stoch=this.tulipIndicators.stoch;
+stoch=this.tulipIndicators.stoch.result.result;
 
 this.rsi=rsi;
 this.RSIhistory.push(this.rsi);
@@ -93,24 +93,24 @@ method.log = function() {var digits = 8;
 
 method.check = function(candle) {
     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-	if(this.stochRSI > 70) {
-	if(this.trend.direction != 'high')this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
+	if(this.stochRSI > this.settings.high) {
+	if(this.trend.direction !== 'high')this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
 	this.trend.duration++;
 	log.debug('In high since', this.trend.duration, 'candle(s)');
-	if(this.trend.duration >= 1){this.trend.persisted = true;}
+	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 	{this.trend.adviced = true;this.advice('short');this.makeoperators();amazing();}
 	else {_.noop;}
 	}
-	else if(this.stochRSI < 30)
+	else if(this.stochRSI < this.settings.low)
 	{
-	if(this.trend.direction != 'low')
+	if(this.trend.direction !== 'low')
 	{
 	this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
 	this.trend.duration++;
 	log.debug('In low since', this.trend.duration, 'candle(s)');
 	}
-	if(this.trend.duration >= 1)
+	if(this.trend.duration >= this.settings.persisted)
 	{this.trend.persisted = true;}
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 	{this.trend.adviced = true;this.advice('long');this.makeoperators();amazing();}
