@@ -9,8 +9,17 @@ var settings = config.INVERTER;this.settings=settings;
 var stoploss = require('./indicators/StopLoss.js');
 
 var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
+
+/* async fibonacci sequence */
+var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function sequence() {console.log('');await sequence;};
+
+/* async keep calm and make something of amazing */ 
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
+
+
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
@@ -22,11 +31,17 @@ function AuxiliaryIndicators(){
    }
  }
 
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+}
+
 //INIT
 var method = {
  prevPrice : 0,
  prevAction : 'wait',
-init: function()
+init:  function()
 {
 AuxiliaryIndicators();
 this.name = 'INVERTER';
@@ -103,8 +118,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');wait();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');wait();break;
+	case (rsi > 68 && rsi < 72):this.advice('short');amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');amazing();break;
 	case (rsi > 40 && rsi < 60):this.pingPong();break;
 	default:_.noop;
 	}
@@ -136,18 +151,18 @@ switch (true) {
         if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='short';}
         else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='long';}
         else _.noop;
-        if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
+        if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}sequence();
 },
 
 //LONG
 long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'short')&&(this.trend.bb !== 'short'))
-  {this.resetTrend();this.trend.duration++;this.advice('long');this.makeoperators();wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('long');this.makeoperators();amazing();}
 },
 //SHORT
 short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'long')&&(this.trend.bb !== 'long'))
-  {this.resetTrend();this.trend.duration++;this.advice('short');this.makeoperators();wait();}
+  {this.resetTrend();this.trend.duration++;this.advice('short');this.makeoperators();amazing();}
 },
 
 //PingPong

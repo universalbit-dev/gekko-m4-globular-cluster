@@ -35,6 +35,12 @@ function AuxiliaryIndicators(){
    }
  }
 
+function onTrade(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+}
+
 var method = {
   priceBuffer : [],
   predictionCount : 0,
