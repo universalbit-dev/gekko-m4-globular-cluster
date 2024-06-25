@@ -1,7 +1,8 @@
 require('../core/tulind');
+const { spawn } = require('node:child_process');
+const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];

@@ -1,5 +1,4 @@
 /* asyncronous method timed by fibonacci sequence */
-
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
