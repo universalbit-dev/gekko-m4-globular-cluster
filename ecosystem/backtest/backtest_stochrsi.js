@@ -4,9 +4,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
-config.STOCHRSI={interval:10,threshold:1,STOPLOSS:3};
-config.STOCHRSI.thresholds={low:30,high:70,persistence:5};
-
+config.STOCHRSI={interval:10,STOPLOSS:3,high:70,low:30,persistence:5,RSI:21,STOCH:21};
 
 //Date.prototype.toISOString()
 //Previous Month
