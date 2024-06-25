@@ -99,7 +99,7 @@ method.check = function(candle) {
 	log.debug('In high since', this.trend.duration, 'candle(s)');
 	if(this.trend.duration >= 1){this.trend.persisted = true;}
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-	{this.trend.adviced = true;this.advice('short');this.makeoperators();wait();}
+	{this.trend.adviced = true;this.advice('short');this.makeoperators();amazing();}
 	else {_.noop;}
 	}
 	else if(this.stochRSI < 30)
@@ -113,7 +113,7 @@ method.check = function(candle) {
 	if(this.trend.duration >= 1)
 	{this.trend.persisted = true;}
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-	{this.trend.adviced = true;this.advice('long');this.makeoperators();wait();}
+	{this.trend.adviced = true;this.advice('long');this.makeoperators();amazing();}
     else {_.noop;}
 	}
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
