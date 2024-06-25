@@ -16,7 +16,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['ATR'];  
+   var files = ['ATR','StopLoss'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
@@ -27,6 +27,12 @@ function makeoperators() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+}
+
+function onTrade(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
 }
 
 var method = {
@@ -42,6 +48,7 @@ init : function() {
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.atr});
+  this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
   this.bought = 0;
 
   this.supertrend = {upperBandBasic : 0,lowerBandBasic : 0,upperBand : 0,lowerBand : 0,supertrend : 0,};

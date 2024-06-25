@@ -36,6 +36,13 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
+function onTrade(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+}
+
+
 //INIT
 var method = {
  prevPrice : 0,
@@ -54,13 +61,11 @@ this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1,optInFastPeriod:233,o
 this.addTulipIndicator('longema', 'ema', {optInTimePeriod: 233,optInFastPeriod:233,optInSlowPeriod:55});
 this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: 55,optInFastPeriod:233,optInSlowPeriod:55});
 this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: 8,optInFastPeriod:89,optInSlowPeriod:21});
-
 this.addTulipIndicator('di', 'di', {optInTimePeriod : 13});
 this.addTulipIndicator('adx', 'adx',{optInTimePeriod: 3,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: 3});
-
 //StopLoss as indicator
-this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');

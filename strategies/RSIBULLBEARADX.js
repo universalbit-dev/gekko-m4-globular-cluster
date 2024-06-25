@@ -15,7 +15,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['SMA', 'RSI','ADX'];
+   var files = ['SMA', 'RSI','ADX','StopLoss'];
    for (var file of files){
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
@@ -34,7 +34,7 @@ var method = {
     config.backtest.batchSize = 1000; // increase performance
     config.silent = true; // NOTE: You may want to set this to 'false' @ live
     config.debug = false;
-
+    this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     // SMA
     this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.SMA_long});
     this.addTulipIndicator('maFast', 'sma', {optInTimePeriod:this.settings.SMA_short});

@@ -26,7 +26,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['DEMA','StopLoss','RSI','SMMA'];  
+   var files = ['DEMA','StopLoss','RSI','SMMA','StopLoss'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
@@ -65,7 +65,7 @@ var method = {
     startTime = new Date();
     //indicators
     //StopLoss as indicator
-    this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
+    this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI

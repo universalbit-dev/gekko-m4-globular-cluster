@@ -28,6 +28,12 @@ var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
+
+function onTrade(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+}
  
 var method = {
 init : function() {
@@ -35,6 +41,7 @@ init : function() {
   this.name = 'DEMA';
   this.currentTrend;
   this.requiredHistory = config.tradingAdvisor.historySize;
+  this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
   this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.DEMA});
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
 },
@@ -55,7 +62,6 @@ log : function() {},
 check : function(candle) {
   dema =  this.tulipIndicators.dema.result.result;
   sma = this.tulipIndicators.sma.result.result;
-  
   switch (true){
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'): log.debug('we are currently in uptrend');this.advice('short');amazing();makeoperators();break;
   case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'): log.debug('we are currently in a downtrend');this.advice('long');amazing();makeoperators();break;
