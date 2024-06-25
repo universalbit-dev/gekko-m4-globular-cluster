@@ -2,13 +2,12 @@
 // originally created by scraqz. Thanks!
 require('../../core/tulind');
 const util = require('../../core/util');
-const config=util.getConfig();
 var Indicator = function(settings) {
   this.input = 'candle';
   this.candle = null;
   this.price = 0;
-  this.action = 'wait'; 
-  this.threshold = config.threshold;
+  this.action = 'wait';
+  this.threshold = settings.threshold;
 };
 util.makeEventEmitter(Indicator);
 
