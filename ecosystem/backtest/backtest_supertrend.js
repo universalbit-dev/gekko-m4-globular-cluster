@@ -4,7 +4,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
-config.SUPERTREND={atr:7,bandFactor:3};
+config.SUPERTREND={atr:7,bandFactor:3,STOPLOSS:3};
 
 //Date.prototype.toISOString()
 //Previous Month
