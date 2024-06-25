@@ -6,7 +6,6 @@ var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
-var stoploss = require('./indicators/StopLoss.js');
 
 var async = require('async');
 
@@ -24,7 +23,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['DEMA','EMA','RSI','ADX','DX'];  
+   var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);

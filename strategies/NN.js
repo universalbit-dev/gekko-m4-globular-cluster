@@ -14,7 +14,6 @@ var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
-var stoploss= require('./indicators/StopLoss.js');
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -66,7 +65,8 @@ var method = {
     //Date
     startTime = new Date();
     //indicators
-    this.addIndicator('stoploss', 'StopLoss', {threshold : this.settings.StopLoss});
+    //StopLoss as indicator
+    this.addIndicator('stoploss', 'StopLoss', {threshold : 3});
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
