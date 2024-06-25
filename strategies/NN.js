@@ -1,3 +1,5 @@
+/* asyncronous method timed by fibonacci sequence */
+
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
@@ -5,6 +7,7 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
+var async = require('async');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
@@ -13,9 +16,14 @@ var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 var stoploss= require('./indicators/StopLoss.js');
 
-var async = require('async');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function wait() {console.log('keep calm and make something of amazing');await sleep(60000);};
+/* async fibonacci sequence */
+var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function sequence() {console.log('keep calm and make something of amazing');await sequence;};
+
+/* async keep calm and make something of amazing */ 
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
@@ -61,7 +69,7 @@ var method = {
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
     var x = 1;
     x = fibonacci_sequence[x];this.x=x;
     var y = 1;
@@ -77,8 +85,6 @@ var method = {
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
-
-    
 
     this.nn.makeLayers(layers);
 
@@ -168,7 +174,7 @@ var method = {
 //Reinforcement Learning
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   
-  brain:function(candle){
+  brain: function(candle){
     var brain = new deepqlearn.Brain(this.x, this.z);
     var state = [Math.random(), Math.random(), Math.random()];
     for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
@@ -226,7 +232,7 @@ return prediction.w[0];
 },
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
-  check : function(candle) {
+  check : async function(candle) {
 
     dema=this.tulipIndicators.dema.result.result;
     rsi=this.tulipIndicators.rsi.result.result;
@@ -282,9 +288,9 @@ return prediction.w[0];
       var signal = meanp < currentPrice;
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
-    {this.advice('long');this.makeoperators();wait();}
+    {this.advice('long');this.makeoperators();amazing();sequence();}
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
-    {this.advice('short');this.makeoperators();wait();}
+    {this.advice('short');this.makeoperators();amazing();sequence();}
 
 //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
@@ -292,16 +298,14 @@ return prediction.w[0];
     this.stoplossCounter++;log.info(':',this.indicators.stoploss.action);
     this.brain();this.prevAction='sell';signal=false;
     }
-    
     log.info('calculated NN properties for candle:');
     log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
     log.info('Price:', candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
-    log.info('==================================================================');
+    log.info('==================================================================');sequence();
   },
-
   end : function() {log.info('THE END');}
 };
 module.exports = method;
