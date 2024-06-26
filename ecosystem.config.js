@@ -39,7 +39,7 @@ module.exports = {
   },
 
   {
-  name: 'supetrend',
+  name: 'supertrend',
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_supertrend.js',
   name      : '|SUPERTREND|-backtest-|',
