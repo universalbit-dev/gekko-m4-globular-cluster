@@ -65,7 +65,7 @@ var method = {
     startTime = new Date();
     //indicators
     //StopLoss as indicator
-    this.addTulipIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
