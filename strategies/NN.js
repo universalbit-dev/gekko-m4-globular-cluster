@@ -171,8 +171,8 @@ var method = {
       this.predictionCount++;
     }
   },
-  setNormalizeFactor : function() {
-    this.settings.scale = Math.pow(10,Math.trunc(candle.high).toString().length+2);
+  setNormalizeFactor : function(candle) {
+    this.settings.scale = Math.pow(10,Math.trunc(candle).toString().length+2);
     log.debug('Set normalization factor to',this.settings.scale);
   },
   
