@@ -1,15 +1,70 @@
 {
-  "assets": ["LTC"],
-  "currencies": ["XBT"],
+  "assets": ["LTC","EUR","USD","XBT","GBP"],
+  "currencies": ["EUR","USD","XBT","GBP","LTC"],
   "markets": [
     {
       "pair": ["XBT","LTC"],
       "prefixed": ["XXBT","XLTC"],
-      "book": "XLTCXXBT",
-      "minimalOrder": {"amount": "0.0001","unit": "currencies"},
-      "pricePrecision": 6,
+      "book": "XXBTXLTC",
+      "minimalOrder": {"amount": "0.0001","unit": "asset"},
+      "pricePrecision": 4,
+      "amountPrecision": 8
+    },
+    
+    {
+      "pair": ["XBT","GBP"],
+      "prefixed": ["XXBT","ZGBP"],
+      "book": "XXBTZGBP",
+      "minimalOrder": {"amount": "0.0001","unit": "asset"},
+      "pricePrecision": 4,
+      "amountPrecision": 8
+    },
+    
+    {
+      "pair": ["XBT","USD"],
+      "prefixed": ["XXBT","ZUSD"],
+      "book": "XXBTZUSD",
+      "minimalOrder": {"amount": "0.0001","unit": "asset"},
+      "pricePrecision": 4,
+      "amountPrecision": 8
+    },
+    
+    {
+      "pair": ["XBT","EUR"],
+      "prefixed": ["XXBT","ZEUR"],
+      "book": "XXBTZEUR",
+      "minimalOrder": {"amount": "0.0001","unit": "asset"},
+      "pricePrecision": 4,
+      "amountPrecision": 8
+    },
+    
+    {
+      "pair": ["LTC","USD"],
+      "prefixed": ["XLTC","ZUSD"],
+      "book": "XLTCZUSD",
+      "minimalOrder": {"amount": "0.08","unit": "asset"},
+      "pricePrecision": 4,
+      "amountPrecision": 8
+    },
+    
+    {
+      "pair": ["LTC","EUR"],
+      "prefixed": ["XLTC","ZEUR"],
+      "book": "XLTCZEUR",
+      "minimalOrder": {"amount": "0.08","unit": "asset"},
+      "pricePrecision": 4,
+      "amountPrecision": 8
+    },
+    
+    {
+      "pair": ["LTC","GBP"],
+      "prefixed": ["XLTC","ZGBP"],
+      "book": "XLTCZGBP",
+      "minimalOrder": {"amount": "0.08","unit": "asset"},
+      "pricePrecision": 4,
       "amountPrecision": 8
     }
+    
   ]
 }
 
