@@ -6,7 +6,7 @@ var Indicator = function(settings) {
   this.input = 'candle';
   this.candle = null;
   this.price = 0;
-  this.action = 'wait';
+  this.action = 'continue';
   this.threshold = settings.threshold;
 };
 util.makeEventEmitter(Indicator);
