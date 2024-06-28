@@ -2,6 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
+config.api={interval:900000}; //15 minutes
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 config.STOCHRSI={interval:10,STOPLOSS:3,high:70,low:30,persistence:5,RSI:21,STOCH:21};
