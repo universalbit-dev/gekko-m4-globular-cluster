@@ -191,9 +191,10 @@ var method = {
     brain.epsilon_test_time = 0.0;
     brain.learning = true;
   },
+  
+update : function(candle) {_.noop},
+log : function() {_.noop},
 
-update : function(candle){},
-log : function(){},
 
 makeoperators:function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
