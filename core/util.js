@@ -73,7 +73,7 @@ var util = {
   },
   die: function(m, soft) {
 
-    if(_gekkoEnv === 'node:child-process') {
+    if(_gekkoEnv === 'child-process') {
       return process.send({type: 'error', error: '\n ERROR: ' + m + '\n'});
     }
 
