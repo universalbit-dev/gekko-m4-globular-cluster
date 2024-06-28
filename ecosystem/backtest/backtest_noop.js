@@ -4,6 +4,7 @@ config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 config.api={interval:900000}; //15 minutes
+config.expects={candle:900}; //900 seconds
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377
 //Strategies
