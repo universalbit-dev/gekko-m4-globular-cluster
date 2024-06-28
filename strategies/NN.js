@@ -202,7 +202,7 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
 
-predictCandle : function() {
+predictCandle : function(candle) {
 let vol = new convnetjs.Vol(this.priceBuffer);
 let prediction = this.nn.forward(vol);
 return prediction.w[0];
@@ -257,7 +257,7 @@ return prediction.w[0];
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100)
 		{this.trend.adviced = true;}
-		else{this.advice(_.noop);}
+		else{this.advice();}
 
 	} else if(this.stochRSI < 30) {
 
