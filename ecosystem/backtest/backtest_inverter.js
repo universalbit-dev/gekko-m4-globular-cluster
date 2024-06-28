@@ -4,6 +4,7 @@ config.debug =true;
 
 //import kraken exchange data
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
+config.api={interval:900000}; //15 minutes
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10};
