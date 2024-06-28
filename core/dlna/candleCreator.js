@@ -6,8 +6,8 @@
     var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss');
 ...
 
-==> gekko-m4 expects a candle every 300 second, if nothing happened during 300 seconds will add empty candle.
-==> and we have a candle for 300 seconds
+==> gekko-m4 expects a candle every 900 second, if nothing happened during 300 seconds will add empty candle.
+==> and we have a candle for 900 seconds
 
 
 //TradeBatcher date format
@@ -104,7 +104,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
-//expects a candle every 300 second, if nothing happened during 300 seconds will add empty candle.
+//expects a candle every 900 second, if nothing happened during 900 seconds will add empty candle.
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
   if(!amount)return candles;
