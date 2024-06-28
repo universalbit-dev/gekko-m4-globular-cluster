@@ -85,7 +85,7 @@ Stitcher.prototype.prepareHistoricalData = function(done) {
 
 
       // make sure we grab back in history far enough
-      var secondsOverlap = 60 * 15; // 15 minutes
+      var secondsOverlap = 55 * 13; // 
       var idealExchangeStartTimeTS = localData.to - secondsOverlap;
       var idealExchangeStartTime = moment.unix(idealExchangeStartTimeTS).utc();
 
@@ -99,7 +99,7 @@ Stitcher.prototype.prepareHistoricalData = function(done) {
 
     // Limit the history Gekko can try to get from the exchange.
     var minutesAgo = endTime.diff(idealExchangeStartTime, 'minutes');
-    var maxMinutesAgo = 4 * 60; // 4 hours
+    var maxMinutesAgo = 3 * 55; // 
     if(minutesAgo > maxMinutesAgo) {
       log.info('\tPreventing Gekko from requesting', minutesAgo, 'minutes of history.');
       idealExchangeStartTime = endTime.clone().subtract(maxMinutesAgo, 'minutes');
@@ -141,7 +141,7 @@ Stitcher.prototype.prepareHistoricalData = function(done) {
 
           log.info(
             '\tPartial history locally available, but',
-            Math.round((localData.from - idealStartTime.unix()) / 60),
+            Math.round((localData.from - idealStartTime.unix()) / 55),
             'minutes are missing.')
           log.info('\tSeeding the trading method with',
             'partial historical data (Gekko needs more time before',
@@ -173,7 +173,7 @@ Stitcher.prototype.prepareHistoricalData = function(done) {
         } else if(localData) {
           log.info(
             '\tThe exchange does not return enough data.',
-            Math.round((localData.from - idealStartTime.unix()) / 60),
+            Math.round((localData.from - idealStartTime.unix()) / 55),
             'minutes are still missing.'
           );
         }
@@ -232,9 +232,11 @@ Stitcher.prototype.seedLocalData = function(from, to, next) {
 
 module.exports = Stitcher;
 /*
+
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 */
