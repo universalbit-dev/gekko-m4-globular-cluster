@@ -25,30 +25,22 @@ var Gekko = function(plugins) {
 }
 util.makeEventEmitter(Gekko);
 
-
-
-Gekko.prototype = Object.create(Writable.prototype, {
-  constructor: { value: Gekko }
-});
+Gekko.prototype = Object.create(Writable.prototype, {constructor: { value: Gekko }});
 
 if(config.debug && mode !== 'importer') {
 
 Gekko.prototype._write = function(chunk, encoding, _done) {
-
-    if(chunk.isFinished) {
-      return this.finalize();
-    }
-
+    if(chunk.isFinished) {return this.finalize();}
     const start = moment();
-    var relayed = false;
-    var at = null;
+    var relayed = false;var at = null;
+    
     const timer = setTimeout(() => {
       if(!relayed)
         log.error([
-          `The plugin "${at}" has not processed a candle for 1 second.`,
+          `The plugin "${at}" has not processed a candle for 0.987 second.`,
           `This will cause Gekko to slow down or stop working completely.`
         ].join(' '));
-    }, 1000);
+    }, 987);
 
     const flushEvents = _.after(this.candleConsumers.length, () => {
       relayed = true;
