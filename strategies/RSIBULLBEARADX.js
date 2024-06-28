@@ -29,7 +29,7 @@ var method = {
   /* INIT */
   init: function() {
     AuxiliaryIndicators();
-    startTime = new Date();
+    startTime=new Date();
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();

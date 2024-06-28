@@ -41,7 +41,7 @@ function onTrade(event) {
 var method = {
 init : function() {
   AuxiliaryIndicators();
-  var startTime= new Date();
+  startTime= new Date();
   this.name = 'SUPERTREND';
   /* MESSAGES */
 
