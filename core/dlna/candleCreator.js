@@ -20,13 +20,11 @@ last.date.format('YYYY-MM-DD HH:mm:ss');
 
 */
 
-
 const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
 var expects=config.expects.candle;
-
 
 var CandleCreator = function() {
   _.bindAll(this,_.functions(this));
@@ -108,7 +106,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
-//expects a candle every 300 second, if nothing happened during 300 seconds will add empty candle.
+//expects a candle every 987 second, if nothing happened during 987 seconds will add empty candle.
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
   if(!amount)return candles;
