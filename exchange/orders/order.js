@@ -1,17 +1,18 @@
-const EventEmitter=require('node:events');
+const {EventEmitter}=require('node:events');
 const _ = require('../../core/lodash');
 const exchangeUtils = require('../exchangeUtils');
 const isValidOrder = exchangeUtils.isValidOrder;
 const states = require('./states');
-//
+const util = require('../../core/util');
+const config = util.getConfig();
 const bindAll = exchangeUtils.bindAll;
-
+var checkinterval=config.api.interval;
 //base order
 class BaseOrder extends EventEmitter {
   constructor(api) {
     super();
     this.api = api;
-    this.checkInterval = api.interval || 1500;
+    this.checkInterval = checkinterval;
     this.status = states.INITIALIZING;
     this.completed = false;
     this.completing = false;

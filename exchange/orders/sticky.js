@@ -1,4 +1,5 @@
 /*
+
   The sticky order is an advanced order:
     - It is created at a limit price of X
       - if limit is not specified always at bbo.
@@ -10,6 +11,7 @@
 
   TODO:
     - native move
+
 */
 
 const _ = require('../../core/lodash');
@@ -19,6 +21,7 @@ const moment = require('moment');
 const errors = require('../exchangeErrors');
 const BaseOrder = require('./order');
 const states = require('./states');
+const util=require('../../core/util.js');
 
 class StickyOrder extends BaseOrder {
   constructor({api, marketConfig, capabilities}) {
@@ -27,16 +30,13 @@ class StickyOrder extends BaseOrder {
     this.capabilities = capabilities;
 
     // global async lock
-    this.sticking = false;
+    this.sticking = true;
 
     // bound helpers
     this.roundPrice = this.api.roundPrice.bind(this.api);
     this.roundAmount = this.api.roundAmount.bind(this.api);
-    if(_.isFunction(this.api.outbidPrice)) {
-      this.outbidPrice = this.api.outbidPrice.bind(this.api);
-    }
-
-    this.debug = this.api.name === 'Deribit2';
+    if(_.isFunction(this.api.outbidPrice)) {this.outbidPrice = this.api.outbidPrice.bind(this.api);}
+    this.debug = this.api.name === config.trader.exchange;
     this.log = m => this.debug && console.log(new Date, m);
   }
 
@@ -84,11 +84,7 @@ class StickyOrder extends BaseOrder {
       this.createOrder();
     } else {
       this.api.getTicker((err, ticker) => {
-        if(this.handleError(err)) {
-          console.log(new Date, 'error get ticker');
-          return;
-        }
-
+        if(this.handleError(err)) {console.log(new Date, 'error get ticker');return;}
         this.price = this.calculatePrice(ticker);
         this.createOrder();
       });
@@ -144,9 +140,7 @@ class StickyOrder extends BaseOrder {
   }
 
   createOrder() {
-    if(this.completed || this.completing) {
-      return false;
-    }
+    if(this.completed || this.completing) {return false;}
 
     const alreadyFilled = this.calculateFilled();
 
