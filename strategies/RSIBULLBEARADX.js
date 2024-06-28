@@ -3,8 +3,7 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var async = require('async');
 var _ = require('../core/lodash');
-const fs = require('node:fs');
-
+var settings = config.RSIBULLBEARADX;this.settings=settings;
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
@@ -91,7 +90,7 @@ var method = {
 
 update : function(candle) {_.noop},
 
-log : function() {
+log : function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}

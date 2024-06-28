@@ -4,6 +4,8 @@ const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var async = require('async');
 const fs = require('node:fs');
+var config = require('../core/util.js').getConfig();
+var settings = config.SUPERTREND;this.settings=settings;
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -37,9 +39,9 @@ function onTrade(event) {
 }
 
 var method = {
-
 init : function() {
   AuxiliaryIndicators();
+  var startTime= new Date();
   this.name = 'SUPERTREND';
   /* MESSAGES */
 
