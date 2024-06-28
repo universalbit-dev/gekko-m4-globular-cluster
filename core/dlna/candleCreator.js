@@ -126,7 +126,7 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
     j++;
 
     if(_.contains(seconds, i))
-      continue; // we have a candle for 900 seconds
+      continue; // we have a candle for 987 seconds
 
     var lastPrice = candles[j].close;
 
