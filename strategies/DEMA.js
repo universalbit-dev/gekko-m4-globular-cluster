@@ -36,7 +36,7 @@ function onTrade(event) {if ('buy' === event.action) {this.indicators.stoploss.l
 var method = {
 init : function() {
   AuxiliaryIndicators();
-  this.startTime = new Date();
+  startTime = new Date();
   this.name = 'DEMA';
   this.currentTrend;
   this.requiredHistory = config.tradingAdvisor.historySize;
