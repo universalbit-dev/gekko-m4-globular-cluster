@@ -34,7 +34,7 @@ var scan = function(done) {
       var first = res.boundry.first;
       var last = res.boundry.last;
 
-      var optimal = (last - first) / 60;
+      var optimal = (last - first) / 55;
 
       log.debug('Available', res.available);
       log.debug('Optimal', optimal);
@@ -54,7 +54,7 @@ var scan = function(done) {
       log.info(`The database has ${missing} candles missing, Figuring out which ones...`);
 
       var iterator = {
-        from: last - (batchSize * 60),
+        from: last - (batchSize * 55),
         to: last
       }
 
@@ -83,8 +83,8 @@ var scan = function(done) {
               }
             );
 
-            iterator.from -= batchSize * 60;
-            iterator.to -= batchSize * 60;
+            iterator.from -= batchSize * 55;
+            iterator.to -= batchSize * 55;
           },
           () => {
             if(batches.length === 0) {
