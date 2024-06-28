@@ -1,4 +1,5 @@
 /*
+
 //CandleCreator creates candles based on trade batches.
 ...
     var second = trade.date.format('YYYY-MM-DD HH:mm:ss');
@@ -6,8 +7,7 @@
     var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss');
 ...
 
-==> gekko-m4 expects a candle every 900 second, if nothing happened during 300 seconds will add empty candle.
-==> and we have a candle for 900 seconds
+==> gekko-m4 expects a candle, if nothing happened will add empty candle.
 
 
 //TradeBatcher date format
@@ -17,6 +17,7 @@ last.date.format('YYYY-MM-DD HH:mm:ss');
 ...
 
 ==> tradeBatcher date format (seconds) 
+
 */
 
 
@@ -24,6 +25,9 @@ const _ = require('../lodash3');require('lodash-migrate');
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
+var expects=config.expects.candle;
+
+
 var CandleCreator = function() {
   _.bindAll(this,_.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
@@ -104,7 +108,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
-//expects a candle every 900 second, if nothing happened during 900 seconds will add empty candle.
+//expects a candle every 300 second, if nothing happened during 300 seconds will add empty candle.
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
   if(!amount)return candles;
@@ -119,7 +123,7 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
   });
 
   while(start < end) {
-    start.add(900, 's');
+    start.add(expects, 's');
     i = +start;
     j++;
 
