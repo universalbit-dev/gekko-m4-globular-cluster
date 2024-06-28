@@ -4,7 +4,7 @@
 
 var moment = require('moment');
 const _ = require('./lodash3');
-var EventEmitter = require('node:events');
+var {EventEmitter} = require('node:events');
 var fs = require('node:fs');
 var semver = require('semver');
 var program = require('commander');
@@ -22,41 +22,44 @@ var util = {
     // cache
     if(_config) return _config;
     if(!program.config)util.die('Please specify a config file.', true);
+    
     if(!fs.existsSync(util.dirs().gekko + program.config))util.die('Cannot find the specified config file.', true);
     _config = require(util.dirs().gekko + program.config);return _config;
   },
-  setConfig: function(config) {
-    _config = config;
-  },
+  
+  setConfig: function(config) {_config = config;},
+  
   setConfigProperty: function(parent, key, value) {
-    if(parent)
-      _config[parent][key] = value;
-    else
-      _config[key] = value;
+    if(parent)_config[parent][key] = value;
+    else _config[key] = value;
   },
+  
   getVersion: function() {
     return util.getPackage().version;
   },
+  
   getPackage: function() {
     if(_package)
       return _package;
     _package = JSON.parse( fs.readFileSync(__dirname + '/../package.json', 'utf8') );
     return _package;
   },
+  
   getRequiredNodeVersion: function() {
   return util.getPackage().engines.node;
   },
+  
   recentNode: function() {
     var required = util.getRequiredNodeVersion();
     return semver.satisfies(process.version, required);
   },
-  // check if two moments are corresponding
-  // to the same time
+  
   equals: function(a, b) {
     return !(a < b || a > b)
   },
+  
   minToMs: function(min) {
-    return min * 60 * 1000;
+    return min * 60 * 987;
   },
   defer: function(fn) {
     return function(args) {
@@ -70,16 +73,15 @@ var util = {
   },
   die: function(m, soft) {
 
-    if(_gekkoEnv === 'child-process') {
+    if(_gekkoEnv === 'node:child-process') {
       return process.send({type: 'error', error: '\n ERROR: ' + m + '\n'});
     }
 
     var log = console.log.bind(console);
 
     if(m) {
-      if(soft) {
-        log('\n ERROR: ' + m + '\n\n');
-      } else {
+      if(soft) {log('\n ERROR: ' + m + '\n\n');} 
+      else {
         log(`\nGekko encountered an error and can\'t continue`);
         log('\nError:\n');
         log(m, '\n\n');
@@ -90,6 +92,7 @@ var util = {
     }
     process.exit(1);
   },
+  
   dirs: function() {
     var ROOT = __dirname + '/../';
 
@@ -108,29 +111,28 @@ var util = {
       broker: ROOT + 'exchange/'
     }
   },
+  
   inherit: function(dest, source) {
     require('util').inherits(
       dest,
       source
     );
   },
+  
   makeEventEmitter: function(dest) {
-    util.inherit(dest, require('events').EventEmitter);
+    util.inherit(dest, require('node:events').EventEmitter);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
   },
+  
   gekkoMode: function() {
-    if(_gekkoMode)
-      return _gekkoMode;
-
-    if(program['import'])
-      return 'importer';
-    else if(program.backtest)
-      return 'backtest';
-    else
-      return 'realtime';
+    if(_gekkoMode)return _gekkoMode;
+    if(program['import'])return 'importer';
+    else if(program.backtest)return 'backtest';
+    else return 'realtime';
   },
+  
   gekkoModes: function() {
     return [
       'importer',
@@ -138,9 +140,11 @@ var util = {
       'realtime'
     ]
   },
+  
   setGekkoEnv: function(env) {
     _gekkoEnv = env;
   },
+  
   gekkoEnv: function() {
     return _gekkoEnv || 'standalone';
   },
