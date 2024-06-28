@@ -35,8 +35,7 @@ function AuxiliaryIndicators(){
 
 function onTrade(event) {
     if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
+    this.prevAction = event.action;this.prevPrice = event.price;
 }
 
 var method = {
@@ -193,11 +192,27 @@ var method = {
     brain.learning = true;
   },
 
-  update : function(candle)
-  {
-  rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-  this.RSIhistory.push(this.rsi);
-  if(_.size(this.RSIhistory) > this.interval)
+update : function(candle){},
+log : function(){},
+
+makeoperators:function() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+},
+
+predictCandle : function() {
+let vol = new convnetjs.Vol(this.priceBuffer);
+let prediction = this.nn.forward(vol);
+return prediction.w[0];
+},
+
+  //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
+  check : function(candle) {
+     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
+     dema=this.tulipIndicators.dema.result.result;
+     this.RSIhistory.push(this.rsi);
+     if(_.size(this.RSIhistory) > this.interval)
   //remove oldest RSI value
   this.RSIhistory.shift();
   this.lowestRSI = _.min(this.RSIhistory);
@@ -217,31 +232,12 @@ var method = {
      while (this.settings.price_buffer_len < _.size(this.priceBuffer))
      this.priceBuffer.shift();
 
-//general purpose log  {data}
+    //general purpose log  {data}
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
   	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
   	if (err) {return console.log(err);}
   	});
-},
 
-makeoperators:function() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);
-console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-},
-
-predictCandle : function(candle) {
-let vol = new convnetjs.Vol(this.priceBuffer);
-let prediction = this.nn.forward(vol);
-return prediction.w[0];
-},
-
-  //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
-  check : function(candle) {
-
-    dema=this.tulipIndicators.dema.result.result;
-    rsi=this.tulipIndicators.rsi.result.result;
-    this.rsi=rsi;
 	if(this.stochRSI > 70) {
 		// new trend detected
 		if(this.trend.direction !== 'high')
@@ -260,7 +256,7 @@ return prediction.w[0];
 
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100)
 		{this.trend.adviced = true;}
-		else{this.advice();}
+		else{this.advice(_.noop);}
 
 	} else if(this.stochRSI < 30) {
 

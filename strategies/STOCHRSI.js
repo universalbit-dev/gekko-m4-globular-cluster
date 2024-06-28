@@ -59,64 +59,64 @@ method.init = function() {
 startTime = new Date();
 }
 
-method.update = function(candle) {
-rsi=this.tulipIndicators.rsi.result.result;
-stoch=this.tulipIndicators.stoch.result.result;
+method.update = function(candle) {}
 
-this.rsi=rsi;
-this.RSIhistory.push(this.rsi);
-if(_.size(this.RSIhistory) > this.interval)
-// remove oldest RSI value
-this.RSIhistory.shift();
-this.lowestRSI = _.min(this.RSIhistory);
-this.highestRSI = _.max(this.RSIhistory);
-this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
+method.log = function() {}
 
-	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-    if (err) {return console.log(err);}
-    });
-}
 method.makeoperators= function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
-method.log = function() {var digits = 8;
-  log.debug('calculated StochRSI properties:');
-  log.debug('\t', 'rsi:', rsi);
-  log.debug("StochRSI min:\t\t" + this.lowestRSI);
-  log.debug("StochRSI max:\t\t" + this.highestRSI);
-  log.debug("StochRSI Value:\t\t" + this.stochRSI);
-}
+method.onTrade function(event) {if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}this.prevAction = event.action;this.prevPrice = event.price;}
 
-method.check = function(candle) {
+method.check = function(candle) 
+{
     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-	if(this.stochRSI > this.settings.high) {
+    stoch=this.tulipIndicators.stoch.result.result;
+    this.RSIhistory.push(this.rsi);
+
+    if(_.size(this.RSIhistory) > this.interval)
+    this.RSIhistory.shift();
+    this.lowestRSI = _.min(this.RSIhistory);
+    this.highestRSI = _.max(this.RSIhistory);
+    this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
+
+	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) 
+	{if (err) {return console.log(err);} });
+
+	if(this.stochRSI > this.settings.high) 
+	{
 	if(this.trend.direction !== 'high')this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
-	this.trend.duration++;
-	log.debug('In high since', this.trend.duration, 'candle(s)');
+	this.trend.duration++;log.debug('In high since', this.trend.duration, 'candle(s)');
 	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
-	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
-	{this.trend.adviced = true;this.advice('short');this.makeoperators();amazing();}
+	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100){this.trend.adviced = true;this.advice('short');this.makeoperators();amazing();}
 	else {_.noop;}
 	}
+	
 	else if(this.stochRSI < this.settings.low)
 	{
 	if(this.trend.direction !== 'low')
-	{
-	this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
-	this.trend.duration++;
-	log.debug('In low since', this.trend.duration, 'candle(s)');
-	}
+    {this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};this.trend.duration++;log.debug('In low since', this.trend.duration, 'candle(s)');}
+	
 	if(this.trend.duration >= this.settings.persisted)
 	{this.trend.persisted = true;}
+	
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 	{this.trend.adviced = true;this.advice('long');this.makeoperators();amazing();}
+    
     else {_.noop;}
 	}
+	
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
+	
+    log.debug('calculated StochRSI properties:');
+    log.debug('\t', 'rsi:', rsi);
+    log.debug("StochRSI min:\t\t" + this.lowestRSI);
+    log.debug("StochRSI max:\t\t" + this.highestRSI);
+    log.debug("StochRSI Value:\t\t" + this.stochRSI);
 	sequence();
 }
 
