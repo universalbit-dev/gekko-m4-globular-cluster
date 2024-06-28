@@ -2,7 +2,7 @@
 const _ = require('../lodash3');require('lodash-migrate');
 
 var missing_candle_allowed = 3;
-var batchSize = 60;
+var batchSize = 55;
 
 var moment = require('moment');
 var async = require('async');
