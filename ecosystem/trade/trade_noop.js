@@ -6,6 +6,7 @@ exchange:'kraken',currency:'XBT',asset:'LTC',
 key:'000000000-00000000000000-0000000000000000000',
 secret:'000000000-00000000000000-0000000000000000000',tickrate:60
 };
+config.api={interval:900000}; //15 minutes
 
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NOOP'};
 //requiredHistory = candleSize 15 * historySize 40 = 600 minutes
