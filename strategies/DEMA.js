@@ -43,7 +43,13 @@ init : function() {
 },
 
 update : function(candle) {_.noop},
-log : function() {_.noop},
+
+log : function() {
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+    if (err) {return console.log(err);}
+    });
+},
 
 check : function(candle) {
   dema =  this.tulipIndicators.dema.result.result;

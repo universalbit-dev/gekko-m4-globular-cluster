@@ -61,7 +61,12 @@ startTime = new Date();
 
 method.update = function(candle) {}
 
-method.log = function() {}
+method.log = function() {
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+    if (err) {return console.log(err);}
+    });
+}
 
 method.makeoperators= function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];

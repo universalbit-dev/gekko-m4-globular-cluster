@@ -14,6 +14,9 @@ var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;
 
+var  priceBuffer = [],predictionCount = 0,stoplossCounter = 0,prevPrice = 0,prevAction = 'wait',hodl_threshold = 1;
+
+
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
@@ -39,13 +42,6 @@ function onTrade(event) {
 }
 
 var method = {
-  priceBuffer : [],
-  predictionCount : 0,
-  stoplossCounter : 0,
-  prevPrice : 0,
-  prevAction : 'none',
-  hodl_threshold : 1,
-
   init : function() {
     AuxiliaryIndicators();
     this.requiredHistory = this.settings.historySize;
@@ -54,12 +50,7 @@ var method = {
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
 
-    this.trend = {
-    direction: 'none',
-    duration: 0,
-    persisted: false,
-    adviced: false
-  };
+    this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
     //Date
     startTime = new Date();
     //indicators
@@ -192,14 +183,19 @@ var method = {
     brain.learning = true;
   },
   
-update : function(candle) {_.noop},
-log : function() {_.noop},
+update : function() {_.noop},
+
+log : function() {
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+    if (err) {return console.log(err);}
+    });
+},
 
 
 makeoperators:function() {
 var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);
-console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+var result = Math.floor(Math.random() * operator.length);console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
 
 predictCandle : function(candle) {
@@ -210,64 +206,40 @@ return prediction.w[0];
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {
-     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-     dema=this.tulipIndicators.dema.result.result;
-     this.RSIhistory.push(this.rsi);
-     if(_.size(this.RSIhistory) > this.interval)
+  rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
+  dema=this.tulipIndicators.dema.result.result;
+  this.RSIhistory.push(this.rsi);
+  if(_.size(this.RSIhistory) > this.interval)
   //remove oldest RSI value
   this.RSIhistory.shift();
   this.lowestRSI = _.min(this.RSIhistory);
   this.highestRSI = _.max(this.RSIhistory);
   this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
-
   if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   // remove oldest priceBuffer value
   this.priceBuffer.shift();
-    dema=this.tulipIndicators.dema.result.result;
-    if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)
-    this.setNormalizeFactor();
-    this.priceBuffer.push(dema / this.settings.scale );
-    if (2 > _.size(this.priceBuffer)) return;
-     for (i=0;i<3;++i)
-     this.learn();this.brain();
-     while (this.settings.price_buffer_len < _.size(this.priceBuffer))
-     this.priceBuffer.shift();
+  if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)this.setNormalizeFactor();this.priceBuffer.push(dema / this.settings.scale );
+  if (2 > _.size(this.priceBuffer)) return;
+  for (i=0;i<3;++i)this.learn();this.brain();
+  while (this.settings.price_buffer_len < _.size(this.priceBuffer))
+  this.priceBuffer.shift();
 
-    //general purpose log  {data}
-    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-  	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-  	if (err) {return console.log(err);}
-  	});
-
-	if(this.stochRSI > 70) {
-		// new trend detected
-		if(this.trend.direction !== 'high')
-			this.trend = {
-				duration: 0,
-				persisted: false,
-				direction: 'high',
-				adviced: false
-			};
-
+if(this.stochRSI > this.settings.high) {
+// new trend detected
+if(this.trend.direction !== 'high')
+this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
 		this.trend.duration++;
-
 		log.debug('In high since', this.trend.duration, 'candle(s)');
-
-		if(this.trend.duration >= 3)this.trend.persisted = true;
-
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100)
-		{this.trend.adviced = true;}
+		if(this.trend.duration >= this.settings.duration)this.trend.persisted = true;
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100){this.trend.adviced = true;}
 		else{this.advice();}
-
-	} else if(this.stochRSI < 30) {
-
+}
+else if(this.stochRSI < this.settings.low) {
 		// new trend detected
-		if(this.trend.direction !== 'low')
-		this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
+		if(this.trend.direction !== 'low')this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
 		this.trend.duration++;
-
 		log.debug('In low since', this.trend.duration, 'candle(s)');
-		if(this.trend.duration >= 3){this.trend.persisted = true;}
+		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0)
 		{this.trend.adviced = true;}
 		else {this.advice();}

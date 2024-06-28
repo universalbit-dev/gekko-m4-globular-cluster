@@ -3,6 +3,7 @@ const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var async = require('async');
+const fs = require('node:fs');
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -57,6 +58,13 @@ init : function() {
 },
 
 update : function(candle) {},
+
+log : function() {
+    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
+    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
+    if (err) {return console.log(err);}
+    });
+},
 
 check : function(candle) {
 
