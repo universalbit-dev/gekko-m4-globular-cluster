@@ -2,6 +2,7 @@ require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var async = require('async');
+var _ = require('../core/lodash');
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -29,37 +30,25 @@ var method = {
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();
-
-    this.debug = false;
-    config.backtest.batchSize = 1000; // increase performance
-    config.silent = true; // NOTE: You may want to set this to 'false' @ live
-    config.debug = false;
     this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     // SMA
     this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.SMA_long});
     this.addTulipIndicator('maFast', 'sma', {optInTimePeriod:this.settings.SMA_short});
-
     // RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI});
     this.addTulipIndicator('BULL_RSI', 'rsi', {optInTimePeriod: this.settings.BULL_RSI});
     this.addTulipIndicator('BEAR_RSI', 'rsi', {optInTimePeriod: this.settings.BEAR_RSI});
-
     // ADX
     this.addTulipIndicator('adx', 'adx', {optInTimePeriod:this.settings.ADX});
-
     // MOD (RSI modifiers)
     this.BULL_MOD_high = this.settings.BULL_MOD_high;
     this.BULL_MOD_low = this.settings.BULL_MOD_low;
     this.BEAR_MOD_high = this.settings.BEAR_MOD_high;
     this.BEAR_MOD_low = this.settings.BEAR_MOD_low;
-
     // debug stuff
     this.startTime = new Date();
-
     // add min/max if debug
-    if (this.debug) {
-      this.stat = {adx: {min: 1000,max: 0},bear: {min: 1000,max: 0},bull: {min: 1000,max: 0}};
-    }
+    if (this.debug) {this.stat = {adx: {min: 1000,max: 0},bear: {min: 1000,max: 0},bull: {min: 1000,max: 0}};}
 
     /* MESSAGES */
 
@@ -99,6 +88,9 @@ var method = {
     }
   },
 
+update : function(candle) {_.noop},
+log : function() {_.noop},
+
   /* CHECK */
   check: function(candle) {
     // get all indicators
@@ -113,11 +105,8 @@ var method = {
       rsi = this.tulipIndicators.BEAR_RSI.result.result;
       let rsi_hi = this.settings.BEAR_RSI_high,rsi_low = this.settings.BEAR_RSI_low;
       //ADX
-      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
-      else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
-
-      if (rsi > rsi_hi) this.short();
-      else if (rsi < rsi_low) this.long();
+      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
+      if (rsi > rsi_hi) this.short();else if (rsi < rsi_low) this.long();
       if (this.debug) this.lowHigh(rsi, 'bear');
     }
 
@@ -127,34 +116,23 @@ var method = {
       rsi = this.tulipIndicators.BULL_RSI.result.result;
       let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
       // ADX
-      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
-      else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
-      
-      if (rsi > rsi_hi) this.short();
-      else if (rsi < rsi_low) this.long();
-      
+      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
+      if (rsi > rsi_hi) this.short();else if (rsi < rsi_low) this.long();
       if (this.debug) this.lowHigh(rsi, 'bull');
     }
     // add adx low/high if debug
-    if (this.debug) this.lowHigh(adx, 'adx');
-sequence();
+    if (this.debug) this.lowHigh(adx, 'adx');sequence();
   },
 
   /* LONG  */
   long: function() {
     if (this.trend.direction !== 'up') // new trend? (only act on new trends)
     {
-      this.resetTrend();
-      this.trend.direction = 'up';this.advice('long');
-      if (this.debug) log.info('Going long');
+    this.resetTrend();this.trend.direction = 'up';this.advice('long');
+    if (this.debug) log.info('Going long');
     }
-
-    if (this.debug) {
-      this.trend.duration++;
-      log.info('Long since', this.trend.duration, 'candle(s)');
-    }
+    if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
-
 
   /* SHORT  */
   short: function() {

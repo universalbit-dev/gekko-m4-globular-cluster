@@ -19,14 +19,14 @@ async function wait() {console.log('keep calm and make something of amazing');aw
 
 // This method is a noop (it doesn't do anything)
 var method = {
-init : function(){this.name = 'NOOP';
+init : async function(){this.name = 'NOOP';
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod: 1});
 },
 
-update : function(candle){_.noop},
-log : function(){_.noop},
-check : function(candle){_.noop},
-end : function() {_.noop}
+update : async function(candle){_.noop},
+log : async function(){_.noop},
+check : async function(candle){_.noop},
+end : async function() {_.noop}
 };
 
 module.exports = method;

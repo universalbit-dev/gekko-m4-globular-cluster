@@ -2,6 +2,7 @@ require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var async = require('async');
+var _ = require ('../core/lodash');
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -41,9 +42,8 @@ init : function() {
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
 },
 
-update : function(candle) {},
-
-log : function() {},
+update : function(candle) {_.noop},
+log : function() {_.noop},
 
 check : function(candle) {
   dema =  this.tulipIndicators.dema.result.result;

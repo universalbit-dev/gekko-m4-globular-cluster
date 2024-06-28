@@ -30,7 +30,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
 function onTrade(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);log.debug('stoploss:',event.price);}
     this.prevAction = event.action;
     this.prevPrice = event.price;
 }
@@ -47,7 +47,7 @@ init : function() {
   log.info('Running', this.name);
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
-  this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.atr});
+  this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
   this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
   this.bought = 0;
 

@@ -69,7 +69,7 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
-method.onTrade function(event) {if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}this.prevAction = event.action;this.prevPrice = event.price;}
+method.onTrade = function(event) {if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}this.prevAction = event.action;this.prevPrice = event.price;}
 
 method.check = function(candle) 
 {
