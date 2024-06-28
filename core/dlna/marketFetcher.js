@@ -4,10 +4,10 @@ var moment = require('moment');
 var utc = moment.utc;
 var util = require('../util');
 var dirs = util.dirs();
-var config = require('../../core/util.js').getConfig();
+var config = util.getConfig();
 var log = require(dirs.core + 'log');
 var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
-var TradeBatcher = require(util.dirs().dlna + 'tradeBatcher');
+var TradeBatcher = require(dirs.dlna + 'tradeBatcher');
 
 var Fetcher = function(config) {
   if(!_.isObject(config))
@@ -41,7 +41,7 @@ var Fetcher = function(config) {
   log.info('Starting to watch the market:',this.exchange.name,this.pair);
 // if the exchange returns an error we will keep on retrying until next scheduled fetch.
   this.tries = 0;
-  this.limit = 20;
+  this.limit = 21;
   this.firstFetch = true;
   this.batcher.on('new batch', this.relayTrades);
 }
@@ -73,7 +73,7 @@ Fetcher.prototype.processTrades = function(err, trades) {
       log.debug('refetching...');
     } else
       log.debug('Trade fetch came back empty, refetching...');
-    setTimeout(this._fetch, +moment.duration('s', 1));
+    setTimeout(this._fetch, +moment.duration('s', 34));
     return;
   }
   this.batcher.write(trades);

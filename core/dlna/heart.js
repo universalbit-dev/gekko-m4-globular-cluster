@@ -1,5 +1,5 @@
 const _ = require('../lodash3');
-const { EventEmitter } = require('events'); 
+const { EventEmitter } = require('node:events'); 
 var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
@@ -19,7 +19,7 @@ Heart.prototype.pump = function() {
 
 Heart.prototype.tick = function() {
   if(this.lastTick) {
-    if(this.lastTick < moment().unix() - TICKRATE * 6)
+    if(this.lastTick < moment().unix() - TICKRATE * 5)
       util.die('Failed to tick in time', true);
   }
 
