@@ -3,6 +3,7 @@ var config = {};
 config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
+config.api={interval:900000}; //15 minutes
 
 //TradingAdvisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};//50minute
