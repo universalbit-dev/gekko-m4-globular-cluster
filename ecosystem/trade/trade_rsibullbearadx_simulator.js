@@ -6,6 +6,8 @@ config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate
 config.trader={enabled:false,
 exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:60};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBULLBEARADX'};
+config.api={interval:900000}; //15 minutes
+config.expects={candle:900}; //900 seconds
 
 //# BULL/BEAR is defined by the longer SMA trends {Make sure your warmup period(tradingAdvisor.historySize) matches SMA_long}
 config.RSIBULLBEARADX={SMA_long:10,SMA_short:55,RSI:14,BULL_RSI:10,
