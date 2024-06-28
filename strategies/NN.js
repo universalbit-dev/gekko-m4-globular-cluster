@@ -290,9 +290,9 @@ return prediction.w[0];
       var signal = meanp < currentPrice;
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
-    {this.advice('long');this.makeoperators();amazing();sequence();}
+    {this.advice('long');this.makeoperators();amazing();}
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
-    {this.advice('short');this.makeoperators();amazing();sequence();}
+    {this.advice('short');this.makeoperators();amazing();}
 
 //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)
