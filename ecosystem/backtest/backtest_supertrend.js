@@ -3,6 +3,7 @@ var config = {};
 config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 config.api={interval:900000}; //15 minutes
+config.expects={candle:900}; //900 seconds
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
 config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3};
