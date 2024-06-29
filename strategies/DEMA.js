@@ -55,16 +55,18 @@ log : function(candle) {
 },
 
 check : function(candle) {
-  dema =  this.tulipIndicators.dema.result.result;
-  sma = this.tulipIndicators.sma.result.result;
-  var diff= dema-sma;this.diff=diff.toFixed(6);
-  var price = this.candle.close;this.price=price;
+  dema =  this.tulipIndicators.dema.result.result;sma = this.tulipIndicators.sma.result.result;
+  var diff= dema-sma;this.diff=diff.toFixed(6);var price = this.candle.close;this.price=price;
   
   switch (true){
-  case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'): log.debug('we are currently in uptrend');this.advice('short');amazing();makeoperators();break;
-  case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'): log.debug('we are currently in a downtrend');this.advice('long');amazing();makeoperators();break;
-  default: log.debug('we are currently not in an up or down trend');
+  case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
+  var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;checkstring='uptrend';break;
+  case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'):
+  var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;checkstring='downtrend';break;
+  default: checkstring='weaktrend';
   }
+  if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');this.makeoperators();amazing();}
+  if ((checkstring === 'downtrend')&& (profit > 0)){this.advice('short');this.makeoperators();amazing();}
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);

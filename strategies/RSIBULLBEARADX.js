@@ -135,21 +135,27 @@ log : function(candle) {
 
   /* LONG  */
   long: function() {
-    if (this.trend.direction !== 'up') // new trend? (only act on new trends)
+    if (this.trend.direction !== 'up')
     {
-    this.resetTrend();this.trend.direction = 'up';this.advice('long');
+    this.resetTrend();this.trend.direction = 'up';
+    var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+	}
+    if (profit > 0){this.advice('long');this.makeoperators();amazing();}
     if (this.debug) log.info('Going long');
-    }
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
 
   /* SHORT  */
   short: function() {
-    if (this.trend.direction !== 'down') {
+    if (this.trend.direction !== 'down')
+    {
       this.resetTrend();
-      this.trend.direction = 'down';this.advice('short');
-      if (this.debug) log.info('Going short');
-    }
+      this.trend.direction = 'down';
+      var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;
+    }  
+    if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+    if (this.debug) log.info('Going short');
+    
 
     if (this.debug) {this.trend.duration++;
       log.info('Short since', this.trend.duration, 'candle(s)');

@@ -39,7 +39,8 @@ function onTrade(event) {
 }
 
 var method = {
-priceBuffer : [],predictionCount : 0,stoplossCounter : 0,prevPrice : 0,prevAction : 'wait',hodl_threshold : 1,
+predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'freefall',hodl_threshold:1,
+
   init : function() {
     AuxiliaryIndicators();
     this.requiredHistory = this.settings.historySize;
@@ -260,9 +261,16 @@ else if(this.stochRSI < this.settings.low) {
       var signal = meanp < currentPrice;
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
-    {this.advice('long');this.makeoperators();amazing();}
+    {
+    var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+    if (profit > 0){this.advice('long');this.makeoperators();amazing();}
+    }
+    
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
-    {this.advice('short');this.makeoperators();amazing();}
+    {
+    var sellprice = this.candle.close;profit=(this.candle.close - sellprice)/sellprice*100;
+    if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+    }
 
 //stoploss as Reinforcement Learning
     if ('stoploss' === this.indicators.stoploss.action)

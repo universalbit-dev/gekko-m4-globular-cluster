@@ -92,25 +92,41 @@ method.check = function(candle)
 	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) 
 	{if (err) {return console.log(err);} });
 
-	if(this.stochRSI > this.settings.high) 
+	if(this.stochRSI > this.settings.high) {
+	if(this.trend.direction !== 'high')
 	{
-	if(this.trend.direction !== 'high')this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
-	this.trend.duration++;log.debug('In high since', this.trend.duration, 'candle(s)');
-	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
-	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100){this.trend.adviced = true;this.advice('short');this.makeoperators();amazing();}
+	this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false}
+	this.trend.duration++;
+	log.debug('In high since' ,this.trend.duration, 'candle(s)');
+	}
+	if(this.trend.duration >= this.settings.persisted)
+	{
+	this.trend.persisted = true;
+	}
+	
+	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
+	{
+	this.trend.adviced = true;
+	var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+	}
+    if (profit > 0){this.advice('long');this.makeoperators();amazing();}
 	else {_.noop;}
 	}
+	
+	
 	
 	else if(this.stochRSI < this.settings.low)
 	{
 	if(this.trend.direction !== 'low')
     {this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};this.trend.duration++;log.debug('In low since', this.trend.duration, 'candle(s)');}
 	
-	if(this.trend.duration >= this.settings.persisted)
-	{this.trend.persisted = true;}
-	
+	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
-	{this.trend.adviced = true;this.advice('long');this.makeoperators();amazing();}
+	{
+	this.trend.adviced = true;
+	var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;
+    if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+	}
     
     else {_.noop;}
 	}

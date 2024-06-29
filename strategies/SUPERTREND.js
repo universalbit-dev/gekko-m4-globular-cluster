@@ -98,13 +98,20 @@ check : function(candle) {
   }
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
-    this.advice("long");makeoperators();amazing();this.bought = 1;
-    log.debug("Buy at: ", candle.close);
+    var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+    if (profit > 0){
+    this.advice('long');this.makeoperators();amazing();
+    this.bought = 1;
+    log.debug("Buy at: ", candle.close);}
   }
 
   if(candle.close < this.supertrend.supertrend && this.bought == 1){
-    this.advice("short");makeoperators();amazing();this.bought = 0;
+  var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;
+    if (profit > 0){
+    this.advice('short');this.makeoperators();amazing();
+    this.bought = 0;
     log.debug("Sell at: ", candle.close);
+    }
   }
 
   this.lastCandleClose = candle.close;

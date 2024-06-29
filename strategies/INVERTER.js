@@ -122,8 +122,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');amazing();break;
+	case (rsi > 68 && rsi < 72):this.advice('short');this.makeoperators();amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');this.makeoperators();amazing();break;
 	case (rsi > 40 && rsi < 60):this.pingPong();break;
 	default:_.noop;
 	}
@@ -139,34 +139,46 @@ switch (true) {
 	
 //https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
 	
-	if(di_plus > di_minus < 21.5){this.trend.state = 'short';} else if(di_minus > di_plus < 21){this.trend.state = 'long';}
+	var diff = di_plus - di_minus;
+	if(diff > 0){this.trend.state = 'long';} else if(diff < 0 ){this.trend.state = 'short';}
 
 	switch (true)
 	{
 	case (adxstrength == 'weak'):this.trend.direction = 'weak';this.pingPong();break;
-	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_down';this.trend.bb='short';this.short();break;
-	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_up';this.trend.bb='long';this.long();break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_down';this.trend.bb='short';this.short();break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_up';this.trend.bb='long';this.long();break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_down';this.trend.bb='short';this.short();break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_up';this.trend.bb='long';this.long();break;
+	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();break;
+	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();break;
 	default:_.noop;this.trend.direction = 'none';
 	}
+	    //trend moving down
         if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='short';}
+        //trend moving up
         else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='long';}
         else _.noop;
-        if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}sequence();
+        if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
+        sequence();
 },
 
 //LONG
 long: function(){
-  if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'short')&&(this.trend.bb !== 'short'))
-  {this.resetTrend();this.trend.duration++;this.advice('long');this.makeoperators();amazing();}
+  if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'long'))
+  {
+  this.resetTrend();this.trend.duration++;
+  var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+  if (profit > 0){this.advice('long');this.makeoperators();amazing();}
+  }
 },
 //SHORT
 short: function(){
-  if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'long')&&(this.trend.bb !== 'long'))
-  {this.resetTrend();this.trend.duration++;this.advice('short');this.makeoperators();amazing();}
+  if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'short'))
+  {
+  this.resetTrend();this.trend.duration++;
+  var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;
+  if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+  }
 },
 
 //PingPong
@@ -174,9 +186,9 @@ pingPong: function(){
 	switch (true)
 	{
 	case ((this.trend.bb !== 'short')&&(this.trend.state !== 'short')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'screw_up';this.trend.lastLongPrice = this.candle;break;
+	this.trend.direction = 'screw_down';this.trend.lastLongPrice = this.candle;break;
 	case ((this.trend.bb !== 'long')&&(this.trend.state !== 'long')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'screw_down';this.trend.lastShortPrice = this.candle;break;
+	this.trend.direction = 'screw_up';this.trend.lastShortPrice = this.candle;break;
 	default:_.noop;this.trend.direction = 'none';
 	}
 },
