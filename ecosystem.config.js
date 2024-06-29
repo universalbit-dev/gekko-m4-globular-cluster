@@ -54,15 +54,6 @@ module.exports = {
   name      : '|RSIBULLBEARADX|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
-  },
-
-  {
-  name: 'noop',
-  script    : 'gekko.js',
-  args      : '-c ecosystem/backtest/backtest_noop.js -b',
-  name      : '|NOOP|-backtest-|',
-  instances : "1",
-  exec_mode : "cluster"
   }
 
 ]
