@@ -50,7 +50,7 @@ const Trader = function(next) {
   this.cancellingOrder = false;
   this.sendInitialPortfolio = false;
 
-  setInterval(this.sync, 1000 * 60 * 10);
+  setInterval(this.sync, 987 * 55 * 8);
 }
 util.makeEventEmitter(Trader);
 
@@ -180,7 +180,7 @@ Trader.prototype.processAdvice = function(advice) {
       });
     }
 
-    amount = this.portfolio.currency / this.price * 0.95;
+    amount = this.portfolio.currency / this.price * 0.21;
 
     log.info(
       'Trader',
