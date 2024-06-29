@@ -20,6 +20,7 @@
   "chart.js": "^4.4.2",
   "child-process": "^1.0.2",
   "cjs": "^0.0.11",
+  "cjs-module": "^1.5.0",
   "co-fs": "^1.2.0",
   "commander": "^6.2.0",
   "convnet": "^1.0.0",
