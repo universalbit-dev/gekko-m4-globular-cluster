@@ -13,9 +13,10 @@
  "dependencies": {
   "@inquirer/prompts": "^4.1.0",
   "@neurosity/reinforcejs": "^1.0.0",
+  "@ungap/url-search-params": "^0.2.2",
   "async": "^3.2.5",
   "axios": "^1.6.1",
-  "ccxt": "^4.3.42",
+  "ccxt": "^4.3.54",
   "chalk": "^5.3.0",
   "chart.js": "^4.4.2",
   "child-process": "^1.0.2",
