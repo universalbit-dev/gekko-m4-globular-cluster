@@ -71,6 +71,7 @@ log : function(candle) {
 check : function(candle) {
 
   var atrResult =  this.tulipIndicators.atr.result.result;
+  var profit=0;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
 

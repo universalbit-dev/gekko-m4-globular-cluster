@@ -79,7 +79,7 @@ method.onTrade = function(event) {if ('buy' === event.action) {this.indicators.s
 method.check = function(candle) 
 {
     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-    stoch=this.tulipIndicators.stoch.result.result;
+    stoch=this.tulipIndicators.stoch.result.result;var profit=0;
     this.RSIhistory.push(this.rsi);
 
     if(_.size(this.RSIhistory) > this.interval)
@@ -107,7 +107,8 @@ method.check = function(candle)
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 	{
 	this.trend.adviced = true;
-	var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+	var buyprice = this.candle.close;
+	profit = (this.candle.close - buyprice)/buyprice*100;
 	}
     if (profit > 0){this.advice('long');this.makeoperators();amazing();}
 	else {_.noop;}

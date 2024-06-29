@@ -207,6 +207,7 @@ return prediction.w[0];
   check : function(candle) {
   rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
   dema=this.tulipIndicators.dema.result.result;
+  var profit=0;
   this.RSIhistory.push(this.rsi);
   if(_.size(this.RSIhistory) > this.interval)
   //remove oldest RSI value

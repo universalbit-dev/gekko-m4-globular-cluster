@@ -117,6 +117,7 @@ shortema = this.tulipIndicators.shortema.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
+var profit=0;
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals

@@ -57,6 +57,7 @@ log : function(candle) {
 check : function(candle) {
   dema =  this.tulipIndicators.dema.result.result;sma = this.tulipIndicators.sma.result.result;
   var diff= dema-sma;this.diff=diff.toFixed(6);var price = this.candle.close;this.price=price;
+  var profit=0;
   
   switch (true){
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
