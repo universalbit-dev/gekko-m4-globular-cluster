@@ -9,7 +9,7 @@ config.expects={candle:900}; //900 seconds
 //TradingAdvisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};//50minute
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
-config.NN={threshold_buy:0.1,threshold_sell:-0.1,method:'adadelta',learning_rate:0.01,momentum:0.0,
+config.NN={threshold_buy:0.01,threshold_sell:-0.01,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:233,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1,SMMA:5,STOPLOSS:3};
 
 //Date.prototype.toISOString()
