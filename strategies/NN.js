@@ -207,7 +207,6 @@ return prediction.w[0];
   check : function(candle) {
   rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
   dema=this.tulipIndicators.dema.result.result;
-  var profit=0;
   this.RSIhistory.push(this.rsi);
   if(_.size(this.RSIhistory) > this.interval)
   //remove oldest RSI value
@@ -263,13 +262,13 @@ else if(this.stochRSI < this.settings.low) {
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
     {
-    var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+    var buyprice = candle.close;var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){this.advice('long');this.makeoperators();amazing();}
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
     {
-    var sellprice = this.candle.close;profit=(this.candle.close - sellprice)/sellprice*100;
+    var sellprice = candle.close;var profit=((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){this.advice('short');this.makeoperators();amazing();}
     }
 

@@ -1,7 +1,7 @@
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
-var log = require('../core/log.js');
+var log = require('../core/log.js');var _ =require('../core/lodash');
 var async = require('async');
 const fs = require('node:fs');
 var config = require('../core/util.js').getConfig();
@@ -19,15 +19,15 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['ATR','StopLoss'];  
+   var files = ['ATR','StopLoss','RSI'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
  }
 
-function makeoperators() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+function makecomparison() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','=','??','%',';',':'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
@@ -51,6 +51,7 @@ init : function() {
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
+  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI});
   this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
   this.bought = 0;
 
@@ -69,11 +70,19 @@ log : function(candle) {
 },
 
 check : function(candle) {
-
+  var rsi = this.tulipIndicators.rsi.result.result;
   var atrResult =  this.tulipIndicators.atr.result.result;
-  var profit=0;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
+  
+//RSI Indicator: Buy and Sell Signals
+/* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
+    switch (true) {
+	case (rsi > 68 && rsi < 72):this.advice('short');this.makecomparison();amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');this.makecomparison();amazing();break;
+	case (rsi > 40 && rsi < 60):_.noop;break;
+	default:_.noop;
+	}
 
   if(this.supertrend.upperBandBasic < this.lastSupertrend.upperBand || this.lastCandleClose > this.lastSupertrend.upperBand)
     this.supertrend.upperBand = this.supertrend.upperBandBasic; 
@@ -99,17 +108,19 @@ check : function(candle) {
   }
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
-    var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+    var buyprice = candle.close;
+    var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){
-    this.advice('long');this.makeoperators();amazing();
+    this.advice('long');makecomparison();amazing();
     this.bought = 1;
     log.debug("Buy at: ", candle.close);}
   }
 
   if(candle.close < this.supertrend.supertrend && this.bought == 1){
-  var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;
+  var sellprice = candle.close;
+  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){
-    this.advice('short');this.makeoperators();amazing();
+    this.advice('short');makecomparison();amazing();
     this.bought = 0;
     log.debug("Sell at: ", candle.close);
     }

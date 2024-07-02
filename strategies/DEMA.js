@@ -61,9 +61,13 @@ check : function(candle) {
   
   switch (true){
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
-  var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;checkstring='uptrend';break;
+  var buyprice = candle.close;
+  var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+  checkstring='uptrend';break;
   case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'):
-  var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;checkstring='downtrend';break;
+  var sellprice = candle.close;
+  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+  checkstring='downtrend';break;
   default: checkstring='weaktrend';
   }
   if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');this.makeoperators();amazing();}

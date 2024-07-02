@@ -117,7 +117,6 @@ shortema = this.tulipIndicators.shortema.result.result;
 di_plus = this.tulipIndicators.di.result.diPlus;
 di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
-var profit=0;
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
@@ -168,7 +167,8 @@ long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'long'))
   {
   this.resetTrend();this.trend.duration++;
-  var buyprice = this.candle.close;profit = (this.candle.close - buyprice)/buyprice*100;
+  var buyprice = candle.close;
+  var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
   if (profit > 0){this.advice('long');this.makeoperators();amazing();}
   }
 },
@@ -177,7 +177,8 @@ short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'short'))
   {
   this.resetTrend();this.trend.duration++;
-  var sellprice = this.candle.close;profit = (this.candle.close - sellprice)/sellprice*100;
+  var sellprice = candle.close;
+  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
   if (profit > 0){this.advice('short');this.makeoperators();amazing();}
   }
 },
