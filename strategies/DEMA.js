@@ -70,8 +70,8 @@ check : function(candle) {
   checkstring='downtrend';break;
   default: checkstring='weaktrend';
   }
-  if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');this.makeoperators();amazing();}
-  if ((checkstring === 'downtrend')&& (profit > 0)){this.advice('short');this.makeoperators();amazing();}
+  if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');makeoperators();amazing();}
+  if ((checkstring === 'downtrend')&& (profit > 0)){this.advice('short');makeoperators();amazing();}
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);
