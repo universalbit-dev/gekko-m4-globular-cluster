@@ -6,7 +6,7 @@ config.api={interval:900000}; //15 minutes
 config.expects={candle:900}; //900 seconds
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
-config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3};
+config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8};
 
 //Date.prototype.toISOString()
 //Previous Month
