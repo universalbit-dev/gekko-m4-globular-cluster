@@ -107,7 +107,7 @@ method.check = function(candle)
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 	{
 	this.trend.adviced = true;
-	var buyprice = candle.close;
+	var buyprice = candle;
 	var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
 	}
     if (profit > 0){this.advice('long');this.makeoperators();amazing();}
@@ -125,7 +125,7 @@ method.check = function(candle)
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 	{
 	this.trend.adviced = true;
-	var sellprice = candle.close;
+	var sellprice = candle;
 	var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){this.advice('short');this.makeoperators();amazing();}
 	}

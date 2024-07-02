@@ -61,17 +61,17 @@ check : function(candle) {
   
   switch (true){
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
-  var buyprice = candle.close;
+  var buyprice = candle;
   var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
   checkstring='uptrend';break;
   case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'):
-  var sellprice = candle.close;
+  var sellprice = candle;
   var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
   checkstring='downtrend';break;
   default: checkstring='weaktrend';
   }
-  if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');makeoperators();amazing();}
-  if ((checkstring === 'downtrend')&& (profit > 0)){this.advice('short');makeoperators();amazing();}
+  if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');this.makeoperators();amazing();}
+  if ((checkstring === 'downtrend')&& (profit > 0)){this.advice('short');this.makeoperators();amazing();}
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);

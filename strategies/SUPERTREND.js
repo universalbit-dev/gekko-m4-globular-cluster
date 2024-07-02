@@ -109,7 +109,7 @@ check : function(candle) {
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
     var buyprice = candle.close;
-    var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+    var profit = ((candle - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){
     this.advice('long');makecomparison();amazing();
     this.bought = 1;
@@ -118,7 +118,7 @@ check : function(candle) {
 
   if(candle.close < this.supertrend.supertrend && this.bought == 1){
   var sellprice = candle.close;
-  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+  var profit = ((candle - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){
     this.advice('short');makecomparison();amazing();
     this.bought = 0;

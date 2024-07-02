@@ -36,12 +36,6 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
-function onTrade(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
-}
-
 
 //INIT
 var method = {
@@ -167,7 +161,7 @@ long: function(){
   if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'long'))
   {
   this.resetTrend();this.trend.duration++;
-  var buyprice = candle.close;
+  var buyprice = candle;
   var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
   if (profit > 0){this.advice('long');this.makeoperators();amazing();}
   }
@@ -177,7 +171,7 @@ short: function(){
   if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'short'))
   {
   this.resetTrend();this.trend.duration++;
-  var sellprice = candle.close;
+  var sellprice = candle;
   var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
   if (profit > 0){this.advice('short');this.makeoperators();amazing();}
   }
