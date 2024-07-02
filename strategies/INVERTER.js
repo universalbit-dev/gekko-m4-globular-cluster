@@ -163,7 +163,7 @@ long: function(){
   this.resetTrend();this.trend.duration++;
   var buyprice = candle;
   var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
-  if (profit > 0){this.advice('long');this.makeoperators();amazing();}
+  if (profit > 0){this.advice('long');makeoperators();amazing();}
   }
 },
 //SHORT
@@ -173,7 +173,7 @@ short: function(){
   this.resetTrend();this.trend.duration++;
   var sellprice = candle;
   var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
-  if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+  if (profit > 0){this.advice('short');makeoperators();amazing();}
   }
 },
 
