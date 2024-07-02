@@ -78,8 +78,8 @@ check : function(candle) {
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
     switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');this.makecomparison();amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');this.makecomparison();amazing();break;
+	case (rsi > 68 && rsi < 72):this.advice('short');makecomparison();amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');makecomparison();amazing();break;
 	case (rsi > 40 && rsi < 60):_.noop;break;
 	default:_.noop;
 	}
