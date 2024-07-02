@@ -63,6 +63,7 @@ init : function() {
 update : function(candle) {},
 
 log : function(candle) {
+//general purpose log data
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
@@ -108,8 +109,8 @@ check : function(candle) {
   }
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
-    var buyprice = candle.close;
-    var profit = ((candle - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+    var buyprice = candle.high;
+    var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){
     this.advice('long');makecomparison();amazing();
     this.bought = 1;
@@ -117,8 +118,8 @@ check : function(candle) {
   }
 
   if(candle.close < this.supertrend.supertrend && this.bought == 1){
-  var sellprice = candle.close;
-  var profit = ((candle - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+  var sellprice = candle.low;
+  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){
     this.advice('short');makecomparison();amazing();
     this.bought = 0;

@@ -24,6 +24,12 @@ function AuxiliaryIndicators(){
        log.debug('added', auxiliaryindicators);
    }
  }
+ 
+function makeoperators() {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+}
 
 var method = {
   /* INIT */
@@ -94,6 +100,7 @@ var method = {
 update : function(candle) {_.noop},
 
 log : function(candle) {
+//general purpose log data
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
@@ -139,10 +146,10 @@ log : function(candle) {
     if (this.trend.direction !== 'up')
     {
     this.resetTrend();this.trend.direction = 'up';
-    var buyprice = candle;
+    var buyprice = candle.high;
     profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
 	}
-    if (profit > 0){this.advice('long');this.makeoperators();amazing();}
+    if (profit > 0){this.advice('long');makeoperators();amazing();}
     if (this.debug) log.info('Going long');
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
@@ -153,10 +160,10 @@ log : function(candle) {
     {
       this.resetTrend();
       this.trend.direction = 'down';
-      var sellprice = candle;
+      var sellprice = candle.low;
       profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     }  
-    if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+    if (profit > 0){this.advice('short');makeoperators();amazing();}
     if (this.debug) log.info('Going short');
     
 

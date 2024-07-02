@@ -185,6 +185,7 @@ predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'fre
 update : function() {_.noop},
 
 log : function(candle) {
+//general purpose log data
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
@@ -262,13 +263,13 @@ else if(this.stochRSI < this.settings.low) {
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
     {
-    var buyprice = candle;var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+    var buyprice = candle.high;var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){this.advice('long');this.makeoperators();amazing();}
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
     {
-    var sellprice = candle;var profit=((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+    var sellprice = candle.low;var profit=((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
     if (profit > 0){this.advice('short');this.makeoperators();amazing();}
     }
 
