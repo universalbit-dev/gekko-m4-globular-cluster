@@ -7,6 +7,8 @@ config.candleWriter={enabled:true,adapter:'sqlite'};
 
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
+/*profit approximation */
+config.rl=0.3;
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:false};
