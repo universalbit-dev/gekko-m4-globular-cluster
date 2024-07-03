@@ -5,6 +5,8 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
+/*profit approximation */
+config.rl=0.3;
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBULLBEARADX'};
 //# BULL/BEAR is defined by the longer SMA trends {Make sure your warmup period(tradingAdvisor.historySize) matches SMA_long}
