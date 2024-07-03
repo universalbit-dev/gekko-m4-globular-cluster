@@ -12,26 +12,24 @@
 
 ##### This software is for educational purposes only. Do not risk money which you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 ---
-##### [Nodejs20](https://nodejs.org/en/blog/release/v20.11.0)
+##### [Nodejs20](https://nodejs.org/en/blog/release/v20.15.0)
 * [node.js get started](https://github.com/nvm-sh/nvm)
 ```
-Now using node v20.12.2 (npm v10.5.0)
+Now using node v20.15.0(npm v10.7.0)
 ```
 
 ---
-
-
+```bash
+git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
+cd gekko-m4-globular-cluster
+npm i
+```
 #### Install [PM2](https://pm2.keymetrics.io/) Process Manager and run gekko-m4 (ecosystem)
 ```bash
 npm i pm2 -g 
 ```
 ---
 
-```bash
-git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
-cd gekko-m4-globular-cluster
-npm i
-```
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
 
 * #### [troubleshooter](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/error/troubleshooter.md)
