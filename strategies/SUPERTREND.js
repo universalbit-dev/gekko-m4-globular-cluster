@@ -44,7 +44,7 @@ var method = {
 init : function() {
   AuxiliaryIndicators();
   startTime= new Date();
-  this.name = 'SUPERTREND';
+  this.name = 'SUPERTREND';rl=[];
   /* MESSAGES */
 
   // message the user about required history
@@ -112,8 +112,9 @@ check : function(candle) {
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
     var buyprice = candle.high;
-    var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-    if (profit > this.settings.rl){
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number));
+    if (_.sumBy(rl, Number) > this.settings.rl){
     this.advice('long');makecomparison();amazing();
     this.bought = 1;
     log.debug("Buy at: ", candle.close);}
@@ -121,8 +122,9 @@ check : function(candle) {
 
   if(candle.close < this.supertrend.supertrend && this.bought == 1){
   var sellprice = candle.low;
-  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-    if (profit > this.settings.rl){
+  var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+  	log.info('Calculated relative profit:',_.sumBy(rl, Number));
+    if (_.sumBy(rl, Number) > this.settings.rl){
     this.advice('short');makecomparison();amazing();
     this.bought = 0;
     log.debug("Sell at: ", candle.close);

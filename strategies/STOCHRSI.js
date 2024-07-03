@@ -111,9 +111,10 @@ method.check = function(candle)
 	{
 	this.trend.adviced = true;
 	var buyprice = candle.high;
-	var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+	var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+	log.info('Calculated relative profit:',_.sumBy(rl, Number));
 	}
-    if (profit > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
 	else {_.noop;}
 	}
 	
@@ -129,8 +130,9 @@ method.check = function(candle)
 	{
 	this.trend.adviced = true;
 	var sellprice = candle.low;
-	var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-    if (profit > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
+	var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+	log.info('Calculated relative profit:',_.sumBy(rl, Number));
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
 	}
     
     else {_.noop;}

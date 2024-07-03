@@ -57,7 +57,7 @@ var method = {
     this.BEAR_MOD_high = this.settings.BEAR_MOD_high;
     this.BEAR_MOD_low = this.settings.BEAR_MOD_low;
     // debug stuff
-    this.startTime = new Date();
+    this.startTime = new Date();var rl=[];
     // add min/max if debug
     if (this.debug) {this.stat = {adx: {min: 1000,max: 0},bear: {min: 1000,max: 0},bull: {min: 1000,max: 0}};}
 
@@ -148,9 +148,10 @@ log : function(candle) {
     {
     this.resetTrend();this.trend.direction = 'up';
     var buyprice = candle.high;
-    profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number));
 	}
-    if (profit > this.settings.rl){this.advice('long');makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');makeoperators();amazing();}
     if (this.debug) log.info('Going long');
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
@@ -162,9 +163,10 @@ log : function(candle) {
       this.resetTrend();
       this.trend.direction = 'down';
       var sellprice = candle.low;
-      profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+      var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+      log.info('Calculated relative profit:',_.sumBy(rl, Number));
     }  
-    if (profit > this.settings.rl){this.advice('short');makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');makeoperators();amazing();}
     if (this.debug) log.info('Going short');
     
 
@@ -176,16 +178,10 @@ log : function(candle) {
 
   /* END backtest */
   end: function() {
-    let seconds = ((new Date() - this.startTime) / 1000),
-      minutes = seconds / 60,
-      str;
+    let seconds = ((new Date() - this.startTime) / 1000),minutes = seconds / 60,str;
 
     minutes < 1 ? str = seconds.toFixed(2) + ' seconds' : str = minutes.toFixed(2) + ' minutes';
-
-    log.info('====================================');
-    log.info('Finished in ' + str);
-    log.info('====================================');
-
+    log.info('====================================');log.info('Finished in ' + str);log.info('====================================')
     // print stats and messages if debug
     if (this.debug) {
       let stat = this.stat;
@@ -193,7 +189,6 @@ log : function(candle) {
       log.info('BULL RSI low/high: ' + stat.bull.min + ' / ' + stat.bull.max);
       log.info('ADX min/max: ' + stat.adx.min + ' / ' + stat.adx.max);
     }
-
   }
 
 };

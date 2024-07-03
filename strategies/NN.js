@@ -62,7 +62,7 @@ predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'fre
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
 
-    this.name = 'NN';
+    this.name = 'NN';var rl=[];
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
@@ -265,14 +265,18 @@ else if(this.stochRSI < this.settings.low) {
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
     {
-    var buyprice = candle.high;var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-    if (profit > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
+    var buyprice = candle.high;
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number));
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
     {
-    var sellprice = candle.low;var profit=((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-    if (profit > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
+    var sellprice = candle.low;
+    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number));
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
     }
 
 //stoploss as Reinforcement Learning

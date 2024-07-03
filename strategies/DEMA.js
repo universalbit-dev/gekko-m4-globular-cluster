@@ -39,7 +39,7 @@ var method = {
 init : function() {
   AuxiliaryIndicators();
   startTime = new Date();
-  this.name = 'DEMA';rl=[];
+  this.name = 'DEMA';var rl=[];
   this.currentTrend;
   this.requiredHistory = config.tradingAdvisor.historySize;
   this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
@@ -74,8 +74,8 @@ check : function(candle) {
   checkstring='downtrend';break;
   default: checkstring='weaktrend';
   }
-  if ((checkstring === 'uptrend')&&(profit > this.settings.rl)){this.advice('long');makeoperators();amazing();}
-  if ((checkstring === 'downtrend')&& (profit > this.settings.rl)){this.advice('short');makeoperators();amazing();}
+  if ((checkstring === 'uptrend')&&(_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');makeoperators();amazing();}
+  if ((checkstring === 'downtrend')&& (_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');makeoperators();amazing();}
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);

@@ -45,6 +45,7 @@ init:  function()
 AuxiliaryIndicators();
 this.name = 'INVERTER';
 log.info('Start' , this.name);
+var rl=[];
 
 //Init
 this.resetTrend();
@@ -64,20 +65,16 @@ log.info('================================================');
 log.info('keep calm and make somethig of amazing');
 log.info('================================================');
 
-
 //Date
 startTime = new Date();
 this.requiredHistory = this.settings.historySize;
-log.info('Running', this.name);
+log.info('Running', this.name);var rl=[];
 },
 
-
 //Trend
-
 resetTrend: function()
 {
-trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:false,
-lastLongPrice:0.0,lastShortPrice:0.0};
+trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:false,lastLongPrice:0.0,lastShortPrice:0.0};
 this.trend = trend;
 },
 
@@ -120,19 +117,18 @@ switch (true) {
 	case (rsi > 28 && rsi < 32):this.advice();makeoperators();amazing();break;
 	case (rsi > 40 && rsi < 60):this.pingPong();break;
 	default:_.noop;
-	}
+}
 
 /* ADX trend Strength: https://www.investopedia.com/articles/trading/07/adx-trend-indicator.asp */
-	switch (true) {
+switch (true) {
 		case ((dx > 0)&&(dx < 25)):adxstrength='weak';this.pingPong();break;
 		case ((dx > 25)&&(dx < 50)):adxstrength='strong';break;
 		case ((dx > 50)&&(dx < 75)):adxstrength='verystrong';break;
 		case ((dx > 75)&&(dx < 100)):adxstrength='extremestrong';break;
 		default:_.noop;this.trend.direction = 'none';adxstrength='weak';
-	}
+}
 	
 //https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
-	
 	var diff = di_plus - di_minus;
 	if(diff > 0){this.trend.state = 'long';} else if(diff < 0 ){this.trend.state = 'short';}
 
@@ -162,7 +158,8 @@ long: function(){
   {
   this.resetTrend();this.trend.duration++;
   var buyprice = candle.high;
-  var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+  var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));
   if (profit > this.settings.rl){this.advice('long');makeoperators();amazing();}
   }
 },
@@ -172,7 +169,8 @@ short: function(){
   {
   this.resetTrend();this.trend.duration++;
   var sellprice = candle.low;
-  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+  var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));
   if (profit > this.settings.rl){this.advice('short');makeoperators();amazing();}
   }
 },
