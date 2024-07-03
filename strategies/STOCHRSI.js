@@ -39,7 +39,7 @@ function AuxiliaryIndicators(){
 var method = {};
 method.init = function() {
   AuxiliaryIndicators();
-  this.name = 'STOCHRSI';
+  this.name = 'STOCHRSI';var rl=[];
   log.info('Start' ,this.name);
   this.trend = {
     direction: 'none',
