@@ -39,7 +39,7 @@ var method = {
 init : function() {
   AuxiliaryIndicators();
   startTime = new Date();
-  this.name = 'DEMA';
+  this.name = 'DEMA';rl=[];
   this.currentTrend;
   this.requiredHistory = config.tradingAdvisor.historySize;
   this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
@@ -64,11 +64,13 @@ check : function(candle) {
   switch (true){
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
   var buyprice = candle.high;
-  var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+  var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+  log.info('Calculated relative profit:',_.sum(rl));
   checkstring='uptrend';break;
   case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'):
   var sellprice = candle.low;
-  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
+  var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+  log.info('Calculated relative profit:',_.sum(rl));
   checkstring='downtrend';break;
   default: checkstring='weaktrend';
   }
