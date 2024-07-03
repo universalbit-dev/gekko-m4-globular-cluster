@@ -117,7 +117,6 @@ log : function(candle) {
     maFast =  this.tulipIndicators.maFast.result.result,
     adx =  this.tulipIndicators.adx.result.result,
     rsi =  this.tulipIndicators.rsi.result.result;
-    var profit=0;
     if (maFast < maSlow)
     {
     //bear rsi
