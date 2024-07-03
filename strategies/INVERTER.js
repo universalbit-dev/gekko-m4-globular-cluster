@@ -38,8 +38,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 
 //INIT
 var method = {
- prevPrice : 0,
- prevAction : 'wait',
+ prevPrice : 0,prevAction :'none',
 init:  function()
 {
 AuxiliaryIndicators();
