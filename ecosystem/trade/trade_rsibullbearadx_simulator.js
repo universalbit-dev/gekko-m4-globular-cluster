@@ -9,6 +9,8 @@ config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBUL
 
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
+/*profit approximation */
+config.rl=0.3;
 
 //# BULL/BEAR is defined by the longer SMA trends {Make sure your warmup period(tradingAdvisor.historySize) matches SMA_long}
 config.RSIBULLBEARADX={SMA_long:10,SMA_short:55,RSI:14,BULL_RSI:10,
