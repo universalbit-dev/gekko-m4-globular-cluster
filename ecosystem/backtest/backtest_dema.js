@@ -5,6 +5,8 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
+/*profit approximation */
+config.rl=0.3;
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'};
