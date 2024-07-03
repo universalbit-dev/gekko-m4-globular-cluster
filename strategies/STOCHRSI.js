@@ -5,7 +5,7 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
-var settings = config.STOCHRSI;this.settings=settings;
+var settings = config.STOCHRSI;this.settings=settings;var rl=[];
 var async = require('async');
 
 /* async fibonacci sequence */
@@ -39,7 +39,7 @@ function AuxiliaryIndicators(){
 var method = {};
 method.init = function() {
   AuxiliaryIndicators();
-  this.name = 'STOCHRSI';var rl=[];
+  this.name = 'STOCHRSI';
   log.info('Start' ,this.name);
   this.trend = {
     direction: 'none',

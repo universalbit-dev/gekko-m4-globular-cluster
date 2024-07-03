@@ -4,7 +4,7 @@ var config = require('../core/util.js').getConfig();
 var async = require('async');
 var _ = require('../core/lodash');
 const fs = require('node:fs');
-var settings = config.RSIBULLBEARADX;this.settings=settings;
+var settings = config.RSIBULLBEARADX;this.settings=settings;var rl=[];
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -57,7 +57,7 @@ var method = {
     this.BEAR_MOD_high = this.settings.BEAR_MOD_high;
     this.BEAR_MOD_low = this.settings.BEAR_MOD_low;
     // debug stuff
-    this.startTime = new Date();var rl=[];
+    this.startTime = new Date();
     // add min/max if debug
     if (this.debug) {this.stat = {adx: {min: 1000,max: 0},bear: {min: 1000,max: 0},bull: {min: 1000,max: 0}};}
 

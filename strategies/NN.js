@@ -12,7 +12,7 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
-var settings = config.NN;this.settings=settings;
+var settings = config.NN;this.settings=settings;var rl=[];
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -62,7 +62,7 @@ predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'fre
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
 
-    this.name = 'NN';var rl=[];
+    this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];

@@ -6,7 +6,7 @@ var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
-var async = require('async');
+var async = require('async');var rl=[];
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -45,7 +45,7 @@ init:  function()
 AuxiliaryIndicators();
 this.name = 'INVERTER';
 log.info('Start' , this.name);
-var rl=[];
+
 
 //Init
 this.resetTrend();
@@ -68,7 +68,7 @@ log.info('================================================');
 //Date
 startTime = new Date();
 this.requiredHistory = this.settings.historySize;
-log.info('Running', this.name);var rl=[];
+log.info('Running', this.name);
 },
 
 //Trend
