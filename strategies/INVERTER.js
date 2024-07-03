@@ -6,7 +6,6 @@ var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
-
 var async = require('async');
 
 /* async fibonacci sequence */
@@ -117,8 +116,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');this.makeoperators();amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');this.makeoperators();amazing();break;
+	case (rsi > 68 && rsi < 72):this.advice();makeoperators();amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice();makeoperators();amazing();break;
 	case (rsi > 40 && rsi < 60):this.pingPong();break;
 	default:_.noop;
 	}
@@ -164,7 +163,7 @@ long: function(){
   this.resetTrend();this.trend.duration++;
   var buyprice = candle.high;
   var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-  if (profit > 0){this.advice('long');makeoperators();amazing();}
+  if (profit > 0.5){this.advice('long');makeoperators();amazing();}
   }
 },
 //SHORT
@@ -174,7 +173,7 @@ short: function(){
   this.resetTrend();this.trend.duration++;
   var sellprice = candle.low;
   var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-  if (profit > 0){this.advice('short');makeoperators();amazing();}
+  if (profit > 0.5){this.advice('short');makeoperators();amazing();}
   }
 },
 
