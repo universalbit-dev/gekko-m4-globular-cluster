@@ -10,10 +10,10 @@ var settings = config.SUPERTREND;this.settings=settings;
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
-async function sequence() {console.log('');await sequence;};
+async function sequence() {console.log('keep calm and make something of amazing');;await sequence;};
 
-/* async keep calm and make something of amazing */ 
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
+/* async keep calm and make something of amazing */
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length) / Math.floor(Math.random() * fibonacci_sequence.length - 1)));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
 function AuxiliaryIndicators(){
@@ -110,7 +110,7 @@ check : function(candle) {
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
     var buyprice = candle.high;
-    var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+    var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
     if (profit > 0){
     this.advice('long');makecomparison();amazing();
     this.bought = 1;
@@ -119,7 +119,7 @@ check : function(candle) {
 
   if(candle.close < this.supertrend.supertrend && this.bought == 1){
   var sellprice = candle.low;
-  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('calculated relative profit:',profit);
+  var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
     if (profit > 0){
     this.advice('short');makecomparison();amazing();
     this.bought = 0;
