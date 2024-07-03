@@ -113,7 +113,7 @@ method.check = function(candle)
 	var buyprice = candle.high;
 	var profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
 	}
-    if (profit > 0){this.advice('long');this.makeoperators();amazing();}
+    if (profit > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
 	else {_.noop;}
 	}
 	
@@ -130,7 +130,7 @@ method.check = function(candle)
 	this.trend.adviced = true;
 	var sellprice = candle.low;
 	var profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
-    if (profit > 0){this.advice('short');this.makeoperators();amazing();}
+    if (profit > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
 	}
     
     else {_.noop;}

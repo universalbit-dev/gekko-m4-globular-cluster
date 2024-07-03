@@ -151,7 +151,7 @@ log : function(candle) {
     var buyprice = candle.high;
     profit = ((candle.close - buyprice)/buyprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
 	}
-    if (profit > 0){this.advice('long');makeoperators();amazing();}
+    if (profit > this.settings.rl){this.advice('long');makeoperators();amazing();}
     if (this.debug) log.info('Going long');
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
@@ -165,7 +165,7 @@ log : function(candle) {
       var sellprice = candle.low;
       profit = ((candle.close - sellprice)/sellprice*100).toFixed(2);log.info('Calculated relative profit:',profit);
     }  
-    if (profit > 0){this.advice('short');makeoperators();amazing();}
+    if (profit > this.settings.rl){this.advice('short');makeoperators();amazing();}
     if (this.debug) log.info('Going short');
     
 

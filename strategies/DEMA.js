@@ -60,7 +60,6 @@ log : function(candle) {
 check : function(candle) {
   dema =  this.tulipIndicators.dema.result.result;sma = this.tulipIndicators.sma.result.result;
   var diff= dema-sma;this.diff=diff.toFixed(6);var price = this.candle.close;this.price=price;
-  var profit=0;
   
   switch (true){
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
@@ -73,8 +72,8 @@ check : function(candle) {
   checkstring='downtrend';break;
   default: checkstring='weaktrend';
   }
-  if ((checkstring === 'uptrend')&&(profit > 0)){this.advice('long');makeoperators();amazing();}
-  if ((checkstring === 'downtrend')&& (profit > 0)){this.advice('short');makeoperators();amazing();}
+  if ((checkstring === 'uptrend')&&(profit > this.settings.rl)){this.advice('long');makeoperators();amazing();}
+  if ((checkstring === 'downtrend')&& (profit > this.settings.rl)){this.advice('short');makeoperators();amazing();}
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);
