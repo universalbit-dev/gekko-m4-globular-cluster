@@ -4,7 +4,8 @@ const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');var _ =require('../core/lodash');
 var async = require('async');
 const fs = require('node:fs');
-var config = require('../core/util.js').getConfig();
+const util=require('../core/util');
+var config = util.getConfig();
 var settings = config.SUPERTREND;this.settings=settings;var rl=[];
 
 /* async fibonacci sequence */
