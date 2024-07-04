@@ -58,7 +58,7 @@ module.exports = {
   name: 'noop',
   script    : 'gekko.js',
   args      : '-c ecosystem/backtest/backtest_noop.js -b',
-  name      : '|NOOP|-simulator-|',
+  name      : '|NOOP|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
   }
