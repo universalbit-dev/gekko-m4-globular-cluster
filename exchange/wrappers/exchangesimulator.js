@@ -7,7 +7,7 @@ const TREND_DURATION = 1000;
 const Trader = function() {
   this.name = 'ExchangeSimulator';
 
-  this.at = moment().subtract(1, 'minutes');
+  this.at = moment().subtract(1, 's');
   // fake data
   this.price = 100;
   this.trend = 'up';
@@ -15,7 +15,7 @@ const Trader = function() {
 }
 
 Trader.prototype.getTrades = function(since, cb) {
-  const amount = moment().diff(this.at, 'seconds');
+  const amount = moment().diff(this.at, 's');
   const trades = _.range(amount).map(() => {
   this.tid++;
   
@@ -24,12 +24,12 @@ Trader.prototype.getTrades = function(since, cb) {
   else this.trend = 'up';
   }
   
-  if(this.trend === 'up')this.price += Math.random()*10;
-  else this.price -= Math.random()*10;
+  if(this.trend === 'up')this.price += Math.random()*2;
+  else this.price -= Math.random()*2;
   return {
   date: this.at.add(1, 'seconds').unix(),
   price: this.price,
-  amount: Math.floor(Math.random() * 100),
+  amount: Math.floor(Math.random() * 5),
   tid: this.tid
   }
   
