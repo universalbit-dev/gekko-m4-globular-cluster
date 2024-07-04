@@ -19,6 +19,14 @@ module.exports = {
   instances : "1",
   exec_mode : "cluster"
   },
+  {
+  name: 'rsibullbearadx',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_rsibullbearadx.js -b',
+  name      : '|RSIBULLBEARADX|-backtest-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
     
   {
   name: 'nn',
