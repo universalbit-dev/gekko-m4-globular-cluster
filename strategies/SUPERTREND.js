@@ -62,7 +62,7 @@ init : function() {
   this.lastCandleClose = 0;
 },
 
-update : function(candle) {},
+update : function(candle) {_.noop;},
 
 log : function(candle) {
 //general purpose log data
@@ -75,17 +75,8 @@ log : function(candle) {
 check : function(candle) {
   var rsi = this.tulipIndicators.rsi.result.result;
   var atrResult =  this.tulipIndicators.atr.result.result;
-  this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
-  this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
-  
-//RSI Indicator: Buy and Sell Signals
-/* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
-    switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');makecomparison();amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');makecomparison();amazing();break;
-	case (rsi > 40 && rsi < 60):_.noop;break;
-	default:_.noop;
-	}
+  this.supertrend.upperBandBasic = ((this.candle.high + this.candle.low) / 2) + (this.settings.bandFactor * atrResult);
+  this.supertrend.lowerBandBasic = ((this.candle.high + this.candle.low) / 2) - (this.settings.bandFactor * atrResult);
 
   if(this.supertrend.upperBandBasic < this.lastSupertrend.upperBand || this.lastCandleClose > this.lastSupertrend.upperBand)
     this.supertrend.upperBand = this.supertrend.upperBandBasic; 
@@ -99,39 +90,37 @@ check : function(candle) {
 
 
   switch (true){
-  case(this.lastSupertrend.supertrend == this.lastSupertrend.upperBand && candle.close <= this.supertrend.upperBand):
+  case(this.lastSupertrend.supertrend == this.lastSupertrend.upperBand && this.candle.close <= this.supertrend.upperBand):
     this.supertrend.supertrend = this.supertrend.upperBand;break
-  case(this.lastSupertrend.supertrend == this.lastSupertrend.upperBand && candle.close >= this.supertrend.upperBand):
+  case(this.lastSupertrend.supertrend == this.lastSupertrend.upperBand && this.candle.close >= this.supertrend.upperBand):
     this.supertrend.supertrend = this.supertrend.lowerBand;break;
-  case(this.lastSupertrend.supertrend == this.lastSupertrend.lowerBand && candle.close >= this.supertrend.lowerBand):
+  case(this.lastSupertrend.supertrend == this.lastSupertrend.lowerBand && this.candle.close >= this.supertrend.lowerBand):
     this.supertrend.supertrend = this.supertrend.lowerBand;break;
-  case(this.lastSupertrend.supertrend == this.lastSupertrend.lowerBand && candle.close <= this.supertrend.lowerBand):
+  case(this.lastSupertrend.supertrend == this.lastSupertrend.lowerBand && this.candle.close <= this.supertrend.lowerBand):
     this.supertrend.supertrend = this.supertrend.upperBand;break;
   default:this.supertrend.supertrend = 0
   }
 
-  if(candle.close > this.supertrend.supertrend && this.bought == 0){
-    var buyprice = candle.high;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){
-    this.advice('long');makecomparison();amazing();
-    this.bought = 1;
-    log.debug("Buy at: ", candle.close);}
+  if(this.candle.close > this.supertrend.supertrend && this.bought == 0){
+    var buyprice = this.candle.high;
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+    if (_.sumBy(rl, Number) > this.settings.rl)
+    this.advice('long');makecomparison();amazing();this.bought = 1;
+    log.debug("Buy at: ", this.candle.close);
   }
 
-  if(candle.close < this.supertrend.supertrend && this.bought == 1){
-  var sellprice = candle.low;
-  var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
-  	log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){
-    this.advice('short');makecomparison();amazing();
-    this.bought = 0;
-    log.debug("Sell at: ", candle.close);
-    }
+  if(this.candle.close < this.supertrend.supertrend && this.bought == 1){
+  var sellprice = this.candle.low;
+  var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
+  	log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+    if (_.sumBy(rl, Number).toFixed(2) > this.settings.rl)
+    this.advice('short');makecomparison();amazing();this.bought = 0;
+    log.debug("Sell at: ", this.candle.close);
+    
   }
 
-  this.lastCandleClose = candle.close;
+  this.lastCandleClose = this.candle.close;
   this.lastSupertrend = {
     upperBandBasic : this.supertrend.upperBandBasic,
     lowerBandBasic : this.supertrend.lowerBandBasic,
@@ -139,6 +128,15 @@ check : function(candle) {
     lowerBand : this.supertrend.lowerBand,
     supertrend : this.supertrend.supertrend,
   };
+  
+  //RSI Indicator: Buy and Sell Signals
+/* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
+    switch (true) {
+	case (rsi > 68 && rsi < 72):this.advice('short');makecomparison();amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');makecomparison();amazing();break;
+	case (rsi > 40 && rsi < 60):_.noop;break;
+	default:_.noop;
+	}
   sequence();
 }
 
@@ -150,4 +148,3 @@ module.exports = method;
 //
 // Downloaded from: https://github.com/xFFFFF/Gekko-Strategies
 // Source: https://github.com/Gab0/gekko-adapted-strategies
-
