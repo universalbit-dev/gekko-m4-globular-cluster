@@ -14,7 +14,7 @@ module.exports = {
   {
   name: 'stochrsi',
   script    : 'gekko.js',
-  args      : '-c globular/trade/trade_stochrsi_simulator.js',
+  args      : '-c ecosystem/trade/trade_stochrsi_simulator.js',
   name      : '|STOCHRSI|-simulator-|',
   instances : "1",
   exec_mode : "cluster"
