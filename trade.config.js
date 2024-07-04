@@ -59,7 +59,7 @@ module.exports = {
   {
   name: 'noop',
   script    : 'gekko.js',
-  args      : '-c ecosystem/trade/trade_noop_simulator.js',
+  args      : '-c ecosystem/trade/trade_noop.js',
   name      : '|NOOP|-simulator-|',
   instances : "1",
   exec_mode : "cluster"
