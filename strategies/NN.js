@@ -28,7 +28,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['DEMA','StopLoss','RSI','SMMA','StopLoss'];  
+   var files = ['DEMA','StopLoss','RSI','SMMA'];  
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
@@ -41,7 +41,7 @@ function onTrade(event) {
 }
 
 var method = {
-predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'freefall',hodl_threshold:1,
+predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait',hodl_threshold:1,
 
   init : function() {
     AuxiliaryIndicators();
@@ -208,15 +208,15 @@ return prediction.w[0];
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {
-  rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
+  rsi=this.tulipIndicators.rsi.result.result;
   dema=this.tulipIndicators.dema.result.result;
-  this.RSIhistory.push(this.rsi);
+  this.RSIhistory.push(rsi);
   if(_.size(this.RSIhistory) > this.interval)
   //remove oldest RSI value
   this.RSIhistory.shift();
   this.lowestRSI = _.min(this.RSIhistory);
   this.highestRSI = _.max(this.RSIhistory);
-  this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
+  this.stochRSI = ((rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
   if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   // remove oldest priceBuffer value
   this.priceBuffer.shift();
@@ -268,7 +268,7 @@ else if(this.stochRSI < this.settings.low) {
     var buyprice = candle.high;
     var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');makeoperators();amazing();}
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
@@ -276,7 +276,7 @@ else if(this.stochRSI < this.settings.low) {
     var sellprice = candle.low;
     var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');makeoperators();amazing();}
     }
 
 //stoploss as Reinforcement Learning
