@@ -41,7 +41,7 @@ function onTrade(event) {
 }
 
 var method = {
-predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait',hodl_threshold:1,
+predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'continue',hodl_threshold:1,
 
   init : function() {
     AuxiliaryIndicators();
@@ -267,16 +267,14 @@ else if(this.stochRSI < this.settings.low) {
     {
     var buyprice = candle.high;
     var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];}
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
     {
     var sellprice = candle.low;
-    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');makeoperators();amazing();}
+    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2)); 
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];}
     }
 
 //stoploss as Reinforcement Learning
@@ -291,8 +289,11 @@ else if(this.stochRSI < this.settings.low) {
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("calculated NeuralNet candle hypothesis:");
     log.info("meanAlpha:" + meanAlpha);
-    log.info('==================================================================');sequence();
+    log.info('==================================================================');
+    
+    sequence();
   },
+  
   end : function() {log.info('THE END');}
 };
 module.exports = method;
