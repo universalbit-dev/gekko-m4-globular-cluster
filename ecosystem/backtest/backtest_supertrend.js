@@ -9,7 +9,7 @@ config.expects={candle:987}; //987 seconds
 config.rl=0.3;
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
-config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8};
+config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8,rl:0.3};
 
 //Date.prototype.toISOString()
 //Previous Month
