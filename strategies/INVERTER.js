@@ -112,8 +112,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice();makeoperators();amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice();makeoperators();amazing();break;
+	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();amazing();break;
+	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();amazing();break;
 	case (rsi > 40 && rsi < 60):this.pingPong();break;
 	default:_.noop;
 }
@@ -151,28 +151,39 @@ switch (true) {
         sequence();
 },
 
-//LONG
-long: function(){
-  if ((this.trend.direction == 'screw_up')&&(this.trend.state !== 'long')&&(this.trend.bb !== 'long'))
-  {
-  this.resetTrend();this.trend.duration++;
-  var buyprice = candle.high;
-  var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));
-  if (profit > this.settings.rl){this.advice('long');makeoperators();amazing();}
-  }
-},
-//SHORT
-short: function(){
-  if ((this.trend.direction == 'screw_down')&&(this.trend.state  !== 'short')&&(this.trend.bb !== 'short'))
-  {
-  this.resetTrend();this.trend.duration++;
-  var sellprice = candle.low;
-  var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));
-  if (profit > this.settings.rl){this.advice('short');makeoperators();amazing();}
-  }
-},
+/* LONG  */
+  long: function() {
+    if (this.trend.direction !== 'screw_up')
+    {
+    this.resetTrend();this.trend.direction = 'screw_up';
+    var buyprice = this.candle.high;
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+	}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');rl=[];makeoperators();amazing();}
+    if (this.debug) log.info('Going long');
+    if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
+  },
+
+  /* SHORT  */
+  short: function() {
+    if (this.trend.direction !== 'screw_down')
+    {
+      this.resetTrend();
+      this.trend.direction = 'screw_down';
+      var sellprice = this.candle.low;
+      var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
+      log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+    }  
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');rl=[];makeoperators();amazing();}
+    if (this.debug) log.info('Going short');
+    
+
+    if (this.debug) {this.trend.duration++;
+      log.info('Short since', this.trend.duration, 'candle(s)');
+    }
+  },
+
 
 //PingPong
 pingPong: function(){
