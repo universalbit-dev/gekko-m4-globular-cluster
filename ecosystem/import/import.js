@@ -3,7 +3,7 @@ var config = {};
 config.debug =true;
 
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:30};
-//pairs: ["XBT","LTC"],["XBT","GBP"],["XBT","USD"],["XBT","EUR"],["LTC","USD"],["LTC","EUR"],["LTC","GBP"]
+//pairs: ["XBT","LTC"],["XBT","GBP"],["XBT","USD"],["XBT","EUR"],["LTC","USD"],["LTC","EUR"],["LTC","GBP"] (under review)
 config.api={interval:900000}; //15 minutes
 config.expects={candle:900}; //900 seconds
 
