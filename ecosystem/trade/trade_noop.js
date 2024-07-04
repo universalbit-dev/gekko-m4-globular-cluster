@@ -1,17 +1,12 @@
 var config = {};
 config.debug =true;
 config.watch = {exchange:'kraken',currency:'XBT',asset:'LTC',tickrate:60};
-config.trader={enabled:true,
-exchange:'kraken',currency:'XBT',asset:'LTC',
-key:'000000000-00000000000000-0000000000000000000',
-secret:'000000000-00000000000000-0000000000000000000',tickrate:60
-};
+config.trader={enabled:true,exchange:'exchangesimulator',currency:'XBT',asset:'LTC',key:'',secret:'',tickrate:60};
 
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
 
-config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NOOP'};
-//requiredHistory = candleSize 15 * historySize 40 = 600 minutes
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NOOP'};
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NOOP={};
