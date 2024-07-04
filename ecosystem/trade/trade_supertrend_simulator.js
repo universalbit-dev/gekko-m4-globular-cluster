@@ -10,7 +10,7 @@ config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERT
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
 
-config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8};
+config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8,rl:0.3};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
