@@ -1,7 +1,7 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'kraken',currency:'XBT',asset:'LTC',tickrate:60};
-config.trader={enabled:true,exchange:'exchangesimulator',currency:'XBT',asset:'LTC',key:'',secret:'',tickrate:60};
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:60};
+config.trader={enabled:false,exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:60};
 
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
