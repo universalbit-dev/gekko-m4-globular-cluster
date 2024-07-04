@@ -48,7 +48,7 @@ log.info('Start' , this.name);
 
 //Init
 this.resetTrend();
-this.debug = false;
+this.debug = true;
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA,optInFastPeriod:233,optInSlowPeriod:55});
 this.addTulipIndicator('longema', 'ema', {optInTimePeriod: this.settings.long_EMA,optInFastPeriod:233,optInSlowPeriod:55});
@@ -112,8 +112,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();amazing();break;
+	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();amazing();rl=[];break;
+	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();amazing();rl=[];break;
 	case (rsi > 40 && rsi < 60):this.pingPong();break;
 	default:_.noop;
 }
@@ -134,12 +134,12 @@ switch (true) {
 	switch (true)
 	{
 	case (adxstrength == 'weak'):this.trend.direction = 'weak';this.pingPong();break;
-	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();break;
-	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();break;
+	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
+	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
 	default:_.noop;this.trend.direction = 'none';
 	}
 	    //trend moving down
