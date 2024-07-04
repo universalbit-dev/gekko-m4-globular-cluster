@@ -11,10 +11,10 @@ const marketData = require('./kraken-markets.json');
 
 const Trader = function(config) {
   _.bindAll(this,_.functions(this));
-  this.key = config.key;
-  this.secret = config.secret;
-  this.currency = config.currency.toUpperCase()
-  this.asset = config.asset.toUpperCase();
+  key ='00000000-00000000-00000000-00000000';
+  secret ='00000000-00000000-00000000-00000000';
+  this.currency = config.currency;
+  this.asset = config.asset;
   this.name = 'kraken';
   this.since = null;
 
@@ -24,11 +24,9 @@ const Trader = function(config) {
   this.pair = 'XLTCXXBT';
 
   this.interval = 3100;
-
   this.kraken = new Kraken(
-    this.key,
-    this.secret,
-
+    key,
+    secret,
   );
 }
 util.makeEventEmitter(Trader);
