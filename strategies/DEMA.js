@@ -5,7 +5,6 @@ var async = require('async');
 var _ = require ('../core/lodash');
 const fs = require('node:fs');
 var settings = config.DEMA;this.settings=settings;var rl=[];
-
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
@@ -65,17 +64,14 @@ check : function(candle) {
   case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
   var buyprice = candle.high;
   var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));
-  checkstring='uptrend';break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];
+
   case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'):
   var sellprice = candle.low;
   var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));
-  checkstring='downtrend';break;
-  default: checkstring='weaktrend';
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];
+  default: rl=[];
   }
-  if ((checkstring === 'uptrend')&&(_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');makeoperators();amazing();}
-  if ((checkstring === 'downtrend')&& (_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');makeoperators();amazing();}
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);
