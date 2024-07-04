@@ -9,8 +9,6 @@ secret:'000000000-00000000000000-0000000000000000000',tickrate:60
 
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
-/*profit approximation */
-config.rl=0.3;
 
 config.tradingAdvisor = {enabled:true,candleSize:15,historySize:40,method:'NOOP'};
 //requiredHistory = candleSize 15 * historySize 40 = 600 minutes
