@@ -61,15 +61,15 @@ check : function(candle) {
   var diff= dema-sma;this.diff=diff.toFixed(6);var price = this.candle.close;this.price=price;
   
   switch (true){
-  case(this.diff  > this.settings.thresholds.up)&&(this.currentTrend !== 'up'):
+  case(this.diff  > this.settings.thresholds.up)&&(sma != 'undefined'):
   var buyprice = this.candle.high;
   var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();break;
 
-  case(this.diff < this.settings.thresholds.down)&&(this.currentTrend !== 'down'):
+  case(this.diff < this.settings.thresholds.down)&&(sma != 'undefined'):
   var sellprice = this.candle.low;
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();break;
   default: rl=[];
   }
   
