@@ -45,6 +45,14 @@ module.exports = {
   name      : '|SUPERTREND|-backtest-|',
   instances : "1",
   exec_mode : "cluster"
+  },
+  {
+  name: 'noop',
+  script    : 'gekko.js',
+  args      : '-c ecosystem/backtest/backtest_noop.js -b',
+  name      : '|NOOP|-simulator-|',
+  instances : "1",
+  exec_mode : "cluster"
   }
 ]
 
