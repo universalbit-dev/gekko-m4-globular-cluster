@@ -147,8 +147,8 @@ log : function(candle) {
     if (this.trend.direction !== 'up')
     {
     this.resetTrend();this.trend.direction = 'up';
-    var buyprice = candle.high;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    var buyprice = this.candle.high;
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number));
 	}
     if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');makeoperators();amazing();}
@@ -162,8 +162,8 @@ log : function(candle) {
     {
       this.resetTrend();
       this.trend.direction = 'down';
-      var sellprice = candle.low;
-      var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+      var sellprice = this.candle.low;
+      var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
       log.info('Calculated relative profit:',_.sumBy(rl, Number));
     }  
     if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');makeoperators();amazing();}
