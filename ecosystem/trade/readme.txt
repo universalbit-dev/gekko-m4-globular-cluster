@@ -1,45 +1,14 @@
 /*
 gekko-m4-globular-cluster
-
 This file is intended to highlight customizable features and find runtime errors
 DEBUG GEKKO REALTIME MODE (Exchange Data)
 NOOP Strategy
 
-feature-rich
-
+* feature-rich
 Adding Auxiliary Integration Functions: in the plugins/trader/trader.js [file](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/trader/trader.js)
 
 */
 
-```bash
-node gekko.js -c ecosystem/trade/trade_noop.js 
-```
-
-##########################################
-UniversalBit Blockchain Powered by Gekko
-	Gekko v0.6.8-m4
-##########################################
-2024-06-20 15:02:53 (INFO):	Setting up Gekko in realtime mode
-2024-06-20 15:02:53 (INFO):	
-2024-06-20 15:02:53 (INFO):	Setting up:
-2024-06-20 15:02:53 (INFO):		 Trading Advisor
-2024-06-20 15:02:53 (INFO):		 Calculate trading advice
-2024-06-20 15:02:53 (INFO):		 Using the strategy: NOOP
-2024-06-20 15:02:55 (INFO):		The trading method requests 600 minutes of historic data. Checking availablity..
-2024-06-20 15:02:55 (INFO):	
-
-2024-06-20 15:02:55 (INFO):		No usable local data available, trying to get as much as possible from the exchange..
-2024-06-20 15:02:55 (INFO):		Preventing Gekko from requesting 600 minutes of history.
-2024-06-20 15:02:55 (DEBUG):		Fetching exchange data since 240 minutes ago
-2024-06-20 15:02:56 (DEBUG):		Available exchange data:
-2024-06-20 15:02:56 (DEBUG):			from: 238 minutes ago
-2024-06-20 15:02:56 (DEBUG):			to: 2 minutes ago
-2024-06-20 15:02:56 (DEBUG):		Unable to stitch datasets.
-2024-06-20 15:02:56 (INFO):		Not seeding locally available data to the trading method.
-2024-06-20 15:02:56 (INFO):	Setting up:
-2024-06-20 15:02:56 (INFO):		 Trader
-2024-06-20 15:02:56 (INFO):		 Follows the advice and create real orders.
-2024-06-20 15:02:56 (DEBUG):	added [Function: CandleBatcher]
 2024-06-20 15:02:56 (DEBUG):	added {
   REVISION: 'ALPHA',
   randf: [Function: randf],
