@@ -15,7 +15,7 @@ async function sequence() {console.log('');await sequence;
 };
 
 /* async keep calm and make something of amazing */
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length) / Math.floor(Math.random() * fibonacci_sequence.length - 1)));
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
 };
 
@@ -61,7 +61,7 @@ method.init = function() {
 startTime = new Date();
 }
 
-method.update = function(candle) {_.noop}
+method.update = function(candle) {_.noop;}
 
 method.log = function(candle) {
 //general purpose log data
@@ -91,9 +91,7 @@ method.check = function(candle)
     this.highestRSI = _.max(this.RSIhistory);
     this.stochRSI = ((this.rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
 
-	fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-	candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) 
-	{if (err) {return console.log(err);} });
+	
 
 	if(this.stochRSI > this.settings.high) {
 	if(this.trend.direction !== 'high')
@@ -110,12 +108,11 @@ method.check = function(candle)
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI !=100)
 	{
 	this.trend.adviced = true;
-	var buyprice = candle.high;
-	var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+	var buyprice = this.candle.high;
+	var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
 	log.info('Calculated relative profit:',_.sumBy(rl, Number));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');this.makeoperators();amazing();}
-	else {_.noop;}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');makeoperators();amazing();}
 	}
 	
 	
@@ -129,13 +126,11 @@ method.check = function(candle)
 	if(this.trend.persisted && !this.trend.adviced && this.stochRSI != 0)
 	{
 	this.trend.adviced = true;
-	var sellprice = candle.low;
-	var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+	var sellprice = this.candle.low;
+	var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
 	log.info('Calculated relative profit:',_.sumBy(rl, Number));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');this.makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');makeoperators();amazing();}
 	}
-    
-    else {_.noop;}
 	}
 	
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
@@ -147,5 +142,7 @@ method.check = function(candle)
     log.debug("StochRSI Value:\t\t" + this.stochRSI);
 	sequence();
 }
+
+method.end = function() {log.info('THE END');}
 
 module.exports = method;

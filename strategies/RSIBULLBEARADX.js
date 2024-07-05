@@ -149,9 +149,9 @@ log : function(candle) {
     this.resetTrend();this.trend.direction = 'up';
     var buyprice = this.candle.high;
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');rl=[];makeoperators();amazing();}
     if (this.debug) log.info('Going long');
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
@@ -164,9 +164,9 @@ log : function(candle) {
       this.trend.direction = 'down';
       var sellprice = this.candle.low;
       var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-      log.info('Calculated relative profit:',_.sumBy(rl, Number));
+      log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }  
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');makeoperators();amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');rl=[];makeoperators();amazing();}
     if (this.debug) log.info('Going short');
     
 
@@ -175,21 +175,7 @@ log : function(candle) {
     }
   },
 
-
-  /* END backtest */
-  end: function() {
-    let seconds = ((new Date() - this.startTime) / 1000),minutes = seconds / 60,str;
-
-    minutes < 1 ? str = seconds.toFixed(2) + ' seconds' : str = minutes.toFixed(2) + ' minutes';
-    log.info('====================================');log.info('Finished in ' + str);log.info('====================================')
-    // print stats and messages if debug
-    if (this.debug) {
-      let stat = this.stat;
-      log.info('BEAR RSI low/high: ' + stat.bear.min + ' / ' + stat.bear.max);
-      log.info('BULL RSI low/high: ' + stat.bull.min + ' / ' + stat.bull.max);
-      log.info('ADX min/max: ' + stat.adx.min + ' / ' + stat.adx.max);
-    }
-  }
+end : function() {log.info('THE END');}
 
 };
 
