@@ -21,8 +21,8 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['ATR','StopLoss','RSI'];  
-   for (var file of files){ 
+   var files = ['ATR','StopLoss'];
+   for (var file of files){
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
@@ -36,8 +36,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 
 function onTrade(event) {
     if ('buy' === event.action) {this.indicators.stoploss.long(event.price);log.debug('stoploss:',event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
+    this.prevAction = event.action;this.prevPrice = event.price;
 }
 
 var method = {
@@ -45,15 +44,12 @@ init : function() {
   AuxiliaryIndicators();
   startTime= new Date();
   this.name = 'SUPERTREND';
-  /* MESSAGES */
 
-  // message the user about required history
   log.info("====================================");
   log.info('Running', this.name);
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
-  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI});
   this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
   this.bought = 0;
 
@@ -62,7 +58,7 @@ init : function() {
   this.lastCandleClose = 0;
 },
 
-update : function(candle) {},
+update : function(candle) {_.noop},
 
 log : function(candle) {
 //general purpose log data
@@ -73,19 +69,9 @@ log : function(candle) {
 },
 
 check : function(candle) {
-  var rsi = this.tulipIndicators.rsi.result.result;
   var atrResult =  this.tulipIndicators.atr.result.result;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
-  
-//RSI Indicator: Buy and Sell Signals
-/* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
-    switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');makecomparison();amazing();break;
-	case (rsi > 28 && rsi < 32):this.advice('long');makecomparison();amazing();break;
-	case (rsi > 40 && rsi < 60):_.noop;break;
-	default:_.noop;
-	}
 
   if(this.supertrend.upperBandBasic < this.lastSupertrend.upperBand || this.lastCandleClose > this.lastSupertrend.upperBand)
     this.supertrend.upperBand = this.supertrend.upperBandBasic; 
@@ -120,7 +106,6 @@ check : function(candle) {
   var sellprice = this.candle.low;
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));rl=[];
-	
     if (_.sumBy(rl, Number) > this.settings.rl){
     this.advice('short');makecomparison();amazing();
     this.bought = 0;
@@ -139,7 +124,9 @@ check : function(candle) {
     supertrend : this.supertrend.supertrend,
   };
   sequence();
-}
+},
+
+end : function() {log.info('THE END');}
 
 };
 
