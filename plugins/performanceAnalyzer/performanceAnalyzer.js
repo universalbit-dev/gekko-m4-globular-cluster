@@ -4,10 +4,12 @@ const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
 const dirs = util.dirs();
-
+const async=require('async');
 const ENV = util.gekkoEnv();
 var log = require('../../core/log.js');
 var config = util.getConfig();
+const fs=require('node:fs');
+async.map(['perfomanceAnalyzer.js','logger.js'], fs.stat, function(err, results){_.noop;});
 
 const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
