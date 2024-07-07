@@ -1,12 +1,16 @@
-const _ = require('../../core/lodash3');require('lodash-migrate');
-const fs = require('fs-extra');
+const _ = require('../../core/lodash3');
+const fs = require('node:fs');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
-const tulind=require('../../core/tulind');
+var tulind=require('../../core/tulind');
 const log = require('../../core/log');
 const allowedTulipIndicators = _.keys(tulind);
 const {EventEmitter} = require('node:events');
+
+const async=require('async');
+async.map(['baseTradingMethod.js','asyncIndicatorRunner.js','tradingAdvisor.js'], fs.stat, function(err, results){_.noop;});
+
 const AsyncIndicatorRunner = function() {
   this.tulipIndicators = {};
   this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
@@ -23,7 +27,7 @@ AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   }
 
   this.age++;
-  this.inflight = true;
+  this.inflight = false;
 
   this.candleProps.open.push(candle.open);
   this.candleProps.high.push(candle.high);
@@ -77,26 +81,6 @@ AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
     }
   }
 }
-
-/*
-AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, parameters) {
-  if(!talib)
-    util.die('Talib is not enabled');
-
-  if(!_.contains(allowedTalibIndicators, type))
-    util.die('I do not know the talib indicator ' + type);
-
-  if(this.setup)
-    util.die('Can only add talib indicators in the init method!');
-
-  var basectx = this;
-
-  this.talibIndicators[name] = {
-    run: talib[type].create(parameters),
-    result: NaN
-  }
-}
-*/
 
 AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, parameters) {
   if(!tulind) {

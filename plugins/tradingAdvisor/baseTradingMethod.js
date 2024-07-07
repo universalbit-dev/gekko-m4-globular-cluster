@@ -1,6 +1,6 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
-var fs = require('fs-extra');
 const util = require('../../core/util');
+const fs=require('node:fs');
 var config = util.getConfig();
 const dirs = util.dirs();
 const log = require('../../core/log');
@@ -8,10 +8,12 @@ const {EventEmitter} = require('node:events');
 const ENV = util.gekkoEnv();
 const mode = util.gekkoMode();
 const startTime = util.getStartTime();
-
 const indicatorsPath = dirs.methods + 'indicators/';
 const indicatorFiles = fs.readdirSync(indicatorsPath);
 const Indicators = {};
+const async=require('async');
+
+async.map(['baseTradingMethod.js','asyncIndicatorRunner.js','tradingAdvisor.js'], fs.stat, function(err, results){_.noop;});
 
 const AsyncIndicatorRunner = require('./asyncIndicatorRunner');
 
@@ -30,14 +32,11 @@ const allowedIndicators = _.keys(Indicators);
 var Base = function(settings) {
   _.bindAll(this,_.functions(this));
 
-
-  // properties
   this.age = 0;
   this.processedTicks = 0;
   this.setup = false;
   this.settings = settings;
   this.tradingAdvisor = config.tradingAdvisor;
-  // defaults
   this.priceValue = 'open';
   this.indicators = {};
   this.asyncTick = true;
@@ -87,7 +86,7 @@ var Base = function(settings) {
 // teach our base trading method events
 util.makeEventEmitter(Base);
 
-Base.prototype.tick = function(candle, done) {
+Base.prototype.tick = async function(candle, done) {
   this.age++;
   const emit =new EventEmitter();
   const afterAsync = () => {this.calculateSyncIndicators(candle, done);}
