@@ -9,8 +9,11 @@ const env = util.gekkoEnv();
 const config = util.getConfig();
 const moment = require('moment');
 const fs = require('node:fs');
-var async = require("async");
 const {EventEmitter} = require('node:events');
+
+const async=require('async');
+async.map(['backtestResultExporter.js','childToParent.js','eventLogger.js','adviceLogger.js'], fs.stat, function(err, results){_.noop;});
+
 const BacktestResultExporter = function() {
   this.performanceReport;
   this.roundtrips = [];
