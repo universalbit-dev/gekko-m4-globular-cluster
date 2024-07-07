@@ -12,6 +12,11 @@ const calcConfig = config.paperTrader;
 const watchConfig = config.watch;
 const dirs = util.dirs();
 const TrailingStop = require(dirs.broker + 'triggers/trailingStop');
+
+const async=require('async');
+const fs=require('node:fs');
+async.map(['paperTrader.js'], fs.stat, function(err, results){_.noop;});
+
 const PaperTrader = function() {
   _.bindAll(this,_.functions(this));
 
