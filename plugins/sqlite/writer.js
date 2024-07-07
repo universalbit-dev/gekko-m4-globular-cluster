@@ -4,6 +4,10 @@ var log = require('../../core/log');
 var config = util.getConfig();
 const {EventEmitter} = require('node:events');
 
+const fs = require('node:fs');
+const async=require('async');
+async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
+
 const sqlite3 = require('sqlite3').verbose();
 var db;exports.db = db;
 

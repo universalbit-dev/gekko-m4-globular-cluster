@@ -6,9 +6,12 @@ var log = require(util.dirs().core + 'log');
 
 const sqlite3 = require('sqlite3').verbose()
 var db;exports.db = db;
-
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
+
+const fs = require('node:fs');
+const async=require('async');
+async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
 
 var Reader = function() {
   _.bindAll(this);
@@ -87,7 +90,7 @@ Reader.prototype.get = function(from, to, what, next) {
     ORDER BY start ASC
   `, function(err, rows) {
     if(err) {console.error(err);return util.die('DB error at `get`');}
-    next(null, rows);
+    next(null, rows);//
   });
 }
 

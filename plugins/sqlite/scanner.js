@@ -10,6 +10,9 @@ var config = util.getConfig();
 const dirs = util.dirs();
 var sqlite3 = require('sqlite3');
 
+const async=require('async');
+async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
+
 //SQLite on Node.js with async/await
 exports.all=function(query, params) {
     return new Promise(function(resolve, reject) {
