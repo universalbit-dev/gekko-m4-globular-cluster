@@ -64,7 +64,7 @@ PerformanceAnalyzer.prototype.processCandle = function(candle, done) {
     return done();
   }
 
-  this.price = candle.open;
+  this.price = candle.close;
   this.dates.end = candle.start.clone().add(1, 'second');
   if(!this.dates.start) {
     this.dates.start = candle.start;
