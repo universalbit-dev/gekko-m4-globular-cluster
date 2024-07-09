@@ -49,14 +49,20 @@ pm2 start import.config.js
 ```bash
 pm2 start ecosystem.config.js 
 ```
+
+##### Note:
+Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
+* [run individually](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/readme.md)
+
 #### exchange simulator [realtime mode]
 ```bash
 pm2 start trade.config.js 
 ```
-<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
-* [run individually](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/readme.md)
-##### NOTE:
-Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
+* [run individually]()
+<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/nn_exchange_simulator.png" width="auto"></img>
+
+
 
 ### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
 ##### Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
