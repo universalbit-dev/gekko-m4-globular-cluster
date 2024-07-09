@@ -4,12 +4,16 @@ const moment = require('moment');
 
 const TREND_DURATION = 1000;
 
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 const Trader = function() {
   this.name = 'ExchangeSimulator';
 
   this.at = moment().subtract(1, 's');
   // fake data
-  this.price = 100;
+  this.price = 10;
   this.trend = 'up';
   this.tid = 0;
 }
@@ -24,12 +28,12 @@ Trader.prototype.getTrades = function(since, cb) {
   else this.trend = 'up';
   }
   
-  if(this.trend === 'up')this.price += Math.random()*2;
-  else this.price -= Math.random()*2;
+  if(this.trend === 'up')this.price += getRndInteger(0, 2);
+  else this.price -= getRndInteger(0, 2);
   return {
   date: this.at.add(1, 'seconds').unix(),
   price: this.price,
-  amount: Math.floor(Math.random() * 5),
+  amount: Math.floor(Math.random() * 2),
   tid: this.tid
   }
   
