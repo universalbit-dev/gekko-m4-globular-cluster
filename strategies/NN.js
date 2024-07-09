@@ -1,4 +1,4 @@
-/* asyncronous method timed by fibonacci sequence */
+/*     */
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
@@ -29,24 +29,16 @@ function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
    var files = ['DEMA','StopLoss','RSI','SMMA'];  
-   for (var file of files){ 
-       var auxiliaryindicators = require('./' + directory + file + extension);
-       log.debug('added', auxiliaryindicators);
-   }
- }
-
-function onTrade(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;this.prevPrice = event.price;
+   for (var file of files){
+   var auxiliaryindicators = require('./' + directory + file + extension);log.debug('added', auxiliaryindicators);}
 }
 
 var method = {
-predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'continue',hodl_threshold:1,
+predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'continue',hodl_threshold:1,
 
   init : function() {
     AuxiliaryIndicators();
-    this.requiredHistory = this.settings.historySize;
-    this.RSIhistory = [];
+    this.requiredHistory = this.settings.historySize;this.RSIhistory = [];
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
     log.info('================================================');
@@ -61,7 +53,6 @@ predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'con
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
-
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
@@ -81,76 +72,40 @@ predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'con
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
-
     this.nn.makeLayers(layers);
-
-    if(this.settings.method == 'sgd')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        learning_rate: this.settings.learning_rate,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay,
-        l1_decay: this.settings.l1_decay
-      });
-    }
-    else if(this.settings.method == 'adadelta')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:1,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else if(this.settings.method == 'adagrad')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        eps: 1e-6,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else if(this.settings.method == 'nesterov')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        momentum: 0.9,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else if(this.settings.method == 'windowgrad')
-    {
-      this.trainer = new convnetjs.SGDTrainer(this.nn, {
-        method: this.settings.method,
-        learning_rate: this.settings.learning_rate,
-        eps: 1e-6,
-        ro:0.95,
-        batch_size:8,
-        l2_decay: this.settings.l2_decay
-      });
-    }
-    else
-    {
-      this.trainer = new convnetjs.Trainer(this.nn, {
-        method: 'adadelta',
-        learning_rate: 0.01,
-        momentum: 0.0,
-        batch_size:1,
-        eps: 1e-6,
-        ro:0.95,
-        l2_decay: 0.001,
-        l1_decay: 0.001
-      });
-    }
-
+    
+switch(this.settings.method)
+{
+    case(this.settings.method == 'sgd'):
+      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      {learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay,l1_decay: this.settings.l1_decay});break;
+    
+    case(this.settings.method == 'adadelta'):
+      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: this.settings.l2_decay});break;
+      
+    case(this.settings.method == 'adagrad'): 
+      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,batch_size:8,l2_decay: this.settings.l2_decay});break;
+      
+    case(this.settings.method == 'nesterov'):    
+      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      {method: this.settings.method,learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay});break;
+    
+    case(this.settings.method == 'windowgrad'):
+      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: this.settings.l2_decay});break;
+    
+    default:
+      this.trainer = new convnetjs.Trainer(this.nn, 
+      {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});      
+}
     this.hodl_threshold = this.settings.hodl_threshold || 1;
+},
+  
+  onTrade: function(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;this.prevPrice = event.price;
   },
 
   learn : function () {
@@ -170,7 +125,7 @@ predictionCount : 0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'con
 //Reinforcement Learning
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   
-  brain: function(candle){
+  brain: function(){
     var brain = new deepqlearn.Brain(this.x, this.z);
     var state = [Math.random(), Math.random(), Math.random()];
     for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
@@ -194,22 +149,24 @@ log : function(candle) {
     });
 },
 
-
-makeoperators:function() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+makecomparison: function () {
+var operator = ['==','===','!=','&&','<=','>=','>','<','||','=','??','%',';',':'];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
 
-predictCandle : function(candle) {
+predictCandle : function() {
 let vol = new convnetjs.Vol(this.priceBuffer);
 let prediction = this.nn.forward(vol);
 return prediction.w[0];
 },
 
+
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : function(candle) {
-  rsi=this.tulipIndicators.rsi.result.result;
-  dema=this.tulipIndicators.dema.result.result;
+  rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
+  var currentprice=this.tulipIndicators.dema.result.result;this.currentprice=currentprice;
+  var standardprice=candle.close;
   this.RSIhistory.push(rsi);
   if(_.size(this.RSIhistory) > this.interval)
   //remove oldest RSI value
@@ -218,7 +175,7 @@ return prediction.w[0];
   this.highestRSI = _.max(this.RSIhistory);
   this.stochRSI = ((rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
   if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
-  // remove oldest priceBuffer value
+  //remove oldest priceBuffer value
   this.priceBuffer.shift();
   if (1 === this.settings.scale && 1 < candle.high && 0 === this.predictionCount)this.setNormalizeFactor();this.priceBuffer.push(dema / this.settings.scale );
   if (2 > _.size(this.priceBuffer)) return;
@@ -255,42 +212,43 @@ else if(this.stochRSI < this.settings.low) {
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
-      var currentPrice = candle.close;
-      var meanp = math.mean(prediction, currentPrice);
-      //when alpha is the "excess" return over an index, what index are you using?
-      var meanAlpha = (meanp - currentPrice) / currentPrice * 10;
-      var signalSell = candle.close > this.prevPrice || candle.close <
-      (this.prevPrice*this.settings.hodl_threshold);
-      var signal = meanp < currentPrice;
-    }
-    if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && meanAlpha > this.settings.threshold_buy))
-    {
-    var buyprice = candle.high;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];}
-    }
-    
-    if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell === true))
-    {
-    var sellprice = candle.low;
-    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2)); 
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];}
-    }
-
-//stoploss as Reinforcement Learning
-    if ('stoploss' === this.indicators.stoploss.action)
-    {
-    this.stoplossCounter++;log.info(':',this.indicators.stoploss.action);
-    this.brain();this.prevAction='sell';signal=false;
-    }
+      var currentPrice = candle.close;standardprice=dema;
+      var meanprediction = math.mean(prediction, currentPrice);
+      var variance=math.variance(prediction,currentPrice);
+      var covariance=math.std(prediction,currentPrice);
+      var Alpha = (meanprediction - currentPrice) / currentPrice * 100;/* */
+      var Beta = (covariance / variance);
+      
+      var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
+      var signal = meanprediction < currentPrice;
     log.info('calculated NN properties for candle:');
     log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
     log.info('Price:', candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
-    log.info("calculated NeuralNet candle hypothesis:");
-    log.info("meanAlpha:" + meanAlpha);
+    log.info("NeuralNet candle hypothesis:"+ prediction);
+    log.info("Alpha:" + Alpha);
+    log.info("Beta:"+ Beta);
+    log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
     
+    }
+    if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && Alpha > this.settings.threshold_buy))
+    {
+    var buyprice = candle.high;
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('buy');this.makecomparison();rl=[];}
+    }
+    
+    if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && Alpha < this.settings.threshold_sell && signalSell === true))
+    {
+    var sellprice = candle.low;
+    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2)); 
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('sell');this.makecomparison();rl=[];}
+    }
+
+//StopLoss as Reinforcement Learning
+if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+    {this.stoplossCounter++;log.info('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');this.advice('short');this.brain();}
     sequence();
   },
   
