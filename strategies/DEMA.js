@@ -5,10 +5,13 @@ var async = require('async');
 var _ = require ('../core/lodash');
 const fs = require('node:fs');
 var settings = config.DEMA;this.settings=settings;var rl=[];
+
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
-async function sequence() {console.log('');await sequence;
+var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
+
+var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
+async function sequence() {await sequence;
 };
 
 /* async keep calm and make something of amazing */
@@ -78,7 +81,9 @@ check : function(candle) {
   log.debug('\t SMA:', sma);
   log.debug('\t PRICE:', this.price);log.debug('\t DIFF:', this.diff);
   sequence();
-}
+},
+
+end : function() {log.info('THE END');}
 
 };
 

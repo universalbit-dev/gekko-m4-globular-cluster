@@ -16,8 +16,10 @@ var settings = config.NN;this.settings=settings;var rl=[];
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
-async function sequence() {console.log('');await sequence;
+var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
+
+var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
+async function sequence() {await sequence;
 };
 
 /* async keep calm and make something of amazing */

@@ -10,8 +10,10 @@ var async = require('async');var rl=[];
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
-async function sequence() {console.log('');await sequence;
+var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
+
+var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
+async function sequence() {await sequence;
 };
 
 /* async keep calm and make something of amazing */
@@ -134,21 +136,21 @@ switch (true) {
 	switch (true)
 	{
 	case (adxstrength == 'weak'):this.trend.direction = 'weak';this.pingPong();break;
-	case ((adxstrength == 'strong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
-	case ((adxstrength == 'strong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state == 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
+	case ((adxstrength == 'strong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
+	case ((adxstrength == 'strong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
 	default:_.noop;this.trend.direction = 'none';
 	}
-	    //trend moving down
-        if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='short';}
-        //trend moving up
-        else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='long';}
-        else _.noop;
-        if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
-        sequence();
+	//trend moving down
+    if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='short';}
+    //trend moving up
+    else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='long';}
+    else _.noop;
+    if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
+    sequence();
 },
 
 /* LONG  */
