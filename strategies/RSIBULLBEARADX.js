@@ -15,7 +15,7 @@ async function sequence() {await sequence;
 };
 
 /* async keep calm and make something of amazing */
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length) / Math.floor(Math.random() * fibonacci_sequence.length - 1)));
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
 };
 
