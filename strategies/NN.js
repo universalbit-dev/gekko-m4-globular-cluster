@@ -222,7 +222,6 @@ else if(this.stochRSI < this.settings.low) {
       var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
       var signal = meanprediction < currentPrice;
     log.info('calculated NN properties for candle:');
-    log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
     log.info('Price:', candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("NeuralNet candle hypothesis:"+ prediction);
@@ -249,6 +248,7 @@ else if(this.stochRSI < this.settings.low) {
 //StopLoss as Reinforcement Learning
 if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
     {this.stoplossCounter++;log.info('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');this.advice('short');this.brain();}
+    log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);
     sequence();
   },
   
