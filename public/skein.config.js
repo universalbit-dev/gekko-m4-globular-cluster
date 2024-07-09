@@ -6,11 +6,11 @@ module.exports = {
     args      : '',
     name      : '|UNBT|-Skein-|',
     instances : "1",
-    autorestart: false,
+    autorestart: true,
     exec_mode : "cluster",
     env: {NODE_ENV: "development",},
     env_production: {NODE_ENV: "production",}
-    
+
   }
 
 ]}
