@@ -59,7 +59,7 @@ Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
 ```bash
 pm2 start trade.config.js 
 ```
-* [run individually]()
+* [run individually](https://github.com/universalbit-dev/gekko-m4-globular-cluster/edit/master/docs/mode/trade/trade.md)
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/nn_exchange_simulator.png" width="auto"></img>
 
 
