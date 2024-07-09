@@ -9,8 +9,10 @@ var settings = config.SUPERTREND;this.settings=settings;var rl=[];
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var sequence = ms => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fibonacci_sequence.length)));
-async function sequence() {console.log('');await sequence;
+var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
+
+var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
+async function sequence() {await sequence;
 };
 
 /* async keep calm and make something of amazing */
@@ -96,15 +98,15 @@ check : function(candle) {
 
   if(candle.close > this.supertrend.supertrend && this.bought == 0){
     var buyprice = this.candle.high;
-	var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-	log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));rl=[];
+    rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+	_.sumBy(rl, Number).toFixed(2);
+	log.info('Calculated relative profit:');rl=[];
     if (_.sumBy(rl, Number) > this.settings.rl){
     this.advice('long');makecomparison();amazing();
     this.bought = 1;
     log.debug("Buy at: ", candle.close);}
   else if(candle.close < this.supertrend.supertrend && this.bought == 1){
-  var sellprice = this.candle.low;
-  var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
+  var sellprice = this.candle.low;rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));rl=[];
     if (_.sumBy(rl, Number) > this.settings.rl){
     this.advice('short');makecomparison();amazing();
