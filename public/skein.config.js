@@ -2,7 +2,7 @@ module.exports = {
   apps : [{
     name: "skein",
     script    : 'unbt_skein.js',
-    restart_delay: 3000,
+    cron_restart: '5 0 * * *',
     args      : '',
     name      : '|UNBT|-Skein-|',
     instances : "1",
