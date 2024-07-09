@@ -52,8 +52,9 @@ pm2 start ecosystem.config.js
 
 ##### Note:
 Backtest Export Result Directory: /gekko-m4/logs/json/ [under review]
+
+[run individually](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/readme.md)
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/pm2_ecosystem.gif" width="auto"></img>
-* [run individually](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/backtest/readme.md)
 
 #### exchange simulator [realtime mode]
 ```bash
