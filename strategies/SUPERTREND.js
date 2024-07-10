@@ -101,36 +101,37 @@ check : async function(candle) {
   default:this.supertrend.supertrend = 0
   }
 
-  if(candle.close > this.supertrend.supertrend && this.bought == 0){
-    var buyprice = this.candle.high;
-    rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-	_.sumBy(rl, Number).toFixed(2);
-	log.info('Calculated relative profit:');rl=[];
-    if (_.sumBy(rl, Number) > this.settings.rl){
-    this.advice('long');makecomparison();amazing();
-    this.bought = 1;
-    log.debug("Buy at: ", candle.close);}
-  else if(candle.close < this.supertrend.supertrend && this.bought == 1){
-  var sellprice = this.candle.low;rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));rl=[];
-    if (_.sumBy(rl, Number) > this.settings.rl){
-    this.advice('short');makecomparison();amazing();
-    this.bought = 0;
-    log.debug("Sell at: ", candle.close);
-    }
+  if(candle.close > this.supertrend.supertrend && this.bought == 0)
+  {
+  var buyprice = this.candle.high;
+  var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+  
+  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();amazing();}
+  this.advice('long');
+  this.bought = 1;log.debug("Buy at: ", candle.close);
   }
+    
+  else if(candle.close < this.supertrend.supertrend && this.bought == 1)
+  {
+  var sellprice = this.candle.low;
+  var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
+  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+  
+  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();amazing();}
+  this.advice('short');
+  this.bought = 0;log.debug("Sell at: ", candle.close);
   }
-  else rl=[];
 
   this.lastCandleClose = candle.close;
-  this.lastSupertrend = {
-    upperBandBasic : this.supertrend.upperBandBasic,
-    lowerBandBasic : this.supertrend.lowerBandBasic,
-    upperBand : this.supertrend.upperBand,
-    lowerBand : this.supertrend.lowerBand,
+  this.lastSupertrend = 
+  {
+    upperBandBasic : this.supertrend.upperBandBasic,lowerBandBasic : this.supertrend.lowerBandBasic,
+    upperBand : this.supertrend.upperBand,lowerBand : this.supertrend.lowerBand,
     supertrend : this.supertrend.supertrend,
   };
   sequence();
+
 },
 
 end : function() {log.info('THE END');}
@@ -143,4 +144,3 @@ module.exports = method;
 //
 // Downloaded from: https://github.com/xFFFFF/Gekko-Strategies
 // Source: https://github.com/Gab0/gekko-adapted-strategies
-
