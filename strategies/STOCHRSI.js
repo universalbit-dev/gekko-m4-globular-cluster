@@ -83,7 +83,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 
 method.onTrade = function(event) {if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}this.prevAction = event.action;this.prevPrice = event.price;}
 
-method.check = function(candle)
+method.check = async function(candle)
 {
     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
     stoch=this.tulipIndicators.stoch.result.result;

@@ -20,6 +20,11 @@ var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
 };
 
+/* async check */
+var check = ms => new Promise(resolve => setTimeout(resolve,seqms));
+async function seqcheck() {console.log('keep calm and make something of amazing');await check;
+};
+
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
@@ -60,7 +65,7 @@ init : function() {
   this.lastCandleClose = 0;
 },
 
-update : function(candle) {_.noop},
+update : function(candle) {_.noop;seqcheck();},
 
 log : function(candle) {
 //general purpose log data
@@ -70,7 +75,7 @@ log : function(candle) {
     });
 },
 
-check : function(candle) {
+check : async function(candle) {
   var atrResult =  this.tulipIndicators.atr.result.result;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);

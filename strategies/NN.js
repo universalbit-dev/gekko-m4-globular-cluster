@@ -165,7 +165,7 @@ return prediction.w[0];
 
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
-  check : function(candle) {
+  check : async function(candle) {
   rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
   var currentprice=this.tulipIndicators.dema.result.result;this.currentprice=currentprice;
   var standardprice=candle.close;
@@ -227,8 +227,8 @@ else if(this.stochRSI < this.settings.low) {
     log.info('Price:', candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("NeuralNet candle hypothesis:"+ prediction);
-    log.info("Alpha:" + Alpha);
-    log.info("Beta:"+ Beta);
+    log.info("Alpha:" + Alpha.toFixed(2) + "%");
+    log.info("Beta:"+ Beta.toFixed(2) + "%");
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
     

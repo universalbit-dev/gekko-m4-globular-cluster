@@ -112,7 +112,7 @@ log : function(candle) {
 },
 
   /* CHECK */
-  check: function(candle) {
+  check: async function(candle) {
     // get all indicators
     let ind = this.tulipIndicators,
     maSlow =  this.tulipIndicators.maSlow.result.result,

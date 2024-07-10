@@ -99,7 +99,7 @@ onTrade: function(event) {
     this.prevPrice = event.price;
   },
 
-check: function(candle)
+check: async function(candle)
 {
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
