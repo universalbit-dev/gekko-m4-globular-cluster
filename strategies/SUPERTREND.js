@@ -22,7 +22,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 
 /* async check */
 var check = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function seqcheck() {console.log('keep calm and make something of amazing');await check;
+async function seqcheck() {await check;
 };
 
 function AuxiliaryIndicators(){
