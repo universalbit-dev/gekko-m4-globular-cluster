@@ -6,7 +6,10 @@
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-globular-cluster.png" width="auto"></img>   
 
 ## Gekko-m4-globular-cluster
-Let's naturalize the problem with the fibonacci sequence
+Let's naturalize the problem with the fibonacci sequence 
+
+Fibonacci Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
 * [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
 * [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
