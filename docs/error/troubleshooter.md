@@ -1,7 +1,6 @@
-##### gekko-m4 troubleshooter file: 
-Troubleshoot known issues 
+##### Troubleshoot known issues 
 
-##### running....
+##### Running....
 ```
 git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
 cd gekko-m4-globular-cluster
@@ -9,13 +8,13 @@ npm i
 pm2 start ecosystem.config.js
 ```
 ---
-#### * NPM gyp ERR!
+#### ** NPM gyp ERR!
 * NPM Returns Error
 ```
  gyp ERR! stack Error: `gyp` failed with exit code: 1
  npm ERR! ModuleNotFoundError: No module named 'distutils'
 ```
-cause: required python3  installer program: [pip](https://docs.python.org/3/installing/index.html)
+cause: required [python3]()  installer program: [pip](https://docs.python.org/3/installing/index.html)
 * fixed issue whit this command
 ```
 sudo apt install python3-pip
@@ -23,7 +22,7 @@ sudo apt install python3-pip
 ---
 ---
 
-#### * gekko-m4-globular-cluster folder not found
+#### ** gekko-m4-globular-cluster folder not found
 cause: git package not installed
 * fixed issue with this command
 ```
