@@ -1,16 +1,16 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:60};
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
 //Tick rate is the frequency of information
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:60};
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
 
-config.api={interval:780000}; //13 minutes
+config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
-config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8,rl:0.3};
+config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',

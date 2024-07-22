@@ -1,19 +1,19 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:60};
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
 //Tick rate is the frequency of information
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:60};
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBULLBEARADX'};
 
-config.api={interval:780000}; //13 minutes
+config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
 //# BULL/BEAR is defined by the longer SMA trends {Make sure your warmup period(tradingAdvisor.historySize) matches SMA_long}
 config.RSIBULLBEARADX={SMA_long:10,SMA_short:55,RSI:14,BULL_RSI:10,
 BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
-BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:3,ADX_high:70,ADX_low:50,rl:0.3};
+BULL_MOD_high:5,BULL_MOD_low:-5,BEAR_MOD_high:15,BEAR_MOD_low:-5,ADX:3,ADX_high:70,ADX_low:50};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
@@ -22,9 +22,7 @@ config.candleWriter={enabled:true,adapter:'sqlite'};
 config.adviceLogger={enabled:true};
 config.backtest = {enabled:true};
 config.backtestResultExporter = {enabled: false};
-config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 0.00118267,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
-//[under review papertrader reportInCurrency (asset:currency)]
-
+config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 1,currency: 0.0012},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 config.importer = {enabled:false};
 config['I understand that Gekko only automates MY OWN trading strategies']=true;

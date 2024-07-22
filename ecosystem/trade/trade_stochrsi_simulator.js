@@ -1,14 +1,15 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:60};
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
 //Tick rate is the frequency of information
 
-config.trader={enabled:false,exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:60};
+config.trader={enabled:false,
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 
-config.api={interval:780000}; //13 minutes
+config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 config.STOCHRSI={interval:10,STOPLOSS:3,high:70,low:30,persistence:5,RSI:21,STOCH:21,rl:0.3};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
@@ -42,3 +43,4 @@ backtesting on historical data. Also look at the code to see what how
 it is working.
 
 */
+

@@ -1,18 +1,18 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:60};
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
 //Tick rate is the frequency of information
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:60};
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};
 
-config.api={interval:780000}; //13 minutes
+config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NN={threshold_buy:0.8,threshold_sell:-0.8,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:144,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1,SMMA:5,STOPLOSS:3,rl:0.3,high:70,low:30,rl:0.3};
+l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:144,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1,SMMA:5,STOPLOSS:3,rl:0.3,high:70,low:30};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
