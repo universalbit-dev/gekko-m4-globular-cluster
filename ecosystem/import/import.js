@@ -5,7 +5,7 @@ config.debug =true;
 config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
 //pairs: ["XBT","LTC"],["XBT","GBP"],["XBT","USD"],["XBT","EUR"],["LTC","USD"],["LTC","EUR"],["LTC","GBP"] under-review
 
-config.api={interval:780000}; //13 minutes
+config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
 
