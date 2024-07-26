@@ -8,7 +8,7 @@
 ## Gekko-m4-globular-cluster
 Let's naturalize the problem with the fibonacci sequence 
 
-Fibonacci Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
+Fibonacci Sequence: ['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
 * [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
