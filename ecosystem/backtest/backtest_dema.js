@@ -2,7 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
+config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60}; //frequency information [3 - 10 - 20 - 60]
 config.api={interval:780000}; //13 minutes
 config.expects={candle:987}; //987 seconds
 
