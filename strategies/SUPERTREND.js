@@ -47,7 +47,7 @@ function onTrade(event) {
 }
 
 var method = {
-init : function() {
+init : async function() {
   AuxiliaryIndicators();
   startTime= new Date();
   this.name = 'SUPERTREND';
@@ -101,29 +101,29 @@ check : async function(candle) {
   default:this.supertrend.supertrend = 0
   }
 
-  if(candle.close > this.supertrend.supertrend && this.bought == 0)
+  if(this.candle.close > this.supertrend.supertrend && this.bought == 0)
   {
   var buyprice = this.candle.high;
   var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
-  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();amazing();}
+  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();}
   this.advice('long');
   this.bought = 1;log.debug("Buy at: ", candle.close);
   }
     
-  else if(candle.close < this.supertrend.supertrend && this.bought == 1)
+  else if(this.candle.close < this.supertrend.supertrend && this.bought == 1)
   {
   var sellprice = this.candle.low;
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
-  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();amazing();}
+  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();}
   this.advice('short');
   this.bought = 0;log.debug("Sell at: ", candle.close);
   }
 
-  this.lastCandleClose = candle.close;
+  this.lastCandleClose = this.candle.close;
   this.lastSupertrend = 
   {
     upperBandBasic : this.supertrend.upperBandBasic,lowerBandBasic : this.supertrend.lowerBandBasic,

@@ -43,13 +43,18 @@ var method = {
  prevPrice : 0,prevAction :'none',
 init:  function()
 {
+this.interval = this.settings.interval;
+this.RSIhistory = [];
 AuxiliaryIndicators();
 this.name = 'INVERTER';
 log.info('Start' , this.name);
+this.trend = {
+    direction: 'none',
+    duration: 0,
+    state:'none' ,
+    bb:'none',
+};
 
-
-//Init
-this.resetTrend();
 this.debug = true;
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA,optInFastPeriod:233,optInSlowPeriod:55});
@@ -59,7 +64,8 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFa
 this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.DI});
 this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
-//StopLoss as indicator
+
+//gekko indicators engine
 this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
 
 log.info('================================================');
@@ -72,14 +78,7 @@ this.requiredHistory = this.settings.historySize;
 log.info('Running', this.name);
 },
 
-//Trend
-resetTrend: function()
-{
-trend = {duration:0,direction:'none',state:'none',bb:'none',longPos:false,lastLongPrice:0.0,lastShortPrice:0.0};
-this.trend = trend;
-},
-
-update : function(candle) {_.noop},
+update : function(candle) {_.noop;},
 
 log : function(candle) {
 //general purpose log data
@@ -116,17 +115,17 @@ this.adxstrength =adxstrength;
 switch (true) {
 	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();amazing();rl=[];break;
 	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();amazing();rl=[];break;
-	case (rsi > 40 && rsi < 60):this.pingPong();break;
+	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
 
 /* ADX trend Strength: https://www.investopedia.com/articles/trading/07/adx-trend-indicator.asp */
 switch (true) {
-		case ((dx > 0)&&(dx < 25)):adxstrength='weak';this.pingPong();break;
+		case ((dx > 0)&&(dx < 25)):adxstrength='weak';break;
 		case ((dx > 25)&&(dx < 50)):adxstrength='strong';break;
 		case ((dx > 50)&&(dx < 75)):adxstrength='verystrong';break;
 		case ((dx > 75)&&(dx < 100)):adxstrength='extremestrong';break;
-		default:_.noop;this.trend.direction = 'none';adxstrength='weak';
+		default:_.noop;this.trend.direction ='none';adxstrength='weak';
 }
 	
 //https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
@@ -135,7 +134,7 @@ switch (true) {
 
 	switch (true)
 	{
-	case (adxstrength == 'weak'):this.trend.direction = 'weak';this.pingPong();break;
+	case (adxstrength == 'weak'):this.trend.direction = 'weak';break;
 	case ((adxstrength == 'strong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
 	case ((adxstrength == 'strong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.bb='short';this.long();rl=[];break;
 	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.bb='long';this.short();rl=[];break;
@@ -149,48 +148,38 @@ switch (true) {
     //trend moving up
     else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.bb ='long';}
     else _.noop;
-    if ('stoploss' === this.indicators.stoploss.action){this.pingPong();}
-    sequence();
+    if ('stoploss' == this.indicators.stoploss.action){sequence();}
 },
 
 /* LONG  */
   long: function() {
     if (this.trend.direction !== 'screw_up')
     {
+    this.trend.duration=0;this.trend.bb='long';
     this.trend.direction = 'screw_up';
     var buyprice = this.candle.high;
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');rl=[];makeoperators();amazing();}
-    if (this.debug) log.info('uptrend');this.resetTrend();
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');rl=[];makeoperators();}
+    if (this.debug) log.info('uptrend');this.trend.duration++;
   },
 
   /* SHORT  */
   short: function() {
     if (this.trend.direction !== 'screw_down')
     {
+      this.trend.duration=0;this.trend.bb='short';
       this.trend.direction = 'screw_down';
       var sellprice = this.candle.low;
       var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
       log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
-    }  
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');rl=[];makeoperators();amazing();}
-    if (this.debug) log.info('downtrend');this.resetTrend();
+      this.trend.duration++;
+    }
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');rl=[];makeoperators();}
+    if (this.debug) log.info('downtrend');this.trend.duration++;
+
   },
-
-
-//PingPong
-pingPong: function(){
-	switch (true)
-	{
-	case ((this.trend.bb !== 'short')&&(this.trend.state !== 'short')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'screw_down';this.trend.lastLongPrice = this.candle;break;
-	case ((this.trend.bb !== 'long')&&(this.trend.state !== 'long')&&(this.trend.direction != 'none')):
-	this.trend.direction = 'screw_up';this.trend.lastShortPrice = this.candle;break;
-	default:_.noop;this.trend.direction = 'none';
-	}
-},
 
 end: function(){log.info('|The End|');}
 
@@ -203,7 +192,6 @@ src:
 Extra Indicators : https://github.com/Gab0/gekko-extra-indicators Gabriel Araujo (@Gab0)
 
 Authors: _RSI _ADX (@TommieHansen)
-PingPong Function for sideways market(@RafaelMart) 
 (CC BY-SA 4.0:https://creativecommons.org/licenses/by-sa/4.0/)
 
 universalBit-dev:

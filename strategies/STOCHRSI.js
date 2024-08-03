@@ -112,10 +112,7 @@ method.check = async function(candle)
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
-    if (_.sumBy(rl, Number) > this.settings.rl)
-    {
-    this.advice('long');amazing();
-    }
+    if (_.sumBy(rl, Number) > this.settings.rl)this.advice();
 	
 	if((this.stochRSI < 30)&&(this.trend.direction !== 'low'))
 	{
@@ -130,7 +127,7 @@ method.check = async function(candle)
 	var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
 	log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');amazing();}
+    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();}
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
 	}
 	

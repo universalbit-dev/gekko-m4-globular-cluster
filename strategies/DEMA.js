@@ -49,7 +49,7 @@ init : function() {
   this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
 },
 
-update : function(candle) {_.noop},
+update : function(candle) {_.noop;},
 
 log : function(candle) {
 //general purpose log data
@@ -67,12 +67,12 @@ check : async function(candle) {
   case(this.diff  > this.settings.thresholds.up)&&(sma != 'undefined'):
   var buyprice = this.candle.high;
   var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();sequence();break;
 
   case(this.diff < this.settings.thresholds.down)&&(sma != 'undefined'):
   var sellprice = this.candle.low;
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();sequence();break;
   default: rl=[];
   }
   
