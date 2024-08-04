@@ -48,7 +48,6 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'conti
     this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
     //Date
     startTime = new Date();
-    //indicators
     //StopLoss as indicator
     this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     //DEMA
@@ -79,26 +78,16 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'conti
     
 switch(this.settings.method)
 {
-    case(this.settings.method == 'sgd'):
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+    case(this.settings.method == 'sgd'): this.trainer = new convnetjs.SGDTrainer(this.nn, 
       {learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay,l1_decay: this.settings.l1_decay});break;
-    
-    case(this.settings.method == 'adadelta'):
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+    case(this.settings.method == 'adadelta'): this.trainer = new convnetjs.SGDTrainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: this.settings.l2_decay});break;
-      
-    case(this.settings.method == 'adagrad'): 
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+    case(this.settings.method == 'adagrad'): this.trainer = new convnetjs.SGDTrainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,batch_size:8,l2_decay: this.settings.l2_decay});break;
-      
-    case(this.settings.method == 'nesterov'):    
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+    case(this.settings.method == 'nesterov'): this.trainer = new convnetjs.SGDTrainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay});break;
-    
-    case(this.settings.method == 'windowgrad'):
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+    case(this.settings.method == 'windowgrad'): this.trainer = new convnetjs.SGDTrainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: this.settings.l2_decay});break;
-    
     default:
       this.trainer = new convnetjs.Trainer(this.nn, 
       {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});      
@@ -152,8 +141,8 @@ log : function(candle) {
     });
 },
 
-makecomparison: function () {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','=','??','%',';',':'];
+comparisonoperators: function () {
+var operator = ['==','===','!=','!==','&&','>','<','>=','<=','?'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
@@ -163,7 +152,6 @@ var vol = new convnetjs.Vol(this.priceBuffer);
 var prediction = this.nn.forward(vol);
 return prediction.w[0];
 },
-
 
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : async function(candle) {
@@ -215,7 +203,7 @@ else if(this.stochRSI < this.settings.low) {
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
-      var currentPrice = candle.close;standardprice=dema;
+      var currentPrice = this.candle.close;standardprice=dema;
       var meanprediction = math.mean(prediction, currentPrice);
       var variance=math.variance(prediction,currentPrice);
       var covariance=math.std(prediction,currentPrice);
@@ -237,16 +225,16 @@ else if(this.stochRSI < this.settings.low) {
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && Alpha > this.settings.threshold_buy))
     {
     var buyprice = this.candle.low;
-    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
+    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');rl=[];}
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && Alpha < this.settings.threshold_sell && signalSell === true))
     {
     var sellprice = this.candle.high;
-    var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2)); 
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('sell');this.makecomparison();rl=[];}
+    var profit = rl.push(((this.candle.close - sellprice)/buyprice*100).toFixed(2));log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
+    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');rl=[];}
 
 //StopLoss as Reinforcement Learning
 if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
