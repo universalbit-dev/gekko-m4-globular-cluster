@@ -113,8 +113,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();rl=[];break;
-	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();rl=[];break;
+	case (rsi > 68 && rsi < 72):this.advice();makeoperators();rl=[];break;
+	case (rsi > 28 && rsi < 32):this.advice();makeoperators();rl=[];break;
 	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
@@ -160,7 +160,7 @@ switch (true) {
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('long');rl=[];makeoperators();}
+    if ((_.sumBy(rl, Number) > this.settings.rl)&&(this.trend.duration > 0)){this.advice('long');rl=[];makeoperators();}
     if (this.debug) log.info('uptrend');this.trend.duration++;
   },
 
@@ -175,9 +175,8 @@ switch (true) {
       log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
       this.trend.duration++;
     }
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('short');rl=[];makeoperators();}
+    if ((_.sumBy(rl, Number) > this.settings.rl)&&(this.trend.duration > 0)){this.advice('short');rl=[];makeoperators();}
     if (this.debug) log.info('downtrend');this.trend.duration++;
-
   },
 
 end: function(){log.info('|The End|');}
