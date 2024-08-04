@@ -112,10 +112,10 @@ switch(this.settings.method)
   },
 
   learn : function () {
-    for (let i = 0; i < _.size(this.priceBuffer) - 1; i++) {
-      let data = [this.priceBuffer[i]];
-      let current_price = [this.priceBuffer[i + 1]];
-      let vol = new convnetjs.Vol(data);
+    for (var i = 0; i < _.size(this.priceBuffer) - 1; i++) {
+      var data = [this.priceBuffer[i]];
+      var current_price = [this.priceBuffer[i + 1]];
+      var vol = new convnetjs.Vol(data);
       this.trainer.train(vol, current_price);
       this.predictionCount++;
     }
@@ -159,8 +159,8 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
 
 predictCandle : function() {
-let vol = new convnetjs.Vol(this.priceBuffer);
-let prediction = this.nn.forward(vol);
+var vol = new convnetjs.Vol(this.priceBuffer);
+var prediction = this.nn.forward(vol);
 return prediction.w[0];
 },
 
