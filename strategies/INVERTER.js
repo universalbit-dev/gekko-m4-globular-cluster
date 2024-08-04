@@ -24,7 +24,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];  
+   var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];
    for (var file of files){ 
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
@@ -113,8 +113,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();amazing();rl=[];break;
-	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();amazing();rl=[];break;
+	case (rsi > 68 && rsi < 72):this.advice('short');makeoperators();rl=[];break;
+	case (rsi > 28 && rsi < 32):this.advice('long');makeoperators();rl=[];break;
 	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
@@ -127,7 +127,6 @@ switch (true) {
 		case ((dx > 75)&&(dx < 100)):adxstrength='extremestrong';break;
 		default:_.noop;this.trend.direction ='none';adxstrength='weak';
 }
-	
 //https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
 	var diff = di_plus - di_minus;
 	if(diff > 0){this.trend.state = 'long';} else if(diff < 0 ){this.trend.state = 'short';}
@@ -187,7 +186,6 @@ end: function(){log.info('|The End|');}
 module.exports = method;
 /*
 
-src: 
 [Gab0](https://github.com/Gab0/) https://github.com/Gab0/gekko-adapted-strategies
 Extra Indicators : https://github.com/Gab0/gekko-extra-indicators Gabriel Araujo (@Gab0)
 
