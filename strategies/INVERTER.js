@@ -30,14 +30,6 @@ function AuxiliaryIndicators(){
        log.debug('added', auxiliaryindicators);
    }
  }
-
-function makeoperators() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);
-console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-}
-
-
 //INIT
 var method = {
  prevPrice : 0,prevAction :'none',
@@ -88,9 +80,11 @@ log : function(candle) {
     });
 },
 
-makeoperators: function() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
-var result = Math.floor(Math.random() * operator.length);console.log("\t\t\t\tcourtesy of... "+ operator[result]);},
+comparisonoperators: function () {
+var operator = ['==','===','!=','!==','&&','>','<','>=','<=','?'];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+},
 
 onTrade: function(event) {
     if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
@@ -113,8 +107,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice();makeoperators();rl=[];break;
-	case (rsi > 28 && rsi < 32):this.advice();makeoperators();rl=[];break;
+	case (rsi > 68 && rsi < 72):this.advice();comparisonoperators();rl=[];break;
+	case (rsi > 28 && rsi < 32):this.advice();comparisonoperators();rl=[];break;
 	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
@@ -160,7 +154,7 @@ switch (true) {
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');rl=[];makeoperators();}
+    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');rl=[];comparisonoperators();}
     if (this.debug) log.info('uptrend');
   },
 
@@ -174,7 +168,7 @@ switch (true) {
     var profit = rl.push(((this.candle.close - sellprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
-    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');rl=[];makeoperators();}
+    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');rl=[];comparisonoperators();}
     if (this.debug) log.info('downtrend');
   },
 
