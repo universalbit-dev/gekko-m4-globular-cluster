@@ -64,13 +64,14 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'conti
     var y = 1;
     y = fibonacci_sequence[y];this.y=y;
     var z = Math.floor(Math.random() * fibonacci_sequence.length);
+    if(z == 0){z = Math.floor(Math.random() * fibonacci_sequence.length);}
     z = fibonacci_sequence[z];this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:4, activation: 'relu'},
-      {type:'fc', num_neurons:4, activation:'sigmoid'},
+      {type:'conv', num_neurons:10946, activation: 'relu'},
+      {type:'fc', num_neurons:10946, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
@@ -235,15 +236,15 @@ else if(this.stochRSI < this.settings.low) {
     }
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && Alpha > this.settings.threshold_buy))
     {
-    var buyprice = candle.high;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice('buy');this.makecomparison();rl=[];}
+    var buyprice = this.candle.low;
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && Alpha < this.settings.threshold_sell && signalSell === true))
     {
-    var sellprice = candle.low;
-    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2)); 
+    var sellprice = this.candle.high;
+    var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2)); 
     if (_.sumBy(rl, Number) > this.settings.rl){this.advice('sell');this.makecomparison();rl=[];}
     }
 

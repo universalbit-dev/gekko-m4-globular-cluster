@@ -152,31 +152,30 @@ switch (true) {
 
 /* LONG  */
   long: function() {
-    if (this.trend.direction !== 'screw_up')
+    if (this.trend.direction !== 'screw_down')
     {
-    this.trend.duration=0;this.trend.bb='long';
-    this.trend.direction = 'screw_up';
-    var buyprice = this.candle.high;
+    this.trend.bb='long';
+    this.trend.direction = 'screw_down';
+    var buyprice = this.candle.low;
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if ((_.sumBy(rl, Number) > this.settings.rl)&&(this.trend.duration > 0)){this.advice('long');rl=[];makeoperators();}
-    if (this.debug) log.info('uptrend');this.trend.duration++;
+    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');rl=[];makeoperators();}
+    if (this.debug) log.info('uptrend');
   },
 
   /* SHORT  */
   short: function() {
-    if (this.trend.direction !== 'screw_down')
+    if (this.trend.direction !== 'screw_up')
     {
-      this.trend.duration=0;this.trend.bb='short';
-      this.trend.direction = 'screw_down';
-      var sellprice = this.candle.low;
-      var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-      log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
-      this.trend.duration++;
+    this.trend.bb='short';
+    this.trend.direction = 'screw_up';
+    var sellprice = this.candle.high;
+    var profit = rl.push(((this.candle.close - sellprice)/buyprice*100).toFixed(2));
+    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
-    if ((_.sumBy(rl, Number) > this.settings.rl)&&(this.trend.duration > 0)){this.advice('short');rl=[];makeoperators();}
-    if (this.debug) log.info('downtrend');this.trend.duration++;
+    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');rl=[];makeoperators();}
+    if (this.debug) log.info('downtrend');
   },
 
 end: function(){log.info('|The End|');}
