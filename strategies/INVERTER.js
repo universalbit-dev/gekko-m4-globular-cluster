@@ -107,8 +107,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice();comparisonoperators();rl=[];break;
-	case (rsi > 28 && rsi < 32):this.advice();comparisonoperators();rl=[];break;
+	case (rsi > 68 && rsi < 72):this.advice();this.comparisonoperators();rl=[];break;
+	case (rsi > 28 && rsi < 32):this.advice();this.comparisonoperators();rl=[];break;
 	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
