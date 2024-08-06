@@ -92,7 +92,7 @@ onTrade: function(event) {
     this.prevPrice = event.price;
   },
 
-check: async function(candle)
+check: function(candle)
 {
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
@@ -151,7 +151,7 @@ switch (true) {
     this.trend.bb='long';
     this.trend.direction = 'screw_down';
     var buyprice = this.candle.low;
-    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
     if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');rl=[];comparisonoperators();}
@@ -165,7 +165,7 @@ switch (true) {
     this.trend.bb='short';
     this.trend.direction = 'screw_up';
     var sellprice = this.candle.high;
-    var profit = rl.push(((this.candle.close - sellprice)/buyprice*100).toFixed(2));
+    var profit = rl.push(((candle.close - sellprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
     if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');rl=[];comparisonoperators();}
