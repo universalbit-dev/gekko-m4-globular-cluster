@@ -109,7 +109,7 @@ switch(this.settings.method)
       let current_price = [this.priceBuffer[i + 1]];
       let vol = new convnetjs.Vol(data);
       this.trainer.train(vol, current_price);
-      this.predictionCount++;
+      this.predictionCount++;this.brain();
     }
   },
   setNormalizeFactor : function(candle) {
@@ -189,8 +189,7 @@ else if(this.stochRSI < this.settings.low) {
 		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
-		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0)
-		{this.trend.adviced = true;}
+		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
 		else {this.advice();}
 	} else {
 		// trends must be on consecutive candles
@@ -234,11 +233,12 @@ else if(this.stochRSI < this.settings.low) {
     var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2)); 
     if (_.sumBy(rl, Number) > this.settings.rl){this.advice('sell');this.makecomparison();rl=[];}
     }
-//StopLoss as Reinforcement Learning
-if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-    {this.stoplossCounter++;log.info('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');this.advice('short');this.brain();}
-    log.info("Trend: ", this.trend.direction, " for ", this.trend.duration);sequence();
-  },
+//StopLoss and Reinforcement Learning
+if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action)) 
+    {this.stoplossCounter++;log.info('>>>>>>>>>> STOPLOSS triggered <<<<<<<<<<');this.advice('short');this.brain();this.sequence();}
+    
+}, /* */
+  
   end : function() {log.info('THE END');}
 };
 module.exports = method;
