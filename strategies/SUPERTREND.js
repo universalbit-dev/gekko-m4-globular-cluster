@@ -108,7 +108,7 @@ check : async function(candle) {
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
   if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();}
-  this.advice('long');
+  this.advice();
   this.bought = 1;log.debug("Buy at: ", candle.close);
   }
     
@@ -119,7 +119,7 @@ check : async function(candle) {
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
   if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();}
-  this.advice('short');
+  this.advice();
   this.bought = 0;log.debug("Sell at: ", candle.close);
   }
 
