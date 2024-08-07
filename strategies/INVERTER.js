@@ -154,7 +154,7 @@ switch (true) {
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
     
-    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('long');rl=[];comparisonoperators();}
+    if ((_.sumBy(rl, Number) > this.settings.rl))this.advice();rl=[];
     if (this.debug) log.info('uptrend');
   },
 
@@ -169,7 +169,7 @@ switch (true) {
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
     
-    if ((_.sumBy(rl, Number) > this.settings.rl)){this.advice('short');rl=[];comparisonoperators();}
+    if ((_.sumBy(rl, Number) > this.settings.rl))this.advice();rl=[];
     if (this.debug){log.info('downtrend');}
   },
 
