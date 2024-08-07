@@ -159,12 +159,12 @@ return prediction.w[0];
   var currentprice=this.tulipIndicators.dema.result.result;this.currentprice=currentprice;
   var standardprice=candle.close;
   this.RSIhistory.push(rsi);
-  if(_.size(this.RSIhistory) > this.interval)
-  //remove oldest RSI value
-  this.RSIhistory.shift();
-  this.lowestRSI = _.min(this.RSIhistory);
-  this.highestRSI = _.max(this.RSIhistory);
+  
+  if(_.size(this.RSIhistory) > 3){
+  this.RSIhistory.shift();this.lowestRSI = _.min(this.RSIhistory);this.highestRSI = _.max(this.RSIhistory);
   this.stochRSI = ((rsi - this.lowestRSI) / (this.highestRSI - this.lowestRSI)) * 100;
+  }
+  
   if(_.size(this.priceBuffer) > this.settings.price_buffer_len)
   //remove oldest priceBuffer value
   this.priceBuffer.shift();
@@ -224,14 +224,14 @@ else if(this.stochRSI < this.settings.low) {
     if ((this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction) && ('buy' !== this.prevAction && signal === false  && Alpha > this.settings.threshold_buy))
     {
     var buyprice = this.candle.high;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     if (_.sumBy(rl, Number) > this.settings.rl){this.advice('buy');this.makecomparison();rl=[];}
     }
     
     if ((this.trend.adviced && this.stochRSI !== 100 && 'sell' !== this.prevAction) && ('sell' !== this.prevAction && signal === true && Alpha < this.settings.threshold_sell && signalSell === true))
     {
     var sellprice = this.candle.low;
-    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2)); 
+    var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2)); 
     if (_.sumBy(rl, Number) > this.settings.rl){this.advice('sell');this.makecomparison();rl=[];}
     }
 //StopLoss as Reinforcement Learning
