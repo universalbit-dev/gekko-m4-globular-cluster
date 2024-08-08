@@ -29,8 +29,8 @@ function AuxiliaryIndicators(){
    }
  }
 
-function makeoperators() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+function makeoperator() {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
@@ -67,14 +67,15 @@ check : async function(candle) {
   case(this.diff  > this.settings.thresholds.up)&&(sma != 'undefined'):
   var buyprice = this.candle.high;
   var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();sequence();break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));break; 
 
   case(this.diff < this.settings.thresholds.down)&&(sma != 'undefined'):
   var sellprice = this.candle.low;
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number));rl=[];this.advice();sequence();break;
+  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));break;
   default: rl=[];
   }
+  if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
   
   log.debug('Calculated DEMA and SMA properties for candle:');
   log.debug('\t DEMA:', dema);

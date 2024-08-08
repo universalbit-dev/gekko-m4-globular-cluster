@@ -75,11 +75,11 @@ method.log = function(candle) {
     });
 }
 
-method.makeoperators= function() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+method.makeoperator= function() {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-}
+},
 
 method.onTrade = function(event) {if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}this.prevAction = event.action;this.prevPrice = event.price;}
 
@@ -109,10 +109,10 @@ method.check = async function(candle)
 	{
 	this.trend.adviced = true;
 	var buyprice = this.candle.high;
-    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
-    if (_.sumBy(rl, Number) > this.settings.rl)this.advice();
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
 	
 	if((this.stochRSI < 30)&&(this.trend.direction !== 'low'))
 	{
@@ -124,10 +124,10 @@ method.check = async function(candle)
 	{
 	this.trend.adviced = true;
 	var sellprice = this.candle.low;
-	var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
+	var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
 	log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();}
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
 	}
 	

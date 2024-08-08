@@ -99,6 +99,12 @@ switch(this.settings.method)
     this.hodl_threshold = this.settings.hodl_threshold || 1;
 },
   
+  makeoperators : function() {
+    var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
+    var result = Math.floor(Math.random() * operator.length);
+    console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+},
+  
   onTrade: function(event) {
     if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
     this.prevAction = event.action;this.prevPrice = event.price;
@@ -142,8 +148,8 @@ log : function(candle) {
     if (err) {return console.log(err);}
     });
 },
-makecomparison: function () {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','=','??','%',';',':'];
+makeoperator: function () {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
@@ -190,11 +196,11 @@ else if(this.stochRSI < this.settings.low) {
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
-		else {this.advice();}
+		else {this.advice();} /* */
 	} else {
 		// trends must be on consecutive candles
 		this.trend.duration = 0;
-		log.debug('In no trend');this.advice();this.learn();
+		log.debug('In no trend');this.advice();this.learn(); /* */
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
@@ -223,19 +229,19 @@ else if(this.stochRSI < this.settings.low) {
     if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction )&&((signal === false)  && (Alpha > this.settings.threshold_buy)))
     {
     var buyprice = this.candle.high;
-    var profit = rl.push(((this.price - buyprice)/buyprice*100).toFixed(2));
-    if (_.sumBy(rl, Number) > this.settings.rl)this.advice();this.makecomparison();rl=[];
+    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
     
     if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)))
     {
     var sellprice = this.candle.low;
-    var profit = rl.push(((this.price - sellprice)/sellprice*100).toFixed(2));
-    if (_.sumBy(rl, Number) > this.settings.rl)this.advice();this.makecomparison();rl=[];
+    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
 //StopLoss and Reinforcement Learning
-if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action)) 
-    {this.stoplossCounter++;log.info('>>>>>>> STOPLOSS triggered <<<<<<<');this.advice();this.brain();this.sequence();}
+if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action))
+{this.stoplossCounter++;log.info('>>>> STOPLOSS triggered <<<<');this.advice();this.brain();this.sequence();}
     
 }, /* */
   

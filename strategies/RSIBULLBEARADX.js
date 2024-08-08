@@ -28,9 +28,9 @@ function AuxiliaryIndicators(){
        log.debug('added', auxiliaryindicators);
    }
  }
- 
-function makeoperators() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','='];
+
+function makeoperator() {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
@@ -153,7 +153,7 @@ log : function(candle) {
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makeoperators();}
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     if (this.debug) log.info('Going long');
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
@@ -168,7 +168,7 @@ log : function(candle) {
       var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
       log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }  
-    if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makeoperators();}
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     if (this.debug) log.info('Going short');
     
 

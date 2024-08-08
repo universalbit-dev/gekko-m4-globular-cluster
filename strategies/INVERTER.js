@@ -25,7 +25,7 @@ function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
    var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];
-   for (var file of files){ 
+   for (var file of files){
        var auxiliaryindicators = require('./' + directory + file + extension);
        log.debug('added', auxiliaryindicators);
    }
@@ -75,8 +75,8 @@ log : function(candle) {
     });
 },
 
-comparisonoperators: function () {
-var operator = ['==','===','!=','!==','&&','>','<','>=','<=','?'];
+makeoperator : function() {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
@@ -102,8 +102,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice();this.comparisonoperators();rl=[];break;
-	case (rsi > 28 && rsi < 32):this.advice();this.comparisonoperators();rl=[];break;
+	case (rsi > 68 && rsi < 72):this.advice();this.makeoperator();rl=[];break;
+	case (rsi > 28 && rsi < 32):this.advice();this.makeoperator();rl=[];break;
 	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
@@ -154,8 +154,8 @@ switch (true) {
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
     
-    if ((_.sumBy(rl, Number) > this.settings.rl))this.advice();rl=[];
-    if (this.debug) log.info('uptrend');
+    if ((_.sumBy(rl, Number) > this.settings.rl)){return this.advice();rl=[];} /* */
+    if (this.debug){log.info('uptrend');}
   },
 
   /* SHORT  */
@@ -169,7 +169,7 @@ switch (true) {
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
     
-    if ((_.sumBy(rl, Number) > this.settings.rl))this.advice();rl=[];
+    if ((_.sumBy(rl, Number) > this.settings.rl)){return this.advice();rl=[];} /* */
     if (this.debug){log.info('downtrend');}
   },
 

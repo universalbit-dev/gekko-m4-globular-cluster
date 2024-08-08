@@ -22,8 +22,7 @@ async function amazing() {console.log('keep calm and make something of amazing')
 
 /* async check */
 var check = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function seqcheck() {await check;
-};
+async function seqcheck() {await check;};
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
@@ -35,8 +34,8 @@ function AuxiliaryIndicators(){
    }
  }
 
-function makecomparison() {
-var operator = ['==','===','!=','&&','<=','>=','>','<','||','=','??','%',';',':'];
+function makeoperator() {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
@@ -47,7 +46,7 @@ function onTrade(event) {
 }
 
 var method = {
-init : async function() {
+init : function() {
   AuxiliaryIndicators();
   startTime= new Date();
   this.name = 'SUPERTREND';
@@ -65,7 +64,7 @@ init : async function() {
   this.lastCandleClose = 0;
 },
 
-update : function(candle) {_.noop;seqcheck();},
+update : function(candle) {_.noop;},
 
 log : function(candle) {
 //general purpose log data
@@ -75,7 +74,7 @@ log : function(candle) {
     });
 },
 
-check : async function(candle) {
+check : function(candle) {
   var atrResult =  this.tulipIndicators.atr.result.result;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
@@ -107,8 +106,7 @@ check : async function(candle) {
   var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
-  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();}
-  this.advice();
+  if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
   this.bought = 1;log.debug("Buy at: ", candle.close);
   }
     
@@ -118,8 +116,7 @@ check : async function(candle) {
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
-  if (_.sumBy(rl, Number) > this.settings.rl){this.advice();rl=[];makecomparison();}
-  this.advice();
+  if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
   this.bought = 0;log.debug("Sell at: ", candle.close);
   }
 
@@ -131,7 +128,6 @@ check : async function(candle) {
     supertrend : this.supertrend.supertrend,
   };
   sequence();
-
 },
 
 end : function() {log.info('THE END');}
@@ -140,7 +136,6 @@ end : function() {log.info('THE END');}
 
 module.exports = method;
 
-// switch case universalbit-dev:https://github.com/universalbit-dev/gekko-m4-globular-cluster
-//
+// Switch case universalbit-dev:https://github.com/universalbit-dev/gekko-m4-globular-cluster
 // Downloaded from: https://github.com/xFFFFF/Gekko-Strategies
 // Source: https://github.com/Gab0/gekko-adapted-strategies
