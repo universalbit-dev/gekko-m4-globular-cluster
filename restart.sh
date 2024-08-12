@@ -4,8 +4,8 @@ for i in {1..1000}
 do
   pm2 restart all --update-env
   pm2 save
-  echo 'Restart after 50 minutes'
-  sleep 50m
+  echo 'Restart after 89 minutes'
+  sleep 89m
 done
 
 # sleep 5m  --- sleep 10m --- sleep 1h --- sleep 1d --- sleep 1y
