@@ -188,7 +188,7 @@ This indicator does not require any parameters.
 
 ### bbands
 
-More information about [Bollinger Bands](https://www.tradingview.com/wiki/Bollinger_Bands_(BB))
+More information about [Bollinger Bands](https://tulipindicators.org/bbands)
 
 Required parameters:
 
