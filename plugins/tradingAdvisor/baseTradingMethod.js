@@ -1,6 +1,6 @@
 const _ = require('../../core/lodash3');require('lodash-migrate');
 const util = require('../../core/util');
-const fs=require('node:fs');
+const fs=require('fs-extra');
 var config = util.getConfig();
 const dirs = util.dirs();
 const log = require('../../core/log');
@@ -39,7 +39,7 @@ var Base = function(settings) {
   this.tradingAdvisor = config.tradingAdvisor;
   this.priceValue = 'open';
   this.indicators = {};
-  this.asyncTick = true;
+  this.asyncTick = false;
   this.deferredTicks = [];
 
   this.propogatedAdvices = 0;
