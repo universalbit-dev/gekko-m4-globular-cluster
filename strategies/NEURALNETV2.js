@@ -29,9 +29,14 @@ var method = {
     z = fibonacci_sequence[z];this.z=z;
     this.SMMA = new SMMA(this.z);
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
+    //full connected layers
     let layers = [
       {type: 'input',out_sx: 1,out_sy: 1,out_depth: this.z},
       {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+            {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+                  {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+                        {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+                              {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
       {type: 'regression',num_neurons: 1}
     ];
 
