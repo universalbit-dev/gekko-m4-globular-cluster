@@ -27,7 +27,7 @@ var method = {
     var z = Math.floor(Math.random() * fibonacci_sequence.length);
     if (z == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
     z = fibonacci_sequence[z];this.z=z;
-    this.SMMA = new SMMA(z);
+    this.SMMA = new SMMA(this.z);
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
     let layers = [
       {type: 'input',out_sx: 1,out_sy: 1,out_depth: this.z},
