@@ -22,8 +22,7 @@ var DarvasHigh = 0;
 var DarvasLow = 0;
 
 method.update = function(candle) {
-  this.psar = this.tulipIndicators.ps.result.result;
-
+  psar = this.tulipIndicators.ps.result.result;this.psar=psar;
   if (candle.low < DarvasLow) {DarvasLow = candle.low;}
   if (candle.high < DarvasHigh) {DarvasHigh = candle.low;}
   this.candle_queue.push(candle);barscount++;
