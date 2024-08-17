@@ -67,6 +67,7 @@ this.addTulipIndicator('sma', 'sma', {optInTimePeriod :this.settings.sma });
 this.addTulipIndicator('adx', 'adx',{optInTimePeriod:this.settings.adx} );
 this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.dema} );
 this.addTulipIndicator('bbands', 'bbands', {optInNbStdDevs: this.settings.nb,optInNbStdDevs:this.settings.nb,optInTimePeriod:this.settings.bbands});
+this.addTulipIndicator('ps', 'psar', {optInAcceleration: this.settings.accel,optInMaximum: this.settings.max});
 ```
 
 #### Indicators result: 
@@ -76,6 +77,7 @@ sma=this.tulipIndicators.sma.result.result;
 adx=this.tulipIndicators.adx.result.result;
 dema=this.tulipIndicators.dema.result.result;
 bbands = this.tulipIndicators.bbands.result;
+psar = this.tulipIndicators.ps.result.result;
 ```
 
 #### Display results
@@ -85,6 +87,7 @@ if(sma != undefined)log.info('SMA:',sma);
 if(adx != undefined)log.info('ADX:',adx);
 if(dema != undefined)log.info('DEMA:',dema);
 if(bbands != undefined)log.info('BBANDS:',bbands);
+if(psar != undefined)log.info('PSAR:',psar);
 ```
 
 ##### Gekko Indicator Runner an incredible [porting](https://en.wikipedia.org/wiki/Porting) job
