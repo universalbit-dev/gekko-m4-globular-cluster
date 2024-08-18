@@ -44,6 +44,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'conti
     //indicators
     //StopLoss as indicator
     this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+    this.hodle_threshold = this.settings.hodle_threshold || 1;
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
@@ -96,7 +97,6 @@ switch(this.settings.method)
       this.trainer = new convnetjs.Trainer(this.nn, 
       {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});      
 }
-    this.hodl_threshold = this.settings.hodl_threshold || 1;
 },
   
   makeoperators : function() {
