@@ -19,13 +19,13 @@ var method = {
 
     this.name = 'NEURALNETV2';
     this.requiredHistory = config.tradingAdvisor.historySize;
-    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21'];//'610','987','1597','2584','4181'];
     var x = 1;
     x = fibonacci_sequence[x];this.x=x;
     var y = 1;
     y = fibonacci_sequence[y];this.y=y;
     var z = Math.floor(Math.random() * fibonacci_sequence.length);
-    if (z == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
+    if (z == 0){z=Math.floor(Math.random() * fibonacci_sequence.length);}
     z = fibonacci_sequence[z];this.z=z;
     this.SMMA = new SMMA(this.z);
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
