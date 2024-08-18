@@ -9,7 +9,7 @@ config.expects={candle:987}; //987 seconds
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NEURALNETV2'};
 config.NEURALNETV2={threshold_buy :1.0,threshold_sell :-1.0,learning_rate :0.01,
 momentum:0.1,decay:0.01,stoploss_enabled :true,stoploss_threshold :0.85,
-hodl_threshold:1,price_buffer_len:4181,min_predictions :144};
+hodl_threshold:1,price_buffer_len:4181,min_predictions :987};
 
 //Date.prototype.toISOString()
 //Previous Month
