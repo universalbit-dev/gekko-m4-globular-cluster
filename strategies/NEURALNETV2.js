@@ -19,7 +19,7 @@ var method = {
 
     this.name = 'NEURALNETV2';
     this.requiredHistory = config.tradingAdvisor.historySize;
-    fibonacci_sequence=['0','1','1','2','3','5','8','13','21'];//'610','987','1597','2584','4181'];
+    fibonacci_sequence=['0','1','1','2','3','5','8'];
     var x = 1;
     x = fibonacci_sequence[x];this.x=x;
     var y = 1;
