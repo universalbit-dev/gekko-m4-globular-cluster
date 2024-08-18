@@ -117,7 +117,7 @@ var method = {
   },
 
   check: function(candle) {
-    if (this.predictionCount > this.settings.min_predictions) { 
+    if (this.predictionCount > this.settings.min_predictions) { this.predictionCount=0;
       if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
       {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();} /* */
 
