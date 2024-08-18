@@ -54,7 +54,7 @@ var method = {
     this.hodle_threshold = this.settings.hodle_threshold || 1;
   },
 
-  learn: function() {
+  learn: function(candle) {
     for (let i = 0; i < this.priceBuffer.length - this.z; i++) {
       let data = this.priceBuffer[i];
       let current_price = this.priceBuffer[i + 1];
