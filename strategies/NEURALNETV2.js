@@ -11,7 +11,7 @@ var SMMA = require('./indicators/SMMA.js');
 
 var method = {
   priceBuffer: [],predictionCount: 0,batchsize: 1,
-  layer_neurons: 0,layer_activation: 'sigmoid',
+  layer_neurons: 0,layer_activation: 'sigmoid',layer2_activation:'relu',
   scale: 1,prevAction: 'wait',prevPrice: 0,stoplossCounter: 0,hodle_threshold: 1,
 
   //init
@@ -33,9 +33,9 @@ var method = {
     let layers = [
       {type: 'input',out_sx: 1,out_sy: 1,out_depth: this.z},
       {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
-            {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+            {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer2_activation},
                   {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
-                        {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+                        {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer2_activation},
                               {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
       {type: 'regression',num_neurons: 1}
     ];
