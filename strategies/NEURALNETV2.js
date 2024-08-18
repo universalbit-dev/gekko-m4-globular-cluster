@@ -54,7 +54,7 @@ var method = {
     this.hodle_threshold = this.settings.hodle_threshold || 1;
   },
 
-  learn: function(candle) {
+ learn: function(candle) {
     for (let i = 0; i < this.priceBuffer.length - this.z; i++) {
       let data = this.priceBuffer[i];
       let current_price = this.priceBuffer[i + 1];
@@ -63,7 +63,7 @@ var method = {
       let predicted_values = this.nn.forward(vol);
       let accuracymatch = predicted_values.w[0] === current_price.first;
       this.nn.backward(accuracymatch);
-      this.predictionCount++;
+      predictionCount=this.predictionCount++;
     }
   },
 
