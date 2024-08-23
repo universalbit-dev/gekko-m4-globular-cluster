@@ -54,7 +54,7 @@ this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFas
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
 
 //gekko indicators engine
-this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');
@@ -152,7 +152,8 @@ switch (true) {
     //trend moving up
     else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='long';}
     else _.noop;
-    if ('stoploss' == this.indicators.stoploss.action){sequence();}
+    if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+      {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();} /* */
 },
 
 /* LONG  */
