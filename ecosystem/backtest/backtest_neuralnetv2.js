@@ -6,7 +6,7 @@ config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:10};
 config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NEURALNETV2'};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:50,method:'NEURALNETV2'};
 config.NEURALNETV2={threshold_buy :0.3,threshold_sell :-0.3,learning_rate :0.01,
 momentum:0.1,decay:0.01,stoploss_enabled :true,stoploss_threshold :0.85,
 hodl_threshold:1,price_buffer_len:4181,min_predictions :987};
