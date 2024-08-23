@@ -7,7 +7,7 @@ config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SCALPER'};
-config.SCALPER={};
+config.SCALPER={stoploss_enabled:true,stoploss_threshold:0.85};
 
 //Date.prototype.toISOString()
 //Previous Month
