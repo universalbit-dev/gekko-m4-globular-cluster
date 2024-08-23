@@ -7,6 +7,10 @@
 ```
 cd ~/gekko-m4-globular-cluster
 ```
+
+##### Some strategies include Random Game of Chess
+* [chess.js](https://github.com/jhlywa/chess.js/) random game of chess
+
 ---
 * [INVERTER.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/INVERTER.js)
 ```
