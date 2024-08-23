@@ -25,7 +25,7 @@ node gekko.js -c ecosystem/backtest/backtest_rsibullbearadx.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_nn.js -b
 ```
-* [NEURALNETV2.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/NN.js)
+* [NEURALNETV2.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/NEURALNETV2.js)
 ```
 node gekko.js -c ecosystem/backtest/backtest_neuralnetv2.js -b
 ```
