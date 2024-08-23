@@ -6,23 +6,22 @@ var async = require('async');
 const fs = require('node:fs');
 var config = require('../core/util.js').getConfig();
 var settings = config.SUPERTREND;this.settings=settings;var rl=[];
+const { Chess } = require('chess.js')
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
 
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;
-};
+async function sequence() {await sequence;};
 
 /* async keep calm and make something of amazing */
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
-};
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
 /* async check */
-var check = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function seqcheck() {await check;};
+var checksequence = ms => new Promise(resolve => setTimeout(resolve,seqms));
+async function seqcheck() {await checksequence;};
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
@@ -40,11 +39,6 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
-function onTrade(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);log.debug('stoploss:',event.price);}
-    this.prevAction = event.action;this.prevPrice = event.price;
-}
-
 var method = {
 init : function() {
   AuxiliaryIndicators();
@@ -56,7 +50,7 @@ init : function() {
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
-  this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+  this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
   this.bought = 0;
 
   this.supertrend = {upperBandBasic : 0,lowerBandBasic : 0,upperBand : 0,lowerBand : 0,supertrend : 0,};
@@ -66,6 +60,12 @@ init : function() {
 
 update : function(candle) {_.noop;},
 
+onTrade: function(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+},
+
 log : function(candle) {
 //general purpose log data
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
@@ -74,7 +74,21 @@ log : function(candle) {
     });
 },
 
-check : function(candle) {
+ fxchess : function(){
+  const chess = new Chess()
+  while (!chess.isGameOver()) {
+  const moves = chess.moves()
+  const move = moves[Math.floor(Math.random() * moves.length)]
+  chess.move(move)
+}
+return console.log(chess.pgn())
+},
+
+check : async function(candle) {
+  if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+      {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();} /* */
+
+  log.debug("Random game of Chess");this.fxchess();
   var atrResult =  this.tulipIndicators.atr.result.result;
   this.supertrend.upperBandBasic = ((candle.high + candle.low) / 2) + (this.settings.bandFactor * atrResult);
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
@@ -117,7 +131,7 @@ check : function(candle) {
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
   if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
-  this.bought = 0;log.debug("Sell at: ", candle.close);
+  this.bought = 0;log.debug("Sell at: ", this.candle.close);
   }
 
   this.lastCandleClose = this.candle.close;
