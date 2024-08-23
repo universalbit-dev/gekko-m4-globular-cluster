@@ -6,7 +6,7 @@ config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
-config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8,rl:0.3};
+config.SUPERTREND={ATR:7,bandFactor:3,stoploss_enabled:true,stoploss_threshold :0.85,RSI:8,rl:0.2};
 
 //Date.prototype.toISOString()
 //Previous Month
