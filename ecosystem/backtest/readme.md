@@ -25,6 +25,11 @@ node gekko.js -c ecosystem/backtest/backtest_rsibullbearadx.js -b
 ```
 node gekko.js -c ecosystem/backtest/backtest_nn.js -b
 ```
+* [NEURALNETV2.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/NN.js)
+```
+node gekko.js -c ecosystem/backtest/backtest_neuralnetv2.js -b
+```
+
 * [SUPERTREND.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/SUPERTREND.js)
 ```
 node gekko.js -c ecosystem/backtest/backtest_supertrend.js -b
@@ -48,6 +53,7 @@ STOCHRSI | yes | [9]
 RSIBULLBEARADX | | 
 SUPERTREND | | 
 NN | [yes] | [7] 
+NEURALNETV2 |  |
 NOOP | | 
 DEMA | |  
 
