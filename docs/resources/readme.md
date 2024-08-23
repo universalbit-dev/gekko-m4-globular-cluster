@@ -16,6 +16,7 @@
 * ##### [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
 * ##### [Forum](https://forum.gekko.wizb.it/)
 * ##### [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
+* ##### [CCXT Wiki](https://github.com/ccxt/ccxt/wiki)
 * ##### [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
 * ##### [Legal context](https://www.europarl.europa.eu/cmsdata/150761/TAX3%20Study%20on%20cryptocurrencies%20and%20blockchain.pdf)
 * ##### [Learning Together](https://github.com/universalbit-dev/gekko-m4/tree/master/docs)
