@@ -7,6 +7,7 @@ const _ = require('../core/lodash');
 const fs = require('node:fs');
 var settings = config.INVERTER;this.settings=settings;
 var async = require('async');var rl=[];
+const { Chess } = require('chess.js')
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
@@ -87,8 +88,19 @@ onTrade: function(event) {
     this.prevPrice = event.price;
   },
 
+ fxchess : function(){
+  const chess = new Chess()
+  while (!chess.isGameOver()) {
+  const moves = chess.moves()
+  const move = moves[Math.floor(Math.random() * moves.length)]
+  chess.move(move)
+}
+return console.log(chess.pgn())
+},
+
 check: function(candle)
 {
+log.debug("Random game of Chess");this.fxchess();
 rsi=this.tulipIndicators.rsi.result.result;
 adx=this.tulipIndicators.adx.result.result;
 dx=this.tulipIndicators.dx.result.result;
@@ -102,8 +114,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):this.advice();this.makeoperator();rl=[];break;
-	case (rsi > 28 && rsi < 32):this.advice();this.makeoperator();rl=[];break;
+	case (rsi > 68 && rsi < 72):return this.advice();this.makeoperator();rl=[];break;
+	case (rsi > 28 && rsi < 32):return this.advice();this.makeoperator();rl=[];break;
 	case (rsi > 40 && rsi < 60):break;
 	default:_.noop;
 }
@@ -150,7 +162,7 @@ switch (true) {
     this.trend.ls='long';
     this.trend.direction = 'screw_down';
     var buyprice = this.candle.low;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
+    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
     
@@ -165,7 +177,7 @@ switch (true) {
     this.trend.ls='short';
     this.trend.direction = 'screw_up';
     var sellprice = this.candle.high;
-    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
+    var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
     
@@ -183,10 +195,9 @@ module.exports = method;
 Extra Indicators : https://github.com/Gab0/gekko-extra-indicators Gabriel Araujo (@Gab0)
 
 Authors: _RSI _ADX (@TommieHansen)
-(CC BY-SA 4.0:https://creativecommons.org/licenses/by-sa/4.0/)
+(CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/)
 
-universalBit-dev:
-https://github.com/universalbit-dev/gekko-m4-globular-cluster/
+universalBit-dev: https://github.com/universalbit-dev/gekko-m4-globular-cluster/
 
 INVERTER:
 Switch Case
