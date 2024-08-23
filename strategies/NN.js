@@ -7,6 +7,7 @@ var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 const _ = require('../core/lodash');
 var async = require('async');
+const { Chess } = require('chess.js');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
@@ -31,7 +32,7 @@ function AuxiliaryIndicators(){
    var auxiliaryindicators = require('./' + directory + file + extension);log.debug('added', auxiliaryindicators);}
 }
 var method = {
-predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'continue',hodl_threshold:1,
+predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait',hodl_threshold:1,
   init : function() {
     AuxiliaryIndicators();
     this.requiredHistory = this.settings.historySize;this.RSIhistory = [];
@@ -43,7 +44,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'conti
     startTime = new Date();
     //indicators
     //StopLoss as indicator
-    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
     this.hodle_threshold = this.settings.hodle_threshold || 1;
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
@@ -64,8 +65,8 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'conti
     
     const layers = [
       {type:'input', out_sx:x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:4, activation: 'relu'},
-      {type:'fc', num_neurons:4, activation:'sigmoid'},
+      {type:'conv', num_neurons:3, activation: 'relu'},
+      {type:'fc', num_neurons:3, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
@@ -78,19 +79,19 @@ switch(this.settings.method)
       {learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay,l1_decay: this.settings.l1_decay});break;
     
     case(this.settings.method == 'adadelta'):
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: this.settings.l2_decay});break;
       
     case(this.settings.method == 'adagrad'): 
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,batch_size:8,l2_decay: this.settings.l2_decay});break;
       
     case(this.settings.method == 'nesterov'):    
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay});break;
     
     case(this.settings.method == 'windowgrad'):
-      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: this.settings.l2_decay});break;
     
     default:
@@ -98,18 +99,14 @@ switch(this.settings.method)
       {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});      
 }
 },
-  
-  onTrade: function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;this.prevPrice = event.price;
-  },
+
   learn : function () {
     for (let i = 0; i < _.size(this.priceBuffer) - 1; i++) {
       let data = [this.priceBuffer[i]];
       let current_price = [this.priceBuffer[i + 1]];
       let vol = new convnetjs.Vol(data);
       this.trainer.train(vol, current_price);
-      this.predictionCount++;this.brain();
+      predictionCount=this.predictionCount++;this.brain();
     }
   },
   setNormalizeFactor : function(candle) {
@@ -130,11 +127,10 @@ switch(this.settings.method)
     brain.backward([reward]); // <-- learning magic happens here
     state[Math.floor(Math.random()*3)] += Math.random()*2-0.5;
     }
-    brain.epsilon_test_time = 0.0;
-    brain.learning = true;
+    brain.epsilon_test_time = 0.0;brain.learning = true;
   },
   
-update : function() {_.noop},
+update : function() {_.noop;},
 log : function(candle) {
 //general purpose log data
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
@@ -142,19 +138,39 @@ log : function(candle) {
     if (err) {return console.log(err);}
     });
 },
+
+onTrade: function(event) {
+    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
+    this.prevAction = event.action;
+    this.prevPrice = event.price;
+},
+
 makeoperator: function () {
 var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
+
 predictCandle : function() {
 let vol = new convnetjs.Vol(this.priceBuffer);
 let prediction = this.nn.forward(vol);
 return prediction.w[0];
 },
 
+fxchess : function(){
+  const chess = new Chess()
+  while (!chess.isGameOver()) {
+  const moves = chess.moves()
+  const move = moves[Math.floor(Math.random() * moves.length)]
+  chess.move(move)
+}
+return console.log(chess.pgn())
+},
   //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
-  check : function(candle) {
+  check : async function(candle) {
+  log.debug("Operator ");this.fxchess();
+  log.debug("Random game of Chess");this.fxchess();
+  this.predictionCount=0;
   rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
   var currentprice=this.tulipIndicators.dema.result.result;this.currentprice=currentprice;
   var standardprice=candle.close;
@@ -173,6 +189,7 @@ return prediction.w[0];
   for (i=0;i<3;++i)this.learn();
   while (this.settings.price_buffer_len < _.size(this.priceBuffer))
   this.priceBuffer.shift();
+  
 if(this.stochRSI > this.settings.high) {
 //new trend detected
 if(this.trend.direction !== 'high')
@@ -190,11 +207,11 @@ else if(this.stochRSI < this.settings.low) {
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
-		else {this.advice();} /* */
+		else {return this.advice();} /* */
 	} else {
 		// trends must be on consecutive candles
 		this.trend.duration = 0;
-		log.debug('In no trend');this.advice();this.learn(); /* */
+		log.debug('In no trend');return this.advice();this.learn(); /* */
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
@@ -234,8 +251,8 @@ else if(this.stochRSI < this.settings.low) {
     if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
 //StopLoss and Reinforcement Learning
-if (('buy' === this.prevAction) && ('stoploss' === this.indicators.stoploss.action))
-{this.stoplossCounter++;log.info('>>>> STOPLOSS triggered <<<<');this.advice();this.brain();this.sequence();}
+if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+    {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();this.brain();} /* */
     
 }, /* */
   
