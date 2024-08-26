@@ -8,7 +8,6 @@ async function exchange_kraken() {
     
 async function load_markets(){
     try {
-        // fetch orders
         let markets = await exchange_kraken();
         console.log(exchange_kraken.id);
     } catch (e) {
