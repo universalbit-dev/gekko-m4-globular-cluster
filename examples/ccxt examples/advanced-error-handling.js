@@ -1,4 +1,4 @@
-//async load markets and checkOrders - advanced error handling -
+//async load markets - advanced error handling -
 "use strict";
 const ccxt = require ('ccxt');
 async function exchange_kraken() {
@@ -6,10 +6,10 @@ async function exchange_kraken() {
     console.log (exchange.id,await exchange.loadMarkets())
 }
     
-async function checkOrders(){
+async function load_markets(){
     try {
         // fetch orders
-        let orders = await exchange_kraken();
+        let markets = await exchange_kraken();
         console.log(exchange_kraken.id);
     } catch (e) {
         if (e instanceof ccxt.DDoSProtection || e.message.includes ('ECONNRESET')) {console.log ('[DDoS Protection] ' + e.message);} 
@@ -21,4 +21,4 @@ async function checkOrders(){
     }
 }
 //
-setInterval(checkOrders, 10000); 
+setInterval(load_markets, 10000); 
