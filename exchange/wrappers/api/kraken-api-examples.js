@@ -4,12 +4,10 @@ const axios = require("axios");
 const crypto = require('crypto');
 const WebSocket = require('ws');
 
-
 const Main = async () => {
 
-//TODO: UPDATE WITH YOUR KEYS :)
-let apiPublicKey = "YOUR_PUBLIC_KEY"
-let apiPrivateKey = "YOUR_PRIVATE_KEY"
+let apiPublicKey = ""
+let apiPrivateKey = ""
 
 try {
 
