@@ -1,39 +1,24 @@
+//async load markets and checkOrders - advanced error handling -
 "use strict";
-
-const ccxt      = require ('../../ccxt.js');
-
-// instantiate the exchange
-let exchange = new ccxt.coinbasepro  ({
-    'apiKey': 'XXXXXXXXXXXXXX',
-    'secret': 'YYYYYYYYYYYYYY',
-});
-
+const ccxt = require ('ccxt');
+async function exchange_kraken() {
+    let exchange = new ccxt.kraken ({apiKey: 'YOUR_PUBLIC_API_KEY',secret: 'YOUR_SECRET_PRIVATE_KEY',})
+    console.log (exchange.id,await exchange.loadMarkets())
+}
+    
 async function checkOrders(){
     try {
         // fetch orders
-        let orders = await exchange.fetchOrders ('BTC/USDT');
-        // output the result
-        console.log (exchange.id, 'fetched orders', orders);
+        let orders = await exchange_kraken();
+        console.log(exchange_kraken.id);
     } catch (e) {
-        if (e instanceof ccxt.DDoSProtection || e.message.includes ('ECONNRESET')) {
-            console.log ('[DDoS Protection] ' + e.message);
-        } else if (e instanceof ccxt.RequestTimeout) {
-            console.log ('[Request Timeout] ' + e.message);
-        } else if (e instanceof ccxt.AuthenticationError) {
-            console.log ('[Authentication Error] ' + e.message);
-        } else if (e instanceof ccxt.ExchangeNotAvailable) {
-            console.log ('[Exchange Not Available Error] ' + e.message);
-        } else if (e instanceof ccxt.ExchangeError) {
-            console.log ('[Exchange Error] ' + e.message);
-        } else if (e instanceof ccxt.NetworkError) {
-            console.log ('[Network Error] ' + e.message);
-        } else {
-            // you can throw it if you want to stop the execution
-            // console.log ('[Exception ' + e.constructor.name + '] ' + e.message);
-            throw e;
-        }
+        if (e instanceof ccxt.DDoSProtection || e.message.includes ('ECONNRESET')) {console.log ('[DDoS Protection] ' + e.message);} 
+        else if (e instanceof ccxt.RequestTimeout) {console.log ('[Request Timeout] ' + e.message);} 
+        else if (e instanceof ccxt.AuthenticationError) {console.log ('[Authentication Error] ' + e.message);} 
+        else if (e instanceof ccxt.ExchangeNotAvailable) {console.log ('[Exchange Not Available Error] ' + e.message);} 
+        else if (e instanceof ccxt.ExchangeError) {console.log ('[Exchange Error] ' + e.message);} else if (e instanceof ccxt.NetworkError) {console.log ('[Network Error] ' + e.message);} 
+        else {throw e;}
     }
 }
-
-//  for demonstrational purposes, we use 1000 ms interval
-setInterval(checkOrders, 1000); 
+//
+setInterval(checkOrders, 10000); 
