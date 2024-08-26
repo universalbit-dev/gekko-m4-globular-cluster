@@ -1,3 +1,4 @@
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 async function QueryPublicEndpoint(endPointName, inputParameters) {
 let jsonData;
 const baseDomain = "https://api.kraken.com";
