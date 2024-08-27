@@ -1,14 +1,14 @@
-//async  fetchTicker- advanced error handling -
+//async  fetchOrderBook - advanced error handling -
 "use strict";
 const ccxt = require ('ccxt');
 async function exchange_kraken() {
     let exchange = new ccxt.kraken ({apiKey: 'YOUR_PUBLIC_API_KEY',secret: 'YOUR_SECRET_PRIVATE_KEY',})
-    console.log (exchange.id,await exchange.fetchTicker('LTC/BTC'))
+    console.log (exchange.id,await exchange.fetchOrderBook(exchange.symbols[0]))
 }
     
-async function fetch_ticker(){
+async function fetch_orderbook(){
     try {
-        let markets = await exchange_kraken();
+        let coin_exchange_platform = await exchange_kraken();
         console.log(exchange_kraken.id);
     } catch (e) {
         if (e instanceof ccxt.DDoSProtection || e.message.includes ('ECONNRESET')) {console.log ('[DDoS Protection] ' + e.message);} 
@@ -20,4 +20,4 @@ async function fetch_ticker(){
     }
 }
 
-fetch_ticker();
+fetch_orderbook();
