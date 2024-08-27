@@ -8,7 +8,7 @@ async function exchange_kraken() {
     
 async function fetch_markets(){
     try {
-        let markets = await exchange_kraken();
+        let coin_exchange_platform = await exchange_kraken();
         console.log(exchange_kraken.id);
     } catch (e) {
         if (e instanceof ccxt.DDoSProtection || e.message.includes ('ECONNRESET')) {console.log ('[DDoS Protection] ' + e.message);} 
