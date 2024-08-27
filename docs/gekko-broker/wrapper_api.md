@@ -20,3 +20,12 @@ NOTE: this API design might still have minor changes leading up to the release o
 - cancelOrder now requires a second parameter to be passed (that indicates whether the order was filled before it was canceled), see [details](https://github.com/askmike/gekko/commit/0e301f7d66e24ec97327f5f01380f691cc2d3725#diff-dbfe320ca090e208be32459d98fc11ed).
 - checkOrder now expects an object with a few properties to be returned, see [details](https://github.com/askmike/gekko/commit/e0d4a7362cd74b4b4f50759b1012ce489ea44a0c#diff-dbfe320ca090e208be32459d98fc11ed).
 - Error handling has gotten a lot more complex, with an updated error interface between a retry system (provided by Gekko) and the exchange wrapper. [Read more here](https://github.com/askmike/gekko/commit/e0d4a7362cd74b4b4f50759b1012ce489ea44a0c#diff-dbfe320ca090e208be32459d98fc11ed).
+
+---
+## [CCXT Library](https://www.npmjs.com/package/ccxt)
+#### Coin Exchange Platform
+* [Kraken](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/exchange/wrappers/api/kraken)
+
+#### CCXT EXAMPLES
+* [javascript examples](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/examples)
+
