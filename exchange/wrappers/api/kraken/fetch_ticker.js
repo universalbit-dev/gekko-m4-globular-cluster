@@ -1,12 +1,12 @@
-//async  fetchOrderBook - advanced error handling -
+//async  fetchTicker - advanced error handling -
 "use strict";
 const ccxt = require ('ccxt');
 async function exchange_kraken() {
     let exchange = new ccxt.kraken ({apiKey: 'YOUR_PUBLIC_API_KEY',secret: 'YOUR_SECRET_PRIVATE_KEY',})
-    console.log (exchange.id,await exchange.fetchOrderBook(exchange.symbols[0]))
+    console.log (exchange.id,await exchange.fetchTicker('LTC/BTC'))
 }
     
-async function fetch_orderbook(){
+async function fetch_ticker(){
     try {
         let coin_exchange_platform = await exchange_kraken();
         console.log(exchange_kraken.id);
@@ -20,4 +20,4 @@ async function fetch_orderbook(){
     }
 }
 
-fetch_orderbook();
+fetch_ticker();
