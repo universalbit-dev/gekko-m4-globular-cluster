@@ -43,7 +43,7 @@
   "node-fetch": "^3.3.2",
   "node-jq": "^6.0.1",
   "path": "^0.12.7",
-  "pm2": "^5.3.1",
+  "pm2": "^5.4.2",
   "promisify-node": "^0.5.0",
   "prompt-lite": "^0.1.1",
   "relieve": "^2.2.3",
@@ -78,6 +78,6 @@
   "doc": "docs"
  },
  "scripts": {
-  "postinstall": "npm link exchange"
+  "postinstall": "npm link exchange && npm link examples"
  }
 }
