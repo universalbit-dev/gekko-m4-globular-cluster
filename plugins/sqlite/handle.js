@@ -30,9 +30,9 @@ var cannotLoad = pluginHelper.cannotLoad(pluginMock);
 if (cannotLoad) util.die(cannotLoad);
 
 var plugins = require(util.dirs().gekko + 'plugins');
-var version = config.sqlite.version;
-var dbName = config.watch.exchange.toLowerCase() + '_' + '0.1' + '.db';
-var dir = config.sqlite.dataDirectory;
+var version = config.version;
+var dbName = config.exchange + '_' + '0.1' + '.db';
+var dir = config.dataDirectory;
 var fullPath = [dir, dbName].join('/');
 var mode = util.gekkoMode();
 if (mode === 'realtime' || mode === 'importer') {
@@ -43,14 +43,14 @@ if (mode === 'realtime' || mode === 'importer') {
   if (!fs.existsSync(fullPath))
     util.die(
       `History database does not exist for exchange ${
-        config.watch.exchange
+        config.exchange
       } at version ${version}.`
     );
 }
 
 module.exports = {
   initDB: () => {
-    var journalMode = config.sqlite.journalMode || 'PERSIST';
+    var journalMode = 'PERSIST';
     var syncMode = journalMode === 'WAL' ? 'NORMAL' : 'FULL';
     
     var db = new sqlite3.Database(fullPath);
