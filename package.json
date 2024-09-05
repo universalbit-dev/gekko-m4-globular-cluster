@@ -1,7 +1,7 @@
 {
- "name": "gekko-m4",
+ "name": "gekko-m4-globular-cluster",
  "version": "0.6.8-m4",
- "description": "Gekko-M4",
+ "description": "NGC 6121",
  "main": "gekko.js",
  "repository": {
   "type": "git",
@@ -11,17 +11,12 @@
  "author": "Mike van Rossum <mike@mvr.me>",
  "license": "MIT",
  "dependencies": {
-  "@inquirer/prompts": "^4.1.0",
-  "@ungap/url-search-params": "^0.2.2",
   "async": "^3.2.5",
   "axios": "^1.6.8",
   "bitcoin": "^3.0.3",
-  "ccxt": "^4.3.86",
+  "ccxt": "^4.3.88",
   "chalk": "^5.3.0",
   "chess.js": "^1.0.0-beta.6",
-  "child-process": "^1.0.2",
-  "cjs-module": "^1.5.0",
-  "co-fs": "^1.2.0",
   "commander": "^6.2.0",
   "core-js": "^3.36.0",
   "crypto-js": "^4.2.0",
@@ -40,13 +35,14 @@
   "lodash-migrate": "^0.3.16",
   "mathjs": "^12.4.0",
   "moment": "^2.29.4",
-  "node-fetch": "^3.3.2",
-  "node-jq": "^6.0.1",
+  "node-fetch": "^2.7.0",
+  "ololog": "^1.1.175",
   "path": "^0.12.7",
-  "pm2": "^5.4.2",
   "promisify-node": "^0.5.0",
   "prompt-lite": "^0.1.1",
+  "qs": "^6.13.0",
   "relieve": "^2.2.3",
+  "request": "^2.88.2",
   "retry": "^0.13.1",
   "semver": "^7.6.0",
   "sqlite": "^5.1.1",
@@ -63,21 +59,24 @@
  },
  "keywords": [
   "gekko-m4",
-  "watching",
-  "papertrade",
-  "trade",
-  "backtest",
-  "educational",
+  "bitcoin",
+  "blockchain",
+  "sustainable",
+  "personal",
+  "finance",
+  "globular",
+  "cluster",
+  "NGC 6121",
   "cryptocurrency"
  ],
  "bugs": {
   "url": "https://github.com/universalbit-dev/gekko-m4-globular-cluster/issues"
  },
- "homepage": "https://universalbit-dev.github.io/gekko-m4-globular-cluster/",
+ "homepage": "https://github.com/universalbit-dev/unbt.github.io",
  "directories": {
   "doc": "docs"
  },
  "scripts": {
-  "postinstall": "npm link exchange && npm link examples"
+  "postinstall": "npm link exchange"
  }
 }
