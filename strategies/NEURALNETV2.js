@@ -136,12 +136,12 @@ return console.log(chess.pgn())
       if ('sell' !== this.prevAction && signal === true && meanAlpha < this.settings.threshold_sell && signalSell) {return this.advice();} /* */
       
       switch(Alpha.length != 0){
-      case (min < math.min(Alpha)):return this.advice();break;
-      case (min <= math.min(Alpha)):return this.advice();break; /* */
-      case (max > math.max(Alpha)):return this.advice();break;
-      case (max >= math.max(Alpha)):return this.advice();break; /* */
-      case (median < math.median(Alpha)):return this.advice();break;
-      case (median > math.median(Alpha)):return this.advice();break;
+      case (min < math.min(Alpha)):this.advice();break;
+      case (min <= math.min(Alpha)):this.advice();break; /* */
+      case (max > math.max(Alpha)):this.advice();break;
+      case (max >= math.max(Alpha)):this.advice();break; /* */
+      case (median < math.median(Alpha)):this.advice();break;
+      case (median > math.median(Alpha)):this.advice();break;
       default: min;max;median;
       }
     }
