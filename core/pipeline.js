@@ -132,7 +132,7 @@ var pipeline = (settings) => {
   }
 
   var prepareMarket = function(next) {
-    if(mode === 'backtest' && config.backtest.daterange === 'scan')
+    if(mode === 'backtest' && config.daterange === 'scan')
       require(dirs.core + 'prepareDateRange')(next);
     else
       next();
