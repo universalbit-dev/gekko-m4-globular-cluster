@@ -216,10 +216,10 @@ else if(this.stochRSI < this.settings.low) {
     if(this.predictionCount > this.settings.min_predictions)
     {
       var prediction = this.predictCandle() * this.settings.scale;
-      var currentPrice = candle.close;standardprice=dema;
-      var meanprediction = math.mean(prediction, currentPrice);
-      var variance=math.variance(prediction,currentPrice);
-      var covariance=math.std(prediction,currentPrice);
+      var standardprice=dema;
+      var meanprediction = math.mean(prediction, this.currentprice);
+      var variance= math.variance(prediction,this.currentprice);
+      var covariance= math.std(prediction,this.currentprice);
       var Alpha = (meanprediction - currentPrice) / currentPrice * 100;/* */
       var Beta = (covariance / variance);
       
