@@ -15,7 +15,7 @@
 * ##### [Gekko-Quasar-UI](https://github.com/H256/gekko-quasar-ui)
 * ##### [Gekko WebSite](https://gekko.wizb.it/docs/installation/installing_gekko.html)
 * ##### [Forum](https://forum.gekko.wizb.it/)
-* ##### [Strategies](https://github.com/xFFFFF/Gekko-Strategies)
+* ##### [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies)
 * ##### [CCXT Wiki](https://github.com/ccxt/ccxt/wiki)
 * ##### [CCXT CLI (Command-Line Interface)](https://github.com/ccxt/ccxt/wiki/CLI)
 * ##### [Extra-Indicators](https://github.com/Gab0/gekko-extra-indicators)
@@ -25,6 +25,6 @@
 * ##### [Perché gestiamo MALE il denaro?](https://www.youtube.com/watch?v=Y63fReR8vYA) con lo psichiatra @ValerioRosso
 * ##### [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) --- [Gekko may also refer to:](https://en.wikipedia.org/wiki/Gekko_(disambiguation))
 * ##### [BTC Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
-* ##### [Mining](https://github.com/universalbit-dev/CityGenerator/blob/master/workers/README.md)
-* ##### [Buy-Sell](https://github.com/universalbit-dev/gekko-m4/edit/master/README.md)
+* ##### [Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)
+* ##### [Buy-Sell](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/README.md)
 
