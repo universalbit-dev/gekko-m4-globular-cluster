@@ -80,14 +80,6 @@ npm install tulind --build-from-source
 * [gekko_indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/gekko_indicators.md)
 ---
 
----
-#### HTTPS server OR nothing.
-* #### [...before run xor_ui.config.js](https://github.com/universalbit-dev/gekko-m4/tree/master/ssl)
-```bash
-pm2 start xor_ui.config.js 
-```
-
-
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 * ##### [Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)
 
