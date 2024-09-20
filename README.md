@@ -35,7 +35,7 @@ npm i pm2 -g
 ---
 ### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 
-#### import exchange data [import mode]
+#### import exchange data [import mode] -- [work in progress ccxt module](https://mastodon.social/@UniversalBit/113005114572853788) --
 ```bash
 pm2 start import.config.js 
 ```
