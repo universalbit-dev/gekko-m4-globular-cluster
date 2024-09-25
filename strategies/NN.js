@@ -220,11 +220,11 @@ else if(this.stochRSI < this.settings.low) {
       var meanprediction = math.mean(prediction, this.currentprice);
       var variance= math.variance(prediction,this.currentprice);
       var covariance= math.std(prediction,this.currentprice);
-      var Alpha = (meanprediction - currentPrice) / currentPrice * 100;/* */
+      var Alpha = (meanprediction - this.currentprice) / this.currentprice * 100;/* */
       var Beta = (covariance / variance);
       
       var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
-      var signal = meanprediction < currentPrice;
+      var signal = meanprediction < this.currentprice;
     log.info('calculated NN properties for candle:');
     log.info('Price:', this.candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
