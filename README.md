@@ -6,7 +6,7 @@
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-globular-cluster.png" width="auto"></img>   
 
 ## Gekko-m4-globular-cluster
-Let's naturalize the problem with the fibonacci sequence 
+Let's naturalize the cryptocurrency
 
 Fibonacci Sequence: ['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 
@@ -68,7 +68,7 @@ npm install tulind --build-from-source
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 * ##### [Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)
 * ##### [NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
-* ##### [Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/mining)
+* ##### [Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)
 
 
 
