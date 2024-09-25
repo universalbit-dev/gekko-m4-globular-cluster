@@ -14,6 +14,7 @@ var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
 var settings = config.NN;this.settings=settings;var rl=[];
+var cov = require( 'compute-covariance' );
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
@@ -172,8 +173,6 @@ return console.log(chess.pgn())
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
   rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
-  var currentprice=this.tulipIndicators.dema.result.result;
-  var standardprice=candle.close;
   this.RSIhistory.push(rsi);
   
   if(_.size(this.RSIhistory) > 3){
@@ -215,15 +214,14 @@ else if(this.stochRSI < this.settings.low) {
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
+      var standardprice=candle.close;
       var currentprice=this.tulipIndicators.dema.result.result;
-      var prediction = this.predictCandle() * 1;
-      var standardprice=dema;
-      var meanprediction = math.mean(prediction, currentprice);
-      var variance= math.variance(prediction,currentprice);
-      var covariance= math.std(prediction,currentprice);
+      var prediction = this.predictCandle();
+      var meanprediction = math.mean([prediction, currentprice]);
+      var variance= math.variance([prediction,currentprice]);
+      var covariance = cov( [prediction,currentprice] );
       var Alpha = (meanprediction - currentprice) / currentprice * 100;/* */
       var Beta = (covariance / variance);
-      
       var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
       var signal = meanprediction < currentprice;
     log.info('calculated NN properties for candle:');
@@ -260,3 +258,4 @@ if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' ==
   end : function() {log.info('THE END');}
 };
 module.exports = method;
+
