@@ -167,7 +167,6 @@ fxchess : function(){
 }
 return console.log(chess.pgn())
 },
-  //https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
   check : async function(candle) {
   log.debug("Operator ");this.fxchess();
   log.debug("Random game of Chess");this.fxchess();
@@ -214,6 +213,11 @@ else if(this.stochRSI < this.settings.low) {
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
+    /*
+      https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
+      α / Alpha	Performance Analysis Excess return relative to benchmark Higher is better; indicates outperformance
+      β / Beta	Risk Assessment	Volatility relative to market	1 = market risk, >1 = higher risk, <1 = lower risk
+    */
       var standardprice=candle.close;
       var currentprice=this.tulipIndicators.dema.result.result;
       var prediction = this.predictCandle();
@@ -258,4 +262,3 @@ if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' ==
   end : function() {log.info('THE END');}
 };
 module.exports = method;
-
