@@ -152,8 +152,8 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
 
 predictCandle : function() {
-let vol = new convnetjs.Vol(this.priceBuffer);
-let prediction = this.nn.forward(vol);
+var vol = new convnetjs.Vol(this.priceBuffer);
+var prediction = this.nn.forward(vol);
 return prediction.w[0];
 },
 
@@ -215,13 +215,13 @@ else if(this.stochRSI < this.settings.low) {
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
-      var prediction = this.predictCandle() * this.settings.scale;
+      var prediction = this.predictCandle() * 1;
       var standardprice=dema;
       var meanprediction = math.mean(prediction, this.currentprice);
       var variance= math.variance(prediction,this.currentprice);
       var covariance= math.std(prediction,this.currentprice);
       var Alpha = (meanprediction - this.currentprice) / this.currentprice * 100;/* */
-      var Beta = (covariance / variance);
+      var Beta = (covariance / variance); //beta value to be reviewed
       
       var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
       var signal = meanprediction < this.currentprice;
