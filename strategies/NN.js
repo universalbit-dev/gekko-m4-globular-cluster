@@ -172,7 +172,7 @@ return console.log(chess.pgn())
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
   rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
-  var currentprice=this.tulipIndicators.dema.result.result;this.currentprice=currentprice;
+  var currentprice=this.tulipIndicators.dema.result.result;
   var standardprice=candle.close;
   this.RSIhistory.push(rsi);
   
@@ -215,16 +215,17 @@ else if(this.stochRSI < this.settings.low) {
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
+      var currentprice=this.tulipIndicators.dema.result.result;
       var prediction = this.predictCandle() * 1;
       var standardprice=dema;
-      var meanprediction = math.mean(prediction, this.currentprice);
-      var variance= math.variance(prediction,this.currentprice);
-      var covariance= math.std(prediction,this.currentprice);
-      var Alpha = (meanprediction - this.currentprice) / this.currentprice * 100;/* */
-      var Beta = (covariance / variance); //beta value to be reviewed
+      var meanprediction = math.mean(prediction, currentprice);
+      var variance= math.variance(prediction,currentprice);
+      var covariance= math.std(prediction,currentprice);
+      var Alpha = (meanprediction - currentprice) / currentprice * 100;/* */
+      var Beta = (covariance / variance);
       
       var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
-      var signal = meanprediction < this.currentprice;
+      var signal = meanprediction < currentprice;
     log.info('calculated NN properties for candle:');
     log.info('Price:', this.candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
