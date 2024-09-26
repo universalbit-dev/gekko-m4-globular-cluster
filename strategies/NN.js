@@ -244,7 +244,7 @@ else if(this.stochRSI < this.settings.low) {
     {
     var buyprice = this.candle.low;
     var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
-    if (_.sumBy(rl, Number) < this.settings.rl){return this.advice();rl=[];} /* */
+    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
     
     if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)))
