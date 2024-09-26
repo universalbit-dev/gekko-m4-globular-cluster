@@ -235,19 +235,20 @@ else if(this.stochRSI < this.settings.low) {
     log.info("Alpha:" + Alpha);
     log.info("Beta:"+ Beta);
     log.info("Alpha:" + Alpha.toFixed(2) + "%");
-    log.info("Beta:"+ Beta.toFixed(2) + "%");
+    if (Beta < 1)log.info("Beta:"+ Beta + "< 1");
+    else if(Beta > 1)log.info("Beta:"+ Beta + "> 1");
+    log.info("Beta:"+ Beta + "%");
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
 
     }
-    if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction )&&((signal === false)  && (Alpha > this.settings.threshold_buy)))
+    if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction )&&((signal === false)&&(Alpha > this.settings.threshold_buy)&&(Beta < 1)))
     {
     var buyprice = this.candle.low;
     var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
-    
-    if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)))
+    if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)&&(Beta < 1)))
     {
     var sellprice = this.candle.high;
     var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
