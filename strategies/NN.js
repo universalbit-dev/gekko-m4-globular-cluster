@@ -224,7 +224,7 @@ else if(this.stochRSI < this.settings.low) {
       var meanprediction = math.mean([prediction, currentprice]);
       var variance= math.variance([prediction,currentprice]);
       var covariance = cov( [prediction,currentprice] );
-      var Alpha = (meanprediction - currentprice) / currentprice * 100;/* */
+      var Alpha = (meanprediction - currentprice) / currentprice * 100; /* */
       var Beta = (covariance / variance);
       var signalSell = ((standardprice > this.prevPrice) || (standardprice < (this.prevPrice * this.settings.hodl_threshold)));
       var signal = meanprediction < currentprice;
@@ -242,14 +242,14 @@ else if(this.stochRSI < this.settings.low) {
     }
     if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction )&&((signal === false)  && (Alpha > this.settings.threshold_buy)))
     {
-    var buyprice = this.candle.high;
+    var buyprice = this.candle.low;
     var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
     
     if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)))
     {
-    var sellprice = this.candle.low;
+    var sellprice = this.candle.high;
     var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
     if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
     }
