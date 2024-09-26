@@ -232,12 +232,10 @@ else if(this.stochRSI < this.settings.low) {
     log.info('Price:', this.candle.close);
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("NeuralNet candle hypothesis:"+ prediction);
-    log.info("Alpha:" + Alpha);
-    log.info("Beta:"+ Beta);
     log.info("Alpha:" + Alpha.toFixed(2) + "%");
     if (Beta < 1)log.info("Beta:"+ Beta + "< 1");
     else if(Beta > 1)log.info("Beta:"+ Beta + "> 1");
-    log.info("Beta:"+ Beta + "%");
+    else log.info("Beta:"+ Beta );
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
 
