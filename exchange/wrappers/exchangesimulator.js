@@ -1,4 +1,4 @@
-// Fake exchanges: used to test purposes to develop Gekko-M4 (works without internet).
+//exchanges simulator: used to test  (works without internet).
 const _ = require('lodash');
 const moment = require('moment');
 
