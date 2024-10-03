@@ -233,12 +233,10 @@ else if(this.stochRSI < this.settings.low) {
     log.info("NeuralNet layer: " + this.x +" x "+ this.y +" x "+ this.z + " "+ "all volumes are 3D");
     log.info("NeuralNet candle hypothesis:"+ prediction);
     log.info("Alpha:" + Alpha.toFixed(2) + "%");
-    if (Beta < 1)log.info("Beta:"+ Beta + "< 1");
-    else if(Beta > 1)log.info("Beta:"+ Beta + "> 1");
-    else log.info("Beta:"+ Beta );
+    log.info("Beta:" + Beta)
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
-
+    if(Beta < 1)this.advice();
     }
     if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction )&&((signal === false)&&(Alpha > this.settings.threshold_buy)&&(Beta < 1)))
     {
@@ -261,3 +259,4 @@ if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' ==
   end : function() {log.info('THE END');}
 };
 module.exports = method;
+
