@@ -142,7 +142,7 @@ return console.log(chess.pgn())
       case (max >= math.max(Alpha)):this.advice();break; /* */
       case (median < math.median(Alpha)):this.advice();break;
       case (median > math.median(Alpha)):this.advice();break;
-      default: min;max;median;
+      default: log.info();
       }
     }
   },
