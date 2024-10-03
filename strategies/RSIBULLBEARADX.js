@@ -112,7 +112,7 @@ log : function(candle) {
 },
 
   /* CHECK */
-  check: async function(candle) {
+  check: function(candle) {
     // get all indicators
     let ind = this.tulipIndicators,
     maSlow =  this.tulipIndicators.maSlow.result.result,
@@ -146,29 +146,29 @@ log : function(candle) {
 
   /* LONG  */
   long: function() {
-    if (this.trend.direction !== 'up')
+    if (this.trend.direction !== 'down')
     {
-    this.resetTrend();this.trend.direction = 'up';
-    var buyprice = this.candle.high;
+    this.resetTrend();this.trend.direction = 'down';
+    var buyprice = this.candle.low;
     var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
-    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
+    this.advice();rl=[]; /* */
     if (this.debug) log.info('Going long');
     if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
   },
 
   /* SHORT  */
   short: function() {
-    if (this.trend.direction !== 'down')
+    if (this.trend.direction !== 'up')
     {
       this.resetTrend();
-      this.trend.direction = 'down';
-      var sellprice = this.candle.low;
+      this.trend.direction = 'up';
+      var sellprice = this.candle.high;
       var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
       log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
-    }  
-    if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
+    }
+    this.advice();rl=[]; /* */
     if (this.debug) log.info('Going short');
     
 
