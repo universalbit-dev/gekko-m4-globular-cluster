@@ -108,7 +108,7 @@ method.check = async function(candle)
 	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI !=100)
 	{
 	this.trend.adviced = true;
-	var buyprice = this.candle.high;
+	var buyprice = this.candle.low;
     var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
     }
@@ -123,7 +123,7 @@ method.check = async function(candle)
 	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI != 0)
 	{
 	this.trend.adviced = true;
-	var sellprice = this.candle.low;
+	var sellprice = this.candle.high;
 	var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
 	log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
 	}
