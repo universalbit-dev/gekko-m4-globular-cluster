@@ -116,7 +116,7 @@ check : async function(candle) {
 
   if(this.candle.close > this.supertrend.supertrend && this.bought == 0)
   {
-  var buyprice = this.candle.high;
+  var buyprice = this.candle.low;
   var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
@@ -126,7 +126,7 @@ check : async function(candle) {
     
   else if(this.candle.close < this.supertrend.supertrend && this.bought == 1)
   {
-  var sellprice = this.candle.low;
+  var sellprice = this.candle.high;
   var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
   log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
   
