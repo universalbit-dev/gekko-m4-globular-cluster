@@ -21,14 +21,15 @@ var to = moment.utc(daterange.to).startOf('minute');
 var from = moment.utc(daterange.from).startOf('minute');
 var toUnix = to.unix();
 
-if(to <= from)
-  util.die('This daterange does not make sense.')
-
-if(!from.isValid())
-  util.die('invalid `from`');
-
-if(!to.isValid())
-  util.die('invalid `to`');
+switch(true){
+case(to <= from):
+util.die('This daterange does not make sense.');break;
+case(!from.isValid()):
+util.die('invalid `from`');break;
+case(!to.isValid()):
+util.die('invalid `to`');break;
+default: console.info();
+}
 
 let iterator = {
   from: from.clone(),
