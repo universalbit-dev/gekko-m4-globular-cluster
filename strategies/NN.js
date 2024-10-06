@@ -5,7 +5,7 @@ const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
-const _ = require('../core/lodash');
+const _ = require('../core/lodash.js');
 var async = require('async');
 const { Chess } = require('chess.js');
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
@@ -13,18 +13,20 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
 var fs = require('node:fs');
-var settings = config.NN;this.settings=settings;var rl=[];
-var cov = require( 'compute-covariance' );
+var settings = config.NN;this.settings=settings;var chess_universe = [];
+var cov = require('compute-covariance');
+
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;
-};
+async function sequence() {await sequence;};
+
 /* async keep calm and make something of amazing */
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
 };
+
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
@@ -119,7 +121,7 @@ switch(this.settings.method)
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   
   brain: function(){
-    var brain = new deepqlearn.Brain(this.x, this.z);
+    var brain = new deepqlearn.Brain(this.x,this.z);
     var state = [Math.random(), Math.random(), Math.random()];
     for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
     {
@@ -165,10 +167,12 @@ fxchess : function(){
   const move = moves[Math.floor(Math.random() * moves.length)]
   chess.move(move)
 }
+chess_universe.push([chess.pgn()]); /* */
 return console.log(chess.pgn())
+//return console.log(chess_universe)
 },
   check : async function(candle) {
-  log.debug("Operator ");this.fxchess();
+  //log.debug("Operator ");this.fxchess();
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
   rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
@@ -236,18 +240,16 @@ else if(this.stochRSI < this.settings.low) {
     log.info("Beta:" + Beta)
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
-    if(Beta < 1)this.advice();
+    if(Beta < 1){this.advice();}
     }
-    if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction )&&((signal === false)&&(Alpha > this.settings.threshold_buy)))
+    if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction)&&((signal === false)&&(Alpha > this.settings.threshold_buy)))
     {
     var buyprice = this.candle.low;
-    var profit = rl.push(((candle.close - buyprice)/buyprice*100).toFixed(2));
     this.advice();/* */
     }
     if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)))
     {
     var sellprice = this.candle.high;
-    var profit = rl.push(((candle.close - sellprice)/sellprice*100).toFixed(2));
     this.advice();/* */
     }
 //StopLoss and Reinforcement Learning
