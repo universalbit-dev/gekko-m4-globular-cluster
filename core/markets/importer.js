@@ -1,4 +1,4 @@
-const _ = require('../lodash3');require('lodash-migrate');
+const _ = require('../lodash');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();

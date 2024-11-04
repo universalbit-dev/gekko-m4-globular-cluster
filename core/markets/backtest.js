@@ -1,4 +1,4 @@
-const _ = require('../lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
@@ -26,7 +26,7 @@ if(!to.isValid())
   util.die('invalid `to`');
 
 var Market = function() {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this,_.functions(Market.prototype));
   this.pushing = false;
   this.ended = false;
   this.closed = false;

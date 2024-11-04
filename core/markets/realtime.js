@@ -1,4 +1,3 @@
-const _ = require('../lodash3');require('lodash-migrate');
 var util = require('../util');
 var dirs = util.dirs();
 var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
@@ -6,14 +5,13 @@ var config = util.getConfig();
 var slug = config.watch.exchange;
 var exchange = exchangeChecker.getExchangeCapabilities(slug);
 
-if(!exchange)
-  util.die(`Unsupported exchange: ${slug}`)
+
+if(!exchange) util.die(`Unsupported exchange: ${slug}`)
 
 var error = exchangeChecker.cantMonitor(config.watch);
-if(error)
-  util.die(error, true);
 
-module.exports = require(dirs.dlna + 'dlna');
+if(error)util.die(error, true);
+module.exports = require('../dlna/dlna');
 
 /*
 The MIT License (MIT)
