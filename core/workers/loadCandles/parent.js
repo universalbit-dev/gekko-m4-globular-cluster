@@ -1,25 +1,21 @@
-const _ = require('lodash');
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const EventEmitter = require('node:events');
+class Child extends EventEmitter {};
+const child = new Child();
 
-const fork = require('node:child_process').fork;
+const util = require('../../core/util');
+const fork = require('node:child_process').fork;config = util.getConfig();
+util.makeEventEmitter(child);util.inherit(child, EventEmitter);
 
 module.exports = (config, callback) => {
   var debug = typeof v8debug === 'object';
-  if (debug) {
-    process.execArgv = [];
-  }
+  if (debug) {process.execArgv = [];}
 
-  const child = fork(__dirname + '/child');
-  const message = {
-    what: 'start',
-    config
-  }
-
+  var child = fork(__dirname + '/child');
+  const message = {what: 'start',config}
   const done = _.once(callback);
-
-  child.on('message', function(m) {
-    if(m === 'ready')
-      return child.send(message);
-
+  child.on('message', function(m) {if(m === 'ready')
+  return child.send(message);
     // else we are done and have candles!
     done(null, m);
     if (this.connected) {
@@ -32,6 +28,7 @@ module.exports = (config, callback) => {
       done('ERROR, unable to load candles, please check the console.');
   });
 }
+
 
 /*
 The MIT License (MIT)
