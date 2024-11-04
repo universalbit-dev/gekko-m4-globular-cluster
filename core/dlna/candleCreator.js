@@ -1,37 +1,20 @@
 /*
 
-//CandleCreator creates candles based on trade batches.
-...
-    var second = trade.date.format('YYYY-MM-DD HH:mm:ss');
-    // create a string referencing the seconds of this trade happened 
-    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss');
-...
-
-==> gekko-m4 expects a candle, if nothing happened will add empty candle.
-
-
-//TradeBatcher date format
-...
-first.date.format('YYYY-MM-DD HH:mm:ss');
-last.date.format('YYYY-MM-DD HH:mm:ss');
-...
-
-==> tradeBatcher date format (seconds) 
-
 */
-
-const _ = require('../lodash3');require('lodash-migrate');
+const EventEmitter=require('node:events');
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
 var expects=config.expects.candle;
 
 var CandleCreator = function() {
-  _.bindAll(this,_.functions(this));
+  EventEmitter.call(this);
+  _.bindAll(this,_.functions(CandleCreator.prototype));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
-util.makeEventEmitter(CandleCreator);
+util.makeEventEmitter(CandleCreator);util.inherit(CandleCreator, EventEmitter);
 
 CandleCreator.prototype.write = function(batch) {
   var trades = batch.data;

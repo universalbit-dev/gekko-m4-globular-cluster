@@ -1,33 +1,26 @@
-// The candleManager consumes trades and emits:
-// - `candles`: array of minutly candles.
-// - `candle`: the most recent candle after a fetch Gekko.
-
-var _ = require('../lodash3');require('lodash-migrate');
+/*  */
+const EventEmitter  = require('node:events'); 
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
 var moment = require('moment');
-var fs = require('node:fs');
+var fs = require('fs-extra');
 var util = require('../../core/util');
 var dirs = util.dirs();
 var config = require('../../core/util.js').getConfig();
 var log = require('../../core/log');
-require('../../core/jquery-3.7.1');
-var CandleCreator = require(dirs.dlna + 'candleCreator');
-var Manager = function() {
-  _.bindAll(this,_.functions(this));
+var CandleCreator = require('./candleCreator.js');
+var Manager = function(candle) {
+  EventEmitter.call(this);
+  _.bindAll(this,_.functions(Manager.prototype));
   this.candleCreator = new CandleCreator;
   this.candleCreator
-    .on('candles', this.relayCandles);
+  .on('candles', this.relayCandles);
 };
-util.makeEventEmitter(Manager);
+util.makeEventEmitter(Manager);util.inherit(Manager, EventEmitter);
 
-Manager.prototype.processTrades = function(tradeBatch) {
-  this.candleCreator.write(tradeBatch);
-}
-
-Manager.prototype.relayCandles = function(candles) {
-  this.emit('candles', candles);
-}
-
+Manager.prototype.processTrades = function(tradeBatch) {this.candleCreator.write(tradeBatch);}
+Manager.prototype.relayCandles = function(candles) {this.emit('candles', candles);}
 module.exports = Manager;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me

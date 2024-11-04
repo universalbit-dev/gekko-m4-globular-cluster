@@ -1,5 +1,5 @@
-const _ = require('../lodash3');
-const { EventEmitter } = require('node:events'); 
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const EventEmitter= require('node:events'); 
 var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
@@ -7,10 +7,11 @@ var moment = require('moment');
 var TICKRATE = config.watch.tickrate;
 
 var Heart = function() {
+  EventEmitter.call(this);
   this.lastTick = false;
-  _.bindAll(this, _.functions(this));
+  _.bindAll(this, _.functions(Heart.prototype));
 }
-util.makeEventEmitter(Heart);
+util.makeEventEmitter(Heart);util.inherit(Heart, EventEmitter);
 
 Heart.prototype.pump = function() {
   log.debug('scheduling ticks');

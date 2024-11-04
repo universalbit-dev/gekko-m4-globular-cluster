@@ -1,19 +1,21 @@
-const _ = require('../lodash3');require('lodash-migrate');
-
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const EventEmitter=require('node:events');
 var moment = require('moment');
 var util = require('../../core/util.js');
 var config = require('../../core/util.js').getConfig();
 var log = require('../../core/log');
+const { createSpinner } =require('nanospinner');
+var math=require('mathjs');
 
 var TradeBatcher = function(tid) {
+  EventEmitter.call(this);
   if(!_.isString(tid))
     throw new Error('tid is not a string');
-
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this,_.functions(TradeBatcher.prototype));
   this.tid = tid;
   this.last = -1;
 }
-util.makeEventEmitter(TradeBatcher);
+util.makeEventEmitter(TradeBatcher);util.inherit(TradeBatcher, EventEmitter);
 
 TradeBatcher.prototype.write = function(batch) {
 
@@ -27,22 +29,23 @@ TradeBatcher.prototype.write = function(batch) {
 
   var amount = _.size(filterBatch);
   if(!amount)
-    return log.debug('No new trades.');
+    return; 
+    //log.debug('No new trades.');
 
   var momentBatch = this.convertDates(filterBatch);
-
+  var min=4000;var max=10000;
   var last = _.last(momentBatch);
   var first = _.first(momentBatch);
-
-  log.debug(
+  const spinner = createSpinner('Processing Exchange Data: '+first.date.format('YYYY-MM-DD HH:mm:ss')).start();
+  setTimeout(() => {spinner.success()}, math.random(min,max));
+  //setTimeout(() => {spinner.spin()}, math.random(min,max));
+  spinner.update({text: 'Processed',color: 'yellow',stream: process.stdout,frames: ['..', 'o', '0', '@@', '*'],interval: math.random(min,max),});
+  /*log.debug(
     'Processing', amount, 'new trades.',
-    'From',
-    first.date.format('YYYY-MM-DD HH:mm:ss'),
-    'UTC to',
-    last.date.format('YYYY-MM-DD HH:mm:ss'),
-    'UTC.',
-    '(' + first.date.from(last.date, true) + ')'
-  );
+    'From',first.date.format('YYYY-MM-DD HH:mm:ss'),
+    'UTC to',last.date.format('YYYY-MM-DD HH:mm:ss'),
+    'UTC.','(' + first.date.from(last.date, true) + ')'
+  );*/
 
   this.emit('new batch', {
     amount: amount,
@@ -70,16 +73,12 @@ TradeBatcher.prototype.filter = function(batch) {
 
 // remove trades that have zero amount
 // read more: https://github.com/askmike/gekko/issues/486
-  batch = _.filter(batch, function(trade) {
-    return trade.amount > 0;
-  });
-  return _.filter(batch, function(trade) {
-    return this.last < trade[this.tid];
-  }, this);
+  batch = _.filter(batch, function(trade) {return trade.amount > 0;});
+  return _.filter(batch, function(trade) {return this.last < trade[this.tid];},this);
 }
 
 TradeBatcher.prototype.convertDates = function(batch) {
-  return _.map(_.cloneDeep(batch), function(trade) {
+  return _.map(_.clone(batch), function(trade) {
     trade.date = moment.unix(trade.date).utc();
     return trade;
   });

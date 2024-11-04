@@ -1,63 +1,42 @@
 /*
 
 */
-var _ = require('../lodash3');require('lodash-migrate');
-var async = require('async');
-const { EventEmitter } = require('events'); 
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const EventEmitter  = require('events'); 
 var util = require('../util');
+const { inspect } = require('util');
 var config = require('../../core/util.js').getConfig();
 var dirs = util.dirs();
 var Heart = require(dirs.dlna + 'heart');
 var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');
 var CandleManager = require(dirs.dlna + 'candleManager');
 var Dlna = function(config) {
-  const emit = new EventEmitter();
-  _.bindAll(this,_.functions(this));
+  EventEmitter.call(this);
+  _.bindAll(this,_.functions(Dlna.prototype));
   Readable.call(this, {objectMode: true});
-// Dlna internal modules:
+//Dlna internal modules:
   this.heart = new Heart;
   this.marketDataProvider = new MarketDataProvider(config);
   this.candleManager = new CandleManager;
-//    Dlna data flow:
+//Dlna data flow:
 // relay a marketUpdate event
-  this.marketDataProvider.on(
-    'marketUpdate',
-    e => this.emit('marketUpdate', e)
-  );
+  this.marketDataProvider.on('marketUpdate',e => this.emit('marketUpdate', e));
 // relay a marketStart event
-  this.marketDataProvider.on(
-    'marketStart',
-    e => this.emit('marketStart', e)
-  );
+  this.marketDataProvider.on('marketStart',e => this.emit('marketStart', e));
 // Output the candles
-  this.candleManager.on(
-    'candles',
-    this.pushCandles
-  );
+  this.candleManager.on('candles',this.pushCandles);
 // on every `tick` retrieve trade data
-  this.heart.on(
-    'tick',
-    this.marketDataProvider.retrieve
-  );
+  this.heart.on('tick',this.marketDataProvider.retrieve);
 // on new trade data create candles
-  this.marketDataProvider.on(
-    'trades',
-    this.candleManager.processTrades
-  );
+  this.marketDataProvider.on('trades',this.candleManager.processTrades);
   this.heart.pump();
 }
-util.makeEventEmitter(Dlna);
+util.makeEventEmitter(Dlna);util.inherit(Dlna, EventEmitter);
 
 var Readable = require('stream').Readable;
-Dlna.prototype = Object.create(Readable.prototype, {
-  constructor: { value: Dlna }
-});
-
-Dlna.prototype._read = function noop() {}
-Dlna.prototype.pushCandles = function(candles) {
-  _.each(candles, this.push);
-}
-
+Dlna.prototype = Object.create(Readable.prototype, {constructor: { value: Dlna }});
+Dlna.prototype._read = function noop() {};
+Dlna.prototype.pushCandles = function(candles) {_.each(candles, this.push);};
 module.exports = Dlna;
 
 /*
