@@ -1,33 +1,27 @@
-require('../../jquery-3.7.1.js');
-var fork = require('node:child_process').fork;
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const util = require('../../core/util');
+const EventEmitter = require('node:events');
+class Child extends EventEmitter {};
+const child = new Child();
+
+const fork = require('child_process').fork;config = util.getConfig();
+util.makeEventEmitter(child);util.inherit(child, EventEmitter);
+
 module.exports = (mode, config, callback) => {
   var debug = typeof v8debug === 'object';
-  if (debug) {
-    process.execArgv = [];
-  }
-
+  if (debug) {process.execArgv = [];}
   var child = fork(__dirname + '/child');
   var handle = require('./messageHandlers/' + mode + 'Handler')(callback);
-
-  var message = {
-    what: 'start',
-    mode: mode,
-    config: config
-  };
-
+  var message = {what: 'start',mode: mode,config: config};
+  const done = _.once(callback);
+  
   child.on('message', function(m) {
-    if(m === 'ready')
-      return child.send(message);
-
-    if(m === 'done')
-      return child.send({what: 'exit'});
-
+    if(m === 'ready') return child.send(message);
+    if(m === 'done') return child.send({what: 'exit'});
     handle.message(m);
   });
-
   child.on('exit', handle.exit);
-
-  return child;
+  return child.send(message);
 }
 /*
 The MIT License (MIT)

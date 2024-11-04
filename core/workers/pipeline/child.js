@@ -1,34 +1,29 @@
-require('../../jquery-3.7.1.js');
+const EventEmitter = require('node:events');
+class Process extends EventEmitter {};
+const process = new Process();
+
+const util = require('../../core/util');config = util.getConfig();
 var start = (mode, config) => {
-var util = require('../../util.js');util.setGekkoEnv('node:child_process');
+var util = require('../../util.js');util.setGekkoEnv('child_process');
 var dirs = util.dirs();
   util.setGekkoMode(mode);
   util.setConfig(config);
   var pipeline = require(dirs.core + 'pipeline');
   pipeline({config: config,mode: mode});
 }
+util.makeEventEmitter(process);util.inherit(process, EventEmitter);
 
-//process.send('ready');
+process.send('ready');
 process.on('message', function(m) {
   if(m.what === 'start')start(m.mode, m.config);
   if(m.what === 'exit')process.exit(0);
 });
 
-process.on('disconnect', function() {
-  console.log('disconnect');
-  process.exit(-1);
-})
-
-process
-  .on('unhandledRejection', (message, p) => {
-    console.error('unhandledRejection', message);
-    process.send({type: 'error', message: message});
-  })
-  .on('uncaughtException', err => {
-    console.error('uncaughtException', err);
-    process.send({type: 'error', error: err});
-    process.exit(1);
-  });
+process.on('disconnect', function() {console.log('disconnect');process.exit(-1);})
+process.on('unhandledRejection', (message, p) => {console.error('unhandledRejection', message);process.send({type: 'error', message: message});})
+process.on('uncaughtException', err => {console.error('uncaughtException', err);
+process.send({type: 'error', error: err});process.exit(1);
+});
 
 /*
 The MIT License (MIT)
