@@ -1,121 +1,89 @@
 /*
 
-
 */
-const _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('../../core/util.js');
 const ENV = util.gekkoEnv();
 var log = require('../../core/log.js');
 var config = util.getConfig();
-const {EventEmitter} = require('node:events');
+const EventEmitter = require('events');
 const calcConfig = config.paperTrader;
 const watchConfig = config.watch;
 const dirs = util.dirs();
 const TrailingStop = require(dirs.broker + 'triggers/trailingStop');
+const fs=require('fs-extra');
 
 const async=require('async');
-const fs=require('node:fs');
 async.map(['paperTrader.js'], fs.stat, function(err, results){_.noop;});
 
 const PaperTrader = function() {
-  _.bindAll(this,_.functions(this));
-
-  if(calcConfig.feeUsing === 'maker') {
-    this.rawFee = calcConfig.feeMaker;
-  } else {
-    this.rawFee = calcConfig.feeTaker;
-  }
-
+  _.bindAll(this,_.functions(PaperTrader.prototype));
+  EventEmitter.call(this);
+  if(calcConfig.feeUsing === 'maker') {this.rawFee = calcConfig.feeMaker;} 
+  else {this.rawFee = calcConfig.feeTaker;}
   this.fee = 1 - this.rawFee / 100;
-
   this.currency = watchConfig.currency;
   this.asset = watchConfig.asset;
-
-  this.portfolio = {
-    asset: calcConfig.simulationBalance.asset,
-    currency: calcConfig.simulationBalance.currency,
-  }
-
+  this.portfolio = {asset: calcConfig.simulationBalance.asset,currency: calcConfig.simulationBalance.currency,}
   this.balance = false;
 
-  if(this.portfolio.asset > 0) {
-    this.exposed = true;
-  }
+  if(this.portfolio.asset > 0) {this.exposed = true;}
 
   this.propogatedTrades = 0;
   this.propogatedTriggers = 0;
-
   this.warmupCompleted = false;
   this.warmupCandle;
 }
-util.makeEventEmitter(PaperTrader);
+util.makeEventEmitter(PaperTrader);util.inherit(PaperTrader, EventEmitter);
 
 PaperTrader.prototype.relayPortfolioChange = function() {
-  this.deferredEmit('portfolioChange', {
-    asset: this.portfolio.asset,
-    currency: this.portfolio.currency
-  });
+  this.deferredEmit('portfolioChange', {asset: this.portfolio.asset,currency: this.portfolio.currency});
 }
 
 PaperTrader.prototype.relayPortfolioValueChange = function() {
-  this.deferredEmit('portfolioValueChange', {
-    balance: this.getBalance()
-  });
+  this.deferredEmit('portfolioValueChange', {balance: this.getBalance()});
 }
 
 PaperTrader.prototype.extractFee = function(amount) {
-  amount *= 1e8;
-  amount *= this.fee;
-  amount = Math.floor(amount);
-  amount /= 1e8;
+  amount *= 1e8;amount *= this.fee;
+  amount = Math.floor(amount);amount /= 1e8;
   return amount;
 }
 
-PaperTrader.prototype.setStartBalance = function() {
-  this.balance = this.getBalance();
-}
-
+PaperTrader.prototype.setStartBalance = function() {this.balance = this.getBalance();}
 // after every succesfull trend ride we hopefully end up
 // with more BTC than we started with, this function
 // calculates Gekko's profit in %.
 PaperTrader.prototype.updatePosition = function(what) {
 
-  let cost;
-  let amount;
-
-  // virtually trade all {currency} to {asset}
-  // at the current price (minus fees)
+  let cost;let amount;
+  // virtually trade all {currency} to {asset} at the current price (minus fees)
   if(what === 'long') {
     cost = (1 - this.fee) * this.portfolio.currency;
     this.portfolio.asset += this.extractFee(this.portfolio.currency / this.price);
     amount = this.portfolio.asset;
     this.portfolio.currency = 0;
-
     this.exposed = true;
     this.trades++;
   }
 
-  // virtually trade all {currency} to {asset}
-  // at the current price (minus fees)
+  // virtually trade all {currency} to {asset} at the current price (minus fees)
   else if(what === 'short') {
     cost = (1 - this.fee) * (this.portfolio.asset * this.price);
     this.portfolio.currency += this.extractFee(this.portfolio.asset * this.price);
     amount = this.portfolio.currency / this.price;
     this.portfolio.asset = 0;
-
     this.exposed = false;
     this.trades++;
   }
-
+  
   const effectivePrice = this.price * this.fee;
-
   return { cost, amount, effectivePrice };
 }
 
 PaperTrader.prototype.getBalance = function() {
   return this.portfolio.currency + this.price * this.portfolio.asset;
 }
-
 PaperTrader.prototype.now = function() {
   return this.candle.start.clone().add(1, 'minute');
 }
@@ -124,20 +92,12 @@ PaperTrader.prototype.processAdvice = function(advice) {
   let action;
   if(advice.recommendation === 'short') {
     action = 'sell';
-
     // clean up potential old stop trigger
-    if(this.activeStopTrigger) {
-      this.deferredEmit('triggerAborted', {
-        id: this.activeStopTrigger.id,
-        date: advice.date
-      });
-
+    if(this.activeStopTrigger) {this.deferredEmit('triggerAborted', {id: this.activeStopTrigger.id,date: advice.date});
       delete this.activeStopTrigger;
     }
 
-  } else if(advice.recommendation === 'long') {
-    action = 'buy';
-
+  } else if(advice.recommendation === 'long') {action = 'buy';
     if(advice.trigger) {
 
       // clean up potential old stop trigger
@@ -193,7 +153,6 @@ PaperTrader.prototype.createTrigger = function(advice) {
   const trigger = advice.trigger;
 
   if(trigger && trigger.type === 'trailingStop') {
-
     if(!trigger.trailValue) {
       return log.warn(`[Papertrader] ignoring trailing stop without trail value`);
     }
@@ -201,13 +160,9 @@ PaperTrader.prototype.createTrigger = function(advice) {
     const triggerId = 'trigger-' + (++this.propogatedTriggers);
 
     this.deferredEmit('triggerCreated', {
-      id: triggerId,
-      at: advice.date,
+      id: triggerId,at: advice.date,
       type: 'trailingStop',
-      proprties: {
-        trail: trigger.trailValue,
-        initialPrice: this.price,
-      }
+      proprties: {trail: trigger.trailValue,initialPrice: this.price,}
     });
 
     this.activeStopTrigger = {
