@@ -8,24 +8,19 @@
   backtesting on historical data. Also look at the code to see what how
   it is working.
 */
-const _ = require('lodash');
-const util = require('./core/util');const async = require('async');
-var tulind = require('tulind');
-
+const { addon: ov } = require('openvino-node');
+const util = require('./core/util');const config = util.getConfig();
+const EventEmitter  = require('node:events');
 console.log('##########################################');
 console.log('UniversalBit Blockchain Powered by Gekko');
 console.log('\tGekko v' + util.getVersion());
 console.log('##########################################');
-
 const dirs = util.dirs();
 const pipeline = require(dirs.core + 'pipeline');
-const config = util.getConfig();
 const mode = util.gekkoMode();
 
-pipeline({
-  config: config,
-  mode: mode
-});
+pipeline({config: config,mode: mode});
+
 
 
 /*
