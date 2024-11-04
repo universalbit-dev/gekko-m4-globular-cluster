@@ -1,12 +1,11 @@
-const _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('../../core/util.js');
-const fs = require('node:fs');
+const fs = require('fs-extra');
 var config = util.getConfig();
 var dirs = util.dirs();
 const sqlite3 = require('sqlite3').verbose();
 var db;exports.db = db;
-
-const {EventEmitter} = require('node:events');
+const EventEmitter = require('events');
 
 const async=require('async');
 async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
@@ -52,7 +51,7 @@ module.exports = {
   initDB: () => {
     var journalMode = config.sqlite.journalMode || 'PERSIST';
     var syncMode = journalMode === 'WAL' ? 'NORMAL' : 'FULL';
-    
+
     var db = new sqlite3.Database(fullPath);
     db.run('PRAGMA synchronous = ' + syncMode);
     db.run('PRAGMA journal_mode = ' + journalMode);

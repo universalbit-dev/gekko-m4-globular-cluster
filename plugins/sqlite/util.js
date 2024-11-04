@@ -1,9 +1,8 @@
 /*
 */
-const _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('../../core/util');
-
-const fs = require('node:fs');
+const fs = require('fs-extra');
 const async=require('async');
 async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
 

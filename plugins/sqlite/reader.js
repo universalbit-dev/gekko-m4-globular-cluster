@@ -1,7 +1,7 @@
-const _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('../../core/util.js');
 var config = util.getConfig();
-const {EventEmitter} = require('node:events');
+const EventEmitter = require('events');
 var log = require(util.dirs().core + 'log');
 
 const sqlite3 = require('sqlite3').verbose()
@@ -14,10 +14,11 @@ const async=require('async');
 async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
 
 var Reader = function() {
-  _.bindAll(this);
+  EventEmitter.call(this);
+   _.bindAll(this, _.functions(Reader.prototype));
   this.db = sqlite.initDB(false);
 }
-util.makeEventEmitter(Reader);
+util.makeEventEmitter(Reader);util.inherit(Reader, EventEmitter);
 
 //SQLite on Node.js with async/await
 exports.all=function(query, params) {

@@ -1,10 +1,10 @@
-const _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('../../core/util');
 var log = require('../../core/log');
 var config = util.getConfig();
-const {EventEmitter} = require('node:events');
+const EventEmitter = require('events');
 
-const fs = require('node:fs');
+const fs = require('fs-extra');
 const async=require('async');
 async.map(['handle.js','reader.js','scanner.js','util.js','writer.js'], fs.stat, function(err, results){_.noop;});
 
@@ -21,18 +21,19 @@ exports.run=function(query, params) {
             if(err) reject("Read error: " + err.message)
             else {resolve(rows)}
         })
-    }) 
+    })
 }
 
 var Store = function(done, pluginMeta) {
-  _.bindAll(this,_.functions(this));
+  EventEmitter.call(this);
+  _.bindAll(this,_.functions(Store.prototype));
   this.done = done
   this.db = sqlite.initDB(false);
   this.db.serialize(this.upsertTables);
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
-util.makeEventEmitter(Store);
+util.makeEventEmitter(Store);util.inherit(Store, EventEmitter);
 
 Store.prototype.upsertTables = function() {
   var createQueries = [
