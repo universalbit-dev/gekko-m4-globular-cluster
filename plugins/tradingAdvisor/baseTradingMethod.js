@@ -1,10 +1,10 @@
-const _ = require('../../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 const util = require('../../core/util');
 const fs=require('fs-extra');
 var config = util.getConfig();
 const dirs = util.dirs();
 const log = require('../../core/log');
-const {EventEmitter} = require('node:events');
+const EventEmitter = require('events');
 const ENV = util.gekkoEnv();
 const mode = util.gekkoMode();
 const startTime = util.getStartTime();
@@ -30,8 +30,8 @@ _.each(indicatorFiles, function(indicator) {
 const allowedIndicators = _.keys(Indicators);
 
 var Base = function(settings) {
-  _.bindAll(this,_.functions(this));
-
+  _.bindAll(this,_.functions(Base.prototype));
+  EventEmitter.call(this);
   this.age = 0;
   this.processedTicks = 0;
   this.setup = false;
@@ -84,7 +84,8 @@ var Base = function(settings) {
 }
 
 // teach our base trading method events
-util.makeEventEmitter(Base);
+util.makeEventEmitter(Base);util.inherit(Base, EventEmitter);
+
 
 Base.prototype.tick = async function(candle, done) {
   this.age++;

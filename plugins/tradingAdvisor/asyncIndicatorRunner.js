@@ -1,25 +1,29 @@
-const _ = require('../../core/lodash3');
-const fs = require('node:fs');
+const EventEmitter=require('events');
+const _ = require('underscore');
+const fs = require('fs-extra');
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
 var tulind=require('../../core/tulind');
 const log = require('../../core/log');
 const allowedTulipIndicators = _.keys(tulind);
-const {EventEmitter} = require('node:events');
 
 const async=require('async');
 async.map(['baseTradingMethod.js','asyncIndicatorRunner.js','tradingAdvisor.js'], fs.stat, function(err, results){_.noop;});
 
 const AsyncIndicatorRunner = function() {
+  _.bindAll(this,_.functions(AsyncIndicatorRunner.prototype));
+  EventEmitter.call(this);
   this.tulipIndicators = {};
   this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
   this.candlePropsCacheSize = 10000;
   this.inflight = false;
   this.backlog = [];
   this.age = 0;
-  _.bindAll(this,_.functions(this));
+
 }
+util.makeEventEmitter(AsyncIndicatorRunner);util.inherit(AsyncIndicatorRunner, EventEmitter);
+
 
 AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   if(this.inflight) {
@@ -56,7 +60,7 @@ AsyncIndicatorRunner.prototype.calculateIndicators = function(next) {
     if(err)
       util.die('TULIP ERROR:', err);
 
-    this.tulipIndicators[name].result = _.mapValues(result, v => _.last(v));
+    this.tulipIndicators[name].result = _.mapObject(result, v => _.last(v));
     done();
   }
 
