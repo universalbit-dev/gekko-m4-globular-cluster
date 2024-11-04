@@ -1,25 +1,19 @@
-const util = require('node:util');
-const events = require('node:events');//
-const NativeEventEmitter = events.EventEmitter;
+const util = require('./util');var Promise = require("bluebird");
+const EventEmitter = require('events');const eventEmitter = new EventEmitter();
+const _ = Promise.promisify(require("underscore"));
 
 const GekkoEventEmitter = function() {
-  NativeEventEmitter.call(this);
+  EventEmitter.call(this);
   this.defferedEvents = [];
+  _.bindAll(this, _.functions(GekkoEventEmitter.prototype));
 }
+util.makeEventEmitter(GekkoEventEmitter);util.inherit(GekkoEventEmitter, EventEmitter);
 
-util.inherits(GekkoEventEmitter, NativeEventEmitter);
-
-GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {
-  this.defferedEvents.push({name, payload});
-}
-
+GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {this.defferedEvents.push({name, payload});}
 GekkoEventEmitter.prototype.broadcastDeferredEmit = function() {
-  if(this.defferedEvents.length === 0)
-    return false;
-  const emit=new events();
-  const event = this.defferedEvents.shift();//
-  this.emit(event.name, event.payload);
-  
+  if(this.defferedEvents.length === 0) return false;
+  const event = this.defferedEvents.shift();
+  eventEmitter.emit(event.name, event.payload);
   return true;
 }
 

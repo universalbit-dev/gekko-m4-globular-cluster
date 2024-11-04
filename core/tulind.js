@@ -1,5 +1,5 @@
-var semver = require("semver");
-var _ = require('lodash');
+var semver = require("semver");var tulind = require('tulind');
+var Promise = require("bluebird");const _ = Promise.promisify(require("lodash"));
 
 // validate that tulind is installed, if not we'll throw an exception which will
 // prevent further loading or out outside this module

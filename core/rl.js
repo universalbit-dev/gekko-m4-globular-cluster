@@ -1,6 +1,3 @@
-const _ = require('../core/lodash3');require('lodash-migrate');
-const fs = require('fs-extra');
-
 var R = {}; // the Recurrent library
 
 (function(global) {

@@ -1,20 +1,18 @@
 /*
 
-
 */
-const _ = require('./lodash3');require('lodash-migrate');
+const _ = require('underscore');
 var util = require('./util');
-
-var CandleBatcher =
-function(candleSize) {
-  _.bindAll(this,_.functions(this));
-  if(!_.isNumber(candleSize))
-    throw new Error('candleSize is not a number');
+const EventEmitter=require('node:events');
+var CandleBatcher = function(candleSize) {
+  EventEmitter.call(this);
+  _.bindAll(this,_.functions(CandleBatcher.prototype));
+  if(!_.isNumber(candleSize)) throw new Error('candleSize is not a number');
   this.candleSize = candleSize;
   this.smallCandles = [];
   this.calculatedCandles = [];
 }
-util.makeEventEmitter(CandleBatcher);
+util.makeEventEmitter(CandleBatcher);util.inherit(CandleBatcher, EventEmitter);
 
 CandleBatcher.prototype.write = function(candles) {
   if(!_.isArray(candles)) {

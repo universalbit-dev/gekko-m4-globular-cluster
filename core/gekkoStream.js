@@ -1,11 +1,11 @@
 /*
 Small writable stream wrapper
 */
-const _ = require('./lodash3');require('lodash-migrate');
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
 var Writable = require('stream').Writable;
 var async = require('async');
 var moment = require('moment');
-
+const EventEmitter=require('node:events');
 var util = require('./util');
 var env = util.gekkoEnv();
 var mode = util.gekkoMode();
@@ -13,17 +13,17 @@ var config = util.getConfig();
 var log = require(util.dirs().core + 'log');
 
 var Gekko = function(plugins) {
+  EventEmitter.call(this);
   this.plugins = plugins;
   this.candleConsumers = plugins
-    .filter(plugin => plugin.processCandle);
+  .filter(plugin => plugin.processCandle);
   Writable.call(this, {objectMode: true});
-
   this.producers = this.plugins
-    .filter(p => p.meta.emits);
+  .filter(p => p.meta.emits);
   this.finalize = _.bind(this.finalize, this);
-  _.bindAll(this, _.functions(this));
+  _.bindAll(this, _.functions(Gekko.prototype));
 }
-util.makeEventEmitter(Gekko);
+util.makeEventEmitter(Gekko);util.inherit(Gekko, EventEmitter);
 
 Gekko.prototype = Object.create(Writable.prototype, {constructor: { value: Gekko }});
 

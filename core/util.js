@@ -1,23 +1,21 @@
 /*
 
 */
-
+const EventEmitter = require('node:events');
 var moment = require('moment');
-const _ = require('./lodash3');
-var {EventEmitter} = require('node:events');
-var fs = require('node:fs');
+const _ = require('underscore');
+const fs = require('node:fs');
 var semver = require('semver');
 var program = require('commander');
 var startTime = moment().utc();
-
 var _config = false;
 var _package = false;
 var _nodeVersion = false;
 var _gekkoMode = false;
 var _gekkoEnv = false;
 var _args = false;
-
-var util = {
+const { inspect } = require('util');
+util = {
   getConfig: function() {
     // cache
     if(_config) return _config;
@@ -119,6 +117,7 @@ var util = {
     );
   },
   
+  
   makeEventEmitter: function(dest) {
     util.inherit(dest, require('node:events').EventEmitter);
   },
@@ -172,8 +171,6 @@ if(!util.recentNode())
     ' and you need at least ',
     util.getRequiredNodeVersion()
   ].join(''), true);
-
-_.bindAll(this, _.functions(this));
 
 module.exports = util;
 

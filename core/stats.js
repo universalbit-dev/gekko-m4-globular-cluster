@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require('underscore');
 var stats = require('stats-lite');
 // simply monkey patch the stats with other stuff we
 // need and pass on.

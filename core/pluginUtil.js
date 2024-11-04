@@ -2,11 +2,12 @@
 
 */
 
-const _ = require('lodash');
-
+var Promise = require("bluebird");const _ = Promise.promisify(require("lodash"));
+const EventEmitter = Promise.promisify(require("events"));
+var tulind = require('tulind');
 var async = require('async');
-var Emitter = require('./emitter');
-var util = require('./util');
+var emitter = require('./emitter');
+var util=require('./util')
 var log = require(util.dirs().core + 'log');
 var config = util.getConfig();
 var pluginDir = util.dirs().plugins;
@@ -80,22 +81,20 @@ var pluginHelper = {
     var Constructor = require(pluginDir + plugin.slug);
 
     if(plugin.async) {
-      inherits(Constructor, Emitter);
+      inherits(Constructor, emitter);
     var instance = new Constructor(util.defer(function(err) {
         next(err, instance);
       }), plugin);
-      Emitter.call(instance);
+      emitter.call(instance);
 
       instance.meta = plugin;
     } else {
-      inherits(Constructor, Emitter);
+      inherits(Constructor, emitter);
       var instance = new Constructor(plugin);
-      Emitter.call(instance);
+      emitter.call(instance);
 
       instance.meta = plugin;
-      _.defer(function() {
-        next(null, instance);
-      });
+      _.defer(function() {next(null, instance);});
     }
 
     if(!plugin.silent)

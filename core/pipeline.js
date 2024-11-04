@@ -11,8 +11,10 @@
 */
 var util = require('./util');
 var dirs = util.dirs();
-const _ = require('./lodash3');require('lodash-migrate');
+const _ = require('underscore');
+const EventEmitter = require('events');const eventEmitter = new EventEmitter();
 
+const utl=require('util');
 var async = require('async');
 var log = require(dirs.core + 'log');
 var pipeline = (settings) => {
@@ -27,6 +29,7 @@ var pipeline = (settings) => {
   var subscriptions = require(dirs.gekko + 'subscriptions');
   var market;
   var loadPlugins = function(next) {
+  EventEmitter.call(this);
     // load all plugins
     async.mapSeries(
       pluginParameters,
@@ -40,37 +43,38 @@ var pipeline = (settings) => {
       }
     );
   };
+  util.makeEventEmitter(loadPlugins);util.inherit(loadPlugins, EventEmitter);
+  
 
   var referenceEmitters = function(next) {
+  EventEmitter.call(this);
     _.each(plugins, function(plugin) {
       if(plugin.meta.emits)
         emitters[plugin.meta.slug] = plugin;
     });
     next();
   }
+  util.makeEventEmitter(referenceEmitters);util.inherit(referenceEmitters, EventEmitter);
 
   // Subscribe all plugins to other emitting plugins
   var subscribePlugins = function(next) {
+  EventEmitter.call(this);
     // events broadcasted by plugins
     var pluginSubscriptions = _.filter(
       subscriptions,
       sub => sub.emitter !== 'market'
     );
-
-    _.each(
-      pluginSubscriptions.filter(s => _.isArray(s.emitter)),
-      subscription => {
-        subscription.emitters = subscription.emitter;
+    _.each(pluginSubscriptions.filter(s => _.isArray(s.emitter)),
+      subscription => {subscription.emitters = subscription.emitter;
         var singleEventEmitters = subscription.emitter
-          .filter(
-            s => _.size(plugins.filter(p => p.meta.slug === s))
-          );
-        if(_.size(singleEventEmitters) > 1) {
-          var error = `Multiple plugins are broadcasting`;
+         .filter(s => _.size(plugins.filter(p => p.meta.slug === s)));
+         
+        if(_.size(singleEventEmitters) > 1) { var error = `Multiple plugins are broadcasting`;
           error += ` the event "${subscription.event}" (${singleEventEmitters.join(',')}).`;
           error += 'This is unsupported.'
           util.die(error);
-        } else {
+        } 
+        else {
           subscription.emitter = _.first(singleEventEmitters);
         }
       }
@@ -107,7 +111,7 @@ var pipeline = (settings) => {
           }
 
           emitters[sub.emitter]
-            .on(sub.event,
+            eventEmitter.on(sub.event,
               plugin[
                 sub.handler
               ])
@@ -116,10 +120,7 @@ var pipeline = (settings) => {
       });
     });
 
-    var marketSubscriptions = _.filter(
-      subscriptions,
-      {emitter: 'market'}
-    );
+    var marketSubscriptions = _.filter(subscriptions,{emitter: 'market'});
     _.each(plugins, function(plugin) {
       _.each(marketSubscriptions, function(sub) {
         if(plugin[sub.handler]) {
@@ -130,15 +131,20 @@ var pipeline = (settings) => {
     });
     next();
   }
+  util.makeEventEmitter(subscribePlugins);util.inherit(subscribePlugins, EventEmitter);
+
 
   var prepareMarket = function(next) {
+    EventEmitter.call(this);
     if(mode === 'backtest' && config.daterange === 'scan')
       require(dirs.core + 'prepareDateRange')(next);
     else
       next();
   }
+  util.makeEventEmitter(prepareMarket);util.inherit(prepareMarket, EventEmitter);
 
   var setupMarket = function(next) {
+  EventEmitter.call(this);
     // load a market based on the config (or fallback to mode)
     let marketType;
     if(config.market)
@@ -149,7 +155,10 @@ var pipeline = (settings) => {
     market = new Market(config);
     next();
   }
+  util.makeEventEmitter(setupMarket);util.inherit(setupMarket, EventEmitter);
+  
   var subscribePluginsToMarket = function(next) {
+  EventEmitter.call(this);
     var marketSubscriptions = _.filter(
       subscriptions,
       {emitter: 'market'}
@@ -166,6 +175,8 @@ var pipeline = (settings) => {
     });
     next();
   }
+  util.makeEventEmitter(subscribePluginsToMarket);util.inherit(subscribePluginsToMarket, EventEmitter);
+  
   log.info('Setting up Gekko in', mode, 'mode');
   log.info('');
   async.series(
