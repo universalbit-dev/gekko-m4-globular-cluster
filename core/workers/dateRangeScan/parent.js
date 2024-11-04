@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 var ForkTask = require('relieve').tasks.ForkTask;
 const fork = require('node:child_process').fork;
 
