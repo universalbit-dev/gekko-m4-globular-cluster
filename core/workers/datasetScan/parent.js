@@ -1,5 +1,4 @@
-const _ = require('lodash');
-
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
 var moment = require('moment');
 var async = require('async');
 var util = require('../../util');
@@ -14,7 +13,7 @@ module.exports = function(config, done) {
   scan((err, markets) => {
     if(err)
     return done(err);
-    let numCPUCores = 2;
+    let numCPUCores = -1;
     if(numCPUCores === undefined)
     numCPUCores = 1;
     async.eachLimit(markets, numCPUCores, (market, next) => {
