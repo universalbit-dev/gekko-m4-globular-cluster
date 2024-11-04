@@ -2,8 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
-//pairs: ["XBT","LTC"],["XBT","GBP"],["XBT","USD"],["XBT","EUR"],["LTC","USD"],["LTC","EUR"],["LTC","GBP"] under-review
+config.watch = {exchange: '',currency:'BTC',asset:'LTC',tickrate:60};
 
 config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
