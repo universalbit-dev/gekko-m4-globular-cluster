@@ -2,7 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:60};
+config.watch = {exchange: '',currency:'BTC',asset:'LTC',tickrate:60};
 config.candleWriter={enabled:true,adapter:'sqlite'};
 
 config.api={interval:317811}; //5.29685 minutes
@@ -39,8 +39,6 @@ config.performanceAnalyzer = {enabled: false};
 
 //Import
 config.importer = {enabled:false};
-
-
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 
