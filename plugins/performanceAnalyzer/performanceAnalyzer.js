@@ -1,21 +1,23 @@
-const _ = require('../../core/lodash3');require('lodash-migrate');
-const {EventEmitter} = require('node:events');
+const EventEmitter = require('events');
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
 const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
 const dirs = util.dirs();
-const async=require('async');
 const ENV = util.gekkoEnv();
 var log = require('../../core/log.js');
 var config = util.getConfig();
-const fs=require('node:fs');
+const fs=require('fs-extra');
+
+const async=require('async');
 async.map(['perfomanceAnalyzer.js','logger.js'], fs.stat, function(err, results){_.noop;});
 
 const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
 const Logger = require('./logger');
 const PerformanceAnalyzer = function() {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this,_.functions(PerformanceAnalyzer.prototype));
+  EventEmitter.call(this);
   this.dates = {start: false,end: false};
   this.startPrice = 0;
   this.endPrice = 0;
@@ -37,13 +39,12 @@ const PerformanceAnalyzer = function() {
   this.openRoundTrip = false;
   this.warmupCompleted = false;
 }
-util.makeEventEmitter(PerformanceAnalyzer);
+util.makeEventEmitter(PerformanceAnalyzer);util.inherit(PerformanceAnalyzer, EventEmitter);
 
 PerformanceAnalyzer.prototype.processPortfolioValueChange = function(event) {
   if(!this.start.balance) {
     this.start.balance = event.balance;
   }
-
   this.balance = event.balance;
 }
 

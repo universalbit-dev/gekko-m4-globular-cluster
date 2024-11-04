@@ -1,24 +1,24 @@
 // log trade performance results
-const _ = require('../../core/lodash');
-
+const EventEmitter = require('events');
+const _ = require('underscore');
 const moment = require('moment');
 const humanizeDuration = require('humanize-duration');
-
 var log = require('../../core/log.js');
 const util = require('../../core/util.js');
-
 var config = util.getConfig();
-
 const dirs = util.dirs();
 const mode = util.gekkoMode();
-const {EventEmitter} = require('node:events');
 
 const Logger = function(watchConfig) {
+  _.bindAll(this,_.functions(Logger.prototype));
+  EventEmitter.call(this);
   this.currency = watchConfig.currency;
   this.asset = watchConfig.asset;
-
   this.roundtrips = [];
+  
 }
+util.makeEventEmitter(Logger);util.inherit(Logger, EventEmitter);
+
 
 Logger.prototype.round = function(amount) {
   return amount.toFixed(8);
