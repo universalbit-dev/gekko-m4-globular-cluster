@@ -1,4 +1,4 @@
-const _ = require('../lodash');
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
 var util = require('../util');
 var config = require('../util.js').getConfig();
 

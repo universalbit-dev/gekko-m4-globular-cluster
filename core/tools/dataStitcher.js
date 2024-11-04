@@ -1,19 +1,22 @@
-const _ = require('../lodash3');require('lodash-migrate');
-const fs = require('node:fs');
-
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const fs = require('fs-extra');
+const EventEmitter= require('node:events');
 var moment = require('moment');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
 var log = require(dirs.core + 'log');
+const batcher=require('../candleBatcher.js');
 
 var Stitcher = function(batcher) {
+  EventEmitter.call(this);
+  _.bindAll(this,_.functions(Stitcher.prototype));
   this.batcher = batcher;
 }
+util.makeEventEmitter(Stitcher);util.inherit(Stitcher, EventEmitter);
 
 Stitcher.prototype.ago = function(ts) {
-  var now = moment().utc();
-  var then = moment.unix(ts).utc();
+  var now = moment().utc();var then = moment.unix(ts).utc();
   return now.diff(then, 'minutes') + ' minutes ago';
 }
 

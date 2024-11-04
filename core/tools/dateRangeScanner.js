@@ -1,14 +1,12 @@
 
-const _ = require('../lodash3');require('lodash-migrate');
-
-var missing_candle_allowed = 3;
+var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+var missing_candle_allowed = 5;
 var batchSize = 55;
 
 var moment = require('moment');
 var async = require('async');
 var util = require('../util');
-var config = util.getConfig();
-var dirs = util.dirs();
+var config = util.getConfig();var dirs = util.dirs();
 var log = require(dirs.core + 'log');
 var adapter = config[config.adapter];
 var Reader = require(dirs.gekko + adapter.path + '/reader');
@@ -17,47 +15,27 @@ var reader = new Reader();
 // todo: rewrite with generators or async/await..
 var scan = function(done) {
   log.info('Scanning local history for backtestable dateranges.');
-
   reader.tableExists('candles', (err, exists) => {
 
-    if(err)
-      return done(err, null, reader);
+    if(err) return done(err, null, reader);
+    if(!exists) return done(null, [], reader);
 
-    if(!exists)
-      return done(null, [], reader);
-
-    async.parallel({
-      boundry: reader.getBoundry,
-      available: reader.countTotal
-    }, (err, res) => {
-
+    async.auto({boundry: reader.getBoundry,available: reader.countTotal}, 
+    (err, res) => {
       var first = res.boundry.first;
       var last = res.boundry.last;
-
       var optimal = (last - first) / 55;
-
+      
       log.debug('Available', res.available);
       log.debug('Optimal', optimal);
 
       // There is a candle for every minute
       if(res.available === optimal + 1) {
-        log.info('Gekko is able to fully use the local history.');
-        return done(false, [{
-          from: first,
-          to: last
-        }], reader);
+      log.info('Gekko is able to fully use the local history.');return done(false, [{from: first,to: last}], reader);
       }
-
       // figure out where the gaps are..
-      var missing = optimal - res.available + 1;
-
-      log.info(`The database has ${missing} candles missing, Figuring out which ones...`);
-
-      var iterator = {
-        from: last - (batchSize * 55),
-        to: last
-      }
-
+      var missing = optimal - res.available + 1;log.info(`The database has ${missing} candles missing, Figuring out which ones...`);
+      var iterator = {from: last - (batchSize * 55),to: last}
       var batches = [];
       // loop through all candles we have in batches and track whether they are complete
       async.whilst(
@@ -67,61 +45,26 @@ var scan = function(done) {
           next => {
             var from = iterator.from;
             var to = iterator.to;
-            reader.count(
-              from,
-              iterator.to,
-              (err, count) => {
-                var complete = count + missing_candle_allowed > batchSize;
-
-                if(complete)
-                  batches.push({
-                    to: to,
-                    from: from
-                  });
-
-                next();
-              }
+            reader.count(from,iterator.to,(err, count) => {
+            var complete = count + missing_candle_allowed > batchSize;
+            if(complete)batches.push({to: to,from: from});next();
+            }
             );
-
-            iterator.from -= batchSize * 55;
-            iterator.to -= batchSize * 55;
+            
+            iterator.from -= batchSize * 55;iterator.to -= batchSize * 55;
           },
           () => {
-            if(batches.length === 0) {
-              return done(null, [], reader);
-            }
-
-            // batches is now a list like
-            // [ {from: unix, to: unix } ]
+            if(batches.length === 0) {return done(null, [], reader);}
+            // batches is now a list like [ {from: unix, to: unix } ]
 
             var ranges = [ batches.shift() ];
-
             _.each(batches, batch => {
               var curRange = _.last(ranges);
-              if(batch.to === curRange.from)
-                curRange.from = batch.from;
-              else
-                ranges.push( batch );
+              if(batch.to === curRange.from) curRange.from = batch.from;
+              else ranges.push( batch );
             })
-
-            // we have been counting chronologically reversed
-            // (backwards, from now into the past), flip definitions
             ranges = ranges.reverse();
-
-            _.map(ranges, r => {
-              return {
-                from: r.to,
-                to: r.from
-              }
-            });
-
-
-            // ranges is now a list like
-            // [ {from: unix, to: unix } ]
-            //
-            // it contains all valid dataranges available for the
-            // end user.
-
+            _.map(ranges, r => {return {from: r.to,to: r.from}});
             return done(false, ranges, reader);
           }
         )
