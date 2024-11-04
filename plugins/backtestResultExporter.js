@@ -1,20 +1,19 @@
 // Small plugin that subscribes to some events, stores
 // them and sends it to the parent process.
 
-const _ = require('../core/lodash3');require('lodash-migrate');
+const _ = require('underscore');
 const log = require('../core/log');
 const util = require('../core/util');
 const dirs = util.dirs();
 const env = util.gekkoEnv();
 const config = util.getConfig();
 const moment = require('moment');
-const fs = require('node:fs');
-const {EventEmitter} = require('node:events');
-
-const async=require('async');
-async.map(['backtestResultExporter.js','childToParent.js','eventLogger.js','adviceLogger.js'], fs.stat, function(err, results){_.noop;});
+const fs = require('fs-extra');
+const EventEmitter = require('events');
 
 const BacktestResultExporter = function() {
+  _.bindAll(this, _.functions(BacktestResultExporter.prototype));
+  EventEmitter.call(this);
   this.performanceReport;
   this.roundtrips = [];
   this.stratUpdates = [];
@@ -27,9 +26,9 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.stratCandles)this.processStratCandles = null;
   if(!config.backtestResultExporter.data.portfolioValues)this.processPortfolioValueChange = null;
   if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
-  _.bindAll(this,_.functions(this));
+  
 }
-util.makeEventEmitter(BacktestResultExporter);
+util.makeEventEmitter(BacktestResultExporter);util.inherit(BacktestResultExporter, EventEmitter);
 
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
@@ -100,23 +99,23 @@ BacktestResultExporter.prototype.finalize = function(done) {
 BacktestResultExporter.prototype.writeToDisk = function(backtest, next) {
   let filename;
 
-  if(config.backtestResultExporter.filename) {filename = config.backtestResultExporter.filename;} 
+  if(config.backtestResultExporter.filename) {filename = config.backtestResultExporter.filename;}
   else {const now = moment().format('YYYY-MM-DD HH:mm:ss');filename = `backtest-${config.tradingAdvisor.method}-${now}.json`;}
   fs.writeFile('logs/json/' + filename,JSON.stringify(backtest),
     err => {
-      if(err) {log.error('unable to write backtest result', err);} 
+      if(err) {log.error('unable to write backtest result', err);}
       else {log.info('written backtest to: ', 'logs/json/' + filename);}
       next();
     }
   );
-  
+
 var obj = {dev: filename};
 var backtest_file= {};
 var value=filename;
 async.forEachOf(obj, (value, key, callback) => {
     fs.readFile("logs/json/" + value, "utf8", (err, data) => {
         if (err) return callback(err);
-        try {backtest_file[key] = JSON.parse(data);} 
+        try {backtest_file[key] = JSON.parse(data);}
         catch (e) {return callback(e);}
         callback();
     });
