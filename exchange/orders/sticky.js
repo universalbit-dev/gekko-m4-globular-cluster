@@ -1,5 +1,4 @@
 /*
-
   The sticky order is an advanced order:
     - It is created at a limit price of X
       - if limit is not specified always at bbo.
@@ -11,39 +10,38 @@
 
   TODO:
     - native move
-
 */
 
-const _ = require('../../core/lodash');
+const _ = require('lodash');
 const async = require('async');
-const events = require('node:events');
+const EventEmitter = require('events');
+const sticky = new EventEmitter();
 const moment = require('moment');
 const errors = require('../exchangeErrors');
 const BaseOrder = require('./order');
 const states = require('./states');
-const util=require('../../core/util.js');
+const util=require('../../core/util');
 
-class StickyOrder extends BaseOrder {
+class StickyOrder extends EventEmitter {
   constructor({api, marketConfig, capabilities}) {
-    super(api)
+    super(api, marketConfig, capabilities);
+    EventEmitter.call(this);
     this.market = marketConfig;
     this.capabilities = capabilities;
-
-    // global async lock
-    this.sticking = true;
+    this.sticking = false;
 
     // bound helpers
     this.roundPrice = this.api.roundPrice.bind(this.api);
     this.roundAmount = this.api.roundAmount.bind(this.api);
-    if(_.isFunction(this.api.outbidPrice)) {this.outbidPrice = this.api.outbidPrice.bind(this.api);}
-    this.debug = this.api.name === config.trader.exchange;
+    if(_.isFunction(this.api.outbidPrice)) {
+      this.outbidPrice = this.api.outbidPrice.bind(this.api);
+    }
+
+    this.debug = this.api.name === 'Deribit2';
     this.log = m => this.debug && console.log(new Date, m);
   }
 
   create(side, rawAmount, params = {}) {
-    this.createRetry = 0;
-    this.setTakerLimit = params.setTakerLimit;
-
     if(this.completed || this.completing) {
       return false;
     }
@@ -73,7 +71,7 @@ class StickyOrder extends BaseOrder {
     }
 
     this.status = states.SUBMITTED;
-    this.emitStatus();
+    sticky.emitStatus();
 
     this.orders = {};
 
@@ -84,7 +82,11 @@ class StickyOrder extends BaseOrder {
       this.createOrder();
     } else {
       this.api.getTicker((err, ticker) => {
-        if(this.handleError(err)) {console.log(new Date, 'error get ticker');return;}
+        if(this.handleError(err)) {
+          console.log(new Date, 'error get ticker');
+          return;
+        }
+
         this.price = this.calculatePrice(ticker);
         this.createOrder();
       });
@@ -94,6 +96,7 @@ class StickyOrder extends BaseOrder {
   }
 
   calculatePrice(ticker) {
+
     const r = this.roundPrice;
 
     if(this.initialLimit && !this.id) {
@@ -108,7 +111,7 @@ class StickyOrder extends BaseOrder {
       }
 
       if(!this.outbid) {
-        return r(Number(ticker.bid));
+        return r(ticker.bid);
       }
 
       const outbidPrice = this.outbidPrice(ticker.bid, true);
@@ -126,7 +129,7 @@ class StickyOrder extends BaseOrder {
       }
 
       if(!this.outbid) {
-        return r(Number(ticker.ask));
+        return r(ticker.ask);
       }
 
       const outbidPrice = this.outbidPrice(ticker.ask, false);
@@ -140,18 +143,11 @@ class StickyOrder extends BaseOrder {
   }
 
   createOrder() {
-    if(this.completed || this.completing) {return false;}
+    if(this.completed || this.completing) {
+      return false;
+    }
 
     const alreadyFilled = this.calculateFilled();
-
-    let setTakerLimit = String(this.setTakerLimit);
-    if (setTakerLimit.charAt(setTakerLimit.length-1) == '%') {
-      if (setTakerLimit.slice(0,-1) > 0 && this.side === 'buy') this.price = this.roundPrice(Number(this.price) + Number(this.price*setTakerLimit.slice(0,-1)/100));
-      if (setTakerLimit.slice(0,-1) > 0 && this.side === 'sell') this.price = this.roundPrice(Number(this.price) - Number(this.price*setTakerLimit.slice(0,-1)/100));
-    } else {
-      if (this.setTakerLimit > 0 && this.side === 'buy') this.price = this.roundPrice(Number(this.price) + Number(this.setTakerLimit));
-      if (this.setTakerLimit > 0 && this.side === 'sell') this.price = this.roundPrice(Number(this.price) - Number(this.setTakerLimit));
-    }
 
     this.submit({
       side: this.side,
@@ -191,7 +187,7 @@ class StickyOrder extends BaseOrder {
           }
 
           this.orders[id].filled = amount;
-          this.emit('fill', this.calculateFilled());
+          sticky.emit('fill', this.calculateFilled());
           if(this.calculateFilled() >= this.amount) {
             return this.filled(this.price);
           }
@@ -237,11 +233,11 @@ class StickyOrder extends BaseOrder {
       filled: 0
     }
 
-    this.emit('new order', this.id);
+    sticky.emit('new order', this.id);
     this.emit('movelimit handled', new Date);
 
     this.status = states.OPEN;
-    this.emitStatus();
+    sticky.emitStatus();
 
     this.scheduleNextCheck();
   }
@@ -320,7 +316,7 @@ class StickyOrder extends BaseOrder {
       }
 
       this.status = states.CHECKED;
-      this.emitStatus();
+      sticky.emitStatus();
 
       if(this.handleError(err)) {
         console.log(new Date, 'checkOrder error');
@@ -330,7 +326,7 @@ class StickyOrder extends BaseOrder {
       if(result.open) {
         if(result.filledAmount !== this.orders[this.id].filled) {
           this.orders[this.id].filled = result.filledAmount;
-          this.emit('fill', this.calculateFilled());
+          sticky.emit('fill', this.calculateFilled());
         }
 
         // if we are already at limit we dont care where the top is
@@ -363,7 +359,7 @@ class StickyOrder extends BaseOrder {
           }
 
           this.ticker = ticker;
-          this.emit('ticker', ticker);
+          sticky.emit('ticker', ticker);
 
           const bookSide = this.side === 'buy' ? 'bid' : 'ask';
           // note: might be string VS float
@@ -383,28 +379,21 @@ class StickyOrder extends BaseOrder {
 
       if(!result.executed) {
         // not open and not executed means it never hit the book
-        this.createRetry++;
-        if (this.createRetry > 3) {
-          console.log(this.side, this.status, this.id, 'not open not executed!', result);
-          this.rejected();
-          throw 'a';
-          return;
-        } else {
-          console.log('Error while opening a new order, will retry in 1 min. Attempt:', this.createRetry);
-          setTimeout(this.createOrder, 60000);
-          return;
-        }
+        console.log(this.side, this.status, this.id, 'not open not executed!', result);
+        this.rejected();
+        throw 'a';
+        return;
       }
 
       // order got filled!
       this.orders[this.id].filled = this.amount;
-      this.emit('fill', this.amount);
+      sticky.emit('fill', this.amount);
       this.filled(this.price);
     });
 
 
     this.status = states.CHECKING;
-    this.emitStatus();
+    sticky.emitStatus();
   }
 
   // global error handler
@@ -416,10 +405,10 @@ class StickyOrder extends BaseOrder {
     console.log(new Date, '[sticky order] FATAL ERROR', error.message);
     console.log(new Date, error);
     this.status = states.ERROR;
-    this.emitStatus();
+    sticky.emitStatus();
     this.error = error;
 
-    this.emit('error', error);
+    sticky.emit('error', error);
     return true;
   }
 
@@ -430,7 +419,7 @@ class StickyOrder extends BaseOrder {
     // it got filled before we could cancel
     if(filled) {
       this.orders[this.id].filled = this.amount;
-      this.emit('fill', this.amount);
+      sticky.emit('fill', this.amount);
       this.filled(this.price);
       return;
     }
@@ -448,7 +437,7 @@ class StickyOrder extends BaseOrder {
 
       if(amountFilled > this.orders[this.id].filled) {
         this.orders[this.id].filled = amountFilled;
-        this.emit('fill', this.calculateFilled());
+        sticky.emit('fill', this.calculateFilled());
       }
     }
 
@@ -461,7 +450,7 @@ class StickyOrder extends BaseOrder {
     }
 
     this.status = states.MOVING;
-    this.emitStatus();
+    sticky.emitStatus();
 
     this.log(`${this.side} ${this.id} this.move 1`);
 
@@ -518,7 +507,7 @@ class StickyOrder extends BaseOrder {
       return false;
     }
 
-    this.emit('movelimit', new Date);
+    sticky.emit('movelimit', new Date);
 
     if(
       this.status === states.INITIALIZING ||
@@ -566,7 +555,7 @@ class StickyOrder extends BaseOrder {
       return true;
     }
 
-    this.emit('movelimit handled', new Date);
+    sticky.emit('movelimit handled', new Date);
     return false;
   }
 
@@ -663,7 +652,7 @@ class StickyOrder extends BaseOrder {
       }
 
       this.status = states.CANCELLED;
-      this.emitStatus();
+      sticky.emitStatus();
 
       this.finish(false);
     })
@@ -678,31 +667,19 @@ class StickyOrder extends BaseOrder {
 
     const checkOrders = _.keys(this.orders)
       .map(id => next => {
-
-        if(!this.orders[id].filled) {
-          return next();
-        }
-
+        if(!this.orders[id].filled) {return next();}
         setTimeout(() => this.api.getOrder(id, next), this.checkInterval);
       });
 
-    async.series(checkOrders, (err, trades) => {
-      // note this is a standalone function after the order is
-      // completed, as such we do not use the handleError flow.
-      if(err) {
-        console.log(new Date, 'error createSummary (checkOrder)')
-        return next(err);
-      }
+    async.auto(checkOrders, (err, trades) => {
+      if(err) {console.log(new Date, 'error createSummary (checkOrder)')return next(err);}
 
       let price = 0;
       let amount = 0;
       let date = moment(0);
 
       _.each(trades, trade => {
-        if(!trade) {
-          return;
-        }
-
+        if(!trade) {return;}
         // last fill counts
         date = moment(trade.date);
         price = ((price * amount) + (+trade.price * trade.amount)) / (+trade.amount + amount);
@@ -755,18 +732,12 @@ class StickyOrder extends BaseOrder {
         });
       }
 
-      this.emit('summary', summary);
-      next(undefined, summary);
+      sticky.emit('summary', summary);next(undefined, summary);
     });
   }
 
 }
+util.makeEventEmitter(StickyOrder);util.inherit(StickyOrder, EventEmitter);
 
 module.exports = StickyOrder;
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+
