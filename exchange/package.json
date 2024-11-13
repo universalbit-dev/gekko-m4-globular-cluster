@@ -4,17 +4,7 @@
   "description": "Gekko's order execution library",
   "main": "gekkoBroker.js",
   "type": "git",
-  "dependencies": {
-    "async": "^3.2.4",
-    "axios": "^1.6.1",
-    "ccxt": "^4.4.20",
-    "dotenv": "^16.4.5",
-    "fs-extra": "^11.2.0",
-    "moment": "^2.22.1",
-    "retry": "^0.13.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
-  },
+  "dependencies": {},
   "contributor": "universalbit-dev",
   "author": "Mike van Rossum <mike@mvr.me>",
   "license": "MIT",
@@ -30,7 +20,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {
-    "@types/node": "^22.7.7"
-  }
+  "devDependencies": {}
 }
