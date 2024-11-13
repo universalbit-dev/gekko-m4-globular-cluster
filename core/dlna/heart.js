@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const EventEmitter= require('node:events'); 
 var util = require('../util');
 var config = util.getConfig();

@@ -3,7 +3,7 @@
 
 */
 const EventEmitter=require('node:events');
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('../util');
 var config = require('../../core/util.js').getConfig();
 var MarketFetcher = require('./marketFetcher');
