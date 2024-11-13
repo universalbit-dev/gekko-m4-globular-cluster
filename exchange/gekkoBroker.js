@@ -5,13 +5,14 @@
   - the management of actual trades to "orders".
 */
 
-var Promise = require("bluebird");const _ = Promise.promisify(require("lodash"));
+//Why Promises https://bluebirdjs.com/docs/why-promises.html
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const async = require('async');
 const EventEmitter = require('events');const eventEmitter = new EventEmitter();
 const util=require('../core/util');
 var config = util.getConfig();
 const moment = require('moment');
-//Why Promises https://bluebirdjs.com/docs/why-promises.html
+
 var checker=Promise.promisifyAll(require("./exchangeChecker.js"));
 var errors=Promise.promisifyAll(require("./exchangeErrors.js"));
 var Portfolio=Promise.promisifyAll(require("./portfolioManager.js"));
