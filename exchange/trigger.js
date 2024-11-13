@@ -1,10 +1,10 @@
 // wraps around a low level trigger and feeds
 // it live market data.
 
-var Promise = require("bluebird");const _ = Promise.promisify(require("lodash"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var exchangeUtils=Promise.promisifyAll(require("./exchangeUtils.js"));
 const bindAll = exchangeUtils.bindAll;
-var triggers=Promise.promisifyAll(require("./trigger.js"));
+var triggers=Promise.promisifyAll(require("./triggers/trailingStop.js"));
 
 // @param api: a gekko broker wrapper instance
 // @param type: type of trigger to wrap
