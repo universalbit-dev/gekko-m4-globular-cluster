@@ -30,15 +30,6 @@ node gekko -c ecosystem/import/import.js -i
 ---
 
 * Plugins to Enable/Disable:[import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/.env/import/import.js)
-  
-#### Import mode
-| Plugin         | description     | enable  |
-|--------------|-----------|------------|
-| BackTest | Testing your strategy      | disabled        |
-| CandleWriter | Store Candle in a database      | enabled        |
-| PaperTrader      | Simulate Fake Trades  | disabled       |
-| Importer | Import Exchange Data      | enabled        |
-| TradingAdvisor | Advice Buy-Sell Orders      | disabled        |
 
 #### Resources:
 * [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Import Exchange Data:
