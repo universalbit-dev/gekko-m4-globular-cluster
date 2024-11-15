@@ -1,28 +1,25 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-#### [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Trade: 
-### [ExchangeSimulator]
+## -- Ecosystem Trade -- 
+#### simulates your strategies using exchange simulator by running gekko-m4 in realtime mode
+
+#### Run gekko-m4 realtime mode -- pm2 -- terminal commands
 ```bash
 cd ~/gekko-m4-globular-cluster
 pm2 start trade.config.js
+#runs all available strategies
 ```
-<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/mode/trade/images/exchange_simulator.png" width="auto" />
 
-
-#### Gekko Realtime Mode:
+#### Run gekko-m4 realtime mode  -- node -- terminal commands
 
 ```bash
 cd ~/gekko-m4-globular-cluster
-node gekko.js -c ecosystem/trade/trade_rsibullbearadx_simulator.js 
-```
-
-```bash
-cd ~/gekko-m4-globular-cluster
-node gekko.js -c ecosystem/trade/trade_nn_simulator.js 
+node gekko.js -c ecosystem/trade/trade_nn_simulator.js
+#executes a strategy
 ```
 ---
 
-[exchangesimulator](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/trade/trade_rsibullbearadx_simulator.js)
-* realtime mode
+* Plugins to Enable/Disable: [trade_inverter_simulator.js](https://github.com/universalbit-dev/gekko-m4/blob/master/.env/trade/trade_inverter_simulator.js)
 
-<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/nn_exchange_simulator.png" width="auto" />
+#### Resources:
+* [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Trade: 
