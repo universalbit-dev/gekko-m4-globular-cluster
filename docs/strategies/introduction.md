@@ -1,11 +1,8 @@
-# Gekko Strategies
-
-Gekko uses [technical analysis indicators](http://www.investopedia.com/articles/active-trading/102914/technical-analysis-strategies-beginners.asp) inside **strategies**.
-
-This investment advice is going to be either **long** or **short**. Long indicates that Gekko the asset should be bought and short indicates that it should be sold.
+## Gekko Strategies 
+* [community-strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/community-strategies)
+* [community-indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/community-indicators)
 
 If you are familiar with javascript you can easily create your own strategies. Here is a video explaining everything you need to know:
-
 * [How to create Gekko Strategies](https://www.youtube.com/watch?v=6-74ZhrG0BE)
 
 Below you can find simple and exemplary strategies that come with Gekko. These strategies come with Gekko and serve as examples.
