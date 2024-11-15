@@ -14,7 +14,7 @@ pm2 start import.config.js
 cd ~/gekko-m4-globular-cluster
 node gekko -c ecosystem/import/import.js -i
 ```
-#### Example gekko-m4 -- import mode -- terminal output
+#### Example gekko-m4 terminal output
 
 ```bash
 2024-03-26 13:00:20 (DEBUG):	Processing 980 new trades. From 2022-02-18 08:01:04 UTC to 2022-02-19 23:06:29 UTC. (2 days)
