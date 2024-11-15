@@ -6,20 +6,12 @@ This investment advice is going to be either **long** or **short**. Long indicat
 
 If you are familiar with javascript you can easily create your own strategies. Here is a video explaining everything you need to know:
 
-[![youtube video on how to create gekko strategies](https://gekko.wizb.it/_static/create-strat-vid.jpg)](https://www.youtube.com/watch?v=6-74ZhrG0BE)
+* [How to create Gekko Strategies](https://www.youtube.com/watch?v=6-74ZhrG0BE)
 
 Below you can find simple and exemplary strategies that come with Gekko. These strategies come with Gekko and serve as examples.
 
 Gekko currently comes with the following example strategies:
-
- - [DEMA](#DEMA)
- - [MACD](#MACD)
- - [PPO](#PPO)
- - [RSI](#RSI)
- - [StochRSI](#StochRSI)
- - [CCI](#CCI)
- - [talib-macd](#talib-macd)
- - [tulip-macd](#tulip-macd)
+* -- [DEMA](#DEMA) -- [MACD](#MACD) -- [PPO](#PPO) -- [RSI](#RSI) -- [StochRSI](#StochRSI) -- [CCI](#CCI) -- [talib-macd](#talib-macd) -- [tulip-macd](#tulip-macd)
 
 ### DEMA
 
@@ -158,7 +150,6 @@ You can configure the following parameters:
     down = -100
     persistence = 0
 
-[TODO!]
 
 ### talib-macd
 
@@ -189,5 +180,3 @@ You can configure the following parameters:
     [thresholds]
     down = -0.025
     up = 0.025
-
-[TODO!]
