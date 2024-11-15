@@ -2,7 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-//import kraken exchange data
+//import exchange data
 config.watch = {exchange: '',currency:'BTC',asset:'LTC',tickrate:60}; //frequency information [3 - 10 - 20 - 60]
 
 //Trading Advisor
