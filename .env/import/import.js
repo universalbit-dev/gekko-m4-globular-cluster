@@ -1,12 +1,7 @@
 var config = {};
 //General Settings
 config.debug =true;
-
 config.watch = {exchange: '',currency:'BTC',asset:'LTC',tickrate:60};
-
-config.api={interval:317811}; //5.29685 minutes
-config.expects={candle:987}; //987 seconds
-
 
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 //Strategies
