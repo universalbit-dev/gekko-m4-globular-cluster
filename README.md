@@ -6,7 +6,7 @@
 
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-globular-cluster.png" width="auto"></img>   
 
-## Gekko-m4-globular-cluster
+## gekko-m4-globular-cluster
 Let's naturalize the cryptocurrency
 #### gekko -- mode -- means running the application to import test and simulate your strategies
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
@@ -28,17 +28,19 @@ npm i pm2 -g
 
 #### -- import mode --  -- [work in progress ccxt module](https://mastodon.social/@UniversalBit/113005114572853788) --
 ```bash
-pm2 start import.config.js 
+pm2 start import.config.js
+#import exchange data 
 ```
 #### -- backtest mode --
 ```bash
 pm2 start backtest.config.js
-#result directory: logs/json/
+#test all available strategies and write results into logs/json/ directory
 ```
 
 #### -- realtime mode -- exchange simulator 
 ```bash
-pm2 start trade.config.js 
+pm2 start trade.config.js
+#simulate all available strategies
 ```
 
 ### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
