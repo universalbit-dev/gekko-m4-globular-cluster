@@ -1,12 +1,9 @@
 # Creating a strategy
-
-*Have you made your own strategy? Gekko Plus is hosting an official Strategy contest: submit your strategy and have a change to win 0.1 BTC! Read more details on [Gekko Plus](https://app.gekkoplus.com/contest).*
-
 Strategies are the core of Gekko's trading bot. They look at the market and decide what to do based on technical analysis indicators. A single strategy is limited to a single market on a single exchange.
 
 Gekko currently comes with [a couple of strategies](./introduction.md) out of the box. Besides those you can also write your own strategy in javascript. If you want to understand how to create your own strategy you can watch this video or read the tech docs on this page.
 
-[![youtube video on how to create gekko strategies](https://gekko.wizb.it/_static/create-strat-vid.jpg)](https://www.youtube.com/watch?v=6-74ZhrG0BE)
+[How to create gekko strategies](https://www.youtube.com/watch?v=6-74ZhrG0BE)
 
 A strategy is a module with a few functions that get market data in the form of candles ([OHLC](https://en.wikipedia.org/wiki/Open-high-low-close_chart), volume, and the average weighted price) and output trading advice.
 
@@ -180,7 +177,7 @@ Gekko uses a few general purpose libraries internally.  The API from those libra
 You can load them like so:
 
     // before any other code
-    var _ = require('lodash');
+    var _ = require('underscore');
     var async = require('async');
 
 ### Logging
