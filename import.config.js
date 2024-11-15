@@ -2,7 +2,7 @@ module.exports = {
   apps : [{
     name: "import",
     script    : 'gekko.js',
-    args      : '-c ecosystem/import/import.js -i',
+    args      : '-c .env/import/import.js -i',
     name      : '|- import exchange data -|',
     instances : "1",
     autorestart: false,
