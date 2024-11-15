@@ -12,7 +12,7 @@ pm2 start import.config.js
 #### Run gekko-m4 import mode -- node -- terminal commands
 ```bash
 cd ~/gekko-m4-globular-cluster
-node gekko -c ecosystem/import/import.js -i
+node gekko -c .env/import/import.js -i
 ```
 #### Example gekko-m4 terminal output
 
