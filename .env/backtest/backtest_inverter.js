@@ -4,8 +4,6 @@ config.debug =true;
 
 //import kraken exchange data
 config.watch = {exchange: '',currency:'BTC',asset:'LTC',tickrate:60}; //frequency information [3 - 10 - 20 - 60]
-config.api={interval:317811}; //5.29685 minutes
-config.expects={candle:987}; //987 seconds
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10};
