@@ -1,16 +1,20 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-#### [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Import Exchange Data:
+## -- Ecosystem Import -- 
+### Import Exchange Data:
+
+#### Run gekko-m4 import mode -- pm2 -- terminal commands
 ```bash
 cd ~/gekko-m4-globular-cluster
 pm2 start import.config.js
 ```
 
-#### Gekko Import Exchange Data:
+#### Run gekko-m4 import mode -- node -- terminal commands
 ```bash
 cd ~/gekko-m4-globular-cluster
 node gekko -c ecosystem/import/import.js -i
 ```
+#### Example gekko-m4 -- import mode -- terminal output
 
 ```bash
 2024-03-26 13:00:20 (DEBUG):	Processing 980 new trades. From 2022-02-18 08:01:04 UTC to 2022-02-19 23:06:29 UTC. (2 days)
@@ -24,9 +28,10 @@ node gekko -c ecosystem/import/import.js -i
 ```
 
 ---
-Plugins to Enable/Disable:[import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/ecosystem/import/import.js)
-* import mode
 
+* Plugins to Enable/Disable:[import.js](https://github.com/universalbit-dev/gekko-m4/blob/master/.env/import/import.js)
+  
+#### Import mode
 | Plugin         | description     | enable  |
 |--------------|-----------|------------|
 | BackTest | Testing your strategy      | disabled        |
@@ -35,6 +40,8 @@ Plugins to Enable/Disable:[import.js](https://github.com/universalbit-dev/gekko-
 | Importer | Import Exchange Data      | enabled        |
 | TradingAdvisor | Advice Buy-Sell Orders      | disabled        |
 
+#### Resources:
+* [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Import Exchange Data:
 
 
 
