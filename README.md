@@ -42,20 +42,22 @@ pm2 start backtest.config.js
 pm2 start trade.config.js
 #simulate all available strategies
 ```
-
+### [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md):
+#### Method of buying and selling
 ### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
 #### Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
-* [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
-
 #### install tulind npm package 
 ```bash
 npm install tulind --build-from-source
 ```
+* [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
+* [gekko_indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/gekko_indicators.md)
+
+
 
 #### Resources:
 * ##### [PM2](https://pm2.keymetrics.io/) Process Manager
 * ##### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
-* ##### [gekko_indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/gekko_indicators.md)
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 * ##### [Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)
 * ##### [NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
