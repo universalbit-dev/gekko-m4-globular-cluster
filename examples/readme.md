@@ -1,6 +1,3 @@
-#### [Developer Area]
-
-
 #### The CCXT library is used to connect and trade with cryptocurrency exchanges and payment processing services worldwide.
 [CCXT](https://www.npmjs.com/package/ccxt)
 ```bash
