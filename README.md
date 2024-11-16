@@ -26,7 +26,7 @@ npm i pm2 -g
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
 ---
 
-#### -- import mode --  -- [work in progress ccxt module](https://mastodon.social/@UniversalBit/113005114572853788) --
+#### -- import mode --  -- [work in progress ccxt module](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/examples) --
 ```bash
 pm2 start import.config.js
 #import exchange data 
