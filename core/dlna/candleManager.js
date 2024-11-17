@@ -2,7 +2,7 @@
 const EventEmitter  = require('node:events'); 
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var moment = require('moment');
-var fs = require('fs-extra');
+const fs = Promise.promisifyAll(require("node:fs"));
 var util = require('../../core/util');
 var dirs = util.dirs();
 var config = require('../../core/util.js').getConfig();

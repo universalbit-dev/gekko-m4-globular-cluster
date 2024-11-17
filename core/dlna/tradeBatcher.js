@@ -40,12 +40,6 @@ TradeBatcher.prototype.write = function(batch) {
   setTimeout(() => {spinner.success()}, math.random(min,max));
   //setTimeout(() => {spinner.spin()}, math.random(min,max));
   spinner.update({text: 'Processed',color: 'yellow',stream: process.stdout,frames: ['..', 'o', '0', '@@', '*'],interval: math.random(min,max),});
-  /*log.debug(
-    'Processing', amount, 'new trades.',
-    'From',first.date.format('YYYY-MM-DD HH:mm:ss'),
-    'UTC to',last.date.format('YYYY-MM-DD HH:mm:ss'),
-    'UTC.','(' + first.date.from(last.date, true) + ')'
-  );*/
 
   this.emit('new batch', {
     amount: amount,

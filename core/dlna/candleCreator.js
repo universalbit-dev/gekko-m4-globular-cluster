@@ -6,8 +6,7 @@ var Promise = require("bluebird");const _ = Promise.promisifyAll(require("unders
 var moment = require('moment');
 var util = require('../../core/util');
 var config = require('../../core/util.js').getConfig();
-//expects a candle every 987 second, if nothing happened during 987 seconds will add empty candle.
-var expects=987; //
+var expects=3; /* */
 
 var CandleCreator = function() {
   EventEmitter.call(this);
@@ -90,6 +89,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
+//expects a candle every 3 second, if nothing happened will add empty candle.
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
   if(!amount)return candles;
