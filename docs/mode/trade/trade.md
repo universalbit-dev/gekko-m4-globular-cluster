@@ -1,6 +1,6 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-## -- Ecosystem Trade -- 
+## -- Ecosystem Realtime -- 
 #### simulates your strategies using exchange simulator by running gekko-m4 in realtime mode
 
 #### Run gekko-m4 realtime mode -- pm2 -- terminal commands
