@@ -9,9 +9,10 @@
 ## gekko-m4-globular-cluster
 Let's naturalize the cryptocurrency
 #### gekko -- mode -- means running the application to import data, test and simulate your strategies
+
 * [import](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/import/import.md)
 * [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
-* [trade](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
+* [realtime](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
 
 ##### unlike easy gains and record price
 
