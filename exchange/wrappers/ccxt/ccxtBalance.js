@@ -39,7 +39,7 @@
 var Promise = require("bluebird");const ccxt = Promise.promisifyAll(require("ccxt"));
 
 //Javascript Examples https://docs.ccxt.com/#/examples/js/
-var id = 'exmo'; /* Exchange Name */
+var id = ''; /* Exchange Name */
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
 
 //Fetch Exchange Balance.Private HTTP REST APIs (apiKey:secret required)
