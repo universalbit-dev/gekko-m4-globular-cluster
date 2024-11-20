@@ -45,7 +45,7 @@ var side = 'sell';
 var amount = 0.01;          
 var price = 1;      
 var params = {};         
-var id = 'exmo'; /* Exchange Name */
+var id = ''; /* Exchange Name */
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
 
 //Market Sell Order.Private HTTP REST APIs (apiKey:secret required)
