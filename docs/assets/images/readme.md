@@ -1,7 +1,3 @@
-| Images                           |                              |
-| ----------------------------------- | ----------------------------------- |
-| ![ngc-6121_01](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/assets/images/geko.png) | ![ngc-6121_02](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/assets/images/logo.png) |
+##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support) -- [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) -- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html) -- [Join Mastodon](https://mastodon.social/invite/wTHp2hSD) -- [Website](https://www.universalbit.it/) -- [Content Delivery Network](https://universalbitcdn.it/) -- [Nodejs20](https://nodejs.org/en/blog/release/v20.15.0) -- [NVM](https://github.com/nvm-sh/nvm) --
 
-|                             |                             |
-| ----------------------------------- | ----------------------------------- |
-| ![ngc-6121_03](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/assets/images/small_logo.png) |  |
+<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/assets/images/geko.png" width="5%" />
