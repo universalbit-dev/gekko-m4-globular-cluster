@@ -1,15 +1,19 @@
 /*
 
 */
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter  = require('events'); 
+
+//https://github.com/petkaantonov/bluebird/blob/2.x/API.md#promisification
+var Promise = require("bluebird");
+const _ = Promise.promisifyAll(require("underscore"));
+const EventEmitter = Promise.promisifyAll(require("node:events"));
+
 var util = require('../util');
-const { inspect } = require('util');
 var config = require('../../core/util.js').getConfig();
-var dirs = util.dirs();
-var Heart = require(dirs.dlna + 'heart');
-var MarketDataProvider =  require(dirs.dlna + 'marketDataProvider');
-var CandleManager = require(dirs.dlna + 'candleManager');
+
+var Heart = require("./heart.js");
+var MarketDataProvider = require("./marketDataProvider.js");
+var CandleManager =require("./candleManager.js");
+
 var Dlna = function(config) {
   EventEmitter.call(this);
   _.bindAll(this,_.functions(Dlna.prototype));
@@ -31,8 +35,7 @@ var Dlna = function(config) {
   this.marketDataProvider.on('trades',this.candleManager.processTrades);
   this.heart.pump();
 }
-util.makeEventEmitter(Dlna);util.inherit(Dlna, EventEmitter);
-
+Promise.promisifyAll(Dlna);
 var Readable = require('stream').Readable;
 Dlna.prototype = Object.create(Readable.prototype, {constructor: { value: Dlna }});
 Dlna.prototype._read = function noop() {};
