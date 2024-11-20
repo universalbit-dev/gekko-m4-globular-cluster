@@ -40,7 +40,7 @@ var Promise = require("bluebird");const ccxt = Promise.promisifyAll(require("ccx
 //Javascript Examples https://docs.ccxt.com/#/examples/js/
 const symbol = 'LTC/BTC'; /* */
 var timeframe= '15m';     /* */   
-var id = 'exmo'; /* Exchange Name */
+var id = ''; /* Exchange Name */
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
 
 //Fetch OHLCV .Public HTTP REST APIs(apiKey:secret not required)
