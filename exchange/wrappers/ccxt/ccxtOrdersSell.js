@@ -59,7 +59,7 @@ const sell = async function() {
     try {
     side='sell';
     const orders = await exchange.createOrder(symbol,type,side,amount);
-    return console.log ('Submitted Sell Order -- Wohoo! -- ');
+    return console.log ('Submitted Sell Order -- Wohoo! -- ',orders);
     }
     catch (e) {
     console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message)
