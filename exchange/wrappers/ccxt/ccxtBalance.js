@@ -50,9 +50,9 @@ var exchange = new ccxt[id] ({
     });
 
 const balance = async function() {
-    try {
-    const ccxtbalance = await exchange.fetchBalance ();ccxtbalance.free['LTC','BTC'];
-    return console.log ('Balance -- Wohoo! -- ');
+   try {
+    const ccxtbalance = await exchange.fetchBalance ();
+    return console.log ('Balance -- Wohoo! -- ',ccxtbalance.free['LTC','BTC']);
     }
     catch (e) {
     console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message)
