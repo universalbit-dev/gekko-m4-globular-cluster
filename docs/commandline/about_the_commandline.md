@@ -27,7 +27,7 @@ To import run:
 ```
 node gekko --config config.js --import
 ```    
-## Gekko UI
+## Gekko UI (Disabled)
 ```
 pm2 start gekko-m4.js
 ```
