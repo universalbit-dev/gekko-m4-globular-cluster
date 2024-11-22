@@ -1,24 +1,37 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require('lodash');
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-const EventEmitter = require('events');
-const log=require("../../core/log.js");
-const async=require('async');
+var Promise = require("bluebird");
 
-var Broker=require("../../exchange/gekkoBroker.js");
+const log = require(dirs.core + 'log');
 
-var Trader = function(next) {
-  EventEmitter.call(this);
-  _.bindAll(this,_.functions(Trader.prototype));
-  this.brokerConfig = {...config.trader,...config.watch,private: true};
-  this.propogatedTrades = 0;this.propogatedTriggers = 0;
+const Broker =Promise.promisifyAll(require("../../exchange/gekkoBroker.js"));
+Promise.promisifyAll(require("../../exchange/dependencyCheck.js"));
 
-  try {this.broker = new Broker(this.brokerConfig);} 
-  catch(e) {util.die(e.message);}
+const Trader = function(next) {
 
-  if(!this.broker.capabilities.gekkoBroker) {util.die('This exchange is not yet supported');}
+  _.bindAll(this);
+
+  this.brokerConfig = {
+    ...config.trader,
+    ...config.watch,
+    private: true
+  }
+
+  this.propogatedTrades = 0;
+  this.propogatedTriggers = 0;
+
+  try {
+    this.broker = new Broker(this.brokerConfig);
+  } catch(e) {
+    util.die(e.message);
+  }
+
+  if(!this.broker.capabilities.gekkoBroker) {
+    util.die('This exchange is not yet supported');
+  }
 
   this.sync(() => {
     log.info('\t', 'Portfolio:');
@@ -27,33 +40,58 @@ var Trader = function(next) {
     log.info('\t', 'Balance:');
     log.info('\t\t', this.balance, this.brokerConfig.currency);
     log.info('\t', 'Exposed:');
-    log.info('\t\t',this.exposed ? 'yes' : 'no',`(${(this.exposure * 100).toFixed(2)}%)`);next();
+    log.info('\t\t',
+      this.exposed ? 'yes' : 'no',
+      `(${(this.exposure * 100).toFixed(2)}%)`
+    );
+    next();
   });
-  this.cancellingOrder = false;this.sendInitialPortfolio = false;setInterval(this.sync, 1000 * 60 * 10);
+
+  this.cancellingOrder = false;
+  this.sendInitialPortfolio = false;
+
+  setInterval(this.sync, 1000 * 60 * 10);
 }
 
 // teach our trader events
-util.makeEventEmitter(Trader);util.inherit(Trader, EventEmitter);
+util.makeEventEmitter(Trader);
 
 Trader.prototype.sync = function(next) {
   log.debug('syncing private data');
   this.broker.asyncPrivateData(() => {
-    if(!this.price) {this.price = this.broker.ticker.bid;}
+    if(!this.price) {
+      this.price = this.broker.ticker.bid;
+    }
+
     const oldPortfolio = this.portfolio;
-    this.setPortfolio();this.setBalance();
-    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {this.relayPortfolioChange();}
+
+    this.setPortfolio();
+    this.setBalance();
+
+    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
+      this.relayPortfolioChange();
+    }
+
     // balance is relayed every minute
     // no need to do it here.
-    if(next) {next();}
+
+    if(next) {
+      next();
+    }
   });
 }
 
 Trader.prototype.relayPortfolioChange = function() {
-  this.deferredEmit('portfolioChange', {asset: this.portfolio.asset,currency: this.portfolio.currency});
+  this.deferredEmit('portfolioChange', {
+    asset: this.portfolio.asset,
+    currency: this.portfolio.currency
+  });
 }
 
 Trader.prototype.relayPortfolioValueChange = function() {
-  this.deferredEmit('portfolioValueChange', {balance: this.balance});
+  this.deferredEmit('portfolioValueChange', {
+    balance: this.balance
+  });
 }
 
 Trader.prototype.setPortfolio = function() {
@@ -90,7 +128,13 @@ Trader.prototype.processCandle = function(candle, done) {
     });
   }
 
-  if(this.balance !== previousBalance) {this.relayPortfolioValueChange();}
+  if(this.balance !== previousBalance) {
+    // this can happen because:
+    // A) the price moved and we have > 0 asset
+    // B) portfolio got changed
+    this.relayPortfolioValueChange();
+  }
+
   done();
 }
 
@@ -253,7 +297,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
 
       log.info('[ORDER] summary:', summary);
       this.order = null;
-      this.sync(() => {
+      this.async(() => {
 
         let cost;
         if(_.isNumber(summary.feePercent)) {
@@ -362,7 +406,7 @@ Trader.prototype.cancelOrder = function(id, advice, next) {
       adviceId: advice.id,
       date: moment()
     });
-    this.sync(next);
+    this.async(next);
   });
 }
 
