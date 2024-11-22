@@ -5,7 +5,7 @@ var plugins = [
     slug: 'candleWriter',
     async: true,
     modes: ['realtime', 'importer'],
-    path: config => 'sqlite/writer.js',
+    path: config => config.adapter + '/writer',
     version: 0.1,
   },
   {
@@ -61,6 +61,13 @@ var plugins = [
     greedy: true
   },
   {
+    name: 'Backtest result export',
+    description: 'Exports the results of a gekko backtest',
+    slug: 'backtestResultExporter',
+    async: false,
+    modes: ['backtest']
+  },
+  {
     name: 'Child to parent',
     description: 'Relays events from the child to the parent process',
     slug: 'childToParent',
@@ -68,16 +75,10 @@ var plugins = [
     modes: ['realtime'],
     greedy: true
   },
-  {
-    name: 'Backtest result export',
-    description: 'Exports the results of a gekko backtest',
-    slug: 'backtestResultExporter',
-    async: false,
-    modes: ['backtest']
-  }
 ];
 
 module.exports = plugins;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
