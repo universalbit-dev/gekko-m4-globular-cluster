@@ -1,5 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs = require('node:fs');
+var _ = require('underscore');
 var config = require('../../core/util.js').getConfig();
 
 var sqlite = require('./handle');

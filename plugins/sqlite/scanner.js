@@ -1,6 +1,6 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs = require('node:fs');
+const _ = require('underscore');
 const async = require('async');
+const fs = require('fs-extra');
 
 const util = require('../../core/util.js');
 const config = util.getConfig();

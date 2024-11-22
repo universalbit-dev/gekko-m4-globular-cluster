@@ -1,6 +1,6 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs = require('node:fs');
-
+var _ = require('underscore');
+var fs = require('fs-extra');
+var Promise = require("bluebird");Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
 var util = require('../../core/util.js');
 var config = util.getConfig();
 var dirs = util.dirs();
@@ -46,7 +46,7 @@ if (mode === 'realtime' || mode === 'importer') {
 
 module.exports = {
   initDB: () => {
-    var journalMode = config.sqlite.journalMode || 'PERSIST';
+    var journalMode = 'WAL';
     var syncMode = journalMode === 'WAL' ? 'NORMAL' : 'FULL';
   
     var db = new sqlite3.Database(fullPath);
