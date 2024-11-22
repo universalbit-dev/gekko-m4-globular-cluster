@@ -2,7 +2,7 @@
 
 const retry = require('retry');
 const errors = require('./exchangeErrors');
-const _ = require('lodash');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 
 const retryInstance = (options, checkFn, callback, e) => {
   if(!options) {
