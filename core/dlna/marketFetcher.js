@@ -40,7 +40,7 @@ var Fetcher = function(config) {
 
   //log.info('Starting to watch the market:',this.exchange.name,this.pair);
 // if the exchange returns an error we will keep on retrying until next scheduled fetch.
-  this.tries = 2;
+  this.tries = 0;
   this.limit = 21;
   this.firstFetch = true;
   this.batcher.on('new batch', this.relayTrades);
