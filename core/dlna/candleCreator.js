@@ -4,8 +4,8 @@
 const EventEmitter=require('node:events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var moment = require('moment');
-var util = require('../../core/util');
-var config = require('../../core/util.js').getConfig();
+var util = require('../util.js');
+var config = require('../util.js').getConfig();
 var expects=3; /* */
 
 var CandleCreator = function() {
@@ -14,7 +14,7 @@ var CandleCreator = function() {
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
-util.makeEventEmitter(CandleCreator);util.inherit(CandleCreator, EventEmitter);
+util.makeEventEmitter(CandleCreator);util.inherit(CandleCreator, EventEmitter);Promise.promisifyAll(CandleCreator);
 
 CandleCreator.prototype.write = function(batch) {
   var trades = batch.data;

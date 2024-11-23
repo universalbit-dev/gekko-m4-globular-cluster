@@ -5,9 +5,10 @@
 const EventEmitter=require('node:events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('../util');
-var config = require('../../core/util.js').getConfig();
-var MarketFetcher = require('./marketFetcher');
+var config = require('../util.js').getConfig();
+var MarketFetcher = require("./marketFetcher");
 var dirs = util.dirs();
+
 var Manager = function(config) {
   EventEmitter.call(this);
   _.bindAll(this,_.functions(Manager.prototype));
@@ -17,7 +18,7 @@ var Manager = function(config) {
   this.source
     .on('trades batch', this.relayTrades);
 }
-util.makeEventEmitter(Manager);util.inherit(Manager, EventEmitter);
+util.makeEventEmitter(Manager);util.inherit(Manager, EventEmitter);Promise.promisifyAll(Manager);
 
 // HANDLERS
 Manager.prototype.retrieve = function() {

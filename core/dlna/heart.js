@@ -4,14 +4,14 @@ var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
 var moment = require('moment');
-var TICKRATE = config.watch.tickrate;
+var TICKRATE = 20;
 
 var Heart = function() {
   EventEmitter.call(this);
   this.lastTick = false;
   _.bindAll(this, _.functions(Heart.prototype));
 }
-util.makeEventEmitter(Heart);util.inherit(Heart, EventEmitter);
+util.makeEventEmitter(Heart);util.inherit(Heart, EventEmitter);Promise.promisifyAll(Heart);
 
 Heart.prototype.pump = function() {
   log.debug('scheduling ticks');

@@ -3,11 +3,12 @@ const EventEmitter  = require('node:events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var moment = require('moment');
 const fs = Promise.promisifyAll(require("node:fs"));
-var util = require('../../core/util');
+var util = require('../util.js');
 var dirs = util.dirs();
-var config = require('../../core/util.js').getConfig();
-var log = require('../../core/log');
-var CandleCreator = require('./candleCreator.js');
+var config = require('../util.js').getConfig();
+var log = Promise.promisifyAll(require('../log.js'));
+var CandleCreator = Promise.promisifyAll(require('./candleCreator.js'));
+
 var Manager = function(candle) {
   EventEmitter.call(this);
   _.bindAll(this,_.functions(Manager.prototype));
@@ -15,7 +16,7 @@ var Manager = function(candle) {
   this.candleCreator
   .on('candles', this.relayCandles);
 };
-util.makeEventEmitter(Manager);util.inherit(Manager, EventEmitter);
+util.makeEventEmitter(Manager);util.inherit(Manager, EventEmitter);Promise.promisifyAll(Manager);
 
 Manager.prototype.processTrades = function(tradeBatch) {this.candleCreator.write(tradeBatch);}
 Manager.prototype.relayCandles = function(candles) {this.emit('candles', candles);}

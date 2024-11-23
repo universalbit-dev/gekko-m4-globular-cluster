@@ -5,16 +5,16 @@ var utc = moment.utc;
 var util = require('../util');
 var dirs = util.dirs();
 var config = util.getConfig();
-var log = require(dirs.core + 'log');
-var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
-var TradeBatcher = require(dirs.dlna + 'tradeBatcher');
+var log = require('../log.js');
+var exchangeChecker = require('../../exchange/exchangeChecker.js');
+var TradeBatcher = Promise.promisifyAll(require('./tradeBatcher'));
 
 var Fetcher = function(config) {
   EventEmitter.call(this);
   if(!_.isObject(config))throw new Error('TradeFetcher expects a config');
 
   var exchangeName = config.watch.exchange.toLowerCase();
-  var DataProvider = require(util.dirs().gekko + 'exchange/wrappers/' + exchangeName);
+  var DataProvider = require('../../exchange/wrappers/' + exchangeName);
   _.bindAll(this,_.functions(Fetcher.prototype));
 
 // Create a public dataProvider object which can retrieve live
@@ -40,12 +40,12 @@ var Fetcher = function(config) {
 
   //log.info('Starting to watch the market:',this.exchange.name,this.pair);
 // if the exchange returns an error we will keep on retrying until next scheduled fetch.
-  this.tries = 0;
+  this.tries = 2;
   this.limit = 21;
   this.firstFetch = true;
   this.batcher.on('new batch', this.relayTrades);
 }
- util.makeEventEmitter(Fetcher);util.inherit(Fetcher, EventEmitter);
+ util.makeEventEmitter(Fetcher);util.inherit(Fetcher, EventEmitter);Promise.promisifyAll(Fetcher);
 
 
 Fetcher.prototype._fetch = function(since) {
@@ -74,7 +74,7 @@ Fetcher.prototype.processTrades = function(err, trades) {
       log.debug('refetching...');
     } else
       log.debug('Trade fetch came back empty, refetching...');
-    setTimeout(this._fetch, +moment.duration('s', 34));
+    setTimeout(this._fetch, +moment.duration('s', 21));
     return;
   }
   this.batcher.write(trades);

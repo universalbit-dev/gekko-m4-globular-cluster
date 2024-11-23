@@ -1,9 +1,8 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const EventEmitter=require('node:events');
-var moment = require('moment');
-var util = require('../../core/util.js');
-var config = require('../../core/util.js').getConfig();
-var log = require('../../core/log');
+var moment = Promise.promisifyAll(require("moment"));
+var util = require('../util.js');var config = require('../util.js').getConfig();
+var log = require('../log.js');
 const { createSpinner } =require('nanospinner');
 var math=require('mathjs');
 
@@ -15,7 +14,7 @@ var TradeBatcher = function(tid) {
   this.tid = tid;
   this.last = -1;
 }
-util.makeEventEmitter(TradeBatcher);util.inherit(TradeBatcher, EventEmitter);
+util.makeEventEmitter(TradeBatcher);util.inherit(TradeBatcher, EventEmitter);Promise.promisifyAll(TradeBatcher);
 
 TradeBatcher.prototype.write = function(batch) {
 
