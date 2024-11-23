@@ -1,6 +1,8 @@
-var _ = require('lodash');
+const { addon: ov } = require('openvino-node');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var log = require('../core/log.js');
 const { Chess } = require('chess.js');
+var fs = require("fs-extra");
 var method = {};
 
 method.makeoperator = function() {
@@ -12,7 +14,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 method.init = function() {
   this.name = 'SCALPER';
   this.addTulipIndicator('ps', 'psar', {optInAcceleration: 0.25,optInMaximum: 0.50});
-  this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
+  //this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
   this.candle_queue = [];
   this.is_buyin = false;
   this.price_buyin = 0;
@@ -61,9 +63,9 @@ return console.log(chess.pgn())
 }
 
 method.check = function(candle) {
-  if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-      {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();} /* */
-      
+  //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+      //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell')} /* */
+
   log.debug("Operator ");this.makeoperator();
   log.debug("Random game of Chess");this.fxchess();
   if (this.candle_queue.length >= 15) {
@@ -93,21 +95,19 @@ method.check = function(candle) {
     MovingTR.push(valid);
     var MovingSlower = MovingTR[MovingTR.length - 2] > valid;
 
-    if (CandeLow && !MovingSlower && valid > 0 && !this.is_buyin && this.candle.close > this.psar) {
-      this.price_buyin = candle.close;
-      log.debug("valid : ", valid);
-      this.candle_queue.length = 0;
-      runningMin = 0;
-      runninMax = 0;
-      Downslow.length = 0;
-
-      this.is_buyin = true;
-      return this.advice(); /* */
-    } else if (candle.close >= runninMax && this.is_buyin) {
-      this.is_buyin = false;
-      return this.advice(); /* */
+    switch(true){
+    
+    case (CandeLow && !MovingSlower && valid > 0 && !this.is_buyin && this.candle.close > this.psar):
+    this.price_buyin = candle.close;log.debug("valid : ", valid);
+    this.candle_queue.length = 0;runningMin = 0;runninMax = 0;Downslow.length = 0;
+    this.is_buyin = true;this.advice('buy');break;/* */
+    
+    case(candle.close >= runninMax && this.is_buyin):
+    this.is_buyin = false;this.advice('sell');break;/* */
+    
+    default:log.info();
     }
-
+    
   }
 }
 

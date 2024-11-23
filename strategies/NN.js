@@ -1,32 +1,30 @@
+const { addon: ov } = require('openvino-node');
 /*     */
-require('../core/tulind');
-const { spawn } = require('node:child_process');
-const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
+
 var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
-const _ = require('../core/lodash.js');
-var async = require('async');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var fs = require("fs-extra");
 const { Chess } = require('chess.js');
+
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');var uuid = require('uuid');
-var fs = require('node:fs');
+
 var settings = config.NN;this.settings=settings;var chess_universe = [];
-var cov = require('compute-covariance');
+var cov = require( 'compute-covariance' );
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
 async function sequence() {await sequence;};
-
 /* async keep calm and make something of amazing */
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
 };
-
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
@@ -47,7 +45,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     startTime = new Date();
     //indicators
     //StopLoss as indicator
-    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
+    //this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
     this.hodle_threshold = this.settings.hodle_threshold || 1;
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
@@ -57,12 +55,12 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
-    var x = 1;
+    var x = Math.floor(Math.random() * fibonacci_sequence.length);
+    if (x == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
     x = fibonacci_sequence[x];this.x=x;
     var y = 1;
     y = fibonacci_sequence[y];this.y=y;
-    var z = Math.floor(Math.random() * fibonacci_sequence.length);
-    if (z == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
+    var z = 1;
     z = fibonacci_sequence[z];this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     
@@ -121,7 +119,7 @@ switch(this.settings.method)
 //https://cs.stanford.edu/people/karpathy/convnetjs/docs.html
   
   brain: function(){
-    var brain = new deepqlearn.Brain(this.x,this.z);
+    var brain = new deepqlearn.Brain(this.x, this.z);
     var state = [Math.random(), Math.random(), Math.random()];
     for(var k=0;k < _.size(this.priceBuffer) - 1;k++)
     {
@@ -142,13 +140,7 @@ log : function(candle) {
     });
 },
 
-onTrade: function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
-},
-
-makeoperator: function () {
+makeoperator: async function () {
 var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
 var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
@@ -160,7 +152,7 @@ var prediction = this.nn.forward(vol);
 return prediction.w[0];
 },
 
-fxchess : function(){
+fxchess :async function(){
   const chess = new Chess()
   while (!chess.isGameOver()) {
   const moves = chess.moves()
@@ -169,9 +161,9 @@ fxchess : function(){
 }
 chess_universe.push([chess.pgn()]); /* */
 return console.log(chess.pgn())
-//return console.log(chess_universe)
 },
-  check : async function(candle) {
+
+  check :async function(candle) {
   //log.debug("Operator ");this.fxchess();
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
@@ -194,8 +186,8 @@ return console.log(chess.pgn())
   
 if(this.stochRSI > this.settings.high) {
 //new trend detected
-if(this.trend.direction !== 'high')
-this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
+if(this.trend.direction !== 'long')
+this.trend = {duration: 0,persisted: false,direction: 'long',adviced: false};
 		this.trend.duration++;
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration)this.trend.persisted = true;
@@ -204,16 +196,16 @@ this.trend = {duration: 0,persisted: false,direction: 'high',adviced: false};
 }
 else if(this.stochRSI < this.settings.low) {
 		// new trend detected
-		if(this.trend.direction !== 'low')this.trend = {duration: 0,persisted: false,direction: 'low',adviced: false};
+		if(this.trend.direction !== 'short')this.trend = {duration: 0,persisted: false,direction: 'short',adviced: false};
 		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
-		else {return this.advice();} /* */
+		else {_.noop;} /* */
 	} else {
 		// trends must be on consecutive candles
 		this.trend.duration = 0;
-		log.debug('In no trend');return this.advice();this.learn(); /* */
+		log.debug('In no trend');this.learn(); /* */
 	}
     if(this.predictionCount > this.settings.min_predictions)
     {
@@ -240,24 +232,20 @@ else if(this.stochRSI < this.settings.low) {
     log.info("Beta:" + Beta)
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
-    if(Beta < 1){this.advice();}
+    if(Beta < 1){log.info('');}
     }
-    if ((this.trend.adviced && this.stochRSI !== 0)&&('buy' !== this.prevAction)&&((signal === false)&&(Alpha > this.settings.threshold_buy)))
-    {
-    var buyprice = this.candle.low;
-    this.advice();/* */
-    }
-    if ((this.trend.adviced && this.stochRSI !== 0)&&((signal === true)&&(Alpha > this.settings.threshold_sell)))
-    {
-    var sellprice = this.candle.high;
-    this.advice();/* */
-    }
-//StopLoss and Reinforcement Learning
-if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-    {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();this.brain();} /* */
+    if (this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
+    {var buyprice = this.candle.low;this.advice('buy');/* */}
     
+    if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
+    {var sellprice = this.candle.high;this.advice('sell');/* */}
+//StopLoss 
+//if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+   //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */
+this.brain();    
 }, /* */
   
   end : function() {log.info('THE END');}
 };
 module.exports = method;
+

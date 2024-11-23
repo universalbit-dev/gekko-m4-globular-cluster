@@ -1,12 +1,11 @@
-require('../core/tulind');
-const { spawn } = require('node:child_process');
-const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
+const { addon: ov } = require('openvino-node');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-const _ = require('../core/lodash');
-const fs = require('node:fs');
+var fs = require("fs-extra");
 var settings = config.INVERTER;this.settings=settings;
-var async = require('async');var rl=[];
+Promise.promisifyAll(require('../plugins/trader/trader.js'));
+
 const { Chess } = require('chess.js')
 
 /* async fibonacci sequence */
@@ -14,8 +13,7 @@ var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','14
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
 
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;
-};
+async function sequence() {await sequence;};
 
 /* async keep calm and make something of amazing */
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
@@ -31,6 +29,7 @@ function AuxiliaryIndicators(){
        log.debug('added', auxiliaryindicators);
    }
  }
+ 
 //INIT
 var method = {
  prevPrice : 0,prevAction :'none',
@@ -54,7 +53,7 @@ this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFas
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
 
 //gekko indicators engine
-this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
+//this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');
@@ -87,7 +86,7 @@ onTrade: function(event) {
     this.prevAction = event.action;
     this.prevPrice = event.price;
   },
-
+/* */
  fxchess : function(){
   const chess = new Chess()
   while (!chess.isGameOver()) {
@@ -98,25 +97,22 @@ onTrade: function(event) {
 return console.log(chess.pgn())
 },
 
-check: function(candle)
+check: function()
 {
 log.debug("Random game of Chess");this.fxchess();
 rsi=this.tulipIndicators.rsi.result.result;
-adx=this.tulipIndicators.adx.result.result;
-dx=this.tulipIndicators.dx.result.result;
-longema = this.tulipIndicators.longema.result.result;
-shortema = this.tulipIndicators.shortema.result.result;
-di_plus = this.tulipIndicators.di.result.diPlus;
-di_minus = this.tulipIndicators.di.result.diMinus;
+adx=this.tulipIndicators.adx.result.result;dx=this.tulipIndicators.dx.result.result;
+longema = this.tulipIndicators.longema.result.result;shortema = this.tulipIndicators.shortema.result.result;
+di_plus = this.tulipIndicators.di.result.diPlus;di_minus = this.tulipIndicators.di.result.diMinus;
 dema = this.tulipIndicators.dema.result.result;
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 68 && rsi < 72):return this.advice();this.makeoperator();rl=[];break;
-	case (rsi > 28 && rsi < 32):return this.advice();this.makeoperator();rl=[];break;
-	case (rsi > 40 && rsi < 60):break;
+	case (rsi > 70 && rsi < 80):this.advice('sell');this.makeoperator();break;
+	case (rsi > 20 && rsi < 30):this.advice('buy');this.makeoperator();break;
+	case (rsi > 40 && rsi < 60):return _.noop;break;
 	default:_.noop;
 }
 
@@ -139,51 +135,40 @@ switch (true) {
 	switch (true)
 	{
 	case (adxstrength == 'weak'):this.trend.direction = 'weak';break;
-	case ((adxstrength == 'strong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.ls='long';this.short();rl=[];break;
-	case ((adxstrength == 'strong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.ls='short';this.long();rl=[];break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.ls='long';this.short();rl=[];break;
-	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.ls='short';this.long();rl=[];break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.ls='long';this.short();rl=[];break;
-	case ((adxstrength == 'extremestrong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.ls='short';this.long();rl=[];break;
-	default:_.noop;
+	case ((adxstrength == 'strong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.ls='long';this.advice('short');break;
+	case ((adxstrength == 'strong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.ls='short';this.advice('long');break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.ls='long';this.advice('short');break;
+	case ((adxstrength == 'verystrong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.ls='short';this.advice('long');break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state !== 'long')):this.trend.direction = 'screw_up';this.trend.ls='long';this.advice('short');break;
+	case ((adxstrength == 'extremestrong')&&(this.trend.state !== 'short')):this.trend.direction = 'screw_down';this.trend.ls='short';this.advice('long');break;
+	default: _.noop;
 	}
 	//trend moving down
     if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='short';}
     //trend moving up
     else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='long';}
     else _.noop;
-    if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-      {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();} /* */
+    
+    //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+    //  {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */
 },
 
 /* LONG  */
   long: function() {
-    if (this.trend.direction !== 'screw_down')
+    if (this.trend.direction.length != 0 && this.trend.direction !==  'screw_up')
     {
     this.trend.ls='long';
-    this.trend.direction = 'screw_down';
-    var buyprice = this.candle.low;
-    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+    this.trend.direction = 'screw_up';this.advice('buy');
 	}
-    
-    if ((_.sumBy(rl, Number) > this.settings.rl)){return this.advice();rl=[];} /* */
-    if (this.debug){log.info('uptrend');}
   },
 
-  /* SHORT  */
-  short: function() {
-    if (this.trend.direction !== 'screw_up')
+/* SHORT  */
+  short: function() { 
+    if (this.trend.direction.length != 0 && this.trend.direction !== 'screw_down')
     {
     this.trend.ls='short';
-    this.trend.direction = 'screw_up';
-    var sellprice = this.candle.high;
-    var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+    this.trend.direction = 'screw_down';this.advice('sell');
     }
-    
-    if ((_.sumBy(rl, Number) > this.settings.rl)){return this.advice();rl=[];} /* */
-    if (this.debug){log.info('downtrend');}
   },
 
 end: function(){log.info('|The End|');}

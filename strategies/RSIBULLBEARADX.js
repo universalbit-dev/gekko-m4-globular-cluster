@@ -1,23 +1,22 @@
-require('../core/tulind');
+const { addon: ov } = require('openvino-node');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var async = require('async');
-var _ = require('../core/lodash');
-const fs = require('node:fs');
-var settings = config.RSIBULLBEARADX;this.settings=settings;var rl=[];
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const fs = require("fs-extra");
+
+var settings = config.RSIBULLBEARADX;this.settings=settings;
+const { Chess } = require('chess.js');
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
 
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;
-};
+async function sequence() {await sequence;};
 
 /* async keep calm and make something of amazing */
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
-};
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
@@ -43,7 +42,7 @@ var method = {
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();
-    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+    //this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     // SMA
     this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.SMA_long});
     this.addTulipIndicator('maFast', 'sma', {optInTimePeriod:this.settings.SMA_short});
@@ -83,51 +82,64 @@ var method = {
     this.trend = trend;
   },
 
-  /* get low/high for backtest-period */
+  /* GET low/high for backtest-period */
   lowHigh: function(val, type) {
     let cur;
-    if (type == 'bear') {
-      cur = this.stat.bear;
-      if (val < cur.min) this.stat.bear.min = val; // set new
+    if (type == 'bear') {cur = this.stat.bear;
+      if (val < cur.min) this.stat.bear.min = val;
       else if (val > cur.max) this.stat.bear.max = val;
     } else if (type == 'bull') {
       cur = this.stat.bull;
-      if (val < cur.min) this.stat.bull.min = val; // set new
+      if (val < cur.min) this.stat.bull.min = val;
       else if (val > cur.max) this.stat.bull.max = val;
     } else {
       cur = this.stat.adx;
-      if (val < cur.min) this.stat.adx.min = val; // set new
+      if (val < cur.min) this.stat.adx.min = val;
       else if (val > cur.max) this.stat.adx.max = val;
     }
   },
 
-update : function(candle) {_.noop},
+update : function(candle) {_.noop;},
 
 log : function(candle) {
-//general purpose log data
+/* general purpose log data */
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
     candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
     if (err) {return console.log(err);}
     });
 },
 
+/* FXChess */
+ fxchess : function(){
+  const chess = new Chess()
+  while (!chess.isGameOver()) {
+  const moves = chess.moves()
+  const move = moves[Math.floor(Math.random() * moves.length)]
+  chess.move(move)
+}
+return console.log(chess.pgn())
+},
+
   /* CHECK */
   check: function(candle) {
+    log.debug("Random game of Chess");this.fxchess();
     // get all indicators
     let ind = this.tulipIndicators,
     maSlow =  this.tulipIndicators.maSlow.result.result,
     maFast =  this.tulipIndicators.maFast.result.result,
     adx =  this.tulipIndicators.adx.result.result,
     rsi =  this.tulipIndicators.rsi.result.result;
+      
     if (maFast < maSlow)
     {
     //bear rsi
       rsi = this.tulipIndicators.BEAR_RSI.result.result;
       let rsi_hi = this.settings.BEAR_RSI_high,rsi_low = this.settings.BEAR_RSI_low;
       //ADX
-      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
-      if (rsi > rsi_hi) this.short();else if (rsi < rsi_low) this.long();
-      if (this.debug) this.lowHigh(rsi, 'bear');
+      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BEAR_MOD_high;
+      else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BEAR_MOD_low;
+      else if (rsi < rsi_low) this.long();
+      else  this.lowHigh(rsi, 'bear');
     }
 
     else
@@ -136,45 +148,29 @@ log : function(candle) {
       rsi = this.tulipIndicators.BULL_RSI.result.result;
       let rsi_hi = this.settings.BULL_RSI_high,rsi_low = this.settings.BULL_RSI_low;
       // ADX
-      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
-      if (rsi > rsi_hi) this.short();else if (rsi < rsi_low) this.long();
-      if (this.debug) this.lowHigh(rsi, 'bull');
+      if (adx > this.settings.ADX_high) rsi_hi = rsi_hi + this.BULL_MOD_high;
+      else if (adx < this.settings.ADX_low) rsi_low = rsi_low + this.BULL_MOD_low;
+      else if (rsi > rsi_hi) this.short();
+      else  this.lowHigh(rsi, 'bull');
     }
     // add adx low/high if debug
-    if (this.debug) this.lowHigh(adx, 'adx');sequence();
+    if (this.debug) this.lowHigh(adx, 'adx');
   },
 
   /* LONG  */
   long: function() {
-    if (this.trend.direction !== 'down')
-    {
-    this.resetTrend();this.trend.direction = 'down';
-    var buyprice = this.candle.low;
-    var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-    log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
-	}
-    this.advice();rl=[]; /* */
-    if (this.debug) log.info('Going long');
-    if (this.debug) {this.trend.duration++;log.info('Long since', this.trend.duration, 'candle(s)');}
+    if(this.trend.direction != 'long')
+    this.trend = {duration: 0,direction: 'long',longPos: true};
+    this.trend.duration++;
+    log.debug('-- UP --', this.trend.duration, 'candle(s)');
   },
 
   /* SHORT  */
   short: function() {
-    if (this.trend.direction !== 'up')
-    {
-      this.resetTrend();
-      this.trend.direction = 'up';
-      var sellprice = this.candle.high;
-      var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-      log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
-    }
-    this.advice();rl=[]; /* */
-    if (this.debug) log.info('Going short');
-    
-
-    if (this.debug) {this.trend.duration++;
-      log.info('Short since', this.trend.duration, 'candle(s)');
-    }
+    if (this.trend.direction != 'short') 
+    this.trend = {duration: 0,direction: 'short',longPos: false};
+    this.trend.duration++;
+    log.debug('-- DOWN --', this.trend.duration, 'candle(s)');
   },
 
 end : function() {log.info('THE END');}
@@ -195,4 +191,5 @@ module.exports = method;
 	https://github.com/Gab0/Gekko-extra-indicators
 	(c) Gabriel Araujo
 	Howto: Download + add to gekko/strategies/indicators
+	
 */

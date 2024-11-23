@@ -1,17 +1,16 @@
-require('../core/tulind');
-const { spawn } = require('node:child_process');
-const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
-var log = require('../core/log.js');var _ =require('../core/lodash');
-var async = require('async');
-const fs = require('node:fs');
+const { addon: ov } = require('openvino-node');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var log = require('../core/log.js');
+var fs = require("fs-extra");
 var config = require('../core/util.js').getConfig();
-var settings = config.SUPERTREND;this.settings=settings;var rl=[];
-const { Chess } = require('chess.js')
+
+var settings = config.SUPERTREND;this.settings=settings;
+const { Chess } = require('chess.js');
+
 
 /* async fibonacci sequence */
 var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
 var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
-
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
 async function sequence() {await sequence;};
 
@@ -19,17 +18,12 @@ async function sequence() {await sequence;};
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
-/* async check */
-var checksequence = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function seqcheck() {await checksequence;};
-
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
    var files = ['ATR','StopLoss'];
    for (var file of files){
        var auxiliaryindicators = require('./' + directory + file + extension);
-       log.debug('added', auxiliaryindicators);
    }
  }
 
@@ -44,13 +38,13 @@ init : function() {
   AuxiliaryIndicators();
   startTime= new Date();
   this.name = 'SUPERTREND';
-
+  console.log('Keep Calm and Make Something of Amazing');
   log.info("====================================");
   log.info('Running', this.name);
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
-  this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
+  //this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
   this.bought = 0;
 
   this.supertrend = {upperBandBasic : 0,lowerBandBasic : 0,upperBand : 0,lowerBand : 0,supertrend : 0,};
@@ -84,9 +78,10 @@ log : function(candle) {
 return console.log(chess.pgn())
 },
 
-check : async function(candle) {
-  if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-      {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice();} /* */
+
+check : function(candle) {
+  //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+      //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell')} /* */
 
   log.debug("Random game of Chess");this.fxchess();
   var atrResult =  this.tulipIndicators.atr.result.result;
@@ -114,25 +109,12 @@ check : async function(candle) {
   default:this.supertrend.supertrend = 0
   }
 
-  if(this.candle.close > this.supertrend.supertrend && this.bought == 0)
-  {
-  var buyprice = this.candle.low;
-  var profit = rl.push(((this.candle.close - buyprice)/buyprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
+  if(this.supertrend.supertrend != 0 && this.candle.close > this.supertrend.supertrend && this.bought != 0)
+  {this.bought = 1;log.debug("Buy at: ", this.candle.close);this.advice('buy');}
   
-  if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
-  this.bought = 1;log.debug("Buy at: ", candle.close);
-  }
     
-  else if(this.candle.close < this.supertrend.supertrend && this.bought == 1)
-  {
-  var sellprice = this.candle.high;
-  var profit = rl.push(((this.candle.close - sellprice)/sellprice*100).toFixed(2));
-  log.info('Calculated relative profit:',_.sumBy(rl, Number).toFixed(2));
-  
-  if (_.sumBy(rl, Number) > this.settings.rl){return this.advice();rl=[];} /* */
-  this.bought = 0;log.debug("Sell at: ", this.candle.close);
-  }
+  if(this.supertrend.supertrend !=0 && this.candle.close < this.supertrend.supertrend && this.bought != 1  )
+  {this.bought = 0;log.debug("Sell at: ", this.candle.close);this.advice('sell');}
 
   this.lastCandleClose = this.candle.close;
   this.lastSupertrend = 
@@ -141,7 +123,6 @@ check : async function(candle) {
     upperBand : this.supertrend.upperBand,lowerBand : this.supertrend.lowerBand,
     supertrend : this.supertrend.supertrend,
   };
-  sequence();
 },
 
 end : function() {log.info('THE END');}
