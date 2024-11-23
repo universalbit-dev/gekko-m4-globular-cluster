@@ -4,7 +4,6 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var fs = require("fs-extra");
 var settings = config.INVERTER;this.settings=settings;
-Promise.promisifyAll(require('../plugins/trader/trader.js'));
 
 const { Chess } = require('chess.js')
 
