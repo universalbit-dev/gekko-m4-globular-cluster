@@ -1,11 +1,11 @@
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
-const fs = require('fs-extra');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const fs = Promise.promisifyAll(require("fs-extra"));
 const EventEmitter= require('node:events');
 var moment = require('moment');
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
-var log = require(dirs.core + 'log');
+var log = Promise.promisifyAll(require("../log.js"));
 const batcher=require('../candleBatcher.js');
 
 var Stitcher = function(batcher) {
@@ -13,7 +13,7 @@ var Stitcher = function(batcher) {
   _.bindAll(this,_.functions(Stitcher.prototype));
   this.batcher = batcher;
 }
-util.makeEventEmitter(Stitcher);util.inherit(Stitcher, EventEmitter);
+util.makeEventEmitter(Stitcher);util.inherit(Stitcher, EventEmitter);Promise.promisifyAll(Stitcher);
 
 Stitcher.prototype.ago = function(ts) {
   var now = moment().utc();var then = moment.unix(ts).utc();
