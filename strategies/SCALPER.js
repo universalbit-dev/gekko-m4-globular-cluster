@@ -14,7 +14,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 method.init = function() {
   this.name = 'SCALPER';
   this.addTulipIndicator('ps', 'psar', {optInAcceleration: 0.25,optInMaximum: 0.50});
-  //this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
+  this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
   this.candle_queue = [];
   this.is_buyin = false;
   this.price_buyin = 0;

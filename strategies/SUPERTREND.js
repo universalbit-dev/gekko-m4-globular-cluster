@@ -44,7 +44,7 @@ init : function() {
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
-  //this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
+  this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
   this.bought = 0;
 
   this.supertrend = {upperBandBasic : 0,lowerBandBasic : 0,upperBand : 0,lowerBand : 0,supertrend : 0,};

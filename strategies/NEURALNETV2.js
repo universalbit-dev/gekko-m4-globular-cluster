@@ -55,7 +55,7 @@ var method = {
       l2_decay: this.settings.decay
     });
     
-    //this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
+    this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
     this.hodle_threshold = this.settings.hodle_threshold || 1;
   },
 

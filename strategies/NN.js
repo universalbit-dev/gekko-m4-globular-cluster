@@ -44,8 +44,8 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     //Date
     startTime = new Date();
     //indicators
-    //StopLoss as indicator
-    //this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
+
+    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
     this.hodle_threshold = this.settings.hodle_threshold || 1;
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});

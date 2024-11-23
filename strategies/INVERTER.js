@@ -50,9 +50,7 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFa
 this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.DI});
 this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
-
-//gekko indicators engine
-//this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
+this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');

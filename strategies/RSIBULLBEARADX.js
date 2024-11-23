@@ -42,7 +42,7 @@ var method = {
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();
-    //this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
+    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     // SMA
     this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.SMA_long});
     this.addTulipIndicator('maFast', 'sma', {optInTimePeriod:this.settings.SMA_short});
