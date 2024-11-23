@@ -1,11 +1,11 @@
-const EventEmitter=require('events');
-const _ = require('underscore');
-const fs = require('fs-extra');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const EventEmitter=require('node:events');
+const fs = Promise.promisifyAll(require("fs-extra"));
 const util = require('../../core/util');
 var config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-const log = require('../../core/log');
+const log = Promise.promisifyAll(require("../../core/log.js"));
 const CandleBatcher = require('../../core/candleBatcher');
 const isLeecher = config.market && config.market.type === 'leech';
 
@@ -19,15 +19,15 @@ const Actor = function(done){
 
   var mode = util.gekkoMode();
 
-  if(mode === 'realtime' && !isLeecher)
+  if(mode === 'realtime')
 {
     var Stitcher = require('../../core/tools/dataStitcher');
     var stitcher = new Stitcher(this.batcher);
     stitcher.prepareHistoricalData(done);
-} else done();
+}
 
 }
-util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);
+util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);Promise.promisifyAll(Actor);
 
 Actor.prototype.setupStrategy = function() {
   if(!fs.existsSync(dirs.methods + this.strategyName + '.js'))
@@ -36,7 +36,7 @@ Actor.prototype.setupStrategy = function() {
   log.info('\t', 'Using the strategy: ' + this.strategyName);
 
   const strategy = require(dirs.methods + this.strategyName);
-  const WrappedStrategy = require('./baseTradingMethod');
+  const WrappedStrategy = Promise.promisifyAll(require("./baseTradingMethod"));
   _.each(strategy, function(fn, name) {WrappedStrategy.prototype[name] = fn;});
 
   let stratSettings;
