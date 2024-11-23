@@ -1,17 +1,17 @@
-const _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('../core/util');
-const EventEmitter = require('events');
+const EventEmitter = require('node:events');
 const subscriptions = require('../subscriptions');
 const config = require('../core/util').getConfig().eventLogger;
 var log = require('../core/log');
-const fs= require('fs-extra');
+const fs= Promise.promisifyAll(require("fs-extra"));
 
 const EventLogger = function() {
 EventEmitter.call(this);
 _.bindAll(this, _.functions(EventLogger.prototype));
 _.each(subscriptions, sub => {if(config.whitelist && !config.whitelist.includes(sub.event))return;)}
 }
-util.makeEventEmitter(EventLogger);util.inherit(EventLogger, EventEmitter);
+util.makeEventEmitter(EventLogger);util.inherit(EventLogger, EventEmitter);Promise.promisifyAll(EventLogger);
 
   EventLogger.prototype[sub.handler] = (event, next) => {
     log.info(`\t\t\t\t[EVENT ${sub.event}]\n`, event);

@@ -1,6 +1,6 @@
 
-const _ = require('underscore');
-const EventEmitter = require('events');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const EventEmitter = require('node:events');
 var log = require('../core/log');
 const util = require('../core/util');
 config = util.getConfig();
@@ -8,10 +8,7 @@ moment = require('moment');
 
 adviceLoggerConfig = config.adviceLogger;
 
-const fs= require('fs-extra');
-const async=require('async');
-async.map(['adviceLogger.js','backtestResultExporter.js','childToParent.js','eventLogger.js'], fs.stat, function(err, results){_.noop;});
-
+const fs= Promise.promisifyAll(require("fs-extra"));
 
 var Actor = function() {
   EventEmitter.call(this);
@@ -19,7 +16,7 @@ var Actor = function() {
   this.marketTime = {format: function() {return 'N/A'}};
   _.bindAll(this, _.functions(Actor.prototype));
 }
-util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);
+util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);Promise.promisifyAll(Actor);
 
 Actor.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
