@@ -1,7 +1,7 @@
 /*
 Small writable stream wrapper
 */
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var Writable = require('stream').Writable;
 var async = require('async');
 var moment = require('moment');
@@ -23,7 +23,7 @@ var Gekko = function(plugins) {
   this.finalize = _.bind(this.finalize, this);
   _.bindAll(this, _.functions(Gekko.prototype));
 }
-util.makeEventEmitter(Gekko);util.inherit(Gekko, EventEmitter);
+util.makeEventEmitter(Gekko);util.inherit(Gekko, EventEmitter);Promise.promisifyAll(Gekko);
 
 Gekko.prototype = Object.create(Writable.prototype, {constructor: { value: Gekko }});
 
