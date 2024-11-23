@@ -9,27 +9,28 @@
   https://gekko.wizb.it/docs/internals/architecture.html
 
 */
-var util = require('./util');
-var dirs = util.dirs();
-const _ = require('underscore');
-const EventEmitter = require('events');const eventEmitter = new EventEmitter();
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var util = require('./util');var dirs = util.dirs();
 
-const utl=require('util');
+const EventEmitter=Promise.promisifyAll(require('node:events'));
+const eventEmitter = new EventEmitter();
+
+const utl=Promise.promisifyAll(require("util"));
+
 var async = require('async');
-var log = require(dirs.core + 'log');
+var log = Promise.promisifyAll(require("./log"));
 var pipeline = (settings) => {
   var mode = settings.mode;
   var config = util.getConfig();
-  var GekkoStream = require(dirs.core + 'gekkoStream');
+  var GekkoStream = Promise.promisifyAll(require("./gekkoStream"));
   var plugins = [];
   var emitters = {};
   var candleConsumers = [];
-  var pluginHelper = require(dirs.core + 'pluginUtil');
-  var pluginParameters = require(dirs.gekko + 'plugins');
-  var subscriptions = require(dirs.gekko + 'subscriptions');
+  var pluginHelper = Promise.promisifyAll(require("./pluginUtil"));
+  var pluginParameters = Promise.promisifyAll(require("../plugins"));
+  var subscriptions = Promise.promisifyAll(require("../subscriptions"));
   var market;
   var loadPlugins = function(next) {
-  EventEmitter.call(this);
     // load all plugins
     async.mapSeries(
       pluginParameters,
@@ -43,22 +44,18 @@ var pipeline = (settings) => {
       }
     );
   };
-  util.makeEventEmitter(loadPlugins);util.inherit(loadPlugins, EventEmitter);
-  
 
   var referenceEmitters = function(next) {
-  EventEmitter.call(this);
     _.each(plugins, function(plugin) {
       if(plugin.meta.emits)
         emitters[plugin.meta.slug] = plugin;
     });
     next();
   }
-  util.makeEventEmitter(referenceEmitters);util.inherit(referenceEmitters, EventEmitter);
+
 
   // Subscribe all plugins to other emitting plugins
   var subscribePlugins = function(next) {
-  EventEmitter.call(this);
     // events broadcasted by plugins
     var pluginSubscriptions = _.filter(
       subscriptions,
@@ -131,20 +128,16 @@ var pipeline = (settings) => {
     });
     next();
   }
-  util.makeEventEmitter(subscribePlugins);util.inherit(subscribePlugins, EventEmitter);
 
 
   var prepareMarket = function(next) {
-    EventEmitter.call(this);
     if(mode === 'backtest' && config.daterange === 'scan')
       require(dirs.core + 'prepareDateRange')(next);
     else
       next();
   }
-  util.makeEventEmitter(prepareMarket);util.inherit(prepareMarket, EventEmitter);
 
   var setupMarket = function(next) {
-  EventEmitter.call(this);
     // load a market based on the config (or fallback to mode)
     let marketType;
     if(config.market)
@@ -155,10 +148,8 @@ var pipeline = (settings) => {
     market = new Market(config);
     next();
   }
-  util.makeEventEmitter(setupMarket);util.inherit(setupMarket, EventEmitter);
   
   var subscribePluginsToMarket = function(next) {
-  EventEmitter.call(this);
     var marketSubscriptions = _.filter(
       subscriptions,
       {emitter: 'market'}
@@ -175,7 +166,6 @@ var pipeline = (settings) => {
     });
     next();
   }
-  util.makeEventEmitter(subscribePluginsToMarket);util.inherit(subscribePluginsToMarket, EventEmitter);
   
   log.info('Setting up Gekko in', mode, 'mode');
   log.info('');
@@ -194,6 +184,7 @@ var pipeline = (settings) => {
         .pipe(gekkoStream)
       market.on('end', gekkoStream.finalize);
     }
+    
   );
 
 }
