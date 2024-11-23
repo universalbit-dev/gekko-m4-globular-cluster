@@ -1,16 +1,13 @@
-const EventEmitter = require('events');
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const EventEmitter = require('node:events');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
 const dirs = util.dirs();
 const ENV = util.gekkoEnv();
-var log = require('../../core/log.js');
+var log = Promise.promisifyAll(require("../../core/log.js"));
 var config = util.getConfig();
-const fs=require('fs-extra');
-
-const async=require('async');
-async.map(['perfomanceAnalyzer.js','logger.js'], fs.stat, function(err, results){_.noop;});
+const fs=Promise.promisifyAll(require("fs-extra"));
 
 const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
@@ -39,7 +36,7 @@ const PerformanceAnalyzer = function() {
   this.openRoundTrip = false;
   this.warmupCompleted = false;
 }
-util.makeEventEmitter(PerformanceAnalyzer);util.inherit(PerformanceAnalyzer, EventEmitter);
+util.makeEventEmitter(PerformanceAnalyzer);util.inherit(PerformanceAnalyzer, EventEmitter);Promise.promisifyAll(PerformanceAnalyzer);
 
 PerformanceAnalyzer.prototype.processPortfolioValueChange = function(event) {
   if(!this.start.balance) {

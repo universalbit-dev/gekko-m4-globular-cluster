@@ -1,9 +1,10 @@
 // log trade performance results
-const EventEmitter = require('events');
-const _ = require('underscore');
+const EventEmitter = require('node:events');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+
 const moment = require('moment');
 const humanizeDuration = require('humanize-duration');
-var log = require('../../core/log.js');
+var log = Promise.promisifyAll(require('../../core/log.js'));
 const util = require('../../core/util.js');
 var config = util.getConfig();
 const dirs = util.dirs();
@@ -17,7 +18,7 @@ const Logger = function(watchConfig) {
   this.roundtrips = [];
   
 }
-util.makeEventEmitter(Logger);util.inherit(Logger, EventEmitter);
+util.makeEventEmitter(Logger);util.inherit(Logger, EventEmitter);Promise.promisifyAll(Logger);
 
 
 Logger.prototype.round = function(amount) {
