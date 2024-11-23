@@ -3,7 +3,7 @@ var util = require('../core/util');
 const EventEmitter = require('node:events');
 const subscriptions = require('../subscriptions');
 const config = require('../core/util').getConfig().eventLogger;
-var log = require('../core/log');
+var log = Promise.promisifyAll(require("../core/log.js"));
 const fs= Promise.promisifyAll(require("fs-extra"));
 
 const EventLogger = function() {
