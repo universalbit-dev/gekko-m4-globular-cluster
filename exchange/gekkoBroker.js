@@ -8,9 +8,11 @@
 //Why Promises https://bluebirdjs.com/docs/why-promises.html
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const async = require('async');
-const EventEmitter = require('events');const eventEmitter = new EventEmitter();
+const EventEmitter = Promise.promisifyAll(require("node:events"));
+const eventEmitter = new EventEmitter();
 
-const util=require('../core/util');var config = util.getConfig();
+const util=require('../core/util');
+var config = util.getConfig();
 const moment = require('moment');
 
 var checker=Promise.promisifyAll(require("./exchangeChecker.js"));
@@ -23,9 +25,11 @@ var exchangeUtils=Promise.promisifyAll(require("./exchangeUtils.js"));
 const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
 
+class Event extends EventEmitter {};
+
 class Broker extends EventEmitter{
   constructor(config) {
-  super(config);
+  super();
   EventEmitter.call(this);
   this.config = config;
     const slug = config.exchange.toLowerCase();
