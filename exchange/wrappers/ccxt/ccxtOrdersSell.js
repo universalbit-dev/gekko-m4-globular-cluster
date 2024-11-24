@@ -65,7 +65,7 @@ const sell = async function() {
     console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message)
      return console.log ('Submit Sell Order -- Error -- ');
     }
-};sell();
+};return sell();
 
 
 module.exports={sell};
