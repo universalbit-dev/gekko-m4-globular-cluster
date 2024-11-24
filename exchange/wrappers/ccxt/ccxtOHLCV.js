@@ -65,7 +65,7 @@ while (true) {
     else {console.log('No candles have been fetched');}
     };
 };
-ccxtohlcv();
+return ccxtohlcv();
 
 module.exports={ccxtohlcv};
 
