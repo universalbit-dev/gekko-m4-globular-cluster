@@ -11,7 +11,7 @@ const fs=Promise.promisifyAll(require("fs-extra"));
 
 const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
-const Logger = require('./logger');
+const Logger = Promise.promisifyAll(require('./logger'));
 const PerformanceAnalyzer = function() {
   _.bindAll(this,_.functions(PerformanceAnalyzer.prototype));
   EventEmitter.call(this);
