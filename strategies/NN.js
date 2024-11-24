@@ -235,10 +235,10 @@ else if(this.stochRSI < this.settings.low) {
     if(Beta < 1){log.info('');}
     }
     if (this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
-    {var buyprice = this.candle.low;this.advice('buy');/* */}
+    {var buyprice = this.candle.low;Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');/* */}
     
     if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
-    {var sellprice = this.candle.high;this.advice('sell');/* */}
+    {var sellprice = this.candle.high;Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');/* */}
 //StopLoss 
 //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
    //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */

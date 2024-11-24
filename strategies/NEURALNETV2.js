@@ -136,8 +136,8 @@ return console.log(chess.pgn())},
       let meanAlpha = (currentPrice - meanp) / currentPrice * 100;Alpha.push([meanAlpha]);
       let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice * this.hodle_threshold);
       let signal = meanp < currentPrice;log.info('Alpha: '+meanAlpha);
-      if ('buy' !== this.prevAction && signal === false && meanAlpha < this.settings.threshold_buy) {return this.advice('long');} /* */
-      if ('sell' !== this.prevAction && signal === true && meanAlpha > this.settings.threshold_sell && signalSell) {return this.advice('short');} /* */
+      if ('buy' !== this.prevAction && signal === false && meanAlpha < this.settings.threshold_buy) {return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');} /* */
+      if ('sell' !== this.prevAction && signal === true && meanAlpha > this.settings.threshold_sell && signalSell) {return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');} /* */
       
       switch(Alpha.length != 0){
       case (min < math.mean(min,max,median)):this.advice('long');break;

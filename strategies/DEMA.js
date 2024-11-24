@@ -85,8 +85,10 @@ check : function(candle) {
   }
 
   switch (true){
-  case(this.matrix  < this.settings.thresholds.down && sma != 'undefined' && this.matrix < 0): this.advice('long');break;
-  case(this.matrix > this.settings.thresholds.up && sma != 'undefined' && this.matrix > 0): this.advice('short');break;
+  case(this.matrix  < this.settings.thresholds.down && sma != 'undefined' && this.matrix < 0): 
+  Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');break;
+  case(this.matrix > this.settings.thresholds.up && sma != 'undefined' && this.matrix > 0): 
+  Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');break;
   default: _.noop;
   }
   

@@ -110,11 +110,11 @@ check : function(candle) {
   }
 
   if(this.supertrend.supertrend != 0 && this.candle.close > this.supertrend.supertrend && this.bought != 0)
-  {this.bought = 1;log.debug("Buy at: ", this.candle.close);this.advice('buy');}
+  {this.bought = 1;log.debug("Buy at: ", this.candle.close);Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');}
   
     
   if(this.supertrend.supertrend !=0 && this.candle.close < this.supertrend.supertrend && this.bought != 1  )
-  {this.bought = 0;log.debug("Sell at: ", this.candle.close);this.advice('sell');}
+  {this.bought = 0;log.debug("Sell at: ", this.candle.close);Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');}
 
   this.lastCandleClose = this.candle.close;
   this.lastSupertrend = 

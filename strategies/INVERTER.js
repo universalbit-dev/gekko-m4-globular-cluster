@@ -155,7 +155,7 @@ switch (true) {
     if (this.trend.direction.length != 0 && this.trend.direction !==  'screw_up')
     {
     this.trend.ls='long';
-    this.trend.direction = 'screw_up';this.advice('buy');
+    this.trend.direction = 'screw_up';Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');
 	}
   },
 
@@ -164,7 +164,7 @@ switch (true) {
     if (this.trend.direction.length != 0 && this.trend.direction !== 'screw_down')
     {
     this.trend.ls='short';
-    this.trend.direction = 'screw_down';this.advice('sell');
+    this.trend.direction = 'screw_down';Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');
     }
   },
 

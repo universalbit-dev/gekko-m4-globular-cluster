@@ -163,6 +163,7 @@ return console.log(chess.pgn())
     this.trend = {duration: 0,direction: 'long',longPos: true};
     this.trend.duration++;
     log.debug('-- UP --', this.trend.duration, 'candle(s)');
+    if (this.trend.duration == 3){Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));}
   },
 
   /* SHORT  */
@@ -171,6 +172,7 @@ return console.log(chess.pgn())
     this.trend = {duration: 0,direction: 'short',longPos: false};
     this.trend.duration++;
     log.debug('-- DOWN --', this.trend.duration, 'candle(s)');
+    if (this.trend.duration == 3) {Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));}
   },
 
 end : function() {log.info('THE END');}
