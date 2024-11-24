@@ -1,5 +1,5 @@
-const EventEmitter=require('node:events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const EventEmitter=Promise.promisifyAll(require('node:events'));
 var moment = require('moment');
 var utc = moment.utc;
 var util = require('../util');
@@ -7,7 +7,7 @@ var dirs = util.dirs();
 var config = util.getConfig();
 var log = require('../log.js');
 var exchangeChecker = require('../../exchange/exchangeChecker.js');
-var TradeBatcher = Promise.promisifyAll(require('./tradeBatcher'));
+var TradeBatcher = Promise.promisifyAll(require('./tradeBatcher.js'));
 
 var Fetcher = function(config) {
   EventEmitter.call(this);
