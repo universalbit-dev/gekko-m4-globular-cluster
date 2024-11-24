@@ -1,11 +1,12 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var fs = Promise.promisifyAll(require("fs-extra"));
 var config = require('../../core/util.js').getConfig();
+
 Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
-var sqlite = require('./handle');
-var sqliteUtil = require('./util');
-var util = require('../../core/util');
-var log = require('../../core/log');
+var sqlite = Promise.promisifyAll(require("./handle"));
+var sqliteUtil = Promise.promisifyAll(require("./util"));
+var util = Promise.promisifyAll(require("../../core/util"));
+var log = Promise.promisifyAll(require("../../core/log"));
 
 var Store = function(done, pluginMeta) {
   _.bindAll(this,_.functions(Store.prototype));
@@ -17,6 +18,7 @@ var Store = function(done, pluginMeta) {
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
+
 
 Store.prototype.upsertTables = function() {
   var createQueries = [

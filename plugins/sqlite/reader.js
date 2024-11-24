@@ -1,11 +1,11 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var fs = Promise.promisifyAll(require("fs-extra"));
-var util = require('../../core/util.js');
+var util = Promise.promisifyAll(require("../../core/util.js"));
 var config = util.getConfig();
-var log = require(util.dirs().core + 'log');
+var log = Promise.promisifyAll(require("../../core/log"));
 Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
-var sqlite = require('./handle');
-var sqliteUtil = require('./util');
+var sqlite = Promise.promisifyAll(require("./handle"));
+var sqliteUtil = Promise.promisifyAll(require("./util"));
 
 var Reader = function() {
   _.bindAll(this,_.functions(Reader.prototype));
