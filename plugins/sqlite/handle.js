@@ -1,6 +1,7 @@
-var _ = require('underscore');
-var fs = require('fs-extra');
-var Promise = require("bluebird");Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+Promise.promisifyAll(require("sqlite"));
+var fs = Promise.promisifyAll(require("fs-extra"));
+
 var util = require('../../core/util.js');
 var config = util.getConfig();
 var dirs = util.dirs();
@@ -19,7 +20,7 @@ if (cannotLoad) util.die(cannotLoad);
 
 // should be good now
 if (config.debug) var sqlite3 = require('sqlite3').verbose();
-else var sqlite3 = require('sqlite3');
+else var sqlite3 = Promise.promisifyAll(require("sqlite"));
 
 var plugins = require(util.dirs().gekko + 'plugins');
 
@@ -46,7 +47,7 @@ if (mode === 'realtime' || mode === 'importer') {
 
 module.exports = {
   initDB: () => {
-    var journalMode = 'WAL';
+    var journalMode = config.sqlite.journalMode || 'PERSIST';
     var syncMode = journalMode === 'WAL' ? 'NORMAL' : 'FULL';
   
     var db = new sqlite3.Database(fullPath);

@@ -1,8 +1,9 @@
-var _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var fs = Promise.promisifyAll(require("fs-extra"));
 var util = require('../../core/util.js');
 var config = util.getConfig();
 var log = require(util.dirs().core + 'log');
-
+Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 

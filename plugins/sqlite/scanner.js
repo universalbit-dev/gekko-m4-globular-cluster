@@ -1,12 +1,12 @@
-const _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var fs = Promise.promisifyAll(require("fs-extra"));
 const async = require('async');
-const fs = require('fs-extra');
 
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 
-const sqlite3 = require('sqlite3');
+const sqlite3 = Promise.promisifyAll(require("sqlite3"));
 
 // todo: rewrite with generators or async/await..
 module.exports = done => {

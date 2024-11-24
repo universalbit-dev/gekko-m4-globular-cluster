@@ -1,6 +1,7 @@
-var _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var fs = Promise.promisifyAll(require("fs-extra"));
 var config = require('../../core/util.js').getConfig();
-
+Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
 var sqlite = require('./handle');
 var sqliteUtil = require('./util');
 var util = require('../../core/util');
@@ -34,11 +35,6 @@ Store.prototype.upsertTables = function() {
       );
     `,
 
-    // TODO: create trades
-    // ``
-
-    // TODO: create advices
-    // ``
   ];
 
   var next = _.after(_.size(createQueries), this.done);
