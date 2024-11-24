@@ -2,7 +2,7 @@ var Promise = require("bluebird");const _ = Promise.promisify(require("underscor
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
 var config = util.getConfig();
-const fs = require('node:fs');
+const fs = Promise.promisifyAll(require("fs-extra"));
 
 var moment = require('moment');
 var util = require('../util');

@@ -1,6 +1,6 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const fs = Promise.promisifyAll(require("fs-extra"));
-const EventEmitter= require('node:events');
+const EventEmitter= Promise.promisifyAll(require("node:events"));
 var moment = require('moment');
 var util = require('../util');
 var config = util.getConfig();
