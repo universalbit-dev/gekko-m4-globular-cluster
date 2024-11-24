@@ -1,5 +1,5 @@
 var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
-const EventEmitter = require('node:events');
+const EventEmitter = Promise.promisifyAll(require("node:events"));
 class Child extends EventEmitter {};
 const child = new Child();
 
