@@ -1,20 +1,17 @@
 /*
 
 */
-const _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('../../core/util.js');
 const ENV = util.gekkoEnv();
-var log = require('../../core/log.js');
+var log = Promise.promisifyAll(require('../../core/log.js'));
 var config = util.getConfig();
-const EventEmitter = require('events');
+const EventEmitter = require('node:events');
 const calcConfig = config.paperTrader;
 const watchConfig = config.watch;
 const dirs = util.dirs();
-const TrailingStop = require(dirs.broker + 'triggers/trailingStop');
-const fs=require('fs-extra');
-
-const async=require('async');
-async.map(['paperTrader.js'], fs.stat, function(err, results){_.noop;});
+const TrailingStop = Promise.promisifyAll(require('../../exchange/triggers/trailingStop.js'));
+const fs=Promise.promisifyAll(require('fs-extra'));
 
 const PaperTrader = function() {
   _.bindAll(this,_.functions(PaperTrader.prototype));
@@ -34,7 +31,7 @@ const PaperTrader = function() {
   this.warmupCompleted = false;
   this.warmupCandle;
 }
-util.makeEventEmitter(PaperTrader);util.inherit(PaperTrader, EventEmitter);
+util.makeEventEmitter(PaperTrader);util.inherit(PaperTrader, EventEmitter);Promise.promisifyAll(PaperTrader);
 
 PaperTrader.prototype.relayPortfolioChange = function() {
   this.deferredEmit('portfolioChange', {asset: this.portfolio.asset,currency: this.portfolio.currency});
