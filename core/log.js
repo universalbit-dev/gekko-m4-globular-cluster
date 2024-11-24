@@ -2,10 +2,11 @@
 
 
 */
-var moment = require('moment');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var moment = Promise.promisifyAll(require("moment"));
 var fmt = require('util').format;
-const _ = require('underscore');
-const EventEmitter=require('node:events');
+
+const EventEmitter=Promise.promisifyAll(require("node:events"));
 var util = require('./util');
 var config = util.getConfig();
 var debug = config.debug;
@@ -33,8 +34,7 @@ var Log = function() {
   else if(this.env === 'child-process')
     this.output = sendToParent();
 };
-util.makeEventEmitter(Log);
-
+util.makeEventEmitter(Log);util.inherit(Log, EventEmitter);Promise.promisifyAll(Log);
 
 Log.prototype = {
   _write: function(method, args, name) {

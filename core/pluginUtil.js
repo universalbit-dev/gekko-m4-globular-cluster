@@ -2,11 +2,11 @@
 
 */
 
-var Promise = require("bluebird");const _ = Promise.promisify(require("lodash"));
-const EventEmitter = Promise.promisify(require("events"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("lodash"));
+const EventEmitter = Promise.promisifyAll(require("node:events"));
 var tulind = require('tulind');
 var async = require('async');
-var emitter = require('./emitter');
+var emitter = Promise.promisifyAll(require("./emitter"));
 var util=require('./util')
 var log = require(util.dirs().core + 'log');
 var config = util.getConfig();
@@ -101,6 +101,8 @@ var pluginHelper = {
       log.info('\n');
   }
 }
+//util.makeEventEmitter(pluginHelper);util.inherit(pluginHelper, EventEmitter);Promise.promisifyAll(pluginHelper);
+
 module.exports = pluginHelper;
 
 /*

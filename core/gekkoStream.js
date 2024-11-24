@@ -5,7 +5,7 @@ var Promise = require("bluebird");const _ = Promise.promisifyAll(require("unders
 var Writable = require('stream').Writable;
 var async = require('async');
 var moment = require('moment');
-const EventEmitter=require('node:events');
+const EventEmitter=Promise.promisifyAll(require("node:events"));
 var util = require('./util');
 var env = util.gekkoEnv();
 var mode = util.gekkoMode();

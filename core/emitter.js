@@ -1,6 +1,7 @@
 const util = require('./util');var Promise = require("bluebird");
-const EventEmitter = require('events');const eventEmitter = new EventEmitter();
-const _ = Promise.promisify(require("underscore"));
+const EventEmitter = Promise.promisifyAll(require("node:events"));
+const eventEmitter = new EventEmitter();
+const _ = Promise.promisifyAll(require("underscore"));
 
 const GekkoEventEmitter = function() {
   EventEmitter.call(this);

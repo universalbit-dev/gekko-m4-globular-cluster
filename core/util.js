@@ -1,10 +1,10 @@
 /*
 
 */
-const EventEmitter = require('node:events');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const EventEmitter = Promise.promisifyAll(require("node:events"));
 var moment = require('moment');
-const _ = require('underscore');
-const fs = require('node:fs');
+const fs = require('fs-extra');
 var semver = require('semver');
 var program = require('commander');
 var startTime = moment().utc();
@@ -111,7 +111,7 @@ util = {
   },
   
   inherit: function(dest, source) {
-    require('util').inherits(
+    require('node:util').inherits(
       dest,
       source
     );
@@ -119,7 +119,7 @@ util = {
   
   
   makeEventEmitter: function(dest) {
-    util.inherit(dest, require('node:events').EventEmitter);
+    util.inherit(dest, require('events').EventEmitter);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
