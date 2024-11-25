@@ -1,21 +1,31 @@
-const EventEmitter = require('node:events');
-class Process extends EventEmitter {};
-const process = new Process();
-const util = require('../../core/util');config = util.getConfig();
-
 var start = (config, candleSize, daterange) => {
-  util.setGekkoEnv('child_process');
+  var util = require(__dirname + '/../../util');
+
+  // force correct gekko env
+  util.setGekkoEnv('child-process');
+
+  // force disable debug
   config.debug = false;
   util.setConfig(config);
+
   var dirs = util.dirs();
+
   var load = require(dirs.tools + 'candleLoader');
-  load(config.candleSize, candles => {process.send(candles);})
+  load(config.candleSize, candles => {
+    process.send(candles);
+  })
 }
-util.makeEventEmitter(process);util.inherit(process, EventEmitter);
 
 process.send('ready');
-process.on('message', (m) => {if(m.what === 'start')start(m.config, m.candleSize, m.daterange);});
-process.on('disconnect', function() {process.exit(0);})
+
+process.on('message', (m) => {
+  if(m.what === 'start')
+    start(m.config, m.candleSize, m.daterange);
+});
+
+process.on('disconnect', function() {
+  process.exit(0);
+})
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me

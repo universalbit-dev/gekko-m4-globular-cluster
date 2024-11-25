@@ -1,21 +1,25 @@
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
-const EventEmitter = Promise.promisifyAll(require("node:events"));
-class Child extends EventEmitter {};
-const child = new Child();
-
-const util = require('../../core/util');
-const fork = require('node:child_process').fork;config = util.getConfig();
-util.makeEventEmitter(child);util.inherit(child, EventEmitter);
+const fork = require('child_process').fork;
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 
 module.exports = (config, callback) => {
   var debug = typeof v8debug === 'object';
-  if (debug) {process.execArgv = [];}
+  if (debug) {
+    process.execArgv = [];
+  }
 
-  var child = fork(__dirname + '/child');
-  const message = {what: 'start',config}
+  const child = fork(__dirname + '/child');
+
+  const message = {
+    what: 'start',
+    config
+  }
+
   const done = _.once(callback);
-  child.on('message', function(m) {if(m === 'ready')
-  return child.send(message);
+
+  child.on('message', function(m) {
+    if(m === 'ready')
+      return child.send(message);
+
     // else we are done and have candles!
     done(null, m);
     if (this.connected) {
