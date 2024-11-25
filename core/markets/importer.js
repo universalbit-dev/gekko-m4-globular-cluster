@@ -1,4 +1,4 @@
-const _ = require('../lodash');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();

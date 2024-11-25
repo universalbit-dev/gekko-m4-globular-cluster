@@ -1,4 +1,4 @@
-const _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
@@ -26,7 +26,7 @@ if(!to.isValid())
   util.die('invalid `to`');
 
 var Market = function() {
-  _.bindAll(this,_.functions(Market.prototype));
+  _.bindAll(this,_.functions(this));
   this.pushing = false;
   this.ended = false;
   this.closed = false;
