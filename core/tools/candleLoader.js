@@ -1,33 +1,36 @@
+const batchSize = 1000;
+
 var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
-const { spawn } = require('node:child_process');
-const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
-var config = util.getConfig();
-const fs = Promise.promisifyAll(require("fs-extra"));
+const fs = require('fs-extra');
+const moment = require('moment');
+const { EventEmitter } = require("events");
+const util = require('../core/util');const dirs = util.dirs();
+const config = util.getConfig();
 
-var moment = require('moment');
-var util = require('../util');
+const log = require(dirs.core + '/log');
 
-var dirs = util.dirs();
-var log = require('../log');
+const adapter = config[config.adapter];
+const Reader = require(dirs.gekko + adapter.path + '/reader');
+const daterange = config.daterange;
 
-var batchSize = 60;
-var adapter = config[config.adapter];
-var Reader = require(dirs.gekko + adapter.path + '/reader');
-var daterange = config.daterange;
+const CandleBatcher = require(dirs.core + 'candleBatcher');
 
-var CandleBatcher = require(dirs.core + 'candleBatcher');
+const to = moment.utc(daterange.to).startOf('minute');
+const from = moment.utc(daterange.from).startOf('minute');
+const toUnix = to.unix();
 
-var to = moment.utc(daterange.to).startOf('minute');
-var from = moment.utc(daterange.from).startOf('minute');
-var toUnix = to.unix();
+if(to <= from)
+  util.die('This daterange does not make sense.')
 
-if(to <= from)util.die('This daterange does not make sense.');
-else if(!from.isValid())util.die('invalid `from`');
-else(!to.isValid())util.die('invalid `to`');
+if(!from.isValid())
+  util.die('invalid `from`');
+
+if(!to.isValid())
+  util.die('invalid `to`');
 
 let iterator = {
   from: from.clone(),
-  to: from.clone().add(batchSize, 's').subtract(1, 's')
+  to: from.clone().add(batchSize, 'm').subtract(1, 's')
 }
 
 var DONE = false;
@@ -37,7 +40,6 @@ var reader = new Reader();
 var batcher;
 var next;
 var doneFn = () => {
-
   process.nextTick(() => {
     next(result);
   })
@@ -63,8 +65,8 @@ const getBatch = () => {
 
 const shiftIterator = () => {
   iterator = {
-    from: iterator.from.clone().add(batchSize, 's'),
-    to: iterator.from.clone().add(batchSize * 2, 's').subtract(1, 's')
+    from: iterator.from.clone().add(batchSize, 'm'),
+    to: iterator.from.clone().add(batchSize * 2, 'm').subtract(1, 's')
   }
 }
 
@@ -82,6 +84,7 @@ const handleCandles = (err, data) => {
 
   if(DONE) {
     reader.close();
+
     setTimeout(doneFn, 100);
 
   } else {
