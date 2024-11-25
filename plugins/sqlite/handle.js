@@ -1,6 +1,5 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-Promise.promisifyAll(require("sqlite"));
-var fs = Promise.promisifyAll(require("fs-extra"));
+var fs =require("fs-extra");
 
 var util = require('../../core/util.js');
 var config = util.getConfig();
@@ -20,7 +19,7 @@ if (cannotLoad) util.die(cannotLoad);
 
 // should be good now
 if (config.debug) var sqlite3 = require('sqlite3').verbose();
-else var sqlite3 = Promise.promisifyAll(require("sqlite"));
+else var sqlite3 = require("sqlite3");
 
 var plugins = require(util.dirs().gekko + 'plugins');
 

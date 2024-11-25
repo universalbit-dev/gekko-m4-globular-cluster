@@ -1,16 +1,15 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs = Promise.promisifyAll(require("fs-extra"));
-var util = Promise.promisifyAll(require("../../core/util.js"));
-var config = util.getConfig();
-var log = Promise.promisifyAll(require("../../core/log"));
-Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
-var sqlite = Promise.promisifyAll(require("./handle"));
-var sqliteUtil = Promise.promisifyAll(require("./util"));
+var fs = require("fs-extra");
+var util = require("../../core/util.js");var config = util.getConfig();
+var log = require("../../core/log");
+var sqlite = require("./handle");
+var sqliteUtil = require("./util");var util = require("../../core/util");
 
 var Reader = function() {
-  _.bindAll(this,_.functions(Reader.prototype));
+  _.bindAll(this,_.functions(this));
   this.db = sqlite.initDB(true);
 }
+util.makeEventEmitter(Reader);
 
 
 // returns the most recent window complete candle

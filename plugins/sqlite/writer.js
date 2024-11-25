@@ -1,24 +1,19 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs = Promise.promisifyAll(require("fs-extra"));
-var config = require('../../core/util.js').getConfig();
-
-Promise.promisifyAll(require("sqlite"));Promise.promisifyAll(require("sqlite3"));
-var sqlite = Promise.promisifyAll(require("./handle"));
-var sqliteUtil = Promise.promisifyAll(require("./util"));
-var util = Promise.promisifyAll(require("../../core/util"));
-var log = Promise.promisifyAll(require("../../core/log"));
+var fs = require("fs-extra");
+var sqlite = require("./handle");
+var sqliteUtil = require("./util");var util = require("../../core/util");
+var config = util.getConfig();
+var log = require("../../core/log");
 
 var Store = function(done, pluginMeta) {
-  _.bindAll(this,_.functions(Store.prototype));
+  _.bindAll(this,_.functions(this));
   this.done = done;
-
   this.db = sqlite.initDB(false);
   this.db.serialize(this.upsertTables);
-
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
-
+util.makeEventEmitter(Store);
 
 Store.prototype.upsertTables = function() {
   var createQueries = [
