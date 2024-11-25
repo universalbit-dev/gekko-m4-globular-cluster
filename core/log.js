@@ -3,10 +3,10 @@
 
 */
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var moment = Promise.promisifyAll(require("moment"));
+var moment = require("moment");
 var fmt = require('util').format;
 
-const EventEmitter=Promise.promisifyAll(require("node:events"));
+const {EventEmitter}=require('events');
 var util = require('./util');
 var config = util.getConfig();
 var debug = config.debug;
@@ -26,7 +26,7 @@ var sendToParent = function() {
 }
 
 var Log = function() {
-  _.bindAll(this,_.functions(Log.prototype));
+  _.bindAll(this,_.functions(this));
   this.env = util.gekkoEnv();
 
   if(this.env === 'standalone')
@@ -34,7 +34,7 @@ var Log = function() {
   else if(this.env === 'child-process')
     this.output = sendToParent();
 };
-util.makeEventEmitter(Log);util.inherit(Log, EventEmitter);Promise.promisifyAll(Log);
+util.makeEventEmitter(Log);
 
 Log.prototype = {
   _write: function(method, args, name) {
