@@ -2,19 +2,19 @@
 
 */
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter=Promise.promisifyAll(require('node:events'));
+const { EventEmitter } = require("events");
 var moment = require('moment');
 var util = require('../util.js');
-var config = require('../util.js').getConfig();
+var config = util.getConfig();
 var expects=3; /* */
 
 var CandleCreator = function() {
   EventEmitter.call(this);
-  _.bindAll(this,_.functions(CandleCreator.prototype));
+  _.bindAll(this,_.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
-util.makeEventEmitter(CandleCreator);util.inherit(CandleCreator, EventEmitter);Promise.promisifyAll(CandleCreator);
+util.makeEventEmitter(CandleCreator);
 
 CandleCreator.prototype.write = function(batch) {
   var trades = batch.data;

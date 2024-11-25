@@ -3,7 +3,7 @@
 
 */
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter=Promise.promisifyAll(require('node:events'));
+const { EventEmitter } = require("events");
 var util = require('../util');
 var config = require('../util.js').getConfig();
 var MarketFetcher = require("./marketFetcher");
@@ -11,15 +11,14 @@ var dirs = util.dirs();
 
 var Manager = function(config) {
   EventEmitter.call(this);
-  _.bindAll(this,_.functions(Manager.prototype));
+  _.bindAll(this,_.functions(this));
 // fetch trades
   this.source = new MarketFetcher(config);
 // relay newly fetched trades
   this.source
     .on('trades batch', this.relayTrades);
 }
-util.makeEventEmitter(Manager);util.inherit(Manager, EventEmitter);Promise.promisifyAll(Manager);
-
+util.makeEventEmitter(Manager);
 // HANDLERS
 Manager.prototype.retrieve = function() {
   this.source.fetch();

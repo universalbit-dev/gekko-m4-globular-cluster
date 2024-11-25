@@ -1,5 +1,5 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter=Promise.promisifyAll(require('node:events'));
+const { EventEmitter } = require("events");
 var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
@@ -9,9 +9,9 @@ var TICKRATE = 20;
 var Heart = function() {
   EventEmitter.call(this);
   this.lastTick = false;
-  _.bindAll(this, _.functions(Heart.prototype));
+  _.bindAll(this,_.functions(this));
 }
-util.makeEventEmitter(Heart);util.inherit(Heart, EventEmitter);Promise.promisifyAll(Heart);
+util.makeEventEmitter(Heart);
 
 Heart.prototype.pump = function() {
   log.debug('scheduling ticks');

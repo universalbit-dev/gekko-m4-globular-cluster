@@ -1,5 +1,5 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter=Promise.promisifyAll(require('node:events'));
+const { EventEmitter } = require("events");
 var moment = require('moment');
 var utc = moment.utc;
 var util = require('../util');
@@ -7,7 +7,7 @@ var dirs = util.dirs();
 var config = util.getConfig();
 var log = require('../log.js');
 var exchangeChecker = require('../../exchange/exchangeChecker.js');
-var TradeBatcher = Promise.promisifyAll(require('./tradeBatcher.js'));
+var TradeBatcher = require('./tradeBatcher.js');
 
 var Fetcher = function(config) {
   EventEmitter.call(this);
@@ -15,7 +15,7 @@ var Fetcher = function(config) {
 
   var exchangeName = config.watch.exchange.toLowerCase();
   var DataProvider = require('../../exchange/wrappers/' + exchangeName);
-  _.bindAll(this,_.functions(Fetcher.prototype));
+  _.bindAll(this,_.functions(this));
 
 // Create a public dataProvider object which can retrieve live
 // trade information from an exchange.
@@ -45,7 +45,7 @@ var Fetcher = function(config) {
   this.firstFetch = true;
   this.batcher.on('new batch', this.relayTrades);
 }
- util.makeEventEmitter(Fetcher);util.inherit(Fetcher, EventEmitter);Promise.promisifyAll(Fetcher);
+ util.makeEventEmitter(Fetcher);
 
 
 Fetcher.prototype._fetch = function(since) {
