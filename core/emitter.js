@@ -1,20 +1,38 @@
-const util = require('./util');var Promise = require("bluebird");
-const EventEmitter = Promise.promisifyAll(require("node:events"));
-const eventEmitter = new EventEmitter();
-const _ = Promise.promisifyAll(require("underscore"));
+// Gekko uses a custom event emitter within the GekkoStream (the plugins) to guarantee
+// the correct order of events that are triggered by eachother. Turns sync events from
+// LIFO into a FIFO stack based model.
+//
+// More details here: https://forum.gekko.wizb.it/thread-56579.html
+
+// Gekko uses a custom event emitter within the GekkoStream (the plugins) to guarantee
+// the correct order of events that are triggered by eachother. Turns sync events from
+// LIFO into a FIFO stack based model.
+//
+// More details here: https://forum.gekko.wizb.it/thread-56579.html
+
+const util = require('util');
+const events = require('events');
+const NativeEventEmitter = events.EventEmitter;
 
 const GekkoEventEmitter = function() {
-  EventEmitter.call(this);
+  NativeEventEmitter.call(this);
   this.defferedEvents = [];
-  _.bindAll(this, _.functions(GekkoEventEmitter.prototype));
 }
-util.makeEventEmitter(GekkoEventEmitter);util.inherit(GekkoEventEmitter, EventEmitter);
+util.inherits(GekkoEventEmitter, NativeEventEmitter);
 
-GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {this.defferedEvents.push({name, payload});}
+// push to stack
+GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {
+  this.defferedEvents.push({name, payload});
+}
+
+// resolve FIFO
 GekkoEventEmitter.prototype.broadcastDeferredEmit = function() {
-  if(this.defferedEvents.length === 0) return false;
+  if(this.defferedEvents.length === 0)
+    return false;
+
   const event = this.defferedEvents.shift();
-  eventEmitter.emit(event.name, event.payload);
+
+  this.emit(event.name, event.payload);
   return true;
 }
 

@@ -3,9 +3,11 @@ Small writable stream wrapper
 */
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var Writable = require('stream').Writable;
+
 var async = require('async');
 var moment = require('moment');
-const EventEmitter=Promise.promisifyAll(require("node:events"));
+const {EventEmitter}=require("events");
+
 var util = require('./util');
 var env = util.gekkoEnv();
 var mode = util.gekkoMode();
@@ -21,9 +23,9 @@ var Gekko = function(plugins) {
   this.producers = this.plugins
   .filter(p => p.meta.emits);
   this.finalize = _.bind(this.finalize, this);
-  _.bindAll(this, _.functions(Gekko.prototype));
+  _.bindAll(this, _.functions(this));
 }
-util.makeEventEmitter(Gekko);util.inherit(Gekko, EventEmitter);Promise.promisifyAll(Gekko);
+util.makeEventEmitter(Gekko);
 
 Gekko.prototype = Object.create(Writable.prototype, {constructor: { value: Gekko }});
 

@@ -3,16 +3,17 @@
 */
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var util = require('./util');
-const EventEmitter=Promise.promisifyAll(require('node:events'));
+const {EventEmitter} = require('events');
+
 var CandleBatcher = function(candleSize) {
   EventEmitter.call(this);
-  _.bindAll(this,_.functions(CandleBatcher.prototype));
+  _.bindAll(this,_.functions(this));
   if(!_.isNumber(candleSize)) throw new Error('candleSize is not a number');
   this.candleSize = candleSize;
   this.smallCandles = [];
   this.calculatedCandles = [];
 }
-util.makeEventEmitter(CandleBatcher);util.inherit(CandleBatcher, EventEmitter);Promise.promisifyAll(CandleBatcher);
+util.makeEventEmitter(CandleBatcher);
 
 CandleBatcher.prototype.write = function(candles) {
   if(!_.isArray(candles)) {
