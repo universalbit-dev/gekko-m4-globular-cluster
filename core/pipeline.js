@@ -1,6 +1,6 @@
 /*
 
-  A pipeline implements a full Gekko Flow based on a config and
+  A pipeline implements a full Gekko Flow based on a config and 
   a mode. The mode is an abstraction that tells Gekko what market
   to load (realtime, backtesting or importing) while making sure
   all enabled plugins are actually supported by that market.
@@ -9,27 +9,44 @@
   https://gekko.wizb.it/docs/internals/architecture.html
 
 */
+
+
+var util = require('./util');
+var dirs = util.dirs();
+
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var util = require('./util');var dirs = util.dirs();
-
-const EventEmitter=Promise.promisifyAll(require('node:events'));
-const eventEmitter = new EventEmitter();
-
-const utl=Promise.promisifyAll(require("util"));
-
 var async = require('async');
-var log = Promise.promisifyAll(require("./log"));
+
+var log = require(dirs.core + 'log');
+
 var pipeline = (settings) => {
+
   var mode = settings.mode;
-  var config = util.getConfig();
-  var GekkoStream = Promise.promisifyAll(require("./gekkoStream"));
+  var config = settings.config;
+
+  // prepare a GekkoStream
+  var GekkoStream = require(dirs.core + 'gekkoStream');
+
+  // all plugins
   var plugins = [];
+  // all emitting plugins
   var emitters = {};
+  // all plugins interested in candles
   var candleConsumers = [];
-  var pluginHelper = Promise.promisifyAll(require("./pluginUtil"));
-  var pluginParameters = Promise.promisifyAll(require("../plugins"));
-  var subscriptions = Promise.promisifyAll(require("../subscriptions"));
+
+  // utility to check and load plugins.
+  var pluginHelper = require(dirs.core + 'pluginUtil');
+
+  // meta information about every plugin that tells Gekko
+  // something about every available plugin
+  var pluginParameters = require(dirs.gekko + 'plugins');
+  // meta information about the events plugins can broadcast
+  // and how they should hooked up to consumers.
+  var subscriptions = require(dirs.gekko + 'subscriptions');
+
   var market;
+
+  // Instantiate each enabled plugin
   var loadPlugins = function(next) {
     // load all plugins
     async.mapSeries(
@@ -45,14 +62,17 @@ var pipeline = (settings) => {
     );
   };
 
+  // Some plugins emit their own events, store
+  // a reference to those plugins.
   var referenceEmitters = function(next) {
+
     _.each(plugins, function(plugin) {
       if(plugin.meta.emits)
         emitters[plugin.meta.slug] = plugin;
     });
+
     next();
   }
-
 
   // Subscribe all plugins to other emitting plugins
   var subscribePlugins = function(next) {
@@ -61,21 +81,33 @@ var pipeline = (settings) => {
       subscriptions,
       sub => sub.emitter !== 'market'
     );
-    _.each(pluginSubscriptions.filter(s => _.isArray(s.emitter)),
-      subscription => {subscription.emitters = subscription.emitter;
+
+    // some events can be broadcasted by different
+    // plugins, however the pipeline only allows a single
+    // emitting plugin for each event to be enabled.
+    _.each(
+      pluginSubscriptions.filter(s => _.isArray(s.emitter)),
+      subscription => {
+        // cache full list
+        subscription.emitters = subscription.emitter;
         var singleEventEmitters = subscription.emitter
-         .filter(s => _.size(plugins.filter(p => p.meta.slug === s)));
-         
-        if(_.size(singleEventEmitters) > 1) { var error = `Multiple plugins are broadcasting`;
+          .filter(
+            s => _.size(plugins.filter(p => p.meta.slug === s))
+          );
+
+        if(_.size(singleEventEmitters) > 1) {
+          var error = `Multiple plugins are broadcasting`;
           error += ` the event "${subscription.event}" (${singleEventEmitters.join(',')}).`;
           error += 'This is unsupported.'
           util.die(error);
-        } 
-        else {
+        } else {
           subscription.emitter = _.first(singleEventEmitters);
         }
       }
     );
+
+    // subscribe interested plugins to
+    // emitting plugins
     _.each(plugins, function(plugin) {
       _.each(pluginSubscriptions, function(sub) {
 
@@ -107,8 +139,9 @@ var pipeline = (settings) => {
             return;
           }
 
+          // attach handler
           emitters[sub.emitter]
-            eventEmitter.on(sub.event,
+            .on(sub.event,
               plugin[
                 sub.handler
               ])
@@ -117,21 +150,29 @@ var pipeline = (settings) => {
       });
     });
 
-    var marketSubscriptions = _.filter(subscriptions,{emitter: 'market'});
+    // events broadcasted by the market
+    var marketSubscriptions = _.filter(
+      subscriptions,
+      {emitter: 'market'}
+    );
+
+    // subscribe plugins to the market
     _.each(plugins, function(plugin) {
       _.each(marketSubscriptions, function(sub) {
+
         if(plugin[sub.handler]) {
           if(sub.event === 'candle')
             candleConsumers.push(plugin);
         }
+
       });
     });
+
     next();
   }
 
-
   var prepareMarket = function(next) {
-    if(mode === 'backtest' && config.daterange === 'scan')
+    if(mode === 'backtest' && config.backtest.daterange === 'scan')
       require(dirs.core + 'prepareDateRange')(next);
     else
       next();
@@ -144,31 +185,43 @@ var pipeline = (settings) => {
       marketType = config.market.type;
     else
       marketType = mode;
+
     var Market = require(dirs.markets + marketType);
+
     market = new Market(config);
+
     next();
   }
-  
+
   var subscribePluginsToMarket = function(next) {
+
+    // events broadcasted by the market
     var marketSubscriptions = _.filter(
       subscriptions,
       {emitter: 'market'}
     );
+
     _.each(plugins, function(plugin) {
       _.each(marketSubscriptions, function(sub) {
+
         if(sub.event === 'candle')
           // these are handled via the market stream
           return;
+
         if(plugin[sub.handler]) {
           market.on(sub.event, plugin[sub.handler]);
         }
+
       });
     });
+
     next();
+
   }
-  
+
   log.info('Setting up Gekko in', mode, 'mode');
   log.info('');
+
   async.series(
     [
       loadPlugins,
@@ -179,17 +232,25 @@ var pipeline = (settings) => {
       subscribePluginsToMarket
     ],
     function() {
+
       var gekkoStream = new GekkoStream(plugins);
+
       market
         .pipe(gekkoStream)
+
+        // convert JS objects to JSON string
+        // .pipe(new require('stringify-stream')())
+        // output to standard out
+        // .pipe(process.stdout);
+
       market.on('end', gekkoStream.finalize);
     }
-    
   );
 
 }
 
 module.exports = pipeline;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
