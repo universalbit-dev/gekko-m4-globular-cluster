@@ -11,7 +11,7 @@ var Stitcher = function(batcher) {
   _.bindAll(this,_.functions(this));
   this.batcher = batcher;
 }
-util.makeEventEmitter(Sticher);
+util.makeEventEmitter(Stitcher);
 
 Stitcher.prototype.ago = function(ts) {
   var now = moment().utc();
