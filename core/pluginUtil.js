@@ -1,28 +1,37 @@
-/*
-
-*/
-
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("lodash"));
-const EventEmitter = Promise.promisifyAll(require("node:events"));
-var tulind = require('tulind');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var async = require('async');
-var emitter = Promise.promisifyAll(require("./emitter"));
-var util=require('./util')
+var Emitter = require('./emitter');
+
+var util = require(__dirname + '/util');
+
 var log = require(util.dirs().core + 'log');
+
 var config = util.getConfig();
 var pluginDir = util.dirs().plugins;
 var gekkoMode = util.gekkoMode();
 var inherits = require('util').inherits;
+
 var pluginHelper = {
+  // Checks whether we can load a module
+
+  // @param Object plugin
+  //    plugin config object
+  // @return String
+  //    error message if we can't
+  //    use the module.
   cannotLoad: function(plugin) {
+
+    // verify plugin dependencies are installed
     if(_.has(plugin, 'dependencies'))
       var error = false;
+
       _.each(plugin.dependencies, function(dep) {
         try {
           var a = require(dep.module);
         }
         catch(e) {
           log.error('ERROR LOADING DEPENDENCY', dep.module);
+
           if(!e.message) {
             log.error(e);
             util.die();
@@ -41,14 +50,18 @@ var pluginHelper = {
             'it by running: \n\n',
             '\tnpm install',
             dep.module + '@' + dep.version
-          ];
-          error.join(' ');
+          ].join(' ');
         }
       });
 
     return error;
   },
-
+  // loads a plugin
+  // 
+  // @param Object plugin
+  //    plugin config object
+  // @param Function next
+  //    callback
   load: function(plugin, next) {
 
     plugin.config = config[plugin.slug];
@@ -56,7 +69,7 @@ var pluginHelper = {
     if(!plugin.config || !plugin.config.enabled)
       return next();
 
-    if(!_.includes(plugin.modes, gekkoMode)) {
+    if(!_.contains(plugin.modes, gekkoMode)) {
       log.warn(
         'The plugin',
         plugin.name,
@@ -73,35 +86,36 @@ var pluginHelper = {
 
     var cannotLoad = pluginHelper.cannotLoad(plugin);
     if(cannotLoad)
-    return next(cannotLoad);
+      return next(cannotLoad);
 
     if(plugin.path)
-    var Constructor = require(pluginDir + plugin.path(config));
+      var Constructor = require(pluginDir + plugin.path(config));
     else
-    var Constructor = require(pluginDir + plugin.slug);
+      var Constructor = require(pluginDir + plugin.slug);
 
     if(plugin.async) {
-      inherits(Constructor, emitter);
-    var instance = new Constructor(util.defer(function(err) {
+      inherits(Constructor, Emitter);
+      var instance = new Constructor(util.defer(function(err) {
         next(err, instance);
       }), plugin);
-      emitter.call(instance);
+      Emitter.call(instance);
 
       instance.meta = plugin;
     } else {
-      inherits(Constructor, emitter);
+      inherits(Constructor, Emitter);
       var instance = new Constructor(plugin);
-      emitter.call(instance);
+      Emitter.call(instance);
 
       instance.meta = plugin;
-      _.defer(function() {next(null, instance);});
+      _.defer(function() {
+        next(null, instance); 
+      });
     }
 
     if(!plugin.silent)
       log.info('\n');
   }
 }
-//util.makeEventEmitter(pluginHelper);util.inherit(pluginHelper, EventEmitter);Promise.promisifyAll(pluginHelper);
 
 module.exports = pluginHelper;
 
