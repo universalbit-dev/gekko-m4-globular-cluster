@@ -44,6 +44,7 @@ npm i ccxt
 ```
 
 * [CCXT Examples](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/examples/ccxt%20examples)
+* [Wiki Manual](https://github.com/ccxt/ccxt/wiki/manual)
 * [Legality_of_cryptocurrency_by_country](https://en.wikipedia.org/wiki/Legality_of_cryptocurrency_by_country_or_territory)
 * [NodeJS Event Loop](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick)
 
