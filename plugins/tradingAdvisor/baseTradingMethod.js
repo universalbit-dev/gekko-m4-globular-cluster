@@ -1,19 +1,13 @@
-const _ = require('underscore');
-const util = require('../../core/util');
-const fs=require('fs-extra');
-var config = util.getConfig();
-const dirs = util.dirs();
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var fs = require("fs-extra");
+const util = require('../../core/util');var config = util.getConfig();const dirs = util.dirs();
 const log = require('../../core/log');
-const EventEmitter = require('events');
-const ENV = util.gekkoEnv();
-const mode = util.gekkoMode();
+const {EventEmitter} = require("events");
+const ENV = util.gekkoEnv();const mode = util.gekkoMode();
 const startTime = util.getStartTime();
 const indicatorsPath = dirs.methods + 'indicators/';
 const indicatorFiles = fs.readdirSync(indicatorsPath);
 const Indicators = {};
-const async=require('async');
-
-async.map(['baseTradingMethod.js','asyncIndicatorRunner.js','tradingAdvisor.js'], fs.stat, function(err, results){_.noop;});
 
 const AsyncIndicatorRunner = require('./asyncIndicatorRunner');
 
@@ -30,7 +24,7 @@ _.each(indicatorFiles, function(indicator) {
 const allowedIndicators = _.keys(Indicators);
 
 var Base = function(settings) {
-  _.bindAll(this,_.functions(Base.prototype));
+  _.bindAll(this,_.functions(this));
   EventEmitter.call(this);
   this.age = 0;
   this.processedTicks = 0;
@@ -84,8 +78,7 @@ var Base = function(settings) {
 }
 
 // teach our base trading method events
-util.makeEventEmitter(Base);util.inherit(Base, EventEmitter);
-
+util.makeEventEmitter(Base);
 
 Base.prototype.tick = async function(candle, done) {
   this.age++;

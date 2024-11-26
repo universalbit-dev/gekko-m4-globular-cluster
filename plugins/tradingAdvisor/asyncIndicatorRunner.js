@@ -1,18 +1,13 @@
-const EventEmitter=require('events');
-const _ = require('underscore');
-const fs = require('fs-extra');
-const util = require('../../core/util');
-var config = util.getConfig();
-const dirs = util.dirs();
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var fs=require("fs-extra");
+const {EventEmitter} = require("events");
+const util = require('../../core/util');var config = util.getConfig();const dirs = util.dirs();
 var tulind=require('../../core/tulind');
 const log = require('../../core/log');
 const allowedTulipIndicators = _.keys(tulind);
 
-const async=require('async');
-async.map(['baseTradingMethod.js','asyncIndicatorRunner.js','tradingAdvisor.js'], fs.stat, function(err, results){_.noop;});
-
 const AsyncIndicatorRunner = function() {
-  _.bindAll(this,_.functions(AsyncIndicatorRunner.prototype));
+  _.bindAll(this,_.functions(this));
   EventEmitter.call(this);
   this.tulipIndicators = {};
   this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
@@ -22,7 +17,7 @@ const AsyncIndicatorRunner = function() {
   this.age = 0;
 
 }
-util.makeEventEmitter(AsyncIndicatorRunner);util.inherit(AsyncIndicatorRunner, EventEmitter);
+util.makeEventEmitter(AsyncIndicatorRunner);
 
 
 AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {

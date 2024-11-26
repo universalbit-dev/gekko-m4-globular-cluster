@@ -1,16 +1,16 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter=require('node:events');
-const fs = Promise.promisifyAll(require("fs-extra"));
+const {EventEmitter} = require("events");
+const fs = require("fs-extra");
 const util = require('../../core/util');
-var config = util.getConfig();
-const dirs = util.dirs();
+var config = util.getConfig();const dirs = util.dirs();
+
 const moment = require('moment');
 const log = Promise.promisifyAll(require("../../core/log.js"));
 const CandleBatcher = require('../../core/candleBatcher');
 const isLeecher = config.market && config.market.type === 'leech';
 
 const Actor = function(done){
-  _.bindAll(this,_.functions(Actor.prototype));
+  _.bindAll(this,_.functions(this));
   EventEmitter.call(this);
   this.done = done;
   this.batcher = new CandleBatcher(config.tradingAdvisor.candleSize);
@@ -27,7 +27,7 @@ const Actor = function(done){
 }
 
 }
-util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);Promise.promisifyAll(Actor);
+util.makeEventEmitter(Actor);
 
 Actor.prototype.setupStrategy = function() {
   if(!fs.existsSync(dirs.methods + this.strategyName + '.js'))
