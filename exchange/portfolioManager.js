@@ -5,7 +5,7 @@ const util=require('../core/util');
 const errors = require('./exchangeErrors');
 var config = util.getConfig();
 
-const {EventEmitter} = require('events');class Event extends EventEmitter {};
+const {EventEmitter} = require("events");class Event extends EventEmitter {};
 const eventEmitter = new EventEmitter();
 
 
@@ -13,7 +13,7 @@ class Portfolio extends Event{
   constructor(config, api) {
   super();
   EventEmitter.call(this);
-    _.bindAll(this,_.functions(Portfolio.prototype));
+    _.bindAll(this,_.functions(this));
     this.config = config;
     this.api = api;
     this.balances = {};
@@ -61,6 +61,6 @@ class Portfolio extends Event{
   setTicker(ticker) {this.ticker = ticker}
 
 }
-util.makeEventEmitter(Portfolio);util.inherit(Portfolio, EventEmitter);
+util.makeEventEmitter(Portfolio);
 
 module.exports = Portfolio
