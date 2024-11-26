@@ -8,8 +8,8 @@
 require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-let _ = require('../core/lodash');
-let fs = require('node:fs');
+let _ = require('underscore');
+let fs = require('fs-extra');
 
 var method = {
 
