@@ -8,7 +8,6 @@ var config = util.getConfig();
 const {EventEmitter} = require("events");class Event extends EventEmitter {};
 const eventEmitter = new EventEmitter();
 
-
 class Portfolio extends Event{
   constructor(config, api) {
   super();
