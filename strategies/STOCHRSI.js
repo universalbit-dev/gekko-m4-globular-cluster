@@ -1,4 +1,4 @@
-const { addon: ov } = require('openvino-node');
+//const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var fs = require("fs-extra");
 const math= require('mathjs');
