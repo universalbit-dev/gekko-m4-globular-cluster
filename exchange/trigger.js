@@ -1,15 +1,19 @@
 // wraps around a low level trigger and feeds
 // it live market data.
-
+const {EventEmitter} = require('events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var exchangeUtils=Promise.promisifyAll(require("./exchangeUtils.js"));
+const util = require('../core/util.js');
+class Event extends EventEmitter {};
+
+var exchangeUtils=require("./exchangeUtils.js");
 const bindAll = exchangeUtils.bindAll;
-var triggers=Promise.promisifyAll(require("./triggers/trailingStop.js"));
+var triggers=require("./triggers/trailingStop.js");
 
 // @param api: a gekko broker wrapper instance
 // @param type: type of trigger to wrap
 // @param props: properties to feed to trigger
-class Trigger {
+
+class Trigger extends Event{
   constructor({api, type, props, onTrigger}) {
     this.onTrigger = onTrigger;
     this.api = api;
@@ -29,7 +33,6 @@ class Trigger {
       onTrigger: this.propogateTrigger,
       ...props
     })
-
     this.scheduleFetch();
   }
 
@@ -56,5 +59,6 @@ class Trigger {
     this.onTrigger(payload);
   }
 }
+util.makeEventEmitter(Trigger);
 
 module.exports = Trigger;
