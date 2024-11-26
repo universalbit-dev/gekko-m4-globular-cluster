@@ -185,9 +185,8 @@ return console.log(chess.pgn())
   
 if(this.stochRSI > this.settings.high) {
 //new trend detected
-if(this.trend.direction !== 'long')
-this.trend = {duration: 0,persisted: false,direction: 'long',adviced: false};
-		this.trend.duration++;
+        this.trend = {duration: 0,persisted: false,direction: 'buy',adviced: false};
+		this.trend.duration++;this.advice('buy');
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration)this.trend.persisted = true;
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100){this.trend.adviced = true;}
@@ -195,19 +194,20 @@ this.trend = {duration: 0,persisted: false,direction: 'long',adviced: false};
 }
 else if(this.stochRSI < this.settings.low) {
 		// new trend detected
-		if(this.trend.direction !== 'short')this.trend = {duration: 0,persisted: false,direction: 'short',adviced: false};
-		this.trend.duration++;
+		this.trend = {duration: 0,persisted: false,direction: 'sell',adviced: false};
+		this.trend.duration++;this.advice('sell');
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
 		else {_.noop;} /* */
-	} else {
+	} 
+else {
 		// trends must be on consecutive candles
 		this.trend.duration = 0;
 		log.debug('In no trend');this.learn(); /* */
-	}
-    if(this.predictionCount > this.settings.min_predictions)
-    {
+		}
+if(this.predictionCount > this.settings.min_predictions)
+{
     /*
       https://www.investopedia.com/articles/investing/092115/alpha-and-beta-beginners.asp
       α / Alpha	Performance Analysis Excess return relative to benchmark Higher is better; indicates outperformance
@@ -234,10 +234,10 @@ else if(this.stochRSI < this.settings.low) {
     if(Beta < 1){log.info('');}
     }
     if (this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
-    {var buyprice = this.candle.low;Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');/* */}
+    {var buyprice = this.candle.low;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');/* */}
     
     if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
-    {var sellprice = this.candle.high;Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');/* */}
+    {var sellprice = this.candle.high;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');/* */}
 //StopLoss 
 //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
    //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */

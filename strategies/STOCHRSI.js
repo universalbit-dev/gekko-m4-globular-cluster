@@ -1,4 +1,4 @@
-//const { addon: ov } = require('openvino-node');
+const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var fs = require("fs-extra");
 const math= require('mathjs');
@@ -105,7 +105,7 @@ method.check = function(candle)
 	}
 	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
 	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI !=100){this.trend.adviced = true;
-	Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));}
+	return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));}
 	
 	if((this.stochRSI < 30)&&(this.trend.direction !== 'short'))
 	{
@@ -114,7 +114,7 @@ method.check = function(candle)
     log.debug('In low since', this.trend.duration, 'candle(s)');
 	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
 	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI != 0){this.trend.adviced = true;
-	Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));}
+	return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));}
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
 	}
     log.debug('calculated StochRSI properties:');

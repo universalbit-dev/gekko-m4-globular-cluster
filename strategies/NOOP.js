@@ -1,3 +1,4 @@
+const { addon: ov } = require('openvino-node');
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
@@ -9,8 +10,9 @@ const _ = require('../core/lodash');
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
-var fs = require('node:fs');
-var async = require('async');
+var Promise = require("bluebird");
+var fs = Promise.promisifyAll(require("fs-extra"));
+
 var settings = config.NOOP;this.settings=settings;
 
 /* async fibonacci sequence */
@@ -19,6 +21,11 @@ var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.len
 
 var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
 async function sequence() {await sequence;
+};
+
+/* async keep calm and make something of amazing */
+var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
+async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
 };
 
 // This method is a noop (it doesn't do anything)

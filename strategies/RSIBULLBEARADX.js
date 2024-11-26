@@ -159,20 +159,20 @@ return console.log(chess.pgn())
 
   /* LONG  */
   long: function() {
-    if(this.trend.direction != 'long')
-    this.trend = {duration: 0,direction: 'long',longPos: true};
-    this.trend.duration++;
+    if(this.trend.direction != 'buy')
+    this.trend = {duration: 0,direction: 'buy',longPos: true};
+    this.trend.duration++;this.advice('buy');
     log.debug('-- UP --', this.trend.duration, 'candle(s)');
-    if (this.trend.duration == 3){Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));}
+    if (this.trend.duration == 3){return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');}
   },
 
   /* SHORT  */
   short: function() {
-    if (this.trend.direction != 'short') 
-    this.trend = {duration: 0,direction: 'short',longPos: false};
-    this.trend.duration++;
+    if (this.trend.direction != 'sell') 
+    this.trend = {duration: 0,direction: 'sell',longPos: false};
+    this.trend.duration++;this.advice('sell');
     log.debug('-- DOWN --', this.trend.duration, 'candle(s)');
-    if (this.trend.duration == 3) {Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));}
+    if (this.trend.duration == 3) {return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');}
   },
 
 end : function() {log.info('THE END');}

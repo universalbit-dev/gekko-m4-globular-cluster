@@ -1,4 +1,4 @@
-//const { addon: ov } = require('openvino-node');
+const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var log = require('../core/log.js');
 const { Chess } = require('chess.js');
@@ -100,10 +100,10 @@ method.check = function(candle) {
     case (CandeLow && !MovingSlower && valid > 0 && !this.is_buyin && this.candle.close > this.psar):
     this.price_buyin = candle.close;log.debug("valid : ", valid);
     this.candle_queue.length = 0;runningMin = 0;runninMax = 0;Downslow.length = 0;
-    this.is_buyin = true;Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');break;/* */
+    this.is_buyin = true;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');break;/* */
     
     case(candle.close >= runninMax && this.is_buyin):
-    this.is_buyin = false;Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');break;/* */
+    this.is_buyin = false;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');break;/* */
     
     default:log.info();
     }
