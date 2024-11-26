@@ -1,7 +1,5 @@
 // log trade performance results
-const EventEmitter = require('node:events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-
 const moment = require('moment');
 const humanizeDuration = require('humanize-duration');
 var log = Promise.promisifyAll(require('../../core/log.js'));
@@ -11,14 +9,13 @@ const dirs = util.dirs();
 const mode = util.gekkoMode();
 
 const Logger = function(watchConfig) {
-  _.bindAll(this,_.functions(Logger.prototype));
-  EventEmitter.call(this);
+  _.bindAll(this,_.functions(this));
   this.currency = watchConfig.currency;
   this.asset = watchConfig.asset;
   this.roundtrips = [];
   
 }
-util.makeEventEmitter(Logger);util.inherit(Logger, EventEmitter);Promise.promisifyAll(Logger);
+util.makeEventEmitter(Logger);
 
 
 Logger.prototype.round = function(amount) {
