@@ -145,7 +145,7 @@ return console.log(chess.pgn())},
       switch(Alpha.length != 0){
       case (min < math.mean(min,max,median)):this.advice('buy');break;
       case (max > math.mean(min,max,median)):this.advice('sell');break;
-      case (median < math.mean(min,max,median)):return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('long');break;/* */
+      case (median < math.mean(min,max,median)):return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');break;/* */
       case (median > math.mean(min,max,median)):return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');break;/* */
       default: log.info('');
       }
