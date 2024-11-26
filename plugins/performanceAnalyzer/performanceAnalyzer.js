@@ -1,19 +1,21 @@
-const EventEmitter = require('node:events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const {EventEmitter} = require("events");
+class Event extends EventEmitter{};
 const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
-const dirs = util.dirs();
-const ENV = util.gekkoEnv();
-var log = Promise.promisifyAll(require("../../core/log.js"));
 var config = util.getConfig();
-const fs=Promise.promisifyAll(require("fs-extra"));
-
 const perfConfig = config.performanceAnalyzer;
 const watchConfig = config.watch;
-const Logger = Promise.promisifyAll(require('./logger'));
+
+const dirs = util.dirs();
+const ENV = util.gekkoEnv();
+var log = require("../../core/log.js");
+const fs=require("fs-extra");
+const Logger = require('./logger');
+
 const PerformanceAnalyzer = function() {
-  _.bindAll(this,_.functions(PerformanceAnalyzer.prototype));
+  _.bindAll(this,_.functions(this));
   EventEmitter.call(this);
   this.dates = {start: false,end: false};
   this.startPrice = 0;
@@ -25,23 +27,17 @@ const PerformanceAnalyzer = function() {
   this.exposure = 0;
   this.roundTrips = [];
   this.losses = [];
-  this.roundTrip = {
-    id: 0,
-    entry: false,
-    exit: false
-  }
+  this.roundTrip = {id: 0,entry: false,exit: false};
   this.portfolio = {};
   this.balance;
   this.start = {};
   this.openRoundTrip = false;
   this.warmupCompleted = false;
 }
-util.makeEventEmitter(PerformanceAnalyzer);util.inherit(PerformanceAnalyzer, EventEmitter);Promise.promisifyAll(PerformanceAnalyzer);
+util.makeEventEmitter(PerformanceAnalyzer);
 
 PerformanceAnalyzer.prototype.processPortfolioValueChange = function(event) {
-  if(!this.start.balance) {
-    this.start.balance = event.balance;
-  }
+  if(!this.start.balance) {this.start.balance = event.balance;}
   this.balance = event.balance;
 }
 
@@ -223,7 +219,7 @@ PerformanceAnalyzer.prototype.finalize = function(done) {
 
   const report = this.calculateReportStatistics();
   if(report) {
-    const emit= new EventEmitter();
+    const emit= new Event();
     this.logger.finalize(report);
     this.emit('performanceReport', report);
   }
