@@ -11,16 +11,18 @@ throw ':(';
 
 */
 
-const _ = require('lodash');
-const EventEmitter = require('node:events');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore")); 
+const {EventEmitter} = require("events");
 const moment = require('moment');
 const errors = require('../exchangeErrors');
 const BaseOrder = require('./order');
 const states = require('./states');
 
-class LimitOrder extends EventEmitter {
+class Event extends EventEmitter{};const limit=new Event();
+
+class LimitOrder extends Event {
   constructor(api) {
-  super(this);
+  super();
   EventEmitter.call(this);
   }
 

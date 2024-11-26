@@ -12,17 +12,19 @@
     - native move
 */
 
-const _ = require('lodash');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const {EventEmitter}=require('events');
 const async = require('async');
-const EventEmitter = require('events');
-const sticky = new EventEmitter();
+class Event extends EventEmitter{};
+const sticky = new Event();
+
 const moment = require('moment');
 const errors = require('../exchangeErrors');
 const BaseOrder = require('./order');
 const states = require('./states');
 const util=require('../../core/util');
 
-class StickyOrder extends EventEmitter {
+class StickyOrder extends Event {
   constructor({api, marketConfig, capabilities}) {
     super(api, marketConfig, capabilities);
     EventEmitter.call(this);
@@ -737,7 +739,7 @@ class StickyOrder extends EventEmitter {
   }
 
 }
-util.makeEventEmitter(StickyOrder);util.inherit(StickyOrder, EventEmitter);
+util.makeEventEmitter(StickyOrder);
 
 module.exports = StickyOrder;
 

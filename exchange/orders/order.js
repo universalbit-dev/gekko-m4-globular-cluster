@@ -1,6 +1,8 @@
-const EventEmitter = require('node:events');
-const base = new EventEmitter();
-const _ = require('lodash');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("lodash"));
+const {EventEmitter}=require('events');
+class Event extends EventEmitter{};
+const base = new Event();
+
 const util=require('../../core/util');
 const exchangeUtils = require('../exchangeUtils');
 const bindAll = exchangeUtils.bindAll;
@@ -9,18 +11,16 @@ const states = require('./states');
 
 // base order
 
-class BaseOrder extends EventEmitter {
-  constructor(api) {
-    super(this);
+class BaseOrder extends Event{
+    constructor(api){
+    super();
     EventEmitter.call(this);
     this.api = api;
-
     this.checkInterval = api.interval || 1500;
     this.status = states.INITIALIZING;
 
     this.completed = false;
     this.completing = false;
-
     bindAll(this);
   }
 
@@ -83,6 +83,6 @@ class BaseOrder extends EventEmitter {
   }
   
 }
-util.makeEventEmitter(BaseOrder);util.inherit(BaseOrder, EventEmitter);
+util.makeEventEmitter(BaseOrder);
 
 module.exports = BaseOrder;
