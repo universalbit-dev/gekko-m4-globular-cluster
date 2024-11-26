@@ -4,9 +4,9 @@ const {EventEmitter} = require('events');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const util = require('../core/util.js');
 class Event extends EventEmitter {};
-
 var exchangeUtils=require("./exchangeUtils.js");
-const bindAll = exchangeUtils.bindAll;
+
+var bindAll = exchangeUtils.bindAll;//**//
 var triggers=require("./triggers/trailingStop.js");
 
 // @param api: a gekko broker wrapper instance
@@ -15,19 +15,17 @@ var triggers=require("./triggers/trailingStop.js");
 
 class Trigger extends Event{
   constructor({api, type, props, onTrigger}) {
+    super();
+    EventEmitter.call(this);
     this.onTrigger = onTrigger;
     this.api = api;
-
     this.isLive = true;
-
     // note: we stay on the safe side and trigger
     // as soon as the bid goes below trail.
     this.tickerProp = 'bid';
-
     if(!_.has(triggers, type)) {throw new Error('Gekko Broker does not know trigger ' + type);}
 
     this.CHECK_INTERVAL = this.api.interval * 10;
-
     bindAll(this);
     this.trigger = new triggers[type]({
       onTrigger: this.propogateTrigger,
@@ -54,9 +52,7 @@ class Trigger extends Event{
 
   cancel() {this.isLive = false;clearTimeout(this.timout);}
   propogateTrigger(payload) {
-    if(!this.isLive) {return;}
-    this.isLive = false;
-    this.onTrigger(payload);
+    if(!this.isLive) {return;} this.isLive = false;this.onTrigger(payload);
   }
 }
 util.makeEventEmitter(Trigger);
