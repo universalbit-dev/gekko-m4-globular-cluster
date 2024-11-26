@@ -1,21 +1,19 @@
-const EventEmitter = require('events');
+const {EventEmitter} = require('events');
 const util = require('../../core/util');
-// Note: as of now only supports trailing the price going up (after 
-// a buy), on trigger (when the price moves down) you should sell.
+
 class Event extends EventEmitter {};
-const eventEmitter = new EventEmitter();
+const eventEmitter = new Event();
 
 // @param initialPrice: initial price, preferably buy price
 // @param trail: fixed offset from the price
 // @param onTrigger: fn to call when the stop triggers
-class TrailingStop extends Event {
+class TrailingStop extends Event{
   constructor({trail, initialPrice, onTrigger}) {
     super();
     EventEmitter.call(this);
     this.trail = trail;
     this.isLive = true;
     this.onTrigger = onTrigger;
-
     this.previousPrice = initialPrice;
     this.trailingPoint = initialPrice - this.trail;
   }
@@ -49,5 +47,6 @@ class TrailingStop extends Event {
     eventEmitter.emit('trigger', this.previousPrice);
   }
 }
-util.makeEventEmitter(TrailingStop);util.inherit(TrailingStop, EventEmitter);
+util.makeEventEmitter(TrailingStop);
+
 module.exports = TrailingStop;
