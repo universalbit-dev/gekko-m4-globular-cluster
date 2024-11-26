@@ -1,5 +1,4 @@
-const { addon: ov } = require('openvino-node');
-/*     */
+//const { addon: ov } = require('openvino-node');
 
 var log = require('../core/log.js');
 var util= require('../core/util.js')
