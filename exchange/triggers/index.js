@@ -1,3 +1,3 @@
 
-const trailingStop = require("./trailingStop");
-module.exports = { trailingStop };
+const TrailingStop = require("./trailingStop");
+module.exports = { TrailingStop };
