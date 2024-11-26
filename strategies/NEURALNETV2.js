@@ -1,8 +1,7 @@
 // Downloaded from: https://github.com/xFFFFF/Gekko-Strategies
 // Source: https://github.com/RJPGriffin/
 
-/* universalbit-dev decentralized strategies */
-const { addon: ov } = require('openvino-node');
+//const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");
 var convnetjs = require('../core/convnet.js');
 var math = require('mathjs');
