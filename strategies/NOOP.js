@@ -1,4 +1,4 @@
-const { addon: ov } = require('openvino-node');
+//const { addon: ov } = require('openvino-node');
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
