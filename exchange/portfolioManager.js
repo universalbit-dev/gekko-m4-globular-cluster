@@ -6,7 +6,7 @@ const errors = require('./exchangeErrors');
 var config = util.getConfig();
 
 const {EventEmitter} = require("events");class Event extends EventEmitter {};
-const eventEmitter = new EventEmitter();
+const eventEmitter = new Event();
 
 class Portfolio extends Event{
   constructor(config, api) {
