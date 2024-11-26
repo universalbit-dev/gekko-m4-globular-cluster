@@ -5,7 +5,7 @@ const util=require('../core/util');
 const errors = require('./exchangeErrors');
 var config = util.getConfig();
 
-const EventEmitter = require('events');class Event extends EventEmitter {};
+const {EventEmitter} = require('events');class Event extends EventEmitter {};
 const eventEmitter = new EventEmitter();
 
 
