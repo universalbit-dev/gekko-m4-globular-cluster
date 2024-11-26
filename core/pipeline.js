@@ -9,42 +9,34 @@
   https://gekko.wizb.it/docs/internals/architecture.html
 
 */
-
-
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const {EventEmitter} = require("events");class Event extends EventEmitter {};
 var util = require('./util');
 var dirs = util.dirs();
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var async = require('async');
-
 var log = require(dirs.core + 'log');
-
 var pipeline = (settings) => {
 
   var mode = settings.mode;
   var config = settings.config;
-
   // prepare a GekkoStream
   var GekkoStream = require(dirs.core + 'gekkoStream');
-
   // all plugins
   var plugins = [];
   // all emitting plugins
   var emitters = {};
   // all plugins interested in candles
   var candleConsumers = [];
-
   // utility to check and load plugins.
   var pluginHelper = require(dirs.core + 'pluginUtil');
-
   // meta information about every plugin that tells Gekko
   // something about every available plugin
   var pluginParameters = require(dirs.gekko + 'plugins');
   // meta information about the events plugins can broadcast
   // and how they should hooked up to consumers.
   var subscriptions = require(dirs.gekko + 'subscriptions');
-
-  var market;
+  var market=new Event();
 
   // Instantiate each enabled plugin
   var loadPlugins = function(next) {
@@ -53,9 +45,7 @@ var pipeline = (settings) => {
       pluginParameters,
       pluginHelper.load,
       function(error, _plugins) {
-        if(error)
-          return util.die(error, true);
-
+        if(error) return util.die(error, true);
         plugins = _.compact(_plugins);
         next();
       }
@@ -138,13 +128,9 @@ var pipeline = (settings) => {
             }
             return;
           }
-
           // attach handler
           emitters[sub.emitter]
-            .on(sub.event,
-              plugin[
-                sub.handler
-              ])
+            .on(sub.event,plugin[sub.handler])
         }
 
       });
