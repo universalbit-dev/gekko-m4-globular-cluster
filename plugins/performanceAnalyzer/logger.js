@@ -2,7 +2,7 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const moment = require('moment');
 const humanizeDuration = require('humanize-duration');
-var log = Promise.promisifyAll(require('../../core/log.js'));
+var log = require('../../core/log.js');
 const util = require('../../core/util.js');
 var config = util.getConfig();
 const dirs = util.dirs();
