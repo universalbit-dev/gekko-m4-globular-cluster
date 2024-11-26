@@ -2,17 +2,15 @@
 // them and sends it to the parent process.
 
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var async=require('async');
 const log = require('../core/log');
-const util = require('../core/util');
-const dirs = util.dirs();
-const env = util.gekkoEnv();
-const config = util.getConfig();
+const util = require('../core/util');const dirs = util.dirs();const env = util.gekkoEnv();const config = util.getConfig();
 const moment = require('moment');
-const fs = Promise.promisifyAll(require("fs-extra"));
-const EventEmitter = require('node:events');
+const fs = require("fs-extra");
+const {EventEmitter} = require("events");
 
 const BacktestResultExporter = function() {
-  _.bindAll(this, _.functions(BacktestResultExporter.prototype));
+  _.bindAll(this, _.functions(this));
   EventEmitter.call(this);
   this.performanceReport;
   this.roundtrips = [];
@@ -28,8 +26,7 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
   
 }
-util.makeEventEmitter(BacktestResultExporter);util.inherit(BacktestResultExporter, EventEmitter);
-Promise.promisifyAll(BacktestResultExporter);
+util.makeEventEmitter(BacktestResultExporter);
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
   this.portfolioValue = portfolio.balance;

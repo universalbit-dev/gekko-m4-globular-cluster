@@ -1,22 +1,19 @@
 
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const EventEmitter = require('node:events');
+const {EventEmitter} = require("events");
 var log = require('../core/log');
-const util = require('../core/util');
-config = util.getConfig();
-moment = require('moment');
-
-adviceLoggerConfig = config.adviceLogger;
-
-const fs= Promise.promisifyAll(require("fs-extra"));
+const util = require('../core/util');const config = util.getConfig();
+const moment = require('moment');
+const adviceLoggerConfig = config.adviceLogger;
+const fs= require("fs-extra");
 
 var Actor = function() {
   EventEmitter.call(this);
   this.price = 'N/A';
   this.marketTime = {format: function() {return 'N/A'}};
-  _.bindAll(this, _.functions(Actor.prototype));
+  _.bindAll(this, _.functions(this));
 }
-util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);Promise.promisifyAll(Actor);
+util.makeEventEmitter(Actor);
 
 Actor.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
