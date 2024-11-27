@@ -8,7 +8,7 @@ const log = require("../../core/log.js");
 
 /* */
 var CandleBatcher = require('../../core/candleBatcher');
-const isLeecher = config.market && config.market.type === 'leech';
+//const isLeecher = config.market && config.market.type === 'leech';
 
 var Actor = function(done){
   _.bindAll(this,_.functions(this));
