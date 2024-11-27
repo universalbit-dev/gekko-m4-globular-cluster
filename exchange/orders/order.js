@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("lodash"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const {EventEmitter}=require('events');
 class Event extends EventEmitter{};
 const base = new Event();
