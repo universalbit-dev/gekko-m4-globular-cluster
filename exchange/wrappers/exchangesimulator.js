@@ -1,8 +1,8 @@
 //exchanges simulator: used to test  (works without internet).
-const _ = require('lodash');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const moment = require('moment');
-
-const TREND_DURATION = 1000;
+const fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
+const TREND_DURATION = Math.floor(Math.random() * fibonacci_sequence.length);
 
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1) ) + min;
