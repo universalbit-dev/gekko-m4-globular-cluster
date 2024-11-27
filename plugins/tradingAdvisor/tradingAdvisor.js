@@ -1,26 +1,27 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const {EventEmitter} = require("events");
 const fs = require("fs-extra");
-const util = require('../../core/util');
-var config = util.getConfig();const dirs = util.dirs();
-
+const util = require('../../core/util');const dirs = util.dirs();
+var config = util.getConfig();
 const moment = require('moment');
 const log = require("../../core/log.js");
-const CandleBatcher = require('../../core/candleBatcher');
+
+/* */
+var CandleBatcher = require('../../core/candleBatcher');
 const isLeecher = config.market && config.market.type === 'leech';
 
-const Actor = function(done){
+var Actor = function(done){
   _.bindAll(this,_.functions(this));
   EventEmitter.call(this);
   this.done = done;
   this.batcher = new CandleBatcher(config.tradingAdvisor.candleSize);
   this.strategyName = config.tradingAdvisor.method;
   this.setupStrategy();
-
   var mode = util.gekkoMode();
 
   if(mode === 'realtime')
 {
+    /* */
     var Stitcher = require('../../core/tools/dataStitcher');
     var stitcher = new Stitcher(this.batcher);
     stitcher.prepareHistoricalData(done);
@@ -29,42 +30,26 @@ const Actor = function(done){
 }
 util.makeEventEmitter(Actor);
 
-Actor.prototype.setupStrategy = function() {
+Actor.prototype.setupStrategy = function() 
+{
   if(!fs.existsSync(dirs.methods + this.strategyName + '.js'))
-    util.die('Gekko can\'t find the strategy "' + this.strategyName + '"');
-
+  util.die('Gekko can\'t find the strategy "' + this.strategyName + '"');
   log.info('\t', 'Using the strategy: ' + this.strategyName);
-
-  const strategy = require(dirs.methods + this.strategyName);
-  const WrappedStrategy = Promise.promisifyAll(require("./baseTradingMethod"));
+  var strategy = require(dirs.methods + this.strategyName);
+  
+  /* */
+  const WrappedStrategy = require("./baseTradingMethod");
   _.each(strategy, function(fn, name) {WrappedStrategy.prototype[name] = fn;});
-
   let stratSettings;
   if(config[this.strategyName]) {stratSettings = config[this.strategyName];}
 
-  this.strategy = new WrappedStrategy(stratSettings);
-  this.strategy
-    .on(
-      'stratWarmupCompleted',
-      e => this.deferredEmit('stratWarmupCompleted', e)
-    )
-    .on('advice', this.relayAdvice)
-    .on(
-      'stratUpdate',
-      e => this.deferredEmit('stratUpdate', e)
-    ).on('stratNotification',
-      e => this.deferredEmit('stratNotification', e)
-    )
-
-  this.strategy
-    .on('tradeCompleted', this.processTradeCompleted);
-
-  this.batcher
-    .on('candle', _candle => {
-      const { id, ...candle } = _candle;
-      this.deferredEmit('stratCandle', candle);
-      this.emitStratCandle(candle);
-    });
+this.strategy = new WrappedStrategy(stratSettings);
+  this.strategy.on('stratWarmupCompleted',e => this.deferredEmit('stratWarmupCompleted', e));
+  this.strategy.on('advice', this.relayAdvice);
+  this.strategy.on('stratUpdate',e => this.deferredEmit('stratUpdate', e)); 
+  this.strategy.on('stratNotification',e => this.deferredEmit('stratNotification', e));
+  this.strategy.on('tradeCompleted', this.processTradeCompleted);
+  this.batcher.on('candle', _candle => {const { id, ...candle } = _candle;this.deferredEmit('stratCandle', candle);this.emitStratCandle(candle);});
 }
 
 Actor.prototype.processCandle = function(candle, done) {
