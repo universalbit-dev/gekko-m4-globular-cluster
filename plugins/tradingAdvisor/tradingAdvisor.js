@@ -5,7 +5,7 @@ const util = require('../../core/util');
 var config = util.getConfig();const dirs = util.dirs();
 
 const moment = require('moment');
-const log = Promise.promisifyAll(require("../../core/log.js"));
+const log = require("../../core/log.js");
 const CandleBatcher = require('../../core/candleBatcher');
 const isLeecher = config.market && config.market.type === 'leech';
 
