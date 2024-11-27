@@ -32,7 +32,7 @@ var Trader = function(next) {
   });
   this.cancellingOrder = false;this.sendInitialPortfolio = false;setInterval(this.sync, 1000 * 60 * 10);
 }
-util.makeEventEmitter(Trader);util.inherit(Trader, EventEmitter);Promise.promisifyAll(Trader);
+util.makeEventEmitter(Trader);
 
 Trader.prototype.sync = function(next) {
   log.debug('syncing private data');
