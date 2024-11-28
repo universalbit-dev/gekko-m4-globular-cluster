@@ -1,5 +1,5 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const {EventEmitter} = require("events");
+const {EventEmitter} = require("events");class Event extends EventEmitter{};
 const fs = require("fs-extra");
 const util = require('../../core/util');const dirs = util.dirs();
 var config = util.getConfig();
