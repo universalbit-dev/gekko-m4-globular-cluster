@@ -30,14 +30,14 @@ Set up a Gekko Broker instance:
 
 ```js
 const {EventEmitter}=require('events');
-class Event extends EventEmitter{};order=new Event();
+class Event extends EventEmitter{};
     const Broker = require('./gekkoBroker.js');
     const wohoo = new Broker({
       currency: 'BTC',asset: 'LTC',private: true,exchange: 'wohoo',key: 'APIKEY',secret: 'APISECRET' 
     });
 ```
 
-Now we have an instance that can create a [sticky order](./sticky_order.md):
+Now we have an instance and can create a [sticky order](./sticky_order.md):
 ```js
 
     const type = 'sticky';const side = 'buy';const amount = 0.01;//set amount
@@ -71,15 +71,13 @@ At any point in time you can change the limit (or the amount), for example:
  
 example file:
 ```js
-const {EventEmitter}=require('events');
-class Event extends EventEmitter{};order=new Event();
+const {EventEmitter}=require('events');class Event extends EventEmitter{};
     const Broker = require('./gekkoBroker.js');
     const wohoo = new Broker({
       currency: 'BTC',asset: 'LTC',private: true,exchange: 'wohoo',key: 'APIKEY',secret: 'APISECRET' 
     });
  const type = 'sticky';const side = 'buy';const amount = 0.01;//set amount
     const order = wohoo.createOrder(type, side, amount);
-
     order.on('statusChange', s => console.log(now(), 'new status', s));
     order.on('fill', s => console.log(now(), 'filled', s));
     order.on('error', s => console.log(now(), 'error!', e));
