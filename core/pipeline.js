@@ -36,7 +36,7 @@ var pipeline = (settings) => {
   // meta information about the events plugins can broadcast
   // and how they should hooked up to consumers.
   var subscriptions = require(dirs.gekko + 'subscriptions');
-  var market=new Event();
+  var market;
 
   // Instantiate each enabled plugin
   var loadPlugins = function(next) {
