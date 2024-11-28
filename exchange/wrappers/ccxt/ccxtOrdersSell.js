@@ -46,13 +46,18 @@ var amount = 0.01;
 var price = 1;      
 var params = {};         
 var id = ''; /* Exchange Name */
+
+return console.log('ccxt -- sell');
+
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
 
 //Market Sell Order.Private HTTP REST APIs (apiKey:secret required)
+
+/*
 var exchange = new ccxt[id] ({
         verbose: false,
-        apiKey: '',/* */
-        secret: '',/* */
+        apiKey: '',
+        secret: '',
     });
 
 const sell = async function() {
@@ -67,6 +72,7 @@ const sell = async function() {
     }
 };return sell();
 
+*/
 
 module.exports={sell};
 
@@ -93,5 +99,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. 
 */
-
 
