@@ -47,13 +47,20 @@ var amount = 0.01;
 var price = 1;      
 var params = {};         
 var id = ''; /* Exchange Name */
+
+return console.log('ccxt -- buy');
+
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
 
 //Market Buy Order.Private HTTP REST APIs (apiKey:secret required)
+
+
+/*
+
 var exchange = new ccxt[id] ({
         verbose: false,
-        apiKey: '',/* */
-        secret: '',/* */
+        apiKey: '',
+        secret: '',
     });
 
 const buy = async function () {
@@ -67,6 +74,8 @@ const buy = async function () {
     return console.log ('Submit Buy Order -- Error -- ');
     }
 };return buy();
+
+*/
 
 module.exports={buy};
 
@@ -93,4 +102,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. 
 */
-
