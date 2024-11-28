@@ -40,13 +40,18 @@ var Promise = require("bluebird");const ccxt = Promise.promisifyAll(require("ccx
 
 //Javascript Examples https://docs.ccxt.com/#/examples/js/
 var id = ''; /* Exchange Name */
+
+return console.log('ccxt -- balance');
+
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
+
+/*
 
 //Fetch Exchange Balance.Private HTTP REST APIs (apiKey:secret required)
 var exchange = new ccxt[id] ({
         verbose: false,
-        apiKey: '',/* */
-        secret: '',/* */
+        apiKey: '',
+        secret: '',
     });
 
 const balance = async function() {
@@ -59,6 +64,8 @@ const balance = async function() {
     return console.log ('Balance -- Error -- ');
     }
 };return balance();
+
+*/
 
 module.exports={balance};
 
