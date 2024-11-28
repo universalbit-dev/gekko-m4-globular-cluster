@@ -8,7 +8,7 @@
 require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-let _ = require('underscore');
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 let fs = require('fs-extra');
 
 var method = {
