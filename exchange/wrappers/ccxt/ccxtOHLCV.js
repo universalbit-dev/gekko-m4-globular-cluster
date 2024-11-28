@@ -41,7 +41,12 @@ var Promise = require("bluebird");const ccxt = Promise.promisifyAll(require("ccx
 const symbol = 'LTC/BTC'; /* */
 var timeframe= '15m';     /* */   
 var id = ''; /* Exchange Name */
+
+return console.log('ccxt -- OHLCV');
+
 /* Supported Exchanges : https://github.com/ccxt/ccxt/wiki/Exchange-Markets */
+
+/*
 
 //Available Exchanges
 console.log (ccxt.exchanges) // print all available exchanges
@@ -49,8 +54,8 @@ console.log (ccxt.exchanges) // print all available exchanges
 //Fetch OHLCV .Public HTTP REST APIs(apiKey:secret not required)
 var exchange = new ccxt[id] ({
         verbose: false,
-        apiKey: '', /* */
-        secret: '', /* */
+        apiKey: '',  
+        secret: '', 
     });
 
 const ccxtohlcv=async function () {
@@ -66,6 +71,8 @@ while (true) {
     };
 };
 return ccxtohlcv();
+
+*/
 
 module.exports={ccxtohlcv};
 
