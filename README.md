@@ -27,6 +27,13 @@ npm i pm2 -g
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
 ---
 
+#### -- realtime mode -- exchange simulator 
+```bash
+pm2 start trade.config.js
+#simulate all available strategies
+```
+
+
 #### -- import mode --  -- [work in progress ccxt module](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/examples) --
 ```bash
 pm2 start import.config.js
@@ -38,11 +45,6 @@ pm2 start backtest.config.js
 #test all available strategies and write results into logs/json/ directory
 ```
 
-#### -- realtime mode -- exchange simulator 
-```bash
-pm2 start trade.config.js
-#simulate all available strategies
-```
 ### [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md):
 #### Method of buying and selling
 ### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
