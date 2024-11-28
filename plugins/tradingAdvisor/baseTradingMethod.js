@@ -2,7 +2,7 @@ var Promise = require("bluebird");const _ = Promise.promisifyAll(require("unders
 var fs = require("fs-extra");
 const util = require('../../core/util');var config = util.getConfig();const dirs = util.dirs();
 const log = require('../../core/log');
-const {EventEmitter} = require("events");
+const {EventEmitter} = require("events");class Event extends EventEmitter{};
 const ENV = util.gekkoEnv();const mode = util.gekkoMode();
 const startTime = util.getStartTime();
 const indicatorsPath = dirs.methods + 'indicators/';
@@ -82,7 +82,7 @@ util.makeEventEmitter(Base);
 
 Base.prototype.tick = async function(candle, done) {
   this.age++;
-  const emit =new EventEmitter();
+  const emit =new Event();
   const afterAsync = () => {this.calculateSyncIndicators(candle, done);}
 
   if(this.asyncTick) {
