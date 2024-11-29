@@ -1,25 +1,19 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs =require("fs-extra");
+const _ = require("underscore");
+var fs = require("fs-extra");
 
-var util = require('../../core/util.js');
-var config = util.getConfig();
-var dirs = util.dirs();
+var util = require('../../core/util.js');var config = util.getConfig();var dirs = util.dirs();
 
 var adapter = config.sqlite;
-
 // verify the correct dependencies are installed
 var pluginHelper = require(dirs.core + 'pluginUtil');
-var pluginMock = {
-  slug: 'sqlite adapter',
-  dependencies: adapter.dependencies,
-};
+var pluginMock = {slug: 'sqlite3',};
 
 var cannotLoad = pluginHelper.cannotLoad(pluginMock);
 if (cannotLoad) util.die(cannotLoad);
 
 // should be good now
 if (config.debug) var sqlite3 = require('sqlite3').verbose();
-else var sqlite3 = require("sqlite3");
+else var sqlite3 = require('sqlite3');
 
 var plugins = require(util.dirs().gekko + 'plugins');
 
@@ -46,8 +40,8 @@ if (mode === 'realtime' || mode === 'importer') {
 
 module.exports = {
   initDB: () => {
-    var journalMode = config.sqlite.journalMode || 'PERSIST';
-    var syncMode = journalMode === 'WAL' ? 'NORMAL' : 'FULL';
+    var journalMode;
+    var syncMode;
   
     var db = new sqlite3.Database(fullPath);
     db.run('PRAGMA synchronous = ' + syncMode);

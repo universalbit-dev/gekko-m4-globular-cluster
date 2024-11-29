@@ -1,14 +1,13 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var fs = require("fs-extra");
-var async=require('async');
+
+const async = require('async');
 
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
+const sqlite3 = require('sqlite3');
 
-const {sqlite3} = require("sqlite3");
-
-// todo: rewrite with generators or async/await..
 module.exports = done => {
   const dbDirectory = dirs.gekko + config.sqlite.dataDirectory
 
@@ -50,15 +49,9 @@ module.exports = done => {
               asset: _.last(parts)
             });
         });
-
         next();
       });
     });
-
-
   },
-  // got all tables!
-  err => {
-    done(err, markets);
-  });
+  err => {done(err, markets);});
 }

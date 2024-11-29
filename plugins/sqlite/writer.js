@@ -1,19 +1,22 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var fs = require("fs-extra");
+
+var config = require('../../core/util.js').getConfig();
 var sqlite = require("./handle");
-var sqliteUtil = require("./util");var util = require("../../core/util");
-var config = util.getConfig();
-var log = require("../../core/log");
+var sqliteUtil = require('./util');
+var util = require('../../core/util');
+var log = require('../../core/log');
 
 var Store = function(done, pluginMeta) {
   _.bindAll(this,_.functions(this));
   this.done = done;
+
   this.db = sqlite.initDB(false);
   this.db.serialize(this.upsertTables);
+
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
-util.makeEventEmitter(Store);
 
 Store.prototype.upsertTables = function() {
   var createQueries = [
@@ -31,7 +34,6 @@ Store.prototype.upsertTables = function() {
         trades INTEGER NOT NULL
       );
     `,
-
   ];
 
   var next = _.after(_.size(createQueries), this.done);
@@ -74,7 +76,6 @@ Store.prototype.writeCandles = function() {
 
     stmt.finalize();
     this.db.run("COMMIT");
-    // TEMP: should fix https://forum.gekko.wizb.it/thread-57279-post-59194.html#pid59194
     this.db.run("pragma wal_checkpoint;");
     
     this.cache = [];
@@ -101,21 +102,5 @@ if(config.candleWriter.enabled) {
   Store.prototype.processCandle = processCandle;
   Store.prototype.finalize = finalize;
 }
-
-// TODO: add storing of trades / advice?
-
-// var processTrades = function(candles) {
-//   util.die('NOT IMPLEMENTED');
-// }
-
-// var processAdvice = function(candles) {
-//   util.die('NOT IMPLEMENTED');
-// }
-
-// if(config.tradeWriter.enabled)
-//  Store.prototype.processTrades = processTrades;
-
-// if(config.adviceWriter.enabled)
-//   Store.prototype.processAdvice = processAdvice;
 
 module.exports = Store;

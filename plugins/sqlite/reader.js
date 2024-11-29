@@ -1,25 +1,24 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var fs = require("fs-extra");
-var util = require("../../core/util.js");var config = util.getConfig();
-var log = require("../../core/log");
-var sqlite = require("./handle");
-var sqliteUtil = require("./util");var util = require("../../core/util");
+
+var util = require('../../core/util.js');
+var config = util.getConfig();
+var log = require(util.dirs().core + 'log');
+
+var sqlite = require('./handle');
+var sqliteUtil = require('./util');
 
 var Reader = function() {
   _.bindAll(this,_.functions(this));
   this.db = sqlite.initDB(true);
 }
-util.makeEventEmitter(Reader);
 
 
 // returns the most recent window complete candle
 // windows within `from` and `to`
 Reader.prototype.mostRecentWindow = function(from, to, next) {
-  to = to.unix();
-  from = from.unix();
-
+  to = to.unix();from = from.unix();
   var maxAmount = to - from + 1;
-
   this.db.all(`
     SELECT start from ${sqliteUtil.table('candles')}
     WHERE start <= ${to} AND start >= ${from}

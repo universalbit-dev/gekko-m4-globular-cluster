@@ -1,5 +1,4 @@
 var config = require('../../core/util.js').getConfig();
-
 var watch = config.watch;
 var settings = {
   exchange: watch.exchange,
