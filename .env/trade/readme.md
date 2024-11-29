@@ -1,7 +1,6 @@
 ##### Gekko-M4-Globular-Cluster
 This file is intended to highlight customizable features and find runtime errors
-DEBUG GEKKO REALTIME MODE (Exchange Data)
-NOOP Strategy
+##### DEBUG GEKKO REALTIME MODE (Exchange Simulator Data)
 
 * Feature-rich
 
