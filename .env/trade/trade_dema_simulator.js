@@ -10,7 +10,7 @@ config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'}
 config.api={interval:317811}; //5.29685 minutes
 config.expects={candle:987}; //987 seconds
 
-config.DEMA={SMA:55,DEMA:1,STOPLOSS:3,rl:03};
+config.DEMA={SMA:55,DEMA:1,STOPLOSS:3,rl:0.3};
 config.DEMA.thresholds={down:-0.000001,up:0.000001};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
