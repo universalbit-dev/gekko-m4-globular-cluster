@@ -6,7 +6,7 @@ var util = require('../../core/util.js');var config = util.getConfig();var dirs 
 var adapter = config.sqlite;
 // verify the correct dependencies are installed
 var pluginHelper = require(dirs.core + 'pluginUtil');
-var pluginMock = {slug: 'sqlite3',};
+var pluginMock = {slug: 'sqlite3'};
 
 var cannotLoad = pluginHelper.cannotLoad(pluginMock);
 if (cannotLoad) util.die(cannotLoad);
