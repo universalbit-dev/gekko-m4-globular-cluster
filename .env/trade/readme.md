@@ -1,13 +1,14 @@
-/*
-gekko-m4-globular-cluster
+##### Gekko-M4-Globular-Cluster
 This file is intended to highlight customizable features and find runtime errors
 DEBUG GEKKO REALTIME MODE (Exchange Data)
 NOOP Strategy
 
-* feature-rich
-Adding Auxiliary Integration Functions: in the plugins/trader/trader.js [file](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/trader/trader.js)
+* Feature-rich
 
-*/
+  Adding Auxiliary Integration Functions: in the [plugins/trader/trader.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/trader/trader.js)
+
+
+```bash
 
 2024-06-20 15:02:56 (DEBUG):	added {
   REVISION: 'ALPHA',
@@ -994,4 +995,6 @@ Adding Auxiliary Integration Functions: in the plugins/trader/trader.js [file](h
 2024-06-20 15:02:56 (DEBUG):	added [Function: TradeBatcher]
 2024-06-20 15:02:56 (DEBUG):	added [Function: Actor]
 2024-06-20 15:02:56 (DEBUG):	syncing private data
-2024-06-20 15:02:56 (INFO):	
+2024-06-20 15:02:56 (INFO):
+
+```
