@@ -19,6 +19,17 @@ node gekko.js -c .env/trade/trade_inverter_simulator.js
 ```
 ---
 
+#### Example on console
+
+```bash
+|INVERTER|-simulator-| > 2024-11-30 02:12:54 (DEBUG):    scheduling ticks                                                    
+|INVERTER|-simulator-| > [EXCHANGE SIMULATOR] emitted 1 fake trades, up until 2024-11-30 02:12:54.                           
+|INVERTER|-simulator-| > - Processing Exchange Data: 2024-11-30 01:12:55                                                   
+|INVERTER|-simulator-| > ✔ Processed                                                                                         
+|INVERTER|-simulator-| > [EXCHANGE SIMULATOR] emitted 20 fake trades, up until 2024-11-30 02:13:34.                          │
+|INVERTER|-simulator-| > - Processing Exchange Data: 2024-11-30 01:13:16     
+```
+
 * Plugins to Enable/Disable: [trade_inverter_simulator.js](https://github.com/universalbit-dev/gekko-m4/blob/master/.env/trade/trade_inverter_simulator.js)
 
 #### Resources:
