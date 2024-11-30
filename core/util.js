@@ -123,7 +123,7 @@ var util = {
   },
   
   makeEventEmitter: function(dest) {
-    util.inherit(dest, require('events').Event);
+    util.inherit(dest, require('events').EventEmitter);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
