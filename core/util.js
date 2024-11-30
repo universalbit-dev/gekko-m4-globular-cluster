@@ -48,7 +48,6 @@ var util = {
     if(_package)
       return _package;
 
-
     _package = JSON.parse( fs.readFileSync(__dirname + '/../package.json', 'utf8') );
     return _package;
   },
@@ -114,19 +113,17 @@ var util = {
       importers: ROOT + 'importers/exchanges/',
       tools: ROOT + 'core/tools/',
       workers: ROOT + 'core/workers/',
-      //web: ROOT + 'web/',
-      config: ROOT + 'config/',
+      config: ROOT + '.env/',
       broker: ROOT + 'exchange/'
     }
   },
+  
   inherit: function(dest, source) {
-    require('util').inherits(
-      dest,
-      source
-    );
+    require('util').inherits(dest,source);
   },
+  
   makeEventEmitter: function(dest) {
-    util.inherit(dest, require('events').EventEmitter);
+    util.inherit(dest, require('events').Event);
   },
   setGekkoMode: function(mode) {
     _gekkoMode = mode;
@@ -173,7 +170,6 @@ program
   .option('-c, --config <file>', 'Config file')
   .option('-b, --backtest', 'backtesting mode')
   .option('-i, --import', 'importer mode')
-  //.option('--ui', 'launch a web UI')
   .parse(process.argv);
 
 // make sure the current node version is recent enough
