@@ -14,7 +14,7 @@ pm2 start import.config.js
 cd ~/gekko-m4-globular-cluster
 node gekko -c .env/import/import.js -i
 ```
-#### Example gekko-m4 terminal output
+#### Example on console
 
 ```bash
 |- import exchange data -|  | - Processing Exchange Data: 2024-10-14 13:51:39
