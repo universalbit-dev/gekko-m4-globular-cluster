@@ -17,14 +17,33 @@ node gekko -c .env/import/import.js -i
 #### Example gekko-m4 terminal output
 
 ```bash
-2024-03-26 13:00:20 (DEBUG):	Processing 980 new trades. From 2022-02-18 08:01:04 UTC to 2022-02-19 23:06:29 UTC. (2 days)
-2024-03-26 13:00:22 (DEBUG):	Processing 999 new trades. From 2022-02-19 23:43:31 UTC to 2022-02-21 23:47:17 UTC. (2 days)
-2024-03-26 13:00:24 (DEBUG):	Processing 999 new trades. From 2022-02-21 23:48:02 UTC to 2022-02-24 02:40:50 UTC. (2 days)
-2024-03-26 13:00:26 (DEBUG):	Processing 999 new trades. From 2022-02-24 02:41:01 UTC to 2022-02-24 20:15:16 UTC. (18 hours)
-2024-03-26 13:00:28 (DEBUG):	Processing 999 new trades. From 2022-02-24 20:17:49 UTC to 2022-02-26 19:10:42 UTC. (2 days)
-2024-03-26 13:00:30 (DEBUG):	Processing 999 new trades. From 2022-02-26 19:15:23 UTC to 2022-02-28 17:06:37 UTC. (2 days)
-2024-03-26 13:00:32 (DEBUG):	Processing 722 new trades. From 2022-02-28 17:06:45 UTC to 2022-02-28 23:58:28 UTC. (7 hours)
-2024-03-26 13:00:32 (INFO):	Done importing!
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-14 13:51:39
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-15 21:20:03
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-17 04:11:28
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-17 16:03:09
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-18 22:05:18
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-21 00:05:23
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-22 13:54:57
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-24 12:10:52
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-25 22:12:57
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-27 22:56:22
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-29 16:47:45
+|- import exchange data -|  | - Processing Exchange Data: 2024-10-30 19:42:44
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | ✔ Processed
+|- import exchange data -|  | - Processing Exchange Data: 2024-11-01 22:31:58
+|- import exchange data -|  | 2024-11-30 02:03:15 (INFO):	Done importing!
+|- import exchange data -|  | ✔ Processed
 ```
 
 ---
