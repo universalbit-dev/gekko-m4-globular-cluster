@@ -15,12 +15,12 @@ const util=require('../core/util');
 var config = util.getConfig();
 const moment = require('moment');
 
-var checker=Promise.promisifyAll(require("./exchangeChecker.js"));
-var errors=Promise.promisifyAll(require("./exchangeErrors.js"));
-var Portfolio=Promise.promisifyAll(require("./portfolioManager.js"));
-var orders=Promise.promisifyAll(require("./orders/order.js"));
-var Trigger=Promise.promisifyAll(require("./trigger.js"));
-var exchangeUtils=Promise.promisifyAll(require("./exchangeUtils.js"));
+var checker=require("./exchangeChecker.js");
+var errors=require("./exchangeErrors.js");
+var Portfolio=require("./portfolioManager.js");
+var orders=require("./orders/order.js");
+var Trigger=require("./trigger.js");
+var exchangeUtils=require("./exchangeUtils.js");
 
 const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
