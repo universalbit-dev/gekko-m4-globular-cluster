@@ -18,13 +18,14 @@ async function sequence() {await sequence;};
 var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
 async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
 
+//https://github.com/Gab0/gekko-extra-indicators
 function AuxiliaryIndicators(){
    var directory = 'indicators/';
    var extension = '.js';
-   var files = ['SMA', 'RSI','ADX','StopLoss'];
+   var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];
    for (var file of files){
        var auxiliaryindicators = require('./' + directory + file + extension);
-       log.debug('added', auxiliaryindicators);
+       log.debug('Ported Indicator:', auxiliaryindicators);
    }
  }
 
