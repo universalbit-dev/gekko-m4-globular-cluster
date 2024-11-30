@@ -33,11 +33,12 @@ pm2 start trade.config.js
 #simulate all available strategies
 ```
 
-
 #### -- import mode --  -- [work in progress ccxt module](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/examples) --
 ```bash
+#import exchange data
 pm2 start import.config.js
-#import exchange data 
+#Nodejs [on console](https://nodejs.org/api/console.html)
+node gekko.js -c .env/import/import.js -i
 ```
 #### -- backtest mode --
 ```bash
