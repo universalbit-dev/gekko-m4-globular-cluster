@@ -1,31 +1,18 @@
 var start = (config, candleSize, daterange) => {
   var util = require(__dirname + '/../../util');
-
-  // force correct gekko env
   util.setGekkoEnv('child-process');
-
-  // force disable debug
   config.debug = false;
   util.setConfig(config);
 
   var dirs = util.dirs();
-
   var load = require(dirs.tools + 'candleLoader');
-  load(config.candleSize, candles => {
-    process.send(candles);
-  })
+  load(config.candleSize, candles => {this.send(candles);});
 }
 
-process.send('ready');
+this.send('ready');
+this.on('message', (m) => {if(m.what === 'start') start(m.config, m.candleSize, m.daterange);});
+this.on('disconnect', function() {process.exit(0);});
 
-process.on('message', (m) => {
-  if(m.what === 'start')
-    start(m.config, m.candleSize, m.daterange);
-});
-
-process.on('disconnect', function() {
-  process.exit(0);
-})
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
