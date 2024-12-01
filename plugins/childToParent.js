@@ -18,6 +18,6 @@ const ChildToParent = function() {
       }
     }, this);
 }
-util.makeEventEmitter(ChildToParent);
+util.makeEventEmitter(ChildToParent);util.inherit(ChildToParent, EventEmitter);
 
 module.exports = ChildToParent;

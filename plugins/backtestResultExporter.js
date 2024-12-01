@@ -26,7 +26,7 @@ const BacktestResultExporter = function() {
   if(!config.backtestResultExporter.data.trades)this.processTradeCompleted = null;
   
 }
-util.makeEventEmitter(BacktestResultExporter);
+util.makeEventEmitter(BacktestResultExporter);util.inherit(BacktestResultExporter, EventEmitter);
 
 BacktestResultExporter.prototype.processPortfolioValueChange = function(portfolio) {
   this.portfolioValue = portfolio.balance;

@@ -13,7 +13,7 @@ var Actor = function() {
   this.marketTime = {format: function() {return 'N/A'}};
   _.bindAll(this, _.functions(this));
 }
-util.makeEventEmitter(Actor);
+util.makeEventEmitter(Actor);util.inherit(Actor, EventEmitter);
 
 Actor.prototype.processCandle = function(candle, done) {
   this.price = candle.close;
