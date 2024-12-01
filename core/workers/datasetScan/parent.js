@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));const { EventEmitter } = require("events");
 var moment = require('moment');
 var async = require('async');
 
@@ -6,46 +6,26 @@ var util = require('../../util');
 var dirs = util.dirs();
 
 var dateRangeScan = require('../dateRangeScan/parent');
-
 module.exports = function(config, done) {
-
   util.setConfig(config);
-
   var adapter = config[config.adapter];
   var scan = require(dirs.gekko + adapter.path + '/scanner');
 
   scan((err, markets) => {
-
     if(err)
       return done(err);
-
       let numCPUCores = 4;
-      if(numCPUCores === undefined)
-         numCPUCores = 2;
+      if(numCPUCores === undefined)numCPUCores = 2;
       async.eachLimit(markets, numCPUCores, (market, next) => {
-
-      let marketConfig = _.clone(config);
-      marketConfig.watch = market;
-
+      let marketConfig = _.clone(config);marketConfig.watch = market;
       dateRangeScan(marketConfig, (err, ranges) => {
-        if(err)
-          return next();
-
-        market.ranges = ranges;
-
-        next();
+      if(err) return next();market.ranges = ranges;next();
       });
-
     }, err => {
-      let resp = {
-        datasets: [],
-        errors: []
-      }
+      let resp = {datasets: [],errors: []}
       markets.forEach(market => {
-        if(market.ranges)
-          resp.datasets.push(market);
-        else
-          resp.errors.push(market);
+        if(market.ranges) resp.datasets.push(market);
+        else resp.errors.push(market);
       })
       done(err, resp);
     })
