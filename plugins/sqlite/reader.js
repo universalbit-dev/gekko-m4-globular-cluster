@@ -1,6 +1,6 @@
 const _ = require("underscore");
 var fs = require("fs-extra");
-
+const {EventEmitter} = require("events");class Event extends EventEmitter{};
 var util = require('../../core/util.js');
 var config = util.getConfig();
 var log = require(util.dirs().core + 'log');
@@ -12,6 +12,8 @@ var Reader = function() {
   _.bindAll(this,_.functions(this));
   this.db = sqlite.initDB(true);
 }
+util.makeEventEmitter(Reader);util.inherit(Reader, EventEmitter);
+
 
 
 // returns the most recent window complete candle

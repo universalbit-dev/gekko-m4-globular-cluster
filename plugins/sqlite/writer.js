@@ -1,6 +1,6 @@
 const _ = require("underscore");
 var fs = require("fs-extra");
-
+const {EventEmitter} = require("events");class Event extends EventEmitter{};
 var config = require('../../core/util.js').getConfig();
 var sqlite = require("./handle");
 var sqliteUtil = require('./util');
@@ -17,6 +17,7 @@ var Store = function(done, pluginMeta) {
   this.cache = [];
   this.buffered = util.gekkoMode() === "importer";
 }
+util.makeEventEmitter(Store);util.inherit(Store, EventEmitter);
 
 Store.prototype.upsertTables = function() {
   var createQueries = [
@@ -88,7 +89,6 @@ var processCandle = function(candle, done) {
   this.cache.push(candle);
   if (!this.buffered || this.cache.length > 1000) 
     this.writeCandles();
-
   done();
 };
 
