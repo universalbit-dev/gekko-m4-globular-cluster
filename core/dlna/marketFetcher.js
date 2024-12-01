@@ -1,10 +1,11 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const { EventEmitter } = require("events");class Event extends EventEmitter{};
+const { EventEmitter } = require("events");
 var moment = require('moment');
 var utc = moment.utc;
-var util = require('../util.js');var config = util.getConfig();var dirs = util.dirs();
+var util = require('../util');
+var dirs = util.dirs();
+var config = util.getConfig();
 var log = require('../log.js');
-
 var exchangeChecker = require('../../exchange/exchangeChecker.js');
 var TradeBatcher = require('./tradeBatcher.js');
 
@@ -15,23 +16,36 @@ var Fetcher = function(config) {
   var exchangeName = config.watch.exchange.toLowerCase();
   var DataProvider = require('../../exchange/wrappers/' + exchangeName);
   _.bindAll(this,_.functions(this));
+
+// Create a public dataProvider object which can retrieve live
+// trade information from an exchange.
   this.exchangeTrader = new DataProvider(config.watch);
   this.exchange = exchangeChecker.settings(config.watch);
-  var requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
 
+  var requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
+// If the trading adviser is enabled we might need a very specific fetch since
+// to line up [local db, trading method, and fetching]
   if(config.tradingAdvisor.enabled && config.tradingAdvisor.firstFetchSince) {
     this.firstSince = config.tradingAdvisor.firstFetchSince;
-    if(this.exchange.providesHistory === 'date') {this.firstSince = moment.unix(this.firstSince).utc();}
+
+    if(this.exchange.providesHistory === 'date') {
+      this.firstSince = moment.unix(this.firstSince).utc();
+    }
   }
-  
-  this.batcher = new TradeBatcher(this.exchange.tid);/* */
-  this.pair = [config.watch.asset,config.watch.currency].join('/');
+  this.batcher = new TradeBatcher(this.exchange.tid);
+  this.pair = [
+    config.watch.asset,
+    config.watch.currency
+  ].join('/');
+
+  //log.info('Starting to watch the market:',this.exchange.name,this.pair);
+// if the exchange returns an error we will keep on retrying until next scheduled fetch.
   this.tries = 0;
   this.limit = 21;
   this.firstFetch = true;
-  this.on('new batch', this.relayTrades);
+  this.batcher.on('new batch', this.relayTrades);
 }
-util.makeEventEmitter(Fetcher);util.inherit(Fetcher,Event)
+ util.makeEventEmitter(Fetcher);
 
 
 Fetcher.prototype._fetch = function(since) {
