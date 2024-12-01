@@ -28,7 +28,7 @@ const PaperTrader = function() {
   this.warmupCompleted = false;
   this.warmupCandle;
 }
-util.makeEventEmitter(PaperTrader);
+util.makeEventEmitter(PaperTrader);util.inherit(PaperTrader, EventEmitter);
 
 PaperTrader.prototype.relayPortfolioChange = function() {
   this.deferredEmit('portfolioChange', {asset: this.portfolio.asset,currency: this.portfolio.currency});
@@ -45,9 +45,6 @@ PaperTrader.prototype.extractFee = function(amount) {
 }
 
 PaperTrader.prototype.setStartBalance = function() {this.balance = this.getBalance();}
-// after every succesfull trend ride we hopefully end up
-// with more BTC than we started with, this function
-// calculates Gekko's profit in %.
 PaperTrader.prototype.updatePosition = function(what) {
 
   let cost;let amount;
