@@ -1,5 +1,5 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const { EventEmitter } = require("events");
+const { EventEmitter } = require("events");class Event extends EventEmitter{};const emit = new Event();
 var util = require('../util');
 var config = util.getConfig();
 var log = require('../log');
@@ -20,22 +20,14 @@ Heart.prototype.pump = function() {
 
 Heart.prototype.tick = function() {
   if(this.lastTick) {
-    if(this.lastTick < moment().unix() - TICKRATE * 5)
-      util.die('Failed to tick in time', true);
+  if(this.lastTick < moment().unix() - TICKRATE * 5) util.die('Failed to tick in time', true);
   }
-
   this.lastTick = moment().unix();
-  const emit = new EventEmitter();
   this.emit('tick');
 }
 
 Heart.prototype.scheduleTicks = function() {
-  setInterval(
-    this.tick,
-    +moment.duration(TICKRATE, 's')
-  );
-
-  // start!
+  setInterval(this.tick, +moment.duration(TICKRATE, 's'));
   _.defer(this.tick);
 }
 
