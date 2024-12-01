@@ -48,6 +48,7 @@ var util = {
     if(_package)
       return _package;
 
+
     _package = JSON.parse( fs.readFileSync(__dirname + '/../package.json', 'utf8') );
     return _package;
   },
@@ -117,11 +118,12 @@ var util = {
       broker: ROOT + 'exchange/'
     }
   },
-  
   inherit: function(dest, source) {
-    require('util').inherits(dest,source);
+    require('util').inherits(
+      dest,
+      source
+    );
   },
-  
   makeEventEmitter: function(dest) {
     util.inherit(dest, require('events').EventEmitter);
   },
@@ -157,8 +159,6 @@ var util = {
   },
 }
 
-// NOTE: those options are only used
-// in stand alone mode
 program
   .version(util.logVersion())
   .option('-c, --config <file>', 'Config file')
@@ -172,7 +172,7 @@ if(!util.recentNode())
     'Your local version of Node.js is too old. ',
     'You have ',
     process.version,
-    ' and you need at least ',
+    ' and you need atleast ',
     util.getRequiredNodeVersion()
   ].join(''), true);
 
