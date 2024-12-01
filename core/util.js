@@ -152,12 +152,6 @@ var util = {
   gekkoEnv: function() {
     return _gekkoEnv || 'standalone';
   },
-  launchUI: function() {
-    if(program['ui'])
-      return true;
-    else
-      return false;
-  },
   getStartTime: function() {
     return startTime;
   },
