@@ -1,21 +1,11 @@
 var util = require(__dirname + '/../../util');
+const { EventEmitter } = require("events");
 var dirs = util.dirs();
 var ipc = require('relieve').IPCEE(process);
 
-ipc.on('start', config => {
-
-  util.setGekkoEnv('node:child_process');
-  config.debug = false;
-  util.setConfig(config);
-
+this.on('start', config => {util.setGekkoEnv('child_process');config.debug = false;util.setConfig(config);
   var scan = require(dirs.tools + 'dateRangeScanner');
-  scan(
-    (err, ranges, reader) => {
-      reader.close();
-      ipc.send('ranges', ranges);
-      process.exit(0);
-    }
-  );
+  scan((err, ranges, reader) => {reader.close();this.send('ranges', ranges);process.exit(0);});
 });
 
 /*
