@@ -14,20 +14,15 @@ var Manager = function(config) {
   _.bindAll(this,_.functions(this));
 // fetch trades
   this.source = new MarketFetcher(config);
-// relay newly fetched trades
-  this.source
-    .on('trades batch', this.relayTrades);
+  this.on('trades batch', this.relayTrades);
 }
 util.makeEventEmitter(Manager);
 // HANDLERS
-Manager.prototype.retrieve = function() {
-  this.source.fetch();
-}
+Manager.prototype.retrieve = function() {this.source.fetch();}
 
 Manager.prototype.relayTrades = function(batch) {
   this.sendMarketStart(batch);
   this.emit('marketUpdate', batch.last.date);
-
   this.emit('trades', batch);
 }
 
