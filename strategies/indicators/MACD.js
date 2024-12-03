@@ -1,6 +1,5 @@
 // required indicators
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var EMA = require('./EMA.js');
 
 var Indicator = function(config) {
@@ -9,8 +8,8 @@ var Indicator = function(config) {
   this.short = new EMA(config.short);
   this.long = new EMA(config.long);
   this.signal = new EMA(config.signal);
+    _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
   this.short.update(price);

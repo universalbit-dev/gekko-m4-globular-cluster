@@ -1,6 +1,5 @@
 // required indicators
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var SMA = require('./SMA');
 
 var Indicator = function (weight) {
@@ -10,8 +9,9 @@ var Indicator = function (weight) {
   this.prices = [];
   this.result = 0;
   this.age = 0;
+    _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
+
 
 Indicator.prototype.update = function (price) {
   this.prices[this.age] = price;

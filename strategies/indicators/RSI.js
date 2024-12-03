@@ -1,5 +1,4 @@
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var SMMA = require('./SMMA.js');
 
 var Indicator = function (settings) {
@@ -13,8 +12,8 @@ var Indicator = function (settings) {
   this.rs = 0;
   this.result = 0;
   this.age = 0;
+    _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle) {
   var currentClose = candle.close;

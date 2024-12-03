@@ -1,6 +1,5 @@
 // required indicators
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var SMA = require('./SMA.js');
 
 var Indicator = function(settings) {
@@ -16,8 +15,8 @@ var Indicator = function(settings) {
   this.secondHigh = new SMA(settings.second.period);
   this.thirdLow = new SMA(settings.third.period);
   this.thirdHigh = new SMA(settings.third.period);
+  _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {
   var close = candle.close;

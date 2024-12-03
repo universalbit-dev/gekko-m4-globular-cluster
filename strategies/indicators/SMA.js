@@ -1,7 +1,6 @@
 // required indicators
 // Simple Moving Average - O(1) implementation 
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var Indicator = function(windowLength) {
   this.input = 'price';
   this.windowLength = windowLength;
@@ -9,8 +8,8 @@ var Indicator = function(windowLength) {
   this.result = 0;
   this.age = 0;
   this.sum = 0;
+    _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
   var tail = this.prices[this.age] || 0; // oldest price in window

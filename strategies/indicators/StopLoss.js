@@ -1,15 +1,14 @@
 // stop loss as an indicator
 // originally created by scraqz. Thanks!
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var Indicator = function(settings) {
   this.input = 'candle';
   this.candle = null;
   this.price = 0;
   this.action = 'continue';
   this.threshold = settings.threshold;
+  _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(candle) {
   this.candle = candle;

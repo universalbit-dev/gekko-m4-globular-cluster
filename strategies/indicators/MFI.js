@@ -1,6 +1,5 @@
 //MFI indicator by Gab0 - 04/jan/2019;
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
@@ -11,8 +10,8 @@ var Indicator = function(settings) {
     this.timePeriod = settings.optInTimePeriod;
     this.posHist = [];
     this.negHist = [];
+      _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.sum = function(a, b) {
     return a + b;

@@ -1,5 +1,4 @@
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var EMA = require('./EMA.js');
 
 var Indicator = function(config) {
@@ -10,8 +9,8 @@ var Indicator = function(config) {
   this.ema = new EMA(config.weight);
   this.ema2 = new EMA(config.weight);
   this.ema3 = new EMA(config.weight);
+    _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 // add a price and calculate the EMAs and
 // the result

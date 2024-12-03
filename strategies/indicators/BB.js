@@ -1,14 +1,10 @@
 // no required indicators
 // Bollinger Bands - Okibcn implementation 2018-01-02
-require('../../core/tulind');
-var util = require('../../core/util');
+const _ = require('underscore');
 var Indicator = function(BBSettings) {
     this.input = 'price';
     this.settings = BBSettings; 
-    // Settings:
-    //    TimePeriod: The amount of samples used for the average.
-    //    NbDevUp: The distance in stdev of the upper band from the SMA.   
-    //    NbDevDn: The distance in stdev of the lower band from the SMA.   
+  
     this.prices = [];
     this.diffs = [];
     this.age = 0;
@@ -17,8 +13,8 @@ var Indicator = function(BBSettings) {
     this.upper = 0;
     this.middle = 0;
     this.lower = 0;
+      _.bindAll(this,_.functions(this));
   };
-  util.makeEventEmitter(Indicator);
   
   Indicator.prototype.update = function(price) {
     var tail = this.prices[this.age] || 0; // oldest price in window

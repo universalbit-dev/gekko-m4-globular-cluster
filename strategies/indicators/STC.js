@@ -1,7 +1,6 @@
 // STC coded by Gab0 03/29/2018;
 //settings: short, long, signal, cycle, smooth;
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var MACD = require('./MACD');
 var STOCH = require('./STOCH');
 
@@ -15,9 +14,8 @@ var Indicator = function (settings) {
     this.Cycle = settings.cycle;
     this.Factor = settings.smooth;
     this.age = 0;
+      _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
-
 
 Indicator.prototype.getMin = function (data) {
     var minimum = 9999999;

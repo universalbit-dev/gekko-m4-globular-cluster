@@ -1,8 +1,8 @@
-require('../../core/tulind');
-const util = require('../../core/util');
-var Indicator=function(weight)
-{this.input='price';this.weight=weight;this.result=false;this.age=0;};
-util.makeEventEmitter(Indicator);
+const _ = require('underscore');
+var Indicator=function(weight){
+this.input='price';this.weight=weight;this.result=false;this.age=0;
+  _.bindAll(this,_.functions(this));
+};
 
 Indicator.prototype.update=function(price){if(this.result===false)
 this.result=price;this.age++;this.calculate(price);return this.result;}

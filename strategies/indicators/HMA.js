@@ -1,6 +1,5 @@
 // HMA ported by Gab0 03/29/2018;
-require('../../core/tulind');
-const util=require('../../core/util');
+const _ = require('underscore');
 var WMA = require('./WMA');
 
 var Indicator = function (weight) {
@@ -12,8 +11,8 @@ var Indicator = function (weight) {
     this.prices = [];
     this.result = 0;
     this.age = 0;
+      _.bindAll(this,_.functions(this));
 }
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (price) {
     this.prices[this.age] = price;

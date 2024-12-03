@@ -2,8 +2,7 @@
 
 // INPUT SETTINGS:
 // optInTimePeriod: period for EMA
-require('../../core/tulind');
-const util=require('../../core/util');
+const _ = require('underscore');
 var SMA = require('./SMA');
 
 var Indicator = function(settings) {
@@ -13,8 +12,8 @@ var Indicator = function(settings) {
     this.sma = new SMA(settings.optInTimePeriod);
     this.delay = (settings.optInTimePeriod / 2) +1;
     this.pricehist = [];
+      _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function(price) {
 
@@ -24,12 +23,8 @@ Indicator.prototype.update = function(price) {
     if (this.pricehist.length >= this.delay)
     {
         var oldprice = this.pricehist.shift();
-
-        //this.sma.update(oldprice);
         this.result = oldprice - this.sma.result;
     }
-
-
 };
 
 module.exports = Indicator;

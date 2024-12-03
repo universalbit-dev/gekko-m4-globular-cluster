@@ -1,15 +1,15 @@
 // required indicators
+const _ = require('underscore');
 var RMA = require('./RMA.js');
 
 var Indicator = function(config) {
   this.input = 'candle';
-
   this.ADX = new RMA(config.ADXLength);
   this.ATR = new RMA(config.DILength);
   this.DIM = new RMA(config.DILength);
   this.DIP = new RMA(config.DILength);
-
   this.lastCandle = false;
+    _.bindAll(this,_.functions(this));
 }
 
 Indicator.prototype.update = function(candle) {

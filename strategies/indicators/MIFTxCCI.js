@@ -1,5 +1,5 @@
 // Inverse Fisher Transformation crossing on CCI (using EMA smoothening)
-const util = require('../../core/util');
+const _ = require('underscore');
 var CCI = require('./CCI.js');
 var EMA = require('./EMA.js');
 
@@ -16,8 +16,8 @@ var Indicator = function(config) {
   this.emaFast3 = new EMA(this.emaFast);
   this.emaSlow1 = new EMA(this.emaSlow);
   this.emaSlow2 = new EMA(this.emaSlow);
+    _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle) {
   this.cci.update(candle);

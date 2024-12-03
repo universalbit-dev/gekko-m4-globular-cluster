@@ -1,8 +1,7 @@
 // True Range indicator;
 // compatible with Gekko Trading Bot. ported from tulip.
 // Gab0 - 2018
-require('../../core/tulind');
-const util = require('../../core/util');
+const _ = require('underscore');
 var Indicator = function()
 {
     this.input = 'candle'
@@ -10,8 +9,9 @@ var Indicator = function()
     this.age = 0;
     this.result = 0;
     this.lastcandle = false;
+      _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
+
 
 Indicator.prototype.update = function(candle) {
     // The first time we can't calculate based on previous

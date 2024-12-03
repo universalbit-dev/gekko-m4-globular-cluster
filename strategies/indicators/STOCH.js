@@ -2,10 +2,9 @@
 // Ported by Gab0 march-2018
 // ref http://www.tadoc.org/indicator/STOCH.htm
 // state: badly coded, uncertain results;
-require('../../core/tulind');
-const util=require('../../core/util');
+const _ = require('underscore');
 var SMA = require('./SMA');
-var _ = require('lodash');
+
 var Indicator = function(settings) {
     this.input = 'candle';
     this.prices = [];
@@ -17,8 +16,9 @@ var Indicator = function(settings) {
     this.candles = [];
     this.KPeriods = settings.KPeriods;
     this.KMA = new SMA(settings.DPeriods);
+      _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
+
 
 Indicator.prototype.getLowest = function()
 {

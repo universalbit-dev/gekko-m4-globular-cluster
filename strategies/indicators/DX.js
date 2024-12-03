@@ -2,8 +2,7 @@
 // for use on gekko trading bot. Same license as gekko.
 // "ported" from tulip: https://tulipindicators.org/dx
 // gab0 - 2018;
-require('../../core/tulind');
-const util=require('../../core/util');
+const _ = require('underscore');
 var ATR = require('./ATR.js');
 var Indicator = function (period)
 {
@@ -17,8 +16,8 @@ var Indicator = function (period)
     this.periodWeight = (period-1)/period;
     this.dm_up = 0;
     this.dm_down = 0;
+      _.bindAll(this,_.functions(this));
 };
-util.makeEventEmitter(Indicator);
 
 Indicator.prototype.update = function (candle) {
 
@@ -30,7 +29,6 @@ Indicator.prototype.update = function (candle) {
     var logicvalueA = candle.high - this.lastcandle.high;
     var logicvalueB = this.lastcandle.low - candle.low;
 
-    // --DEFINE UP VALUE;
     if (logicvalueA < 0 || logicvalueA < logicvalueB)
     {
         var up = 0
