@@ -1,6 +1,10 @@
+/*
+
+
+
+*/
 // NOTE: this is currently broken, see
 // @link https://github.com/askmike/gekko/issues/2398
-
 throw ':(';
 
 /*
@@ -8,29 +12,32 @@ throw ':(';
     - It is created at the specified price
     - If it were to cross it will throw instead (only if postOnly is specified)
     - It can be moved
-
 */
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore")); 
-const {EventEmitter} = require("events");
+
+const async = require('async');
+const events = require('events');
+const config = require('../../method-nn');
+
 const moment = require('moment');
 const errors = require('../exchangeErrors');
 const BaseOrder = require('./order');
 const states = require('./states');
 
-class Event extends EventEmitter{};const limit=new Event();
-
-class LimitOrder extends Event {
+class LimitOrder extends BaseOrder {
   constructor(api) {
-  super();
-  EventEmitter.call(this);
+    super(api);
   }
 
   create(side, amount, params) {
     this.side = side;
-    this.postOnly = params.postOnly
+
+    this.postOnly = params.postOnly;
+
     this.status = states.SUBMITTED;
-    this.emitStatus();this.createOrder(price, amount);
+    this.emitStatus();
+
+    this.createOrder(price, amount);
   }
 
   createOrder(price, amount) {
@@ -58,7 +65,7 @@ class LimitOrder extends Event {
       throw err;
 
     this.status = states.OPEN;
-    limit.emitStatus();
+    this.emitStatus();
 
     this.id = id;
 
@@ -93,7 +100,7 @@ class LimitOrder extends Event {
         this.filledAmount = result.filledAmount;
 
         // note: doc event API
-        limit.emit('fill', this.filledAmount);
+        this.emit('fill', this.filledAmount);
       }
 
       if(this.cancelling)
@@ -190,7 +197,7 @@ class LimitOrder extends Event {
     clearTimeout(this.timeout);
 
     this.status = states.MOVING;
-    limit.emitStatus();
+    this.emitStatus();
 
     this.api.cancelOrder(this.id, (err, filled) => {
       if(err)
@@ -233,10 +240,17 @@ class LimitOrder extends Event {
         return this.filled(this.price);
 
       this.status = states.CANCELLED;
-      limit.emitStatus();
+      this.emitStatus();
       this.finish(false);
     });
   }
 }
-util.makeEventEmitter(LimitOrder);util.inherit(LimitOrder, EventEmitter);
+
 module.exports = LimitOrder;
+/*
+The MIT License (MIT)
+Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/

@@ -12,24 +12,22 @@
     - native move
 */
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const {EventEmitter}=require('events');
+const _ = require('lodash');
 const async = require('async');
-class Event extends EventEmitter{};
-const sticky = new Event();
-
+const events = require('events');
 const moment = require('moment');
 const errors = require('../exchangeErrors');
 const BaseOrder = require('./order');
 const states = require('./states');
-const util=require('../../core/util');
 
-class StickyOrder extends Event {
+class StickyOrder extends BaseOrder {
   constructor({api, marketConfig, capabilities}) {
-    super(api, marketConfig, capabilities);
-    EventEmitter.call(this);
+    super(api);
+    _.bindAll(this,_.functionsIn(this));
     this.market = marketConfig;
     this.capabilities = capabilities;
+
+    // global async lock
     this.sticking = false;
 
     // bound helpers
@@ -38,9 +36,6 @@ class StickyOrder extends Event {
     if(_.isFunction(this.api.outbidPrice)) {
       this.outbidPrice = this.api.outbidPrice.bind(this.api);
     }
-
-    this.debug = this.api.name === 'Deribit2';
-    this.log = m => this.debug && console.log(new Date, m);
   }
 
   create(side, rawAmount, params = {}) {
@@ -73,7 +68,7 @@ class StickyOrder extends Event {
     }
 
     this.status = states.SUBMITTED;
-    sticky.emitStatus();
+    this.emitStatus();
 
     this.orders = {};
 
@@ -189,7 +184,7 @@ class StickyOrder extends Event {
           }
 
           this.orders[id].filled = amount;
-          sticky.emit('fill', this.calculateFilled());
+          this.emit('fill', this.calculateFilled());
           if(this.calculateFilled() >= this.amount) {
             return this.filled(this.price);
           }
@@ -227,40 +222,18 @@ class StickyOrder extends Event {
       delete this.orders[this.id];
 
     // register new order
-    this.log(`${this.side} old id: ${this.id} new id: ${id}`);
     this.id = id;
-
     this.orders[id] = {
       price: this.price,
       filled: 0
     }
 
-    sticky.emit('new order', this.id);
-    this.emit('movelimit handled', new Date);
+    this.emit('new order', this.id);
 
     this.status = states.OPEN;
-    sticky.emitStatus();
+    this.emitStatus();
 
     this.scheduleNextCheck();
-  }
-
-  initiateDefferedAction() {
-    // check whether we had an action pending
-    if(this.cancelling) {
-      this.cancel();
-      return true;
-    }
-
-    if(this.movingLimit && this.moveLimit()) {
-      return true;
-    }
-
-    if(this.movingAmount) {
-      this.moveAmount();
-      return true;
-    }
-
-    return false;
   }
 
   scheduleNextCheck() {
@@ -268,8 +241,17 @@ class StickyOrder extends Event {
     // remove lock
     this.sticking = false;
 
-    if(this.initiateDefferedAction()) {
-      return;
+    // check whether we had an action pending
+    if(this.cancelling) {
+      return this.cancel();
+    }
+
+    if(this.movingLimit) {
+      return this.moveLimit();
+    }
+
+    if(this.movingAmount) {
+      return this.moveAmount();
     }
 
     // register check
@@ -280,46 +262,12 @@ class StickyOrder extends Event {
   checkOrder() {
 
     if(this.completed || this.completing) {
-      return console.log(new Date, this.side, 'checkOrder called on completed/completing order..', this.completed, this.completing);
-    }
-
-    if(this.status === states.MOVING) {
-      return console.log(new Date, this.side, 'refusing to check, in the middle of move');
-    }
-
-    if(this.initiateDefferedAction()) {
-      console.log(new Date, this.side, 'skipping check logic, better things to do - 0');
-      return;
+      return console.log(new Date, 'checkOrder called on completed/completing order..', this.completed, this.completing);
     }
 
     this.sticking = true;
-    const checkId = this.id;
 
     this.api.checkOrder(this.id, (err, result) => {
-
-      if(!this.debug) {
-        if(this.ignoreCheckResult) {
-          this.log(this.side + ' debug ignoring check result');
-          this.ignoreCheckResult = false;
-          return;
-        }
-      }
-
-      if(this.status === states.MOVING) {
-        this.log(`${this.side} ${this.id} debug ignoring check result - in the middle of move`);
-        this.ignoreCheckResult = false;
-        return;
-      }
-
-      if(checkId !== this.id) {
-        this.log(this.side + ' debug got check on old id ' + checkId + ', ' + this.id);
-        this.ignoreCheckResult = false;
-        return;
-      }
-
-      this.status = states.CHECKED;
-      sticky.emitStatus();
-
       if(this.handleError(err)) {
         console.log(new Date, 'checkOrder error');
         return;
@@ -328,7 +276,7 @@ class StickyOrder extends Event {
       if(result.open) {
         if(result.filledAmount !== this.orders[this.id].filled) {
           this.orders[this.id].filled = result.filledAmount;
-          sticky.emit('fill', this.calculateFilled());
+          this.emit('fill', this.calculateFilled());
         }
 
         // if we are already at limit we dont care where the top is
@@ -338,38 +286,22 @@ class StickyOrder extends Event {
           return;
         }
 
-        if(this.initiateDefferedAction()) {
-          console.log(new Date, this.side, 'skipping check ticker logic, better things to do 1');
-          return;
-        }
-
         this.api.getTicker((err, ticker) => {
           if(this.handleError(err)) {
             console.log(new Date, 'getTicker error');
             return;
           }
 
-          if(this.initiateDefferedAction()) {
-            console.log(new Date, this.side, 'skipping check ticker logic, better things to do 2');
-            return;
-          }
-
-          if(this.status === states.MOVING) {
-            this.log(`${this.side} ${this.id} debug ignoring check result - in the middle of move     ---- 2`);
-            this.ignoreCheckResult = false;
-            return;
-          }
-
           this.ticker = ticker;
-          sticky.emit('ticker', ticker);
+          this.emit('ticker', ticker);
 
           const bookSide = this.side === 'buy' ? 'bid' : 'ask';
           // note: might be string VS float
           if(ticker[bookSide] != this.price) {
             return this.move(this.calculatePrice(ticker));
-          } else {
-            this.scheduleNextCheck();
           }
+
+          this.scheduleNextCheck();
         });
 
         return;
@@ -381,21 +313,17 @@ class StickyOrder extends Event {
 
       if(!result.executed) {
         // not open and not executed means it never hit the book
-        console.log(this.side, this.status, this.id, 'not open not executed!', result);
-        this.rejected();
-        throw 'a';
+        this.status = states.REJECTED;
+        this.emitStatus();
+        this.finish();
         return;
       }
 
       // order got filled!
       this.orders[this.id].filled = this.amount;
-      sticky.emit('fill', this.amount);
+      this.emit('fill', this.amount);
       this.filled(this.price);
     });
-
-
-    this.status = states.CHECKING;
-    sticky.emitStatus();
   }
 
   // global error handler
@@ -407,10 +335,10 @@ class StickyOrder extends Event {
     console.log(new Date, '[sticky order] FATAL ERROR', error.message);
     console.log(new Date, error);
     this.status = states.ERROR;
-    sticky.emitStatus();
+    this.emitStatus();
     this.error = error;
 
-    sticky.emit('error', error);
+    this.emit('error', error);
     return true;
   }
 
@@ -421,7 +349,7 @@ class StickyOrder extends Event {
     // it got filled before we could cancel
     if(filled) {
       this.orders[this.id].filled = this.amount;
-      sticky.emit('fill', this.amount);
+      this.emit('fill', this.amount);
       this.filled(this.price);
       return;
     }
@@ -439,7 +367,7 @@ class StickyOrder extends Event {
 
       if(amountFilled > this.orders[this.id].filled) {
         this.orders[this.id].filled = amountFilled;
-        sticky.emit('fill', this.calculateFilled());
+        this.emit('fill', this.calculateFilled());
       }
     }
 
@@ -452,22 +380,16 @@ class StickyOrder extends Event {
     }
 
     this.status = states.MOVING;
-    sticky.emitStatus();
+    this.emitStatus();
 
-    this.log(`${this.side} ${this.id} this.move 1`);
-
-    const cancelId = this.id;
-
-    this.api.cancelOrder(cancelId, (err, filled, data) => {
-      this.log(`${this.side} ${this.id} this.move 2`);
-
+    this.api.cancelOrder(this.id, (err, filled, data) => {
       if(this.handleError(err)) {
         console.log(new Date, 'error move');
         return;
       }
 
       // it got filled before we could cancel
-      if(cancelId === this.id && this.handleCancel(filled, data)) {
+      if(this.handleCancel(filled, data)) {
         return;
       }
 
@@ -494,10 +416,6 @@ class StickyOrder extends Event {
 
     if(!limit) {
       limit = this.moveLimitTo;
-      // console.log(new Date, this.side, 'debug resuming move!');
-    } else {
-      this.limitRequested = new Date;
-      this.log(this.side + ' received move limit');
     }
 
     if(this.limit === this.roundPrice(limit)) {
@@ -509,56 +427,34 @@ class StickyOrder extends Event {
       return false;
     }
 
-    sticky.emit('movelimit', new Date);
-
     if(
       this.status === states.INITIALIZING ||
       this.status === states.SUBMITTED ||
       this.status === states.MOVING ||
-      this.status === states.CHECKING ||
       this.sticking
     ) {
-
-      if(
-        !this.api.fillDataOnCancel ||
-        this.status === states.MOVING ||
-        this.status === states.SUBMITTED
-      ) {
-        // console.log(new Date, '[sticky]', this.side, 'skipping because:', this.status);
-        this.moveLimitTo = limit;
-        this.movingLimit = true;
-        return false;
-      }
-    }
-
-    this.limit = this.roundPrice(limit);
-    this.movingLimit = false;
-
-    const moveBuy = this.side === 'buy' && this.limit < this.price;
-    const moveSell = this.side === 'sell' && this.limit > this.price;
-
-    if(moveBuy || moveSell) {
-      this.sticking = true;
-      clearTimeout(this.timeout);
-
-      if(this.api.fillDataOnCancel && this.status === states.CHECKING) {
-        this.log(this.side + 'debug move overwrites running check ' + this.status + ' ' + this.id);
-        this.ignoreCheckResult = true;
-      }
-
-      this.log(this.side + ' moving ' + this.id);
-
-      const timeToMove = new Date - this.limitRequested;
-      if(timeToMove > 300) {
-        console.log(new Date, this.side, 'long time to move:', timeToMove);
-      }
-      this.move(this.limit);
-
+      this.moveLimitTo = limit;
+      this.movingLimit = true;
       return true;
     }
 
-    sticky.emit('movelimit handled', new Date);
-    return false;
+    this.limit = this.roundPrice(limit);
+
+    clearTimeout(this.timeout);
+
+    this.movingLimit = false;
+
+    if(this.side === 'buy' && this.limit < this.price) {
+      this.sticking = true;
+      this.move(this.limit);
+    } else if(this.side === 'sell' && this.limit > this.price) {
+      this.sticking = true;
+      this.move(this.limit);
+    } else {
+      this.scheduleNextCheck();
+    }
+
+    return true;
   }
 
   moveAmount(amount) {
@@ -654,7 +550,7 @@ class StickyOrder extends Event {
       }
 
       this.status = states.CANCELLED;
-      sticky.emitStatus();
+      this.emitStatus();
 
       this.finish(false);
     })
@@ -669,19 +565,31 @@ class StickyOrder extends Event {
 
     const checkOrders = _.keys(this.orders)
       .map(id => next => {
-        if(!this.orders[id].filled) {return next();}
+
+        if(!this.orders[id].filled) {
+          return next();
+        }
+
         setTimeout(() => this.api.getOrder(id, next), this.checkInterval);
       });
 
-    async.auto(checkOrders, (err, trades) => {
-      if(err) {console.log(new Date, 'error createSummary (checkOrder)')return next(err);}
+    async.series(checkOrders, (err, trades) => {
+      // note this is a standalone function after the order is
+      // completed, as such we do not use the handleError flow.
+      if(err) {
+        console.log(new Date, 'error createSummary (checkOrder)')
+        return next(err);
+      }
 
       let price = 0;
       let amount = 0;
       let date = moment(0);
 
       _.each(trades, trade => {
-        if(!trade) {return;}
+        if(!trade) {
+          return;
+        }
+
         // last fill counts
         date = moment(trade.date);
         price = ((price * amount) + (+trade.price * trade.amount)) / (+trade.amount + amount);
@@ -734,12 +642,11 @@ class StickyOrder extends Event {
         });
       }
 
-      sticky.emit('summary', summary);next(undefined, summary);
+      this.emit('summary', summary);
+      next(undefined, summary);
     });
   }
-
+ 
 }
-util.makeEventEmitter(StickyOrder);
 
 module.exports = StickyOrder;
-

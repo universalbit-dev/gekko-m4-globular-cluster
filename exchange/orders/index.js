@@ -2,12 +2,7 @@
 
 
 */
-const states={INITIALIZING:'INITIALIZING',SUBMITTED:'SUBMITTED',MOVING:'MOVING',OPEN:'OPEN',FILLED:'FILLED',CANCELLED:'CANCELLED',REJECTED:'REJECTED',ERROR:'ERROR'}
-const util = require('../../core/util');
-var config = util.getConfig();
-
-module.exports=states;
-
+const sticky=require('./sticky');module.exports={sticky}
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
