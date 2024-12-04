@@ -3,12 +3,12 @@ const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-const {EventEmitter} = require("events");class Event extends EventEmitter{};
+const {EventEmitter} = require("events");
 const log=require("../../core/log.js");
 const async=require('async');
 
 var Broker=Promise.promisifyAll(require("../../exchange/gekkoBroker.js"));
-const TrailingStop=Promise.promisifyAll(require('../../exchange/triggers/index.js'));
+const TrailingStop=require('../../exchange/triggers/index.js');
 
 var Trader = function(next) {
   EventEmitter.call(this);
@@ -21,7 +21,7 @@ var Trader = function(next) {
 
   if(!this.broker.capabilities.gekkoBroker) {util.die('This exchange is not yet supported');}
 
-  this.sync(() => {
+  this.async(() => {
     log.info('\t', 'Portfolio:');
     log.info('\t\t', this.portfolio.currency, this.brokerConfig.currency);
     log.info('\t\t', this.portfolio.asset, this.brokerConfig.asset);
@@ -30,13 +30,13 @@ var Trader = function(next) {
     log.info('\t', 'Exposed:');
     log.info('\t\t',this.exposed ? 'yes' : 'no',`(${(this.exposure * 100).toFixed(2)}%)`);next();
   });
-  this.cancellingOrder = false;this.sendInitialPortfolio = false;setInterval(this.sync, 1000 * 60 * 10);
+  this.cancellingOrder = false;this.sendInitialPortfolio = false;setInterval(this.async, 1000 * 60 * 10);
 }
-util.makeEventEmitter(Trader);util.inherit(Trader, EventEmitter);
+util.makeEventEmitter(Trader);
 
-Trader.prototype.sync = function(next) {
+Trader.prototype.async = function(next) {
   log.debug('syncing private data');
-  this.broker.asyncPrivateData(() => {
+  this.broker.syncPrivateData(() => {
     if(!this.price) {this.price = this.broker.ticker.bid;}
     const oldPortfolio = this.portfolio;
     this.setPortfolio();this.setBalance();
@@ -183,6 +183,12 @@ Trader.prototype.processAdvice = function(advice) {
 
 Trader.prototype.createOrder = function(side, amount, advice, id) {
   const type = 'sticky';
+
+  // NOTE: this is the best check we can do at this point
+  // with the best price we have. The order won't be actually
+  // created with this.price, but it should be close enough to
+  // catch non standard errors (lot size, price filter) on
+  // exchanges that have them.
   const check = this.broker.isValidOrder(amount, this.price);
 
   if(!check.valid) {
@@ -209,10 +215,10 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
 
   this.order = this.broker.createOrder(type, side, amount);
 
-  this.on('fill', f => log.info('[ORDER] partial', side, 'fill, total filled:', f));
-  this.on('statusChange', s => log.debug('[ORDER] statusChange:', s));
+  this.order.on('fill', f => log.info('[ORDER] partial', side, 'fill, total filled:', f));
+  this.order.on('statusChange', s => log.debug('[ORDER] statusChange:', s));
 
-  this.on('error', e => {
+  this.order.on('error', e => {
     log.error('[ORDER] Gekko received error from GB:', e.message);
     log.debug(e);
     this.order = null;
@@ -226,7 +232,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
     });
 
   });
-  this.on('completed', () => {
+  this.order.on('completed', () => {
     this.order.createSummary((err, summary) => {
       if(!err && !summary) {
         err = new Error('GB returned an empty summary.')
@@ -345,7 +351,7 @@ Trader.prototype.cancelOrder = function(id, advice, next) {
 
   this.order.removeAllListeners();
   this.order.cancel();
-  this.once('completed', () => {
+  this.order.once('completed', () => {
     this.order = null;
     this.cancellingOrder = false;
     this.deferredEmit('tradeCancelled', {
