@@ -8,6 +8,7 @@ const log = require("../../core/log.js");
 
 /* */
 var CandleBatcher = require('../../core/candleBatcher');
+//const isLeecher = config.market && config.market.type === 'leech';
 
 var Actor = function(done){
   _.bindAll(this,_.functions(this));
@@ -42,13 +43,21 @@ Actor.prototype.setupStrategy = function()
   let stratSettings;
   if(config[this.strategyName]) {stratSettings = config[this.strategyName];}
 
-this.strategy = new WrappedStrategy(stratSettings);
-  this.on('stratWarmupCompleted',e => this.deferredEmit('stratWarmupCompleted', e));
-  this.on('advice', this.relayAdvice);
-  this.on('stratUpdate',e => this.deferredEmit('stratUpdate', e)); 
-  this.on('stratNotification',e => this.deferredEmit('stratNotification', e));
-  this.on('tradeCompleted', this.processTradeCompleted);
-  this.on('candle', _candle => {const { id, ...candle } = _candle;this.deferredEmit('stratCandle', candle);this.emitStratCandle(candle);});
+ this.strategy = new WrappedStrategy(stratSettings);
+  this.strategy
+    .on('stratWarmupCompleted',e => this.deferredEmit('stratWarmupCompleted', e))
+    .on('advice', this.relayAdvice)
+    .on('stratUpdate',e => this.deferredEmit('stratUpdate', e))
+    .on('stratNotification',e => this.deferredEmit('stratNotification', e))
+  this.strategy
+    .on('tradeCompleted', this.processTradeCompleted);
+
+  this.batcher
+    .on('candle', _candle => {
+      const { id, ...candle } = _candle;
+      this.deferredEmit('stratCandle', candle);
+      this.emitStratCandle(candle);
+    });
 }
 
 Actor.prototype.processCandle = function(candle, done) {
