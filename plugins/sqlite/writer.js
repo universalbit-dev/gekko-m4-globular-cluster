@@ -1,19 +1,14 @@
-/*
+const _ = require("underscore");
+var fs = require("fs-extra");
 
-
-*/
-let _ = require('lodash');
-
-var util = require('../../core/util');
-var config = util.getConfig();
-
-var sqlite = require('./handle');
+var config = require('../../core/util.js').getConfig();
+var sqlite = require("./handle");
 var sqliteUtil = require('./util');
-
+var util = require('../../core/util');
 var log = require('../../core/log');
 
 var Store = function(done, pluginMeta) {
-  _.bindAll(this);
+  _.bindAll(this,_.functions(this));
   this.done = done;
 
   this.db = sqlite.initDB(false);
@@ -39,12 +34,6 @@ Store.prototype.upsertTables = function() {
         trades INTEGER NOT NULL
       );
     `,
-
-    // TODO: create trades
-    // ``
-
-    // TODO: create advices
-    // ``
   ];
 
   var next = _.after(_.size(createQueries), this.done);
@@ -87,9 +76,8 @@ Store.prototype.writeCandles = function() {
 
     stmt.finalize();
     this.db.run("COMMIT");
-    // TEMP: should fix https://forum.gekko.wizb.it/thread-57279-post-59194.html#pid59194
     this.db.run("pragma wal_checkpoint;");
-
+    
     this.cache = [];
   }
 
@@ -98,7 +86,7 @@ Store.prototype.writeCandles = function() {
 
 var processCandle = function(candle, done) {
   this.cache.push(candle);
-  if (!this.buffered || this.cache.length > 1000)
+  if (!this.buffered || this.cache.length > 1000) 
     this.writeCandles();
 
   done();
@@ -115,28 +103,4 @@ if(config.candleWriter.enabled) {
   Store.prototype.finalize = finalize;
 }
 
-// TODO: add storing of trades / advice?
-
-// var processTrades = function(candles) {
-//   util.die('NOT IMPLEMENTED');
-// }
-
-// var processAdvice = function(candles) {
-//   util.die('NOT IMPLEMENTED');
-// }
-
-// if(config.tradeWriter.enabled)
-//  Store.prototype.processTrades = processTrades;
-
-// if(config.adviceWriter.enabled)
-//   Store.prototype.processAdvice = processAdvice;
-
 module.exports = Store;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
