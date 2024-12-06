@@ -3,7 +3,7 @@
 
 
 */
-// NOTE: this is currently broken, see
+// 
 // @link https://github.com/askmike/gekko/issues/2398
 throw ':(';
 
@@ -14,10 +14,12 @@ throw ':(';
     - It can be moved
 */
 
+/* NOTE: this is currently Unknown <work in progress>*/
 
 const async = require('async');
 const events = require('events');
-const config = require('../../method-nn');
+const util = require('../../core/util');
+var config = util.getConfig();
 
 const moment = require('moment');
 const errors = require('../exchangeErrors');

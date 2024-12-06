@@ -5,7 +5,7 @@
 
 let _ = require('lodash');
 
-const {EventEmitter}=require('events');
+const EventEmitter=require('events');
 const exchangeUtils=require('../exchangeUtils');
 const util = require('../../core/util');
 var config = util.getConfig();
