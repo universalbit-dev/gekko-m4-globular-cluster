@@ -2,7 +2,7 @@
 // Source: https://github.com/RJPGriffin/
 
 /* universalbit-dev decentralized strategies */
-//const { addon: ov } = require('openvino-node');
+const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");
 var convnetjs = require('../core/convnet.js');
 var math = require('mathjs');
@@ -13,7 +13,10 @@ var tulind=require('../core/tulind');
 var SMMA = require('./indicators/SMMA.js');
 var config = require('../core/util.js').getConfig();
 var fs = require("fs-extra");
-
+var settings = config.NEURALNETV2;this.settings=settings;
+const buy=Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));
+const sell=Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));
+var Alpha=[];var min=0;var max=0;var median=0;
 var method = {
   priceBuffer: [],predictionCount: 0,batchsize: 1,
   layer_neurons: 0,layer_activation: 'sigmoid',layer2_activation:'relu',
@@ -34,7 +37,6 @@ var method = {
     z = fibonacci_sequence[z];this.z=z;
     console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     
-    Alpha=[];min=0; max=0; median=0;
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
     //full connected layers
     let layers = [
@@ -123,30 +125,32 @@ return console.log(chess.pgn())},
   check: function(candle) {
   log.debug("Operator ");this.makeoperator();
   log.debug("Random game of Chess");this.fxchess();
-  if (Alpha.length != 0){var max=math.max(Alpha);var min=math.min(Alpha);var median=math.median(Alpha);var matrix=math.mean(min,max,median);}
-    if (this.predictionCount > this.settings.min_predictions) { this.predictionCount=0;
-      //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-      //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */
 
+  if (Alpha.length != 0) {
+  max=math.max(Alpha);min=math.min(Alpha);median=math.median(Alpha);
+  if (min != undefined && max != undefined && median != undefined) {matrix=math.mean(min,max,median);}
+  }
+  
+    if (this.predictionCount > this.settings.min_predictions) 
+    { this.predictionCount=0;
       let prediction = this.predictCandle() * this.scale;
       let currentPrice = candle.close;log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
-
-      log.debug('alpha_min = ' + min + ', alpha_max = ' + max + ',alpha_median = '+ median );
+      log.debug('alpha_min = ' + min + ', alpha_max = ' + max + ',alpha_median = '+ median);
       let meanp = math.mean(prediction, currentPrice);
       let meanAlpha = (currentPrice - meanp) / currentPrice * 100;Alpha.push([meanAlpha]);
       let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice * this.hodle_threshold);
       let signal = meanp < currentPrice;log.info('Alpha: '+meanAlpha);
-      if ('buy' !== this.prevAction && signal === false && meanAlpha < this.settings.threshold_buy) 
-      {return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');} /* */
-      if ('sell' !== this.prevAction && signal === true && meanAlpha > this.settings.threshold_sell && signalSell) 
-      {return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');} /* */
+      
+      if(signal === false && meanAlpha < this.settings.threshold_buy) {this.buy;this.advice('long');} /* */
+      if(signal === true && meanAlpha > this.settings.threshold_sell && signalSell) {this.sell;this.advice('short');} /* */
       
       switch(Alpha.length != 0){
-      case (min < math.mean(min,max,median)):this.advice('long');break;
-      case (max > math.mean(min,max,median)):this.advice('short');break;
-      case (median < math.mean(min,max,median)):return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');break;/* */
-      case (median > math.mean(min,max,median)):return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');break;/* */
+      case (min < math.mean(min,max,median)):break;
+      case (max > math.mean(min,max,median)):break;
+      case (median < math.mean(min,max,median)):this.buy;break;/* */
+      case (median > math.mean(min,max,median)):this.sell;break;/* */
       default: log.info('');
+      
       }
     }
   },
@@ -156,4 +160,3 @@ return console.log(chess.pgn())},
 };
 
 module.exports = method;
-
