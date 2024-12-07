@@ -1,36 +1,34 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var Promise = require("bluebird");const _ =require("underscore");
 var util = require('../util');
 var config = util.getConfig();
 var dirs = util.dirs();
 var log = require(dirs.core + 'log.js');
 var moment = require('moment');
 
-var adapter = config[config.adapter];
+var adapter = 'sqlite adapter';
 var Reader = require('../../plugins/sqlite/reader');
 var daterange = config.backtest.daterange;
-var requiredHistory = config.tradingAdvisor.candleSize * config.tradingAdvisor.historySize;
+var requiredHistory = config.tradingAdvisor.candleSize;
+
+//https://en.wikipedia.org/wiki/NOP_(code)
+var noop = require('node-noop').noop;
+require('fs-extra').writeFile('noop.out',"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."+"Antoine de Saint-Exupery",noop);
 
 var to = moment.utc(daterange.to);
 var from = moment.utc(daterange.from).subtract(requiredHistory, 'm');
 
-if(to <= from)
-  util.die('This daterange does not make sense.')
+if(to <= from) util.die('This daterange does not make sense.')
+if(!config.paperTrader.enabled) util.die('You need to enable the \"Paper Trader\" first to run a backtest.')
 
-if(!config.paperTrader.enabled)
-  util.die('You need to enable the \"Paper Trader\" first to run a backtest.')
+if(!from.isValid()) util.die('invalid `from`');
 
-if(!from.isValid())
-  util.die('invalid `from`');
-
-if(!to.isValid())
-  util.die('invalid `to`');
+if(!to.isValid()) util.die('invalid `to`');
 
 var Market = function() {
   _.bindAll(this,_.functions(this));
   this.pushing = false;
   this.ended = false;
   this.closed = false;
-
   Readable.call(this, {objectMode: true});
 
   log.write('');
@@ -60,7 +58,7 @@ Market.prototype = Object.create(Readable.prototype, {
   constructor: { value: Market }
 });
 
-Market.prototype._read = _.once(function() {
+Market.prototype.read = _.once(function() {
   this.get();
 });
 

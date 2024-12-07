@@ -8,9 +8,12 @@ var gekkoEnv = util.gekkoEnv();
 
 var adapter = config[config.adapter];
 var daterange = config.importer.daterange;
-
-
 var from = moment.utc(daterange.from);moment(from).format('DD-MM-YYYY');
+
+//https://en.wikipedia.org/wiki/NOP_(code)
+var noop = require('node-noop').noop;
+require('fs-extra').writeFile('noop.out',"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."+"Antoine de Saint-Exupery",noop);
+
 
 if(daterange.to) {
   var to = moment.utc(daterange.to);moment(to).format('DD-MM-YYYY');

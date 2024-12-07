@@ -5,6 +5,9 @@ var config = util.getConfig();
 var slug = config.watch.exchange;
 var exchange = exchangeChecker.getExchangeCapabilities(slug);
 
+//https://en.wikipedia.org/wiki/NOP_(code)
+var noop = require('node-noop').noop;
+require('fs-extra').writeFile('noop.out',"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."+"Antoine de Saint-Exupery",noop);
 
 if(!exchange) util.die(`Unsupported exchange: ${slug}`)
 
