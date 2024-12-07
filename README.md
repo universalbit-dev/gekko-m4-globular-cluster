@@ -52,11 +52,10 @@ pm2 start backtest.config.js
 #### Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
 #### install tulind npm package 
 ```bash
-npm install tulind --build-from-source
+npm install tulind -g
 ```
 * [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
 * [gekko_indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/gekko_indicators.md)
-
 
 
 #### Resources:
