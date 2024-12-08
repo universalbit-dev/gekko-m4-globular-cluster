@@ -40,7 +40,7 @@ var method = {
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
     //full connected layers
     let layers = [
-      {type: 'input',out_sx: 1,out_sy: 1,out_depth: this.z},
+      {type: 'input',out_sx: this.x,out_sy: 1,out_depth: 1},
       {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
             {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer2_activation},
                   {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
