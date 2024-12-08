@@ -64,7 +64,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     
     const layers = [
-      {type:'input', out_sx:x, out_sy:y, out_depth:z},
+      {type:'input', out_sx:this.x, out_sy:y, out_depth:z},
       {type:'conv', num_neurons:3, activation: 'relu'},
       {type:'fc', num_neurons:3, activation:'sigmoid'},
       {type:'regression', num_neurons:1}
