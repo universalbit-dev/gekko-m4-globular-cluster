@@ -1,3 +1,4 @@
+//https://en.wikipedia.org/wiki/Candlestick_chart
 const batchSize = 1000;
 
 var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
