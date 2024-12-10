@@ -1,4 +1,5 @@
 /*  */
+//https://en.wikipedia.org/wiki/Candlestick_chart
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const { EventEmitter } = require("events");
 var moment = require('moment');
