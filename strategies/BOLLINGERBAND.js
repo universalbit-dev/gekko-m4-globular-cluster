@@ -1,6 +1,6 @@
 /* Decentralized Strategies: {CCXT Library} Create Market Buy/Sell Orders */
 /* BB strategy - okibcn 2018-01-03 */
-//const { addon: ov } = require('openvino-node');
+const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
