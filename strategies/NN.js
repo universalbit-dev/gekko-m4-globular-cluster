@@ -4,7 +4,7 @@ var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs = require("fs-extra");
+var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const { Chess } = require('chess.js');
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
