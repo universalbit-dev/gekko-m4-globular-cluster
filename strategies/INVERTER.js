@@ -2,7 +2,7 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var fs = require("fs-extra");
+var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var settings = config.INVERTER;this.settings=settings;
 
 const { Chess } = require('chess.js')
