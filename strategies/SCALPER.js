@@ -2,7 +2,7 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var log = require('../core/log.js');
 const { Chess } = require('chess.js');
-var fs = require("fs-extra");
+var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var method = {};
 
 method.makeoperator = function() {
