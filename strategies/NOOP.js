@@ -1,4 +1,4 @@
-//const { addon: ov } = require('openvino-node');
+const { addon: ov } = require('openvino-node');
 require('../core/tulind');
 const { spawn } = require('node:child_process');
 const { setTimeout: setTimeoutPromise } = require('node:timers/promises');
@@ -11,7 +11,7 @@ var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
 var Promise = require("bluebird");
-var fs = Promise.promisifyAll(require("fs-extra"));
+var fs = Promise.promisifyAll(require("fs-extra"));fs.createReadStream('/dev/null');
 
 var settings = config.NOOP;this.settings=settings;
 
