@@ -12,7 +12,7 @@ var config = require('../core/util.js').getConfig();
 var tulind=require('../core/tulind');
 var SMMA = require('./indicators/SMMA.js');
 var config = require('../core/util.js').getConfig();
-var fs = require("fs-extra");
+var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var settings = config.NEURALNETV2;this.settings=settings;
 const buy=Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));
 const sell=Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));
