@@ -1,21 +1,21 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const { EventEmitter } = require("events");
+let _ = require('lodash');
+
 var moment = require('moment');
 var utc = moment.utc;
-var util = require('../util');
+var util = require(__dirname + '/../util');
 var dirs = util.dirs();
 var config = util.getConfig();
-var log = require('../log.js');
-var exchangeChecker = require('../../exchange/exchangeChecker.js');
-var TradeBatcher = require('./tradeBatcher.js');
+var log = require(dirs.core + 'log');
+var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
+var TradeBatcher = require(util.dirs().budfox + 'tradeBatcher');
 
 var Fetcher = function(config) {
-  EventEmitter.call(this);
-  if(!_.isObject(config))throw new Error('TradeFetcher expects a config');
+  if(!_.isObject(config))
+    throw new Error('TradeFetcher expects a config');
 
   var exchangeName = config.watch.exchange.toLowerCase();
-  var DataProvider = require('../../exchange/wrappers/' + exchangeName);
-  _.bindAll(this,_.functions(this));
+  var DataProvider = require(util.dirs().gekko + 'exchange/wrappers/' + exchangeName);
+  _.bindAll(this);
 
 // Create a public dataProvider object which can retrieve live
 // trade information from an exchange.
@@ -38,15 +38,14 @@ var Fetcher = function(config) {
     config.watch.currency
   ].join('/');
 
-  //log.info('Starting to watch the market:',this.exchange.name,this.pair);
+  log.info('Starting to watch the market:',this.exchange.name,this.pair);
 // if the exchange returns an error we will keep on retrying until next scheduled fetch.
   this.tries = 0;
-  this.limit = 21;
+  this.limit = 20;
   this.firstFetch = true;
   this.batcher.on('new batch', this.relayTrades);
 }
- util.makeEventEmitter(Fetcher);
-
+util.makeEventEmitter(Fetcher);
 
 Fetcher.prototype._fetch = function(since) {
   if(++this.tries >= this.limit)
@@ -63,7 +62,7 @@ Fetcher.prototype.fetch = function() {
     since = false;
 
   this.tries = 0;
-  //log.debug('Requested', this.pair, 'exchange data');
+  log.debug('Requested', this.pair, 'trade data from', this.exchange.name, '...');
   this._fetch(since);
 }
 
@@ -74,7 +73,7 @@ Fetcher.prototype.processTrades = function(err, trades) {
       log.debug('refetching...');
     } else
       log.debug('Trade fetch came back empty, refetching...');
-    setTimeout(this._fetch, +moment.duration('s', 21));
+    setTimeout(this._fetch, +moment.duration('s', 1));
     return;
   }
   this.batcher.write(trades);
