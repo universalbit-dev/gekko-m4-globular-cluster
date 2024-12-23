@@ -52,12 +52,6 @@ startTime = new Date();
 
 method.update = function(candle) {_.noop;}
 
-method.onTrade = function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
-}
-
 method.log = function(candle) {
 //general purpose log data
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
