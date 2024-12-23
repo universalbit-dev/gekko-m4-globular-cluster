@@ -1,3 +1,4 @@
+// log trade performance results
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const moment = require('moment');
 const humanizeDuration = require('humanize-duration');
@@ -12,8 +13,10 @@ const Logger = function(watchConfig) {
   this.currency = watchConfig.currency;
   this.asset = watchConfig.asset;
   this.roundtrips = [];
+  
 }
 util.makeEventEmitter(Logger);
+
 
 Logger.prototype.round = function(amount) {
   return amount.toFixed(8);
@@ -23,6 +26,7 @@ Logger.prototype.round = function(amount) {
 // - realtime logging (per advice)
 // - backtest logging (on finalize)
 Logger.prototype.logReport = function(trade, report) {
+  // ignore the trade
 
   var start = this.round(report.startBalance);
   var current = this.round(report.balance);
@@ -47,6 +51,7 @@ Logger.prototype.logRoundtrip = function(rt) {
     rt.pnl.toFixed(2),
     rt.profit.toFixed(2)
   ];
+
   log.info('', display.join('\t'));
 }
 
@@ -56,13 +61,17 @@ if(mode === 'backtest') {
       return;
 
     var at = trade.date.format('YYYY-MM-DD HH:mm:ss');
+
+
     if(trade.action === 'sell')
+
         log.info(
           `${at}: Paper trader simulated a SELL`,
           `\t${this.round(trade.portfolio.currency)}`,
           `${this.currency} <= ${this.round(trade.portfolio.asset)}`,
           `${this.asset}`
         );
+
     else if(trade.action === 'buy')
 
       log.info(

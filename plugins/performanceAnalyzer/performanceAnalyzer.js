@@ -1,6 +1,6 @@
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const {EventEmitter} = require("events");
-class Event extends EventEmitter{};const event=new Event();
+class Event extends EventEmitter{};
 const moment = require('moment');
 const statslite = require('stats-lite');
 var util = require('../../core/util.js');
