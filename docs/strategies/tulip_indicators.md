@@ -712,5 +712,3 @@ Required parameters:
 
 ---
 
-* [gekko-indicator](https://github.com/universalbit-dev/gekko-m4/blob/master/strategies/readme.md)
-
