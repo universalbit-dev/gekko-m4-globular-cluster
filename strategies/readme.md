@@ -7,9 +7,9 @@
 #### Tulip Node
 Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
 
-##### install [tulind npm package](https://www.npmjs.com/package/tulind) from source:
+##### install [tulind npm package](https://www.npmjs.com/package/tulind):
 ```
-npm install tulind --build-from-source
+npm install tulind --save
 ```
 
 ### WebSite: [TulipIndicator](https://tulipindicators.org/)
