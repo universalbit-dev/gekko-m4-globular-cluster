@@ -47,6 +47,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
     //Date
     startTime = new Date();
+    this.hodle_threshold = this.settings.hodle_threshold || 1;
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
@@ -164,7 +165,7 @@ return console.log(chess.pgn())
 },
 
   check :async function(candle) {
-  //log.debug("Operator ");this.fxchess();
+ 
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
   rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
@@ -239,9 +240,9 @@ if(this.predictionCount > this.settings.min_predictions)
     
     if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
     {var sellprice = this.candle.high;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');/* */}
-        
+    this.brain();    
 }, /* */
   
-  end : function() {log.info('THE END');}
+  end : function() {log.debug('THE END');}
 };
 module.exports = method;
