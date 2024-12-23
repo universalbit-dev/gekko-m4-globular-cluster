@@ -14,7 +14,6 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 method.init = function() {
   this.name = 'SCALPER';
   this.addTulipIndicator('ps', 'psar', {optInAcceleration: 0.25,optInMaximum: 0.50});
-  this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
   this.candle_queue = [];
   this.is_buyin = false;
   this.price_buyin = 0;
@@ -30,12 +29,6 @@ method.update = function(candle) {
   if (candle.high < DarvasHigh) {DarvasHigh = candle.low;}
   this.candle_queue.push(candle);barscount++;
   if (this.candle_queue.length > 0) {candle.delta = candle.close - this.candle_queue[0].close;}
-}
-
-method.onTrade = function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
 }
 
 var percent = 35;
@@ -63,8 +56,6 @@ return console.log(chess.pgn())
 }
 
 method.check = function(candle) {
-  //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-      //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell')} /* */
 
   log.debug("Operator ");this.makeoperator();
   log.debug("Random game of Chess");this.fxchess();
