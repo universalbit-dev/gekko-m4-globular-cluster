@@ -7,29 +7,28 @@ var settings = config.INVERTER;this.settings=settings;
 
 const { Chess } = require('chess.js')
 
-/* async fibonacci sequence */
-var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
-
-var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;};
-
-/* async keep calm and make something of amazing */
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
+const sequence = async function() {
+    try {
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
+    var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);fibonacci_number = fibonacci_sequence[fibonacci_number];
+    await console.log ('Fibonacci Sequence -- Wohoo! -- Number: ',fibonacci_number);
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Fibonacci Sequence -- Error -- ');
+    }
 };
 
-//https://github.com/Gab0/gekko-extra-indicators
-function AuxiliaryIndicators(){
-   var directory = 'indicators/';
-   var extension = '.js';
-   var files = ['DEMA','EMA','RSI','ADX','DX','StopLoss'];
-   for (var file of files){
-       var auxiliaryindicators = require('./' + directory + file + extension);
-       log.debug('Ported Indicator:', auxiliaryindicators);
-   }
- }
- 
+const keepcalm = async function() {
+    try {
+    await console.log('Keep Calm and Make Something of Amazing -- Wohoo! --');
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
+    }
+};
+
 //INIT
 var method = {
  prevPrice : 0,prevAction :'none',
