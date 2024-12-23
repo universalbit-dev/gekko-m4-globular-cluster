@@ -7,7 +7,7 @@ var dirs = util.dirs();
 var config = util.getConfig();
 var log = require(dirs.core + 'log');
 var exchangeChecker = require(dirs.gekko + 'exchange/exchangeChecker');
-var TradeBatcher = require(util.dirs().budfox + 'tradeBatcher');
+var TradeBatcher = require(util.dirs().dlna + 'tradeBatcher');
 
 var Fetcher = function(config) {
   if(!_.isObject(config))
