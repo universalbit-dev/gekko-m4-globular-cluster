@@ -15,26 +15,31 @@ var math = require('mathjs');var uuid = require('uuid');
 var settings = config.NN;this.settings=settings;var chess_universe = [];
 var cov = require( 'compute-covariance' );
 
-/* async fibonacci sequence */
-var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
-var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;};
-/* async keep calm and make something of amazing */
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
+const sequence = async function() {
+    try {
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
+    var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);fibonacci_number = fibonacci_sequence[fibonacci_number];
+    await console.log ('Fibonacci Sequence -- Wohoo! -- Number: ',fibonacci_number);
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Fibonacci Sequence -- Error -- ');
+    }
 };
-function AuxiliaryIndicators(){
-   var directory = 'indicators/';
-   var extension = '.js';
-   var files = ['DEMA','StopLoss','RSI','SMMA'];  
-   for (var file of files){
-   var auxiliaryindicators = require('./' + directory + file + extension);log.debug('added', auxiliaryindicators);}
-}
+
+const keepcalm = async function() {
+    try {
+    await console.log('Keep Calm and Make Something of Amazing -- Wohoo! --');
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
+    }
+};
+
 var method = {
 predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait',hodl_threshold:1,
   init : function() {
-    AuxiliaryIndicators();
     this.requiredHistory = this.settings.historySize;this.RSIhistory = [];
     log.info('================================================');
     log.info('keep calm and make somethig of amazing');
@@ -42,10 +47,6 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
     //Date
     startTime = new Date();
-    //indicators
-
-    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
-    this.hodle_threshold = this.settings.hodle_threshold || 1;
     //DEMA
     this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
     //RSI
@@ -53,7 +54,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
     var x = Math.floor(Math.random() * fibonacci_sequence.length);
     if (x == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
     x = fibonacci_sequence[x];this.x=x;
@@ -238,13 +239,9 @@ if(this.predictionCount > this.settings.min_predictions)
     
     if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
     {var sellprice = this.candle.high;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');/* */}
-//StopLoss 
-//if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
-   //{this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */
-this.brain();    
+        
 }, /* */
   
   end : function() {log.info('THE END');}
 };
 module.exports = method;
-
