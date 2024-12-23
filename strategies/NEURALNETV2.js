@@ -10,7 +10,7 @@ const { Chess } = require('chess.js')
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind=require('../core/tulind');
-var SMMA = require('./indicators/SMMA.js');
+
 var config = require('../core/util.js').getConfig();
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var settings = config.NEURALNETV2;this.settings=settings;
@@ -27,7 +27,7 @@ var method = {
     this.name = 'NEURALNETV2';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377'];//'610','987','1597','2584','4181'];
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
     var x = Math.floor(Math.random() * fibonacci_sequence.length);
     if (x == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
     x = fibonacci_sequence[x];this.x=x;
@@ -56,8 +56,6 @@ var method = {
       batch_size: this.batchsize,
       l2_decay: this.settings.decay
     });
-    
-    this.addIndicator('stoploss', 'StopLoss', {threshold: this.settings.stoploss_threshold});
     this.hodle_threshold = this.settings.hodle_threshold || 1;
   },
 
@@ -93,12 +91,6 @@ var method = {
 
     for (let i = 0; i < (this.z * 3); ++i) this.learn(candle);
     while (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.shift();
-  },
-
-  onTrade: function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
   },
 
   printObject: function(o) {
@@ -155,7 +147,7 @@ return console.log(chess.pgn())},
     }
   },
   
-  end: function() {log.debug('Triggered stoploss',this.stoplossCounter,'times');}
+  end: function() {log.debug('THE END');}
 
 };
 
