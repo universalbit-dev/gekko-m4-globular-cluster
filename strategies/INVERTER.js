@@ -36,7 +36,6 @@ init:  function()
 {
 this.interval = this.settings.interval;
 this.RSIhistory = [];
-AuxiliaryIndicators();
 this.name = 'INVERTER';
 log.info('Start' , this.name);
 this.trend = {direction: 'none',duration: 0,state:'none',ls:'none'};
@@ -50,7 +49,6 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFa
 this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.DI});
 this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
-this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.stoploss_threshold});
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');
@@ -78,11 +76,6 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 },
 
-onTrade: function(event) {
-    if ('buy' === event.action) {this.indicators.stoploss.long(event.price);}
-    this.prevAction = event.action;
-    this.prevPrice = event.price;
-  },
 /* */
  fxchess : function(){
   const chess = new Chess()
