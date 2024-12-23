@@ -1,33 +1,40 @@
-/* The Portfolio class holds data about the portfolio */
+/*
+  The Portfolio class holds data about the portfolio
+*/
 
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
-const util=require('../core/util');
+const _ = require('lodash');
+const async = require('async');
 const errors = require('./exchangeErrors');
-var config = util.getConfig();
+// const EventEmitter = require('events');
 
-const {EventEmitter} = require("events");class Event extends EventEmitter {};
-const eventEmitter = new Event();
-
-class Portfolio extends Event{
+class Portfolio {
   constructor(config, api) {
-  super();
-  EventEmitter.call(this);
-    _.bindAll(this,_.functions(this));
+    _.bindAll(this);
     this.config = config;
     this.api = api;
     this.balances = {};
     this.fee = null;
   }
 
-  getBalance(fund) {return this.getFund(fund).amount;}
+  getBalance(fund) {
+    return this.getFund(fund).amount;
+  }
+
   // return the [fund] based on the data we have in memory
-  getFund(fund) {return _.find(this.balances, function(f) { return f.name === fund});}
+  getFund(fund) {
+    return _.find(this.balances, function(f) { return f.name === fund});
+  }
+
   // convert into the portfolio expected by the performanceAnalyzer
   convertBalances(asset,currency) { // rename?
     var asset = _.find(this.balances, a => a.name === this.config.asset).amount;
     var currency = _.find(this.balances, a => a.name === this.config.currency).amount;
 
-    return {currency,asset,balance: currency + (asset * this.ticker.bid)}
+    return {
+      currency,
+      asset,
+      balance: currency + (asset * this.ticker.bid)
+    }
   }
 
   setBalances(callback) {
@@ -41,26 +48,41 @@ class Portfolio extends Event{
       const balances = [ this.config.currency, this.config.asset ]
         .map(name => {
           let item = _.find(fullPortfolio, {name});
-          if(!item) {item = {name, amount: 0};}return item;
+
+          if(!item) {
+            // assume we have 0
+            item = { name, amount: 0 };
+          }
+
+          return item;
         });
 
       this.balances = balances;
-      if(_.isFunction(callback))callback();
+
+      if(_.isFunction(callback))
+        callback();
     }
+
     this.api.getPortfolio(set);
   }
   
   setFee(callback) {
     this.api.getFee((err, fee) => {
-      if(err) throw new errors.ExchangeError(err);
+      if(err)
+        throw new errors.ExchangeError(err);
+
       this.fee = fee;
-      if(_.isFunction(callback))callback();
+
+      if(_.isFunction(callback))
+        callback();
     });
   }
-  setTicker(ticker) {this.ticker = ticker}
+
+  setTicker(ticker) {
+    this.ticker = ticker;
+  }
 
 }
-util.makeEventEmitter(Portfolio);
 
 module.exports = Portfolio
 

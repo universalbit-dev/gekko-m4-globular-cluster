@@ -1,10 +1,10 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-const fs = require('fs-extra');
+const _ = require('lodash');
+const fs = require('fs');
 const moment = require('moment');
 const errors = require('./exchangeErrors');
 
 const Checker = function() {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
 }
 
 Checker.prototype.getExchangeCapabilities = function(slug) {

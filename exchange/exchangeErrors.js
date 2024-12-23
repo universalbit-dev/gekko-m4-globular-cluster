@@ -1,21 +1,24 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require('lodash');
 
 const ExchangeError = function(message) {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
+
   this.name = "ExchangeError";
   this.message = message;
 }
 ExchangeError.prototype = new Error();
 
 const ExchangeAuthenticationError = function(message) {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
+
   this.name = "ExchangeAuthenticationError";
   this.message = message;
 }
 ExchangeAuthenticationError.prototype = new Error();
 
 const RetryError = function(message) {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
+
   this.name = "RetryError";
   this.retry = 5;
   this.message = message;
@@ -23,7 +26,8 @@ const RetryError = function(message) {
 RetryError.prototype = new Error();
 
 const AbortError = function(message) {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this);
+
   this.name = "AbortError";
   this.message = message;
 }
@@ -35,7 +39,6 @@ module.exports = {
   RetryError,
   AbortError
 };
-
 
 /*
 The MIT License (MIT)
