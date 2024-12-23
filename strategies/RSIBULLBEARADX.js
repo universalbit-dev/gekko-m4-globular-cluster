@@ -7,27 +7,27 @@ const fs = require("fs-extra");fs.createReadStream('/dev/null');
 var settings = config.RSIBULLBEARADX;this.settings=settings;
 const { Chess } = require('chess.js');
 
-/* async fibonacci sequence */
-var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
+const sequence = async function() {
+    try {
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
+    var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);fibonacci_number = fibonacci_sequence[fibonacci_number];
+    await console.log ('Fibonacci Sequence -- Wohoo! -- Number: ',fibonacci_number);
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Fibonacci Sequence -- Error -- ');
+    }
+};
 
-var sequence = ms => new Promise(resolve => setTimeout(resolve, seqms));
-async function sequence() {await sequence;};
-
-/* async keep calm and make something of amazing */
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;};
-
-//https://github.com/Gab0/gekko-extra-indicators
-function AuxiliaryIndicators(){
-   var directory = 'indicators/';
-   var extension = '.js';
-   var files = ['SMA', 'RSI','ADX','StopLoss'];
-   for (var file of files){
-       var auxiliaryindicators = require('./' + directory + file + extension);
-       log.debug('Ported Indicator:', auxiliaryindicators);
-   }
- }
+const keepcalm = async function() {
+    try {
+    await console.log('Keep Calm and Make Something of Amazing -- Wohoo! --');
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
+    }
+};
 
 function makeoperator() {
 var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
@@ -38,12 +38,10 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 var method = {
   /* INIT */
   init: function() {
-    AuxiliaryIndicators();
     startTime=new Date();this.debug=true;
     this.name = 'RSIBULLBEARADX';
     this.requiredHistory = config.tradingAdvisor.historySize;
     this.resetTrend();
-    this.addIndicator('stoploss', 'StopLoss', {threshold:this.settings.STOPLOSS});
     // SMA
     this.addTulipIndicator('maSlow', 'sma', {optInTimePeriod: this.settings.SMA_long});
     this.addTulipIndicator('maFast', 'sma', {optInTimePeriod:this.settings.SMA_short});
