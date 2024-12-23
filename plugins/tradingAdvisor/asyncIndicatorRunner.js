@@ -1,24 +1,34 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var fs=require("fs-extra");
-const {EventEmitter} = require("events");
-const util = require('../../core/util');var config = util.getConfig();const dirs = util.dirs();
-var tulind=require('../../core/tulind');
-const log = require('../../core/log');
+const _ = require('underscore');
+const fs = require('fs-extra');
+const util = require('../../core/util');
+const config = util.getConfig();
+const dirs = util.dirs();
+const log = require(dirs.core + 'log');
+
+const talib = require(dirs.core + 'talib');
+const tulind = require(dirs.core + 'tulind');
+
+const allowedTalibIndicators = _.keys(talib);
 const allowedTulipIndicators = _.keys(tulind);
 
 const AsyncIndicatorRunner = function() {
-  _.bindAll(this,_.functions(this));
-  EventEmitter.call(this);
+  this.talibIndicators = {};
   this.tulipIndicators = {};
-  this.candleProps = {open: [],high: [],low: [],close: [],volume: []};
-  this.candlePropsCacheSize = 10000;
+
+  this.candleProps = {
+    open: [],
+    high: [],
+    low: [],
+    close: [],
+    volume: []
+  };
+
+  this.candlePropsCacheSize = 1000;
+
   this.inflight = false;
   this.backlog = [];
   this.age = 0;
-
 }
-util.makeEventEmitter(AsyncIndicatorRunner);
-
 
 AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   if(this.inflight) {
@@ -26,7 +36,7 @@ AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
   }
 
   this.age++;
-  this.inflight = false;
+  this.inflight = true;  
 
   this.candleProps.open.push(candle.open);
   this.candleProps.high.push(candle.high);
@@ -47,7 +57,26 @@ AsyncIndicatorRunner.prototype.processCandle = function(candle, next) {
 
 AsyncIndicatorRunner.prototype.calculateIndicators = function(next) {
   const done = _.after(
-    _.size(this.tulipIndicators),this.handlePostFlight(next)
+    _.size(this.talibIndicators) + _.size(this.tulipIndicators),
+    this.handlePostFlight(next)
+  );
+
+  // handle result from talib
+  const talibResultHander = name => (err, result) => {
+    if(err)
+      util.die('TALIB ERROR:', err);
+
+    this.talibIndicators[name].result = _.mapObject(result, v => _.last(v));
+    done();
+  }
+
+  // handle result from talib
+  _.each(
+    this.talibIndicators,
+    (indicator, name) => indicator.run(
+      this.candleProps,
+      talibResultHander(name)
+    )
   );
 
   // handle result from tulip
@@ -81,10 +110,31 @@ AsyncIndicatorRunner.prototype.handlePostFlight = function(next) {
   }
 }
 
+AsyncIndicatorRunner.prototype.addTalibIndicator = function(name, type, parameters) {
+  if(!talib)
+    util.die('Talib is not enabled');
+
+  if(!_.contains(allowedTalibIndicators, type))
+    util.die('I do not know the talib indicator ' + type);
+
+  if(this.setup)
+    util.die('Can only add talib indicators in the init method!');
+
+  var basectx = this;
+
+  this.talibIndicators[name] = {
+    run: talib[type].create(parameters),
+    result: NaN
+  }
+}
+
 AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, parameters) {
   if(!tulind) {
     util.die('Tulip indicators is not enabled');
   }
+
+  if(!_.contains(allowedTulipIndicators, type))
+    util.die('I do not know the tulip indicator ' + type);
 
   if(this.setup)
     util.die('Can only add tulip indicators in the init method!');
@@ -98,6 +148,7 @@ AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, paramete
 }
 
 module.exports = AsyncIndicatorRunner;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me

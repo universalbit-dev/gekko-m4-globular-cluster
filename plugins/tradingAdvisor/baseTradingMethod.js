@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var fs = require("fs-extra");
 const util = require('../../core/util');var config = util.getConfig();const dirs = util.dirs();
 const log = require('../../core/log');
@@ -78,9 +78,9 @@ var Base = function(settings) {
 }
 
 // teach our base trading method events
-util.makeEventEmitter(Base);
+util.makeEventEmitter(Base);util.inherit(Event, Base);
 
-Base.prototype.tick = async function(candle, done) {
+Base.prototype.tick = function(candle, done) {
   this.age++;
   const emit =new Event();
   const afterAsync = () => {this.calculateSyncIndicators(candle, done);}

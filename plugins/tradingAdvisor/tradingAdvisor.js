@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const {EventEmitter} = require("events");class Event extends EventEmitter{};
 const fs = require("fs-extra");
 const util = require('../../core/util');const dirs = util.dirs();
@@ -6,9 +6,7 @@ var config = util.getConfig();
 const moment = require('moment');
 const log = require("../../core/log.js");
 
-/* */
 var CandleBatcher = require('../../core/candleBatcher');
-//const isLeecher = config.market && config.market.type === 'leech';
 
 var Actor = function(done){
   _.bindAll(this,_.functions(this));
@@ -21,14 +19,14 @@ var Actor = function(done){
 
   if(mode === 'realtime')
 {
-    /* */
+
     var Stitcher = require('../../core/tools/dataStitcher');
     var stitcher = new Stitcher(this.batcher);
     stitcher.prepareHistoricalData(done);
 }
 
 }
-util.makeEventEmitter(Actor);
+util.makeEventEmitter(Actor);util.inherit(Event, Actor);
 
 Actor.prototype.setupStrategy = function() 
 {
@@ -36,8 +34,7 @@ Actor.prototype.setupStrategy = function()
   util.die('Gekko can\'t find the strategy "' + this.strategyName + '"');
   log.info('\t', 'Using the strategy: ' + this.strategyName);
   var strategy = require(dirs.methods + this.strategyName);
-  
-  /* */
+
   const WrappedStrategy = require("./baseTradingMethod");
   _.each(strategy, function(fn, name) {WrappedStrategy.prototype[name] = fn;});
   let stratSettings;
@@ -93,6 +90,8 @@ Actor.prototype.relayAdvice = function(advice) {
 }
 
 module.exports = Actor;
+
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
