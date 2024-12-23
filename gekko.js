@@ -8,15 +8,18 @@
   backtesting on historical data. Also look at the code to see what how
   it is working.
 */
-//const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");
+
+//New General Catalogue
+//https://it.wikipedia.org/wiki/New_General_Catalogue
+
+const { addon: ov } = require('openvino-node');
 const util = require('./core/util');const config = util.getConfig();const dirs = util.dirs();
 console.log('##########################################');
 console.log('UniversalBit Blockchain Powered by Gekko');
 console.log('\tGekko v' + util.getVersion());
 console.log('##########################################');
 
-const pipeline = Promise.promisifyAll(require("./core/pipeline.js"));
+const pipeline = require("./core/pipeline.js");
 const mode = util.gekkoMode();
 
 pipeline({config: config,mode: mode});
