@@ -39,6 +39,15 @@ module.exports = {
   },
 
   {
+  name: 'neuralnetv2',
+  script    : 'gekko.js',
+  args      : '-c .env/trade/trade_neuralnetv2_simulator.js',
+  name      : '|NEURALNETV2|-simulator-|',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+
+  {
   name: 'supertrend',
   script    : 'gekko.js',
   args      : '-c .env/trade/trade_supertrend_simulator.js',
