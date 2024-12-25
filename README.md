@@ -4,7 +4,7 @@
 <img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="3%"></img>   
 ##### sustainable personal finance
 
-<img src="" width="auto"></img>   
+<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-codespaces.png" width="auto"></img>   
 
 ## gekko-m4-globular-cluster
 Let's naturalize the cryptocurrency
