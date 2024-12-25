@@ -9,5 +9,5 @@ Here's a to-do list:
 - Balanced risk tolerance: stop-loss and take-profit.
 - Develop Exchange Simulator fix bugs and runtime errors.
 - Regularly nodejs app health check.
-- Prepared to adjust your strategies as market conditions change.
+- Adaptive neural learning based on market changes
 - Backtest your strategy,fix bugs and runtime errors. 
