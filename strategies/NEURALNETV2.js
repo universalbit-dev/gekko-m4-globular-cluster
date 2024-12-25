@@ -17,7 +17,7 @@ var settings = config.NEURALNETV2;this.settings=settings;
 /*ccxt library: https://www.npmjs.com/package/ccxt*/
 var symbol = '';var type='';var side='';
 var amount = 0.01; var price =0.00; 
-var limit=0.00;var stoporder=0.00;var takeorder=0.00;
+var currentPrice=0.00;var limit=0.00;var stoporder=0.00;var takeorder=0.00;
 var parameters = {};
 
 /* https://github.com/ccxt/ccxt/wiki/Exchange-Markets-By-Country */
@@ -226,12 +226,12 @@ return console.log(chess.pgn())
     {
       log.debug("Nostradamus: " + this.predictionCount);
       var prediction = this.predictCandle() * this.scale;
-      let currentPrice = candle.close;log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
+      currentPrice = candle.close;log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
       log.debug('Alpha_Median = '+ median);
       
       /*  Orders: -- Buy - Sell - StopLoss - TakeProfit -- */
       
-      limit = prediction - (currentPrice * this.settings.limit_order/100);//limit order nearest currentPrice
+      limit = prediction - (prediction * this.settings.limit_order/100);//limit order nearest currentPrice
       stoporder= limit - (prediction * this.settings.stop_order/100);//stoporder - 0.2% of prediction
       takeorder= limit + (prediction * this.settings.take_order/100);//takeorder + 0.2% of prediction
       
