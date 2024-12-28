@@ -17,7 +17,7 @@ var settings = config.NEURALNETV2;this.settings=settings;
 /*ccxt library: https://www.npmjs.com/package/ccxt*/
 var symbol = '';var type='';var side='';
 var amount = 0.01; var price =0.00; 
-var currentPrice=0.00;var limit=0.00;var stoporder=0.00;var takeorder=0.00;
+var limit=0.00;var stoporder=0.00;var takeorder=0.00;
 var parameters = {};
 
 /* https://github.com/ccxt/ccxt/wiki/Exchange-Markets-By-Country */
@@ -28,24 +28,7 @@ var exchange = new ccxt[id] ({
         secret: '', 
     });
 
-/*
-
-placing order schema: https://github.com/ccxt/ccxt/wiki/Manual#placing-orders
-createOrder ("symbol","type","side","amount","price","parameters")
-
-//buy 
-createOrder('LTC/BTC', 'limit', 'buy', 0.01, 20000, { triggerPrice: 19000 })
-
-//stoploss
-stopLoss order
-createOrder('LTC/BTC', 'limit', 'buy', 0.01, 20000, { stopLossPrice: 22000 })
-
-//takeprofit 
-takeProfit order
-createOrder('LTC/BTC', 'limit', 'buy', 0.01, 20000, { takeProfitPrice: 18000 })
-
-*/    
-
+/*placing order schema: https://github.com/ccxt/ccxt/wiki/Manual#placing-orders*/
 const buy = async function() {
     try {
     symbol ='LTC/BTC';type='limit';side='buy';amount = 0.01;price=currentPrice;parameters={};
@@ -102,9 +85,9 @@ var method = {
 
   //init
   init: function() {
+    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     this.name = 'NEURALNETV2';
     this.nn = new convnetjs.Net();
-    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
     var x = Math.floor(Math.random() * fibonacci_sequence.length);
     if (x == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
@@ -115,7 +98,24 @@ var method = {
     z = fibonacci_sequence[z];this.z=z;
     console.debug('\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
     
+    //random learning method
+    random_learning=['adadelta','sgd','adagrad','nesterov','windowgrad'];
+    var learningmethod = Math.floor(Math.random() * random_learning.length);
+    if (learningmethod == undefined){Math.floor(Math.random() * random_learning.length);}
+    
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
+    switch (true){
+    case (learningmethod == 0 ):learningmethod='adadelta';break;
+    case (learningmethod == 1):learningmethod='sgd';break;
+    case(learningmethod == 2):learningmethod='adagrad';break;
+    case(learningmethod == 3):learningmethod='nesterov';break;
+    case(learningmethod == 4):learningmethod='windowgrad';break;
+    default: learningmethod = 'adadelta';
+    }
+    /**/
+    log.debug('Learning Method: '+ learningmethod);
+    this.settings.method=learningmethod;
+    
     //full connected layers
     let layers = [
       {type: 'input',out_sx: this.x,out_sy: 1,out_depth: 1},
@@ -221,19 +221,19 @@ return console.log(chess.pgn())
   max=math.max(Alpha);min=math.min(Alpha);median=math.median(Alpha);
   if (math.mean(min,max,median) != undefined) {matrix=math.mean(min,max,median);}
   }
-  
+  log.info('Nostradamus Counter: '+this.predictionCount);
   if (this.predictionCount > this.settings.min_predictions) 
     {
-      log.debug("Nostradamus: " + this.predictionCount);
       var prediction = this.predictCandle() * this.scale;
-      currentPrice = candle.close;log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
+      let currentPrice = candle.close;log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
       log.debug('Alpha_Median = '+ median);
       
-      /*  Orders: -- Buy - Sell - StopLoss - TakeProfit -- */
+      /*  Orders: -- Buy - Sell - Take - Stop --     Open/Close Position -- */
+      limit_buy = prediction - (currentPrice * this.settings.limit_order/100); //limit order nearest currentPrice
+      limit_sell= prediction + (currentPrice * this.settings.limit_order/100);
+      takeorder= prediction - (prediction * this.settings.take_order/100);//takeorder - 0.2% of prediction
+      stoporder= prediction + (prediction * this.settings.stop_order/100);//stoporder + 0.2% of prediction
       
-      limit = prediction - (prediction * this.settings.limit_order/100);//limit order nearest currentPrice
-      stoporder= limit - (prediction * this.settings.stop_order/100);//stoporder - 0.2% of prediction
-      takeorder= limit + (prediction * this.settings.take_order/100);//takeorder + 0.2% of prediction
       
       let meanp = math.mean(prediction, currentPrice);
       let meanAlpha = (currentPrice - meanp) / currentPrice * 100;Alpha.push([meanAlpha]);
@@ -247,11 +247,15 @@ return console.log(chess.pgn())
       }
       
     }
-    log.info("-- Order Types -- :");
-    log.info("-- Limit -- :" + limit);log.info("-- Stop  -- :" + stoporder);log.info("-- Take  -- :" + takeorder);
+    /*
+    log.info("-- Price -- :" + currentPrice);
+    log.info("-- Limit Buy -- :" + limit_buy);
+    log.info("-- Limit Sell-- :" + limit_sell);
+    log.info("-- Stop  -- :" + stoporder);
+    log.info("-- Take  -- :" + takeorder);
+    */
   },
   end: function() {log.debug('THE END');}
 
 };
 module.exports = method;
-
