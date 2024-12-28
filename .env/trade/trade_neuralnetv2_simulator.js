@@ -7,7 +7,7 @@ config.trader={enabled:false,
 exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NEURALNETV2'};
 
-config.NEURALNETV2={method:'adadelta,'threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,stop_order:0.2,take_order:0.2,
+config.NEURALNETV2={method:'adadelta',threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,stop_order:0.2,take_order:0.2,
 momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:4181,min_predictions :28657};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
