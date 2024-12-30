@@ -116,14 +116,14 @@ var method = {
     log.debug('Learning Method: '+ learningmethod);
     this.settings.method=learningmethod;
     
-    //full connected layers
+   //full connected layers and convolutional neural network
     let layers = [
       {type: 'input',out_sx: this.x,out_sy: 1,out_depth: 1},
-      {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
-            {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer2_activation},
-                  {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
-                        {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer2_activation},
-                              {type: 'fc',num_neurons: this.layer_neurons, activation: this.layer_activation},
+      {type: 'conv',num_neurons: 1, activation: 'relu'},
+            {type: 'fc',num_neurons: 1, activation: 'sigmoid'},
+                  {type: 'conv',num_neurons: 1, activation: 'relu'},
+                        {type: 'fc',num_neurons: 1, activation: 'sigmoid'},
+                              {type: 'conv',num_neurons: 1, activation: 'relu'},
       {type: 'regression',num_neurons: 1}
     ];
     
