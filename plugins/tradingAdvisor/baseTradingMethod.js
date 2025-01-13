@@ -72,7 +72,7 @@ var Base = function(settings) {
   this.setup = true;
 
   if(_.size(this.asyncIndicatorRunner.tulipIndicators))
-    this.asyncTick = true;
+    this.asyncTick = false;
   else
     delete this.asyncIndicatorRunner;
 }
