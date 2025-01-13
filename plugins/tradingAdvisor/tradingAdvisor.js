@@ -12,7 +12,7 @@ var Actor = function(done){
   _.bindAll(this,_.functions(this));
   EventEmitter.call(this);
   this.done = done;
-  this.batcher = new CandleBatcher(config.tradingAdvisor.candleSize);
+  var batcher = new CandleBatcher(config.tradingAdvisor.candleSize);this.batcher=batcher;
   this.strategyName = config.tradingAdvisor.method;
   this.setupStrategy();
   var mode = util.gekkoMode();
