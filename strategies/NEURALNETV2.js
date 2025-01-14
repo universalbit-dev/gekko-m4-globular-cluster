@@ -5,33 +5,60 @@
 const { addon: ov } = require('openvino-node');
 const ccxt = require("ccxt");
 var convnetjs = require('../core/convnet.js');
-var math = require('mathjs');
+var deepqlearn= require('../core/deepqlearn.js');
+const _ = require("underscore");
+var math = require('mathjs');var cov = require('compute-covariance');
 const { Chess } = require('chess.js')
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind=require('../core/tulind');
+
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 
 var settings = config.NEURALNETV2;this.settings=settings;
 
-/*ccxt library: https://www.npmjs.com/package/ccxt*/
 var symbol = '';var type='';var side='';
-var amount = 0.01; var price =0.00; 
-var limit=0.00;var stoporder=0.00;var takeorder=0.00;
-var parameters = {};
+var amount = 0.00; var price =0.00; var since='';var limit=0;var parameters = {};
+var limit_buy=0.00;var limit_sell=0.00;var stoporder=0.00;var takeorder=0.00;
+var currentPrice=0.00;var spread=0.00;
 
-/* https://github.com/ccxt/ccxt/wiki/Exchange-Markets-By-Country */
-var id = 'coinmate'; 
+var id = ''; /* Exchange Name */
+//ccxt histogram variables 
+var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0.00;var candle_volume=0.00;
+
 var exchange = new ccxt[id] ({
         verbose: false,
         apiKey: '',
-        secret: '', 
+        secret: '',
     });
 
-/*placing order schema: https://github.com/ccxt/ccxt/wiki/Manual#placing-orders*/
+var ohlcv = async function() {
+try {
+    const since = await exchange.milliseconds() - 86400 * 1000; //last 24 hrs
+    symbol ='LTC/BTC';timeframe='45m';limit=100;parameters={};
+    const Ohlcv = await exchange.fetchOHLCV(symbol, timeframe, since, limit);
+    console.log (' -- ohlcv -- Wohoo! -- open -- high -- close -- volume --',Ohlcv);
+    //ccxt Histogram -- open -- high -- low -- close -- volume --
+    for (let i = 0; i <= _.size(limit)-1; i++) {
+        for (let j = 1; j <= 5; j++) {
+      candle_open = this.priceBuffer.push(Ohlcv[i][j]);this.candle_open=candle_open;
+          candle_high = this.priceBuffer.push(Ohlcv[i][j]);this.candle_high=candle_high;
+             candle_low = this.priceBuffer.push(Ohlcv[i][j]);this.candle_low=candle_low;
+                 candle_close = this.priceBuffer.push(Ohlcv[i][j]);this.candle_close=candle_close;
+                    candle_volume = Ohlcv[i][j];this.candle_volume=candle_volume; }
+    }
+    
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (' ohlcv -- Error -- ');
+    }
+};
+    
+/* placing order schema: https://github.com/ccxt/ccxt/wiki/Manual#placing-orders */
 const buy = async function() {
     try {
-    symbol ='LTC/BTC';type='limit';side='buy';amount = 0.01;price=currentPrice;parameters={};
+    symbol ='LTC/BTC';type='limit';side='buy';amount = 0.02;price=limit_buy;parameters={};
     const orders = await exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Buy Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
@@ -43,7 +70,7 @@ const buy = async function() {
 
 const sell = async function() {
     try {
-    symbol = 'LTC/BTC';type='limit';side='sell';amount = 0.01;price=currentPrice;parameters={};
+    symbol = 'LTC/BTC';type='limit';side='sell';amount = 0.02;price=limit_sell;parameters={};
     const orders = await exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Sell Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
@@ -55,7 +82,7 @@ const sell = async function() {
 
 const stop = async function() {
     try {
-    symbol = 'LTC/BTC';type='limit';side='sell';amount = 0.01;price=stoporder;parameters={};
+    symbol = 'LTC/BTC';type='limit';side='sell';amount = 0.02;price=stoporder;parameters={};
     const orders = await exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Stop Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
@@ -67,7 +94,7 @@ const stop = async function() {
 
 const take = async function() {
     try {
-    symbol = 'LTC/BTC';type='limit';side='buy';amount = 0.01;price=takeorder;parameters={};
+    symbol = 'LTC/BTC';type='limit';side='buy';amount = 0.02;price=takeorder;parameters={};
     const orders = await exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Take Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
@@ -77,53 +104,74 @@ const take = async function() {
     }
 };
 
+const openOrders = async function() {
+    try {
+    symbol = 'LTC/BTC';
+    let since = await exchange.milliseconds() - 86400000 // -1 day from now (24 hours)
+    let limit =20;parameters={};
+    const openorders = await exchange.fetchOpenOrders(symbol, since, limit, parameters);
+    console.log ('OpenOrders -- Wohoo! -- ', openorders);
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('OpenOrders -- Error -- ');
+    }
+};
+
+//https://www.investopedia.com/terms/a/alpha.asp
 var Alpha=[];var min=0;var max=0;var median=0;var matrix=0;
 var method = {
   priceBuffer: [],predictionCount: 0,batchsize: 1,
-  layer_neurons: 0,layer_activation: 'sigmoid',layer2_activation: 'relu',
+  layer_neurons: 21,layer_activation: 'sigmoid',layer2_activation: 'relu',
   scale: 1,prevPrice: 0,hodle_threshold: 1,
 
   //init
   init: function() {
-    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
+    //ohlcv();
     this.name = 'NEURALNETV2';
     this.nn = new convnetjs.Net();
+    //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
-    var x = Math.floor(Math.random() * fibonacci_sequence.length);
-    if (x == 0){Math.floor(Math.random() * fibonacci_sequence.length);}
-    x = fibonacci_sequence[x];this.x=x;
-    var y = 1;
-    y = fibonacci_sequence[y];this.y=y;
-    var z = 1;
-    z = fibonacci_sequence[z];this.z=z;
-    console.debug('\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
+    var x = Math.floor(Math.random() * fibonacci_sequence.length);this.x=x;
     
-    //random learning method
-    random_learning=['adadelta','sgd','adagrad','nesterov','windowgrad'];
+    while(x == 0){
+    Math.floor(Math.random() * fibonacci_sequence.length);
+    x = fibonacci_sequence[x];this.x=x;
+    }
+    
+    var y = 1;y = fibonacci_sequence[y];this.y=y;
+    var z = 1;z = fibonacci_sequence[z];this.z=z;
+    console.debug('NeuralNet Layer: ' + '\t\tINPUT:'+ x + '\tHIDE:' + y + '\tOUT:' + z);
+
+    //random trainer
+    var random_trainer=true;
+    random_learning=['adadelta','sgd','sgd+momentum','adagrad','nesterov','windowgrad'];
     var learningmethod = Math.floor(Math.random() * random_learning.length);
-    if (learningmethod == undefined){Math.floor(Math.random() * random_learning.length);}
+    if (learningmethod != undefined){Math.floor(Math.random() * random_learning.length);} 
     
     //https://cs.stanford.edu/people/karpathy/convnetjs/demo/trainers.html
-    switch (true){
+    switch (random_trainer){
     case (learningmethod == 0 ):learningmethod='adadelta';break;
     case (learningmethod == 1):learningmethod='sgd';break;
-    case(learningmethod == 2):learningmethod='adagrad';break;
-    case(learningmethod == 3):learningmethod='nesterov';break;
-    case(learningmethod == 4):learningmethod='windowgrad';break;
-    default: learningmethod = 'adadelta';
+    case (learningmethod == 2):learningmethod='sgd+momentum';break;
+    case(learningmethod == 3):learningmethod='adagrad';break;
+    case(learningmethod == 4):learningmethod='nesterov';break;
+    case(learningmethod == 5):learningmethod='windowgrad';break;
+    default: learningmethod = 'sgd+momentum';
     }
-    /**/
-    log.debug('Learning Method: '+ learningmethod);
-    this.settings.method=learningmethod;
     
-   //full connected layers and convolutional neural network
+    this.settings.method='sgd+momentum'; //'adadelta'  'sgd' 'sgd+momentum' 'adagrad' 'nesterov' 'windowgrad'
+    //enable random trainer
+    //this.settings.method=learningmethod;
+    
+    //full connected layers and convolutional neural network
     let layers = [
-      {type: 'input',out_sx: this.x,out_sy: 1,out_depth: 1},
-      {type: 'conv',num_neurons: 1, activation: 'relu'},
-            {type: 'fc',num_neurons: 1, activation: 'sigmoid'},
-                  {type: 'conv',num_neurons: 1, activation: 'relu'},
-                        {type: 'fc',num_neurons: 1, activation: 'sigmoid'},
-                              {type: 'conv',num_neurons: 1, activation: 'relu'},
+      {type: 'input',out_sx: x,out_sy: 1,out_depth: 1},
+      {type: 'conv',num_neurons: 21, activation: 'relu'},
+            {type: 'fc',num_neurons: 21, activation: 'sigmoid'},
+                  {type: 'conv',num_neurons: 21, activation: 'relu'},
+                        {type: 'fc',num_neurons: 21, activation: 'sigmoid'},
+                              {type: 'conv',num_neurons: 21, activation: 'relu'},
       {type: 'regression',num_neurons: 1}
     ];
     
@@ -131,12 +179,16 @@ var method = {
     {
     case(this.settings.method == 'sgd'):
       this.trainer = new convnetjs.SGDTrainer(this.nn, 
-      {learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay,l1_decay: this.settings.l1_decay});break;
-    
+      {method: this.settings.method,learning_rate: this.settings.learning_rate,momentum: 0.0,batch_size:8,l2_decay: this.settings.l2_decay,l1_decay: this.settings.l1_decay});break;
+      
+    case(this.settings.method == 'sgd+momentum'):
+      this.trainer = new convnetjs.SGDTrainer(this.nn, 
+      {method: this.settings.method,learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay,l1_decay: this.settings.l1_decay});break;
+
     case(this.settings.method == 'adadelta'):
       this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: this.settings.l2_decay});break;
-      
+
     case(this.settings.method == 'adagrad'): 
       this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,batch_size:8,l2_decay: this.settings.l2_decay});break;
@@ -144,11 +196,10 @@ var method = {
     case(this.settings.method == 'nesterov'):    
       this.trainer = new convnetjs.Trainer(this.nn, 
       {method: this.settings.method,learning_rate: this.settings.learning_rate,momentum: 0.9,batch_size:8,l2_decay: this.settings.l2_decay});break;
-    
+
     case(this.settings.method == 'windowgrad'):
       this.trainer = new convnetjs.Trainer(this.nn, 
-      {method: this.settings.method,learning_rate: this.settings.learning_rate,eps: 1e-6,ro:0.95,batch_size:8,l2_decay: this.settings.l2_decay});break;
-    
+      {method: this.settings.method,learning_rate: 0.01,eps: 1e-6,ro:0.95,batch_size:1,l2_decay: this.settings.l2_decay});break;
     default:
       this.trainer = new convnetjs.Trainer(this.nn, 
       {method: 'adadelta',learning_rate: 0.01,momentum: 0.0,batch_size:1,eps: 1e-6,ro:0.95,l2_decay: 0.001,l1_decay: 0.001});      
@@ -156,23 +207,23 @@ var method = {
 
     this.nn.makeLayers(layers);
     this.trainer = new convnetjs.Trainer(this.nn, {
+      method: this.settings.method,
       learning_rate: this.settings.learning_rate,
       momentum: this.settings.momentum,
       batch_size: this.batchsize,
       l2_decay: this.settings.decay
     });
-
 },
 
- learn: function(candle) {
-    for (let i = 0; i < this.priceBuffer.length - this.z; i++) {
-      let data = this.priceBuffer[i];
+ learn: async function(candle) {
+    for (let i = 0; i < this.priceBuffer.length - 2; i++) {
+      let data = this.priceBuffer[i];this.data=data;
       let current_price = this.priceBuffer[i + 1];
       let vol = new convnetjs.Vol(data);
       this.trainer.train(vol, current_price);
       let predicted_values = this.nn.forward(vol);
-      let accuracymatch = predicted_values.w[0] === current_price.first;
-      this.nn.backward(accuracymatch);
+      let accurancymatch = predicted_values.w[0] === current_price.first;
+      this.nn.backward(accurancymatch);
       predictionCount=this.predictionCount++;
     }
   },
@@ -180,28 +231,38 @@ var method = {
   setNormalizeFactor: function(candle) {
     this.scale = Math.pow(10, Math.trunc(candle.high).toString().length + 2);
   },
+  
+  //Reinforcement Learning
+  brain: async function(candle){
+  var brain = new deepqlearn.Brain(1, 1);//number of input,number of actions
+  var action = brain.forward(this.data);
+  var reward = action === 0 ? 1.0 : 0.0;
+  brain.backward(reward); 
+  brain.epsilon_test_time = 0.0;
+  brain.learning = false;
+  var action = brain.forward(this.data);
+  },
 
   makeoperator: function () {
-  var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
+  var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>','...'];
   var result = Math.floor(Math.random() * operator.length);
-  console.log("\tcourtesy of... "+ operator[result]);
+  log.debug("\tcourtesy of... "+ operator[result]);
   }, 
 
   update: function(candle) {
     if (1 === this.scale && 1 < candle.high && 0 === this.predictionCount) this.setNormalizeFactor(candle);
     this.candle = candle;
     this.priceBuffer.push([(candle.low / this.scale),(candle.high / this.scale),(candle.close / this.scale),(candle.open / this.scale),(candle.volume / 1000)]);
-    if ((this.z * 2) > this.priceBuffer.length) return;
-
-    for (let i = 0; i < (this.z * 3); ++i) this.learn(candle);
-    while (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.shift();
+    if ((this.x * 2) > this.priceBuffer.length) return;
+    for (let i = 0; i < (this.x * 3); ++i) this.learn(candle);this.brain(candle);
+    if (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.unshift();
   },
  
-  predictCandle: function() {
-    let vol = new convnetjs.Vol(this.priceBuffer);
-    let prediction = this.nn.forward(vol);
-    return prediction.w[0];
-  },
+  predictCandle : function() {
+var vol = new convnetjs.Vol(this.priceBuffer);
+var prediction = this.nn.forward(vol);
+return prediction.w[0];
+},
 
 fxchess : function(){
   const chess = new Chess()
@@ -209,53 +270,55 @@ fxchess : function(){
   const moves = chess.moves()
   const move = moves[Math.floor(Math.random() * moves.length)]
   chess.move(move)
-}
+  }
 return console.log(chess.pgn())
 },
 
   check: async function(candle) {
-  log.debug("Operator ");this.makeoperator();
-  log.debug("Random game of Chess");this.fxchess();
+  log.debug("Operator ");this.makeoperator();log.debug("Random game of Chess");this.fxchess();
 
-  if (Alpha.length != 0) { 
+  if (Alpha.length != 0) {
   max=math.max(Alpha);min=math.min(Alpha);median=math.median(Alpha);
-  if (math.mean(min,max,median) != undefined) {matrix=math.mean(min,max,median);}
+  if (math.mean(min,max,median) != 0) {matrix=math.mean(min,max,median);}
   }
   log.info('Nostradamus Counter: '+this.predictionCount);
-  if (this.predictionCount > this.settings.min_predictions) 
+  if (this.predictionCount > this.settings.min_predictions ) 
     {
       var prediction = this.predictCandle() * this.scale;
-      let currentPrice = candle.close;log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
-      log.debug('Alpha_Median = '+ median);
+      currentPrice = this.candle.close;
+      var variance= math.variance([prediction,currentPrice]);
+      var covariance = cov( [prediction,currentPrice] );
+      log.debug('Price = ' + currentPrice + ', Prediction = ' + prediction);
       
-      /*  Orders: -- Buy - Sell - Take - Stop --     Open/Close Position -- */
-      limit_buy = prediction - (currentPrice * this.settings.limit_order/100); //limit order nearest currentPrice
-      limit_sell= prediction + (currentPrice * this.settings.limit_order/100);
-      takeorder= prediction - (prediction * this.settings.take_order/100);//takeorder - 0.2% of prediction
-      stoporder= prediction + (prediction * this.settings.stop_order/100);//stoporder + 0.2% of prediction
+      //A spread in finance typically refers to some form of difference or gap between two related values:https://www.investopedia.com/terms/s/spread.asp
+      var spread=prediction - currentPrice;
+      /*  Orders: -- Buy - Sell - Take - Stop -- Open/Close Position --  */ 
+      limit_buy = currentPrice - ((currentPrice * 0.2)/100);
+      limit_sell= currentPrice + ((currentPrice * 0.2)/100);
+      takeorder= limit_buy - spread;
+      stoporder= limit_sell + spread;
       
-      
-      let meanp = math.mean(prediction, currentPrice);
+      let meanp =  math.mean(prediction, currentPrice);
       let meanAlpha = (currentPrice - meanp) / currentPrice * 100;Alpha.push([meanAlpha]);
-      let signalSell = candle.close > this.prevPrice || candle.close < (this.prevPrice * this.hodle_threshold);
-      let signal = meanp < currentPrice;log.info('Alpha: '+ meanAlpha);
-
+      var Beta = (covariance / variance);
+      log.info('Alpha: '+ meanAlpha);log.info("Beta:" + Beta);
       if(Alpha.length != 0){
-      if(prediction > currentPrice && median !=0 && median < matrix){log.info('Nostradamus predict : --UP--');buy();stop();this.predictionCount=0;median=0;}
-      if(prediction < currentPrice && median !=0 && median > matrix){log.info('Nostradamus predict : --DOWN--');sell();take();this.predictionCount=0;median=0;}
+      if(prediction > currentPrice && median < matrix && (spread > 0 && spread < 21)&& prediction != undefined && Beta < 0.9999999999999999)
+      /* OpenPosition (buy order) price should --up-- */
+      {log.info('Nostradamus predict : --UP--');buy();stop();this.predictionCount=0;median=0;}
+      if(prediction < currentPrice && median > matrix && (spread > -21 && spread < 0)&& prediction != undefined && Beta < 0.9999999999999999)
+      /* ClosePosition (sell order) price should --down-- */
+      {log.info('Nostradamus predict : --DOWN--');sell();take();this.predictionCount=0;median=0;}
       if(this.predictionCount > this.settings.min_predictions){this.predictionCount=0;}
       }
-      
     }
-    /*
-    log.info("-- Price -- :" + currentPrice);
-    log.info("-- Limit Buy -- :" + limit_buy);
-    log.info("-- Limit Sell-- :" + limit_sell);
-    log.info("-- Stop  -- :" + stoporder);
-    log.info("-- Take  -- :" + takeorder);
-    */
+    console.debug("-- Price -- :" + currentPrice);console.debug("-- Prediction -- :" + prediction);
+    console.debug("-- Buy  -- :" + limit_buy);console.debug("-- Sell  -- :" + limit_sell);
+    console.debug("-- Stop  -- :" + stoporder);console.debug("-- Take  -- :" + takeorder);
+    console.debug("-- Spread  -- :" + spread);
+    console.debug('-- Learning Method -- :' + this.settings.method);
+    
   },
   end: function() {log.debug('THE END');}
-
 };
 module.exports = method;
