@@ -1,7 +1,7 @@
 const { addon: ov } = require('openvino-node');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var Promise = require("bluebird");const _ = require("underscore");
 const fs = require("fs-extra");fs.createReadStream('/dev/null');
 
 var settings = config.RSIBULLBEARADX;this.settings=settings;
