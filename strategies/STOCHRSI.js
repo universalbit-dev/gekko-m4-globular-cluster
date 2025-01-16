@@ -1,5 +1,5 @@
 const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+var Promise = require("bluebird");const _ = require("underscore");
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const math= require('mathjs');
 var log = require('../core/log.js');
