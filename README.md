@@ -1,3 +1,4 @@
+[![CodeQL](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql)
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support) -- [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) -- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html) -- [Join Mastodon](https://mastodon.social/invite/wTHp2hSD) -- [Website](https://sites.google.com/view/universalbit-dev/home-page) -- [Content Delivery Network](https://universalbitcdn.it/) -- [Nodejs20](https://nodejs.org/en/blog/release/v20.15.0) -- [NVM](https://github.com/nvm-sh/nvm) -- [BTC TestNet](https://en.bitcoin.it/wiki/Testnet)
 
 
