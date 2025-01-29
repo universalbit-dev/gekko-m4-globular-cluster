@@ -322,7 +322,8 @@ return console.log(chess.pgn())
   end: function() {log.debug('THE END');}
 };
 module.exports = method;
-/*
+
+/* COPILOT EXPLAIN
 This file, `NEURALNETV2.js`, is a trading strategy for the Gekko trading bot. It leverages machine learning, specifically neural networks, for predicting market trends and making trading decisions. Here's a detailed breakdown of the code:
 
 ### Libraries and Modules
