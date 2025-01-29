@@ -322,3 +322,53 @@ return console.log(chess.pgn())
   end: function() {log.debug('THE END');}
 };
 module.exports = method;
+/*
+This file, `NEURALNETV2.js`, is a trading strategy for the Gekko trading bot. It leverages machine learning, specifically neural networks, for predicting market trends and making trading decisions. Here's a detailed breakdown of the code:
+
+### Libraries and Modules
+- **openvino-node**: For neural network operations.
+- **ccxt**: For interacting with cryptocurrency exchanges.
+- **convnetjs** and **deepqlearn**: For neural network and reinforcement learning.
+- **underscore**: Utility library.
+- **mathjs** and **compute-covariance**: For mathematical operations.
+- **chess.js**: For simulating chess games (used for debugging or random operations).
+- **fs-extra**: For file system operations.
+- **log.js** and **util.js**: Custom logging and utility modules.
+
+### Configuration and Initialization
+- **Settings and Variables**: Various settings and variables are initialized, including symbol, type, side, amount, price, and exchange-related variables.
+- **Exchange Initialization**: Initializes an exchange object using ccxt with placeholders for API keys.
+
+### Functions
+1. **OHLCV Data Fetching**:
+   - `ohlcv`: Fetches OHLCV (Open, High, Low, Close, Volume) data from the exchange.
+
+2. **Order Placement**:
+   - `buy`, `sell`, `stop`, `take`: Functions to place different types of orders (buy, sell, stop, take) on the exchange.
+
+3. **Open Orders Fetching**:
+   - `openOrders`: Fetches open orders from the exchange.
+
+4. **Neural Network and Learning**:
+   - **Initialization**:
+     - `init`: Initializes the neural network with random parameters and sets up the training method.
+   - **Learning**:
+     - `learn`: Trains the neural network using price data.
+     - `setNormalizeFactor`: Sets a normalization factor for price data.
+     - `brain`: Implements reinforcement learning using deepqlearn.
+   - **Prediction**:
+     - `makeoperator`: Generates a random operator for debugging purposes.
+     - `update`: Updates the neural network with new candle data.
+     - `predictCandle`: Predicts the next candle using the neural network.
+     - `fxchess`: Simulates a random game of chess (used for debugging or random operations).
+
+5. **Trading Logic**:
+   - `check`: Main function that checks trading conditions and makes decisions based on predictions and calculated metrics (Alpha, Beta, spread).
+
+6. **End**:
+   - `end`: Function to be called at the end of the strategy.
+
+### Summary
+This strategy uses neural networks and reinforcement learning to predict price movements and make trading decisions on a cryptocurrency exchange. It fetches market data, trains a neural network, and places buy/sell orders based on the predictions and calculated metrics like Alpha and Beta. The strategy also includes functions for debugging and random operations.
+
+*/
