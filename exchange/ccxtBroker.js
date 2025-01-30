@@ -31,7 +31,7 @@ const exchangeUtils = require('./exchangeUtils');
 const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
 
-class CcxtBroker {
+class CcxtBroker extends Broker {
   constructor(config) {
     this.config = config;
 
