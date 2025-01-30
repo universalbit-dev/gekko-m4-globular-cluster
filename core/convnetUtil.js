@@ -1,4 +1,18 @@
+/* COPILOT EXPLAIN
 
+The convnetUtil.js file contains various utility functions used in convolutional neural networks.
+
+Key components:
+
+    Window Class: Stores a fixed number of values and returns their average, useful for tracking validation or training accuracy during SGD (Stochastic Gradient Descent).
+        add(x): Adds a value to the window.
+        get_average(): Returns the average of the values if the number of values is above a minimum size.
+        reset(): Clears the window.
+    maxmin Function: Returns the minimum and maximum values and their indices from an array.
+    f2t Function: Converts a float to a string representation truncated to a specified number of digits.
+
+These utilities help in managing and analyzing data during the training process.
+*/
 // contains various utility functions 
 var cnnutil = (function(exports){
 
