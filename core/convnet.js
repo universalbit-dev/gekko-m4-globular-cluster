@@ -1,4 +1,4 @@
-/*
+/* COPILOT EXPLAIN
 The convnet.js file defines various components for creating and training convolutional neural networks (CNNs).
 
 Key components:
