@@ -1,3 +1,17 @@
+/*
+The convnet.js file defines various components for creating and training convolutional neural networks (CNNs).
+
+Key components:
+
+    Utility Functions: Functions for random number generation, array manipulation, and other utilities.
+    Vol Class: Represents a 3D volume of numbers used for storing data, weights, and gradients.
+    Layers: Defines different types of layers used in CNNs, such as convolutional, fully connected, pooling, ReLU, Sigmoid, Tanh, Maxout, Dropout, and Local Response Normalization layers.
+    Net Class: Manages a set of layers to form a neural network.
+    Trainer Class: Provides functionality to train the network using various optimization methods.
+    MagicNet Class: Implements a method for hyperparameter optimization and model selection using cross-validation.
+
+The file provides a comprehensive framework for building, training, and evaluating CNNs.
+*/
 var convnetjs = convnetjs || { REVISION: 'ALPHA' };
 (function(global) {
   "use strict";
