@@ -1,4 +1,29 @@
-/*
+/* CODEPILOT EXPLAIN
+
+The core/dlna/candleCreator.js file is responsible for creating candlestick data from trade data. Here is an overview of its components:
+
+    Imports and Initial Setup:
+        Uses bluebird for promises and underscore for utility functions.
+        Imports EventEmitter for event handling and utility modules like moment for date manipulation.
+        Defines a constant expects set to 3 seconds for the expected interval between candles.
+
+    CandleCreator Class:
+        Constructor: Initializes the CandleCreator instance, sets a threshold date, and an empty buckets object to store trades.
+        write(batch): Main method to process a batch of trades:
+            Filters trades based on the threshold.
+            Calculates candles from the trades.
+            Adds empty candles if no trades occurred in the expected interval.
+            Updates the threshold to the start of the last candle and emits the candles event.
+        filter(trades): Filters trades to include only those after the threshold.
+        fillBuckets(trades): Organizes trades into buckets based on the second they occurred.
+        calculateCandles(): Creates candles from the trades in each bucket.
+        calculateCandle(trades): Calculates the properties of a single candle (open, high, low, close, volume, etc.) from the trades.
+        addEmptyCandles(candles): Adds empty candles if no trades occurred in the expected interval of 3 seconds.
+
+    Event Handling:
+        Utilizes EventEmitter to emit candles events after processing trade data into candle data.
+
+The CandleCreator class processes raw trade data into structured candlestick data, ensuring regular intervals even if no trades occurred in some intervals.
 
 */
 //https://en.wikipedia.org/wiki/Candlestick_chart
@@ -38,7 +63,20 @@ CandleCreator.prototype.filter = function(trades) {
   }, this);
 }
 
-// put each trade in a per second bucket
+/*COPILOT EXPLAIN
+The fillBuckets method in CandleCreator class organizes trades into buckets based on the second they occurred.
+
+Here's a breakdown of what this method does:
+
+    Iterates over each trade.
+    Formats the trade's date to a string representing the second it occurred.
+    Checks if a bucket for that second exists; if not, it creates one.
+    Adds the trade to the corresponding bucket.
+    Stores the last trade processed.
+
+This method helps group trades by their exact second, facilitating further processing like candle calculation.
+
+*/
 CandleCreator.prototype.fillBuckets = function(trades) {
   _.each(trades, function(trade) {
     var second = trade.date.format('YYYY-MM-DD HH:mm:ss');
