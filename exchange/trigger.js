@@ -36,7 +36,7 @@ class Trigger {
 
     this.scheduleFetch();
   }
-
+  //COPILOT FIX
   scheduleFetch() {
     this.timeout = setTimeout(this.fetch.bind(this), this.CHECK_INTERVAL);
   }
@@ -62,7 +62,7 @@ class Trigger {
     this.trigger.updatePrice(this.price);
     this.scheduleFetch();
   }
-
+  //COPILOT FIX
   cancel() {
     this.isLive = false;
     clearTimeout(this.timeout);
