@@ -1,7 +1,18 @@
-/*
+/* COPILOT EXPLAIN
+The marketDataProvider.js file defines a Manager class to handle market data fetching and relaying.
 
+Key components:
 
+    Dependencies: Imports required modules such as Promise, underscore, EventEmitter, and utility functions.
+    Manager Constructor: Initializes the MarketFetcher with the provided configuration and binds all functions to the class instance.
+    Event Handling:
+        retrieve method fetches market data using MarketFetcher.
+        relayTrades method relays trade batches, emits 'marketUpdate' and 'trades' events.
+        sendMarketStart method emits a 'marketStart' event once with the date of the first trade in the batch.
+
+The class uses EventEmitter to manage and relay market data events.
 */
+
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const { EventEmitter } = require("events");
 var util = require('../util');
