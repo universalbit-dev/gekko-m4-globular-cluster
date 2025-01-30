@@ -1,3 +1,22 @@
+/*COPILOT EXPLAIN
+The TradeBatcher class processes batches of trades, filtering and converting trade data for further use.
+
+Key components:
+
+    Constructor (TradeBatcher): Initializes with a tid (trade ID), binds functions, and sets last to -1.
+    write method:
+        Validates the batch is an array and not empty.
+        Filters and converts trade dates.
+        Emits a 'new batch' event with batch details.
+        Updates last trade ID.
+    filter method:
+        Filters out trades with zero amount.
+        Ensures trades are processed only if their trade ID is greater than the last processed ID.
+    convertDates method: Converts Unix timestamps to moment.js date objects.
+
+The class uses EventEmitter to handle events and integrates various utility functions and libraries for processing.
+*/
+
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const { EventEmitter } = require("events");
 var moment = require("moment");
