@@ -1,5 +1,28 @@
-/*
-Small writable stream wrapper
+/* CODEPILOT EXPLAIN
+This JavaScript file defines a class Gekko that extends the Writable stream class to process and handle financial data in the form of "candles". Here's a detailed explanation:
+
+    Dependencies: The script imports several libraries like Promise, underscore, stream, async, moment, and events. It also imports some utility functions from a local util module.
+
+    Gekko Class:
+        The Gekko class extends EventEmitter and Writable. It initializes with an array of plugins and determines which plugins process candles and which emit events.
+        The constructor binds the finalize method and all other methods to the instance using underscore.
+
+    _write Method:
+        This method is overridden to handle incoming data chunks (candles).
+        Depending on the configuration (config.debug and mode), it either logs if a candle is not processed within 0.987 seconds or just processes the candle.
+        It uses underscore's after function to ensure all candle consumers process the candle before calling _done.
+
+    flushDefferedEvents Method: This method ensures all deferred events from producers are broadcasted.
+
+    finalize Method: This method finalizes the processing by finding the 'Trading Advisor' plugin and calling its finish method, which in turn calls shutdown.
+
+    shutdown Method: This method ends the stream, iterates over all plugins to call their finalize method (if they have one), and then exits the process.
+
+    Module Exports: The Gekko class is exported as a module.
+
+    License: The file includes an MIT License disclaimer.
+
+In summary, this script sets up a stream-based processing system for financial candles, using plugins to handle the actual data processing and event handling.
 */
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var Writable = require('stream').Writable;
