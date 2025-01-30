@@ -2,6 +2,21 @@
 This implementation extends the functionality of the existing gekkoBroker.js to use the ccxt library for interacting with exchanges.
 */
 
+/*
+Key components:
+    Imports: Includes various required modules and utilities.
+    Constructor: Initializes the broker with configuration, sets API using ccxt, capabilities, market configuration, and initializes the portfolio if private.
+    Methods:
+        cantTrade and cantMonitor: Check if trading or monitoring is allowed.
+        sync and syncPrivateData: Sync data with the exchange, including setting ticker and balances.
+        setTicker: Fetches and sets the current ticker from the exchange using ccxt.
+        isValidOrder: Validates an order based on amount and price.
+        createOrder: Creates a new order and manages its state and events.
+        createTrigger: Creates a new trigger for specific events.
+        delay: Delays execution for a specified time.
+This class integrates ccxt to manage communication with exchanges, enhancing the original broker functionality.
+*/
+
 const ccxt = require('ccxt');
 const _ = require('lodash');
 const async = require('async');
