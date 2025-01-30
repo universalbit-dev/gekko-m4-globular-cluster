@@ -1,4 +1,29 @@
-/*
+/* COPILOT EXPLAIN
+The core/dlna/dlna.js file is responsible for managing data flow and events within the Gekko trading bot. Here is an overview of its components:
+
+    Imports and Initial Setup:
+        Uses bluebird for promises and underscore for utility functions.
+        Imports EventEmitter for event handling and several utility files.
+
+    Internal Modules:
+        Heart: Manages the timing of events and triggers.
+        MarketDataProvider: Fetches market data.
+        CandleManager: Processes trade data into candles.
+
+    Dlna Class:
+        Constructor: Initializes internal modules and sets up event relays.
+            Relays marketUpdate and marketStart events from MarketDataProvider.
+            Outputs candles from CandleManager.
+            Retrieves trade data on every tick using Heart.
+            Processes trade data into candles using CandleManager.
+            Starts the Heart to begin the event cycle.
+        pushCandles(candles): Pushes new candles to the stream.
+        _read(): A no-operation function required for the Readable stream.
+
+    Event Handling:
+        Utilizes EventEmitter to relay and handle various events related to market data and trade processing.
+
+The file sets up a flow where market data is fetched, processed into candles, and then relayed to other components or systems. This ensures real-time data processing and event-driven architecture within the Gekko trading bot.
 
 */
 
