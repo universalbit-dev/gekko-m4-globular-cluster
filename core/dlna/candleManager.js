@@ -1,4 +1,17 @@
-/*  */
+/*  CODEPILOT EXPLAIN
+The candleManager.js file defines a Manager class responsible for handling the creation and relay of candlestick data from trade batches.
+
+Key components:
+
+    Dependencies: Includes required modules such as Promise, underscore, EventEmitter, moment, fs-extra, and utility functions.
+    Constructor (Manager): Initializes the CandleCreator instance, binds functions, and sets up an event listener for 'candles' events.
+    Methods:
+        processTrades(tradeBatch): Passes a batch of trades to CandleCreator for processing.
+        relayCandles(candles): Emits 'candles' events with the created candlestick data.
+
+The class uses EventEmitter to handle and relay candlestick data events.
+
+*/
 //https://en.wikipedia.org/wiki/Candlestick_chart
 var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 const { EventEmitter } = require("events");
