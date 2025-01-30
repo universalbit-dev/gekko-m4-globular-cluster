@@ -1,3 +1,19 @@
+/*CODEPILOT EXPLAIN
+The core/vis.js file contains utility functions for graphing data. Here is an overview of its main components:
+
+    Graph Class:
+        Constructor: Initializes the graph with a step horizon and an empty set of points (pts). Also initializes miny and maxy values.
+        add(step, y): Adds a new data point to the graph and updates the miny and maxy values if necessary.
+        drawSelf(canv): Draws the graph on a given HTML canvas element, including guidelines, values, and the actual data curve.
+
+    MultiGraph Class:
+        Constructor: Similar to Graph, but supports multiple lines on the same graph. Takes a legend array and initializes line styles.
+        add(step, yl): Adds multiple data points to the graph for each line and updates the miny and maxy values if necessary.
+        drawSelf(canv): Draws the multi-line graph on a given HTML canvas element, including guidelines, values, legend, and the actual data curves.
+
+Both classes use similar methods for drawing and updating the graph, but MultiGraph can handle multiple lines with distinct colors. 
+The file is setup to work both in a browser and in Node.js by exporting the classes appropriately.
+*/
 
 // contains various utility functions 
 var cnnvis = (function(exports){
