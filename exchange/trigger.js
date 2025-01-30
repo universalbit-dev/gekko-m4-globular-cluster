@@ -38,14 +38,14 @@ class Trigger {
   }
 
   scheduleFetch() {
-    this.timout = setTimeout(this.fetch, this.CHECK_INTERVAL);
+    this.timeout = setTimeout(this.fetch.bind(this), this.CHECK_INTERVAL);
   }
 
   fetch() {
     if(!this.isLive) {
       return;
     }
-    this.api.getTicker(this.processTicker)
+    this.api.getTicker(this.processTicker.bind(this))
   }
 
   processTicker(err, ticker) {
@@ -65,7 +65,7 @@ class Trigger {
 
   cancel() {
     this.isLive = false;
-    clearTimeout(this.timout);
+    clearTimeout(this.timeout);
   }
 
   propogateTrigger(payload) {
@@ -78,6 +78,7 @@ class Trigger {
 }
 
 module.exports = Trigger;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
@@ -85,3 +86,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
