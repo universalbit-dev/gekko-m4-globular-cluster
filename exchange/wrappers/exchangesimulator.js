@@ -14,6 +14,10 @@ const _ = require('underscore');
 
 const TREND_DURATION = 10;
 
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 const Trader = function() {
     this.name = 'ExchangeSimulator';
     this.at = moment().subtract(1, 's');
