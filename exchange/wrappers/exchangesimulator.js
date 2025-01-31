@@ -12,6 +12,8 @@ const ccxt = require('ccxt'); // Import the ccxt library for exchange API
 const moment = require('moment');
 const _ = require('underscore');
 
+const TREND_DURATION = 10;
+
 const Trader = function() {
     this.name = 'ExchangeSimulator';
     this.at = moment().subtract(1, 's');
@@ -23,8 +25,8 @@ const Trader = function() {
 
 Trader.prototype.fetchLatestPrice = async function() {
     try {
-        const ticker = await this.exchange.fetchTicker('BTC/LTC');
-        this.price = ticker.last; // Update the price with the latest BTC-LTC price
+        const ticker = await this.exchange.fetchTicker('LTC/BTC');
+        this.price = ticker.last; // Update the price with the latest LTC-BTC price
     } catch (error) {
         console.error('Error fetching latest price:', error);
     }
