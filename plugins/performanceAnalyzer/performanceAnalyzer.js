@@ -2,7 +2,7 @@
 * @see {@link https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/performanceAnalyzer/performanceAnalyzer.md|GitHub}
  */
 
-/*
+/* copilot enhance
 Added JSDoc comments to all functions and the class to improve documentation and understanding.
 Used modern JavaScript syntax for better readability and maintainability.
 Improved error handling and logging where necessary.
