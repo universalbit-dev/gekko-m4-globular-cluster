@@ -1,124 +1,148 @@
-var Promise = require("bluebird");const _ =require("underscore");
-var util = require('../util');
-var config = util.getConfig();
-var dirs = util.dirs();
-var log = require(dirs.core + 'log.js');
-var moment = require('moment');
+/**
+* @see {@link https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/core/markets/backtest.md|GitHub}
+ */
 
-var adapter = 'sqlite adapter';
-var Reader = require('../../plugins/sqlite/reader');
-var daterange = config.backtest.daterange;
-var requiredHistory = config.tradingAdvisor.candleSize;
+/*
+Copilot Enhancements for backtest.js
 
-//https://en.wikipedia.org/wiki/NOP_(code)
-var noop = require('node-noop').noop;
-require('fs-extra').writeFile('noop.out',"Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away."+"Antoine de Saint-Exupery",noop);
+    Add JSDoc Comments: Adding JSDoc comments will help to document the functions and improve code readability.
+    Use Modern JavaScript Syntax: Update the code to use ES6+ syntax, such as const, let, arrow functions, and destructuring.
+    Improve Error Handling: Add more detailed error handling and logging to help with debugging.
+    Refactor Code: Break down some of the larger functions into smaller, more manageable functions.
+*/
 
-var to = moment.utc(daterange.to);
-var from = moment.utc(daterange.from).subtract(requiredHistory, 'm');
+const Promise = require("bluebird");
+const _ = require("underscore");
+const moment = require('moment');
+const { Readable } = require('stream');
+const util = require('../util');
+const log = require(util.dirs().core + 'log.js');
+const fs = require('fs-extra');
+const noop = require('node-noop').noop;
 
-if(to <= from) util.die('This daterange does not make sense.')
-if(!config.paperTrader.enabled) util.die('You need to enable the \"Paper Trader\" first to run a backtest.')
+const config = util.getConfig();
+const daterange = config.backtest.daterange;
+const requiredHistory = config.tradingAdvisor.candleSize;
 
-if(!from.isValid()) util.die('invalid `from`');
+const Reader = require('../../plugins/sqlite/reader');
 
-if(!to.isValid()) util.die('invalid `to`');
+const to = moment.utc(daterange.to);
+const from = moment.utc(daterange.from).subtract(requiredHistory, 'm');
 
-var Market = function() {
-  _.bindAll(this,_.functions(this));
-  this.pushing = false;
-  this.ended = false;
-  this.closed = false;
-  Readable.call(this, {objectMode: true});
+if (to <= from) util.die('This daterange does not make sense.');
+if (!config.paperTrader.enabled) util.die('You need to enable the "Paper Trader" first to run a backtest.');
 
-  log.write('');
-  log.info('\t=================================================');
-  log.info('\tWARNING: BACKTESTING FEATURE NEEDS PROPER TESTING');
-  log.info('\tWARNING: ACT ON THESE NUMBERS AT YOUR OWN RISK!');
-  log.info('\t=================================================');
-  log.write('');
+if (!from.isValid()) util.die('invalid `from`');
+if (!to.isValid()) util.die('invalid `to`');
 
-  this.reader = new Reader();
+/**
+ * Market class to read historical market data and push it to the backtesting engine.
+ * @extends Readable
+ */
+class Market extends Readable {
+  constructor() {
+    super({ objectMode: true });
+    _.bindAll(this, _.functions(this));
+    this.pushing = false;
+    this.ended = false;
+    this.closed = false;
 
+    log.write('');
+    log.info('\t=================================================');
+    log.info('\tWARNING: BACKTESTING FEATURE NEEDS PROPER TESTING');
+    log.info('\tWARNING: ACT ON THESE NUMBERS AT YOUR OWN RISK!');
+    log.info('\t=================================================');
+    log.write('');
 
-  log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', daterange.from, 'UTC');
+    this.reader = new Reader();
+    log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', daterange.from, 'UTC');
 
-  this.batchSize = config.backtest.batchSize;
-  this.iterator = {
-    from: from.clone(),
-    to: from.clone().add(this.batchSize, 'm').subtract(1, 's')
+    this.batchSize = config.backtest.batchSize;
+    this.iterator = {
+      from: from.clone(),
+      to: from.clone().add(this.batchSize, 'm').subtract(1, 's')
+    };
+  }
+
+  /**
+   * Initiates the data retrieval process.
+   */
+  _read() {
+    this.get();
+  }
+
+  /**
+   * Fetches a batch of historical data from the reader.
+   */
+  get() {
+    if (this.iterator.to >= to) {
+      this.iterator.to = to;
+      this.ended = true;
+    }
+
+    this.reader.get(
+      this.iterator.from.unix(),
+      this.iterator.to.unix(),
+      'full',
+      this.processCandles.bind(this)
+    );
+  }
+
+  /**
+   * Processes the retrieved candles and pushes them to the backtesting engine.
+   * @param {Error} err - The error object if any.
+   * @param {Array} candles - The array of candle data.
+   */
+  processCandles(err, candles) {
+    if (err) {
+      log.error('Error processing candles:', err);
+      return;
+    }
+
+    this.pushing = true;
+    const amount = _.size(candles);
+
+    if (amount === 0) {
+      if (this.ended) {
+        this.closed = true;
+        this.reader.close();
+        this.push({ isFinished: true });
+      } else {
+        util.die('Query returned no candles (do you have local data for the specified range?)');
+      }
+    }
+
+    if (!this.ended && amount < this.batchSize) {
+      const d = ts => moment.unix(ts).utc().format('YYYY-MM-DD');
+      const fromDate = d(_.first(candles).start);
+      const toDate = d(_.last(candles).start);
+      log.warn(`Simulation based on incomplete market data (${this.batchSize - amount} missing between ${fromDate} and ${toDate}).`);
+    }
+
+    candles.forEach(c => {
+      c.start = moment.unix(c.start);
+      this.push(c);
+    });
+
+    this.pushing = false;
+
+    this.iterator = {
+      from: this.iterator.from.clone().add(this.batchSize, 'm'),
+      to: this.iterator.from.clone().add(this.batchSize * 2, 'm').subtract(1, 's')
+    };
+
+    if (!this.closed) {
+      setTimeout(() => {
+        this.get();
+      }, 5);
+    }
   }
 }
+
 util.makeEventEmitter(Market);
 
-
-var Readable = require('stream').Readable;
-
-Market.prototype = Object.create(Readable.prototype, {
-  constructor: { value: Market }
-});
-
-Market.prototype.read = _.once(function() {
-  this.get();
-});
-
-Market.prototype.get = function() {
-  if(this.iterator.to >= to) {
-    this.iterator.to = to;
-    this.ended = true;
-  }
-
-  this.reader.get(
-    this.iterator.from.unix(),
-    this.iterator.to.unix(),
-    'full',
-    this.processCandles
-  )
-}
-
-Market.prototype.processCandles = function(err, candles) {
-  this.pushing = true;
-  var amount = _.size(candles);
-
-  if(amount === 0) {
-    if(this.ended) {
-      this.closed = true;
-      this.reader.close();
-      this.push({isFinished: true});
-    } else {
-      util.die('Query returned no candles (do you have local data for the specified range?)');
-    }
-  }
-
-  if(!this.ended && amount < this.batchSize) {
-    var d = function(ts) {
-      return moment.unix(ts).utc().format('YYYY-MM-DD');
-    }
-    var from = d(_.first(candles).start);
-    var to = d(_.last(candles).start);
-    log.warn(`Simulation based on incomplete market data (${this.batchSize - amount} missing between ${from} and ${to}).`);
-  }
-
-  _.each(candles, function(c, i) {
-    c.start = moment.unix(c.start);
-    this.push(c);
-  }, this);
-
-  this.pushing = false;
-
-  this.iterator = {
-    from: this.iterator.from.clone().add(this.batchSize, 'm'),
-    to: this.iterator.from.clone().add(this.batchSize * 2, 'm').subtract(1, 's')
-  }
-
-  if(!this.closed) {
-    setTimeout(() => {
-      this.get();
-    }, 5);
-  }
-}
-
 module.exports = Market;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
