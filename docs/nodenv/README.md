@@ -38,15 +38,14 @@ make shims available system wide
 sudo ln -vs $(nodenv root)/shims/* /usr/local/bin/
 ```
 make sure everything is working
+```bash
 node --version
 npm --version
 npx --version
 ```
-also can be integrated with the environment which was built
-by virtualenv (python) [nodeenv 1.8.0](https://pypi.org/project/nodeenv/)
+also can be integrated with the environment which was built by virtualenv (python) [nodeenv 1.8.0](https://pypi.org/project/nodeenv/)
 
-Thanks 
-@mrbar42 
+Additional resources:
 * [Installing nodenv on ubuntu](https://gist.github.com/mrbar42/faa10a68e32a40c2363aed5e150d68da)
 * [How-to-setup-virtual-environments-in-Python](https://www.freecodecamp.org/news/how-to-setup-virtual-environments-in-python/)
 
