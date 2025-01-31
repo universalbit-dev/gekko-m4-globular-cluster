@@ -1,96 +1,127 @@
+/**
+* @see {@link https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/tradingAdvisor/tradingAdvisor.md|GitHub}
+ */
+
+/* 
+    Copilot Enhancements for tradingAdvisor.js 
+    Add JSDoc Comments: Adding JSDoc comments will help to document the functions and improve code readability.
+    Use Modern JavaScript Syntax: Update the code to use ES6+ syntax, such as const, let, arrow functions, and destructuring.
+    Improve Error Handling: Add more detailed error handling and logging to help with debugging.
+*/
+
 const _ = require("underscore");
-const {EventEmitter} = require("events");class Event extends EventEmitter{};
+const { EventEmitter } = require("events");
 const fs = require("fs-extra");
-const util = require('../../core/util');const dirs = util.dirs();
-var config = util.getConfig();
+const util = require('../../core/util');
 const moment = require('moment');
 const log = require("../../core/log.js");
+const CandleBatcher = require('../../core/candleBatcher');
 
-var CandleBatcher = require('../../core/candleBatcher');
+const dirs = util.dirs();
+let config = util.getConfig();
 
-var Actor = function(done){
-  _.bindAll(this,_.functions(this));
-  EventEmitter.call(this);
-  this.done = done;
-  var batcher = new CandleBatcher(config.tradingAdvisor.candleSize);this.batcher=batcher;
-  this.strategyName = config.tradingAdvisor.method;
-  this.setupStrategy();
-  var mode = util.gekkoMode();
+class Actor extends EventEmitter {
+  constructor(done) {
+    super();
+    _.bindAll(this, _.functions(this));
+    this.done = done;
+    this.batcher = new CandleBatcher(config.tradingAdvisor.candleSize);
+    this.strategyName = config.tradingAdvisor.method;
+    this.setupStrategy();
+    const mode = util.gekkoMode();
 
-  if(mode === 'realtime')
-{
+    if (mode === 'realtime') {
+      const Stitcher = require('../../core/tools/dataStitcher');
+      const stitcher = new Stitcher(this.batcher);
+      stitcher.prepareHistoricalData(done);
+    }
+  }
 
-    var Stitcher = require('../../core/tools/dataStitcher');
-    var stitcher = new Stitcher(this.batcher);
-    stitcher.prepareHistoricalData(done);
-}
+  /**
+   * Setup the strategy by requiring the strategy file and initializing it.
+   */
+  setupStrategy() {
+    if (!fs.existsSync(`${dirs.methods}${this.strategyName}.js`)) {
+      util.die(`Gekko can't find the strategy "${this.strategyName}"`);
+    }
+    log.info('\t', 'Using the strategy: ' + this.strategyName);
+    const strategy = require(`${dirs.methods}${this.strategyName}`);
+    const WrappedStrategy = require("./baseTradingMethod");
 
-}
-util.makeEventEmitter(Actor);util.inherit(Event, Actor);
+    _.each(strategy, (fn, name) => {
+      WrappedStrategy.prototype[name] = fn;
+    });
 
-Actor.prototype.setupStrategy = function() 
-{
-  if(!fs.existsSync(dirs.methods + this.strategyName + '.js'))
-  util.die('Gekko can\'t find the strategy "' + this.strategyName + '"');
-  log.info('\t', 'Using the strategy: ' + this.strategyName);
-  var strategy = require(dirs.methods + this.strategyName);
+    const stratSettings = config[this.strategyName] || {};
+    this.strategy = new WrappedStrategy(stratSettings);
 
-  const WrappedStrategy = require("./baseTradingMethod");
-  _.each(strategy, function(fn, name) {WrappedStrategy.prototype[name] = fn;});
-  let stratSettings;
-  if(config[this.strategyName]) {stratSettings = config[this.strategyName];}
+    this.strategy
+      .on('stratWarmupCompleted', e => this.deferredEmit('stratWarmupCompleted', e))
+      .on('advice', this.relayAdvice)
+      .on('stratUpdate', e => this.deferredEmit('stratUpdate', e))
+      .on('stratNotification', e => this.deferredEmit('stratNotification', e))
+      .on('tradeCompleted', this.processTradeCompleted);
 
- this.strategy = new WrappedStrategy(stratSettings);
-  this.strategy
-    .on('stratWarmupCompleted',e => this.deferredEmit('stratWarmupCompleted', e))
-    .on('advice', this.relayAdvice)
-    .on('stratUpdate',e => this.deferredEmit('stratUpdate', e))
-    .on('stratNotification',e => this.deferredEmit('stratNotification', e))
-  this.strategy
-    .on('tradeCompleted', this.processTradeCompleted);
-
-  this.batcher
-    .on('candle', _candle => {
+    this.batcher.on('candle', _candle => {
       const { id, ...candle } = _candle;
       this.deferredEmit('stratCandle', candle);
       this.emitStratCandle(candle);
     });
-}
-
-Actor.prototype.processCandle = function(candle, done) {
-  this.candle = candle;
-  const completedBatch = this.batcher.write([candle]);
-  if(completedBatch) {
-    this.next = done;
-  } else {
-    done();
-    this.next = false;
   }
-  this.batcher.flush();
-}
 
-// propogate a custom sized candle to the trading strategy
-Actor.prototype.emitStratCandle = function(candle) {
-  const next = this.next || _.noop;
-  this.strategy.tick(candle, next);
-}
+  /**
+   * Process a candle and pass it to the batcher.
+   * @param {Object} candle - The candle to process
+   * @param {Function} done - Callback function when processing is done
+   */
+  processCandle(candle, done) {
+    this.candle = candle;
+    const completedBatch = this.batcher.write([candle]);
+    if (completedBatch) {
+      this.next = done;
+    } else {
+      done();
+      this.next = false;
+    }
+    this.batcher.flush();
+  }
 
-Actor.prototype.processTradeCompleted = function(trade) {
-  this.strategy.processTrade(trade);
-}
+  /**
+   * Propagate a custom-sized candle to the trading strategy.
+   * @param {Object} candle - The candle to emit
+   */
+  emitStratCandle(candle) {
+    const next = this.next || _.noop;
+    this.strategy.tick(candle, next);
+  }
 
-Actor.prototype.finish = function(done) {
-  this.strategy.finish(done);
-}
+  /**
+   * Process a completed trade.
+   * @param {Object} trade - The completed trade
+   */
+  processTradeCompleted(trade) {
+    this.strategy.processTrade(trade);
+  }
 
-// EMITTERS
-Actor.prototype.relayAdvice = function(advice) {
-  advice.date = this.candle.start.clone().add(1, 'minute');
-  this.deferredEmit('advice', advice);
+  /**
+   * Finish the strategy.
+   * @param {Function} done - Callback function when finished
+   */
+  finish(done) {
+    this.strategy.finish(done);
+  }
+
+  /**
+   * Relay advice from the strategy.
+   * @param {Object} advice - The advice to relay
+   */
+  relayAdvice(advice) {
+    advice.date = this.candle.start.clone().add(1, 'minute');
+    this.deferredEmit('advice', advice);
+  }
 }
 
 module.exports = Actor;
-
 
 /*
 The MIT License (MIT)
