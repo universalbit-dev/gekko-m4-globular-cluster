@@ -258,13 +258,18 @@ var method = {
     if (this.settings.price_buffer_len < this.priceBuffer.length) this.priceBuffer.unshift();
   },
  
-  predictCandle : function() {
-var vol = new convnetjs.Vol(this.priceBuffer);
-var prediction = this.nn.forward(vol);
-return prediction.w[0];
-},
+  predictCandle: function() { // --copilot enhance --
+  // Normalize the priceBuffer before creating the volume
+  let normalizedBuffer = this.priceBuffer.map(data => data.map(value => value / this.scale));
+  // Create a Vol of size 32x32x3, and filled with normalized priceBuffer numbers
+  var vol = new convnetjs.Vol(32, 32, 3, normalizedBuffer);
+  // Forward pass to get the prediction
+  var prediction = this.nn.forward(vol);
+  // Return the predicted value
+  return prediction.w[0];
+  },
 
-fxchess : function(){
+  fxchess : function(){
   const chess = new Chess()
   while (!chess.isGameOver()) {
   const moves = chess.moves()
