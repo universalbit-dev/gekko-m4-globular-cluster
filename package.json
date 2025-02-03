@@ -28,7 +28,7 @@
   "lodash": "^4.17.21",
   "mathjs": "^12.4.0",
   "moment": "^2.29.4",
-  "nanospinner": "^1.1.0",
+  "nanospinner": "^1.2.2",
   "node-noop": "^1.0.0",
   "openvino-node": "^2024.3.0",
   "path": "^0.12.7",
