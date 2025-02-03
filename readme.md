@@ -1,4 +1,5 @@
 [![CodeQL](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Litecoin](https://img.shields.io/badge/Litecoin-A6A9AA?style=for-the-badge&logo=Litecoin&logoColor=white)
 ![Bitcoin](https://img.shields.io/badge/Bitcoin-000?style=for-the-badge&logo=bitcoin&logoColor=white)
