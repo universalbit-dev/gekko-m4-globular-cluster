@@ -28,8 +28,8 @@ var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0
 
 var exchange = new ccxt[id] ({
         verbose: false,
-        apiKey: '',
-        secret: '',
+        apiKey: process.env.API_KEY || '',
+        secret: process.env.API_SECRET || '',
     });
 
 var ohlcv = async function() {
