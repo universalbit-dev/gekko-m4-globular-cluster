@@ -1,6 +1,7 @@
 [![CodeQL](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql)
-[![CodeQL Advanced](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/codeql.yml/badge.svg)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/codeql.yml)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Litecoin](https://img.shields.io/badge/Litecoin-A6A9AA?style=for-the-badge&logo=Litecoin&logoColor=white)
+![Bitcoin](https://img.shields.io/badge/Bitcoin-000?style=for-the-badge&logo=bitcoin&logoColor=white)
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support) -- [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) -- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html) -- [Join Mastodon](https://mastodon.social/invite/wTHp2hSD) -- [Website](https://sites.google.com/view/universalbit-dev/home-page) -- [Content Delivery Network](https://universalbitcdn.it/) -- [Nodejs20](https://nodejs.org/en/blog/release/v20.15.0) -- [NVM](https://github.com/nvm-sh/nvm) -- [BTC TestNet](https://en.bitcoin.it/wiki/Testnet)
 
 
