@@ -1,4 +1,5 @@
 Copilot Explanation of backtest.js
+
 The `backtest.js` file is responsible for running backtests on historical market data. Here's a detailed explanation of its components and functionality:
 
 1. **Imports and Initialization**:
