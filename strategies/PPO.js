@@ -12,7 +12,7 @@ var log = require('../core/log');
 
 // let's create our own method
 var method = {};
-
+const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
   this.name = 'PPO';
@@ -25,15 +25,14 @@ method.init = function() {
   };
 
   this.requiredHistory = this.tradingAdvisor.historySize;
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
   // define the indicators we need
   this.addIndicator('ppo', 'PPO', this.settings);
 }
 
 // what happens on every new candle?
-method.update = function(candle) {
-  // nothing!
-}
+method.update = function(candle) {this.stopLoss.update(candle);}
 
 // for debugging purposes log the last
 // calculated parameters.
@@ -142,7 +141,9 @@ method.check = function(candle) {
 
     this.advice();
   }
-
+ //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    else {this.advice('long');}
 }
 
 module.exports = method;

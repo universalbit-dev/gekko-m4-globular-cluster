@@ -13,7 +13,7 @@ var RSI = require('./indicators/RSI.js');
 
 // let's create our own method
 var method = {};
-
+const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
   this.name = 'RSI';
@@ -26,10 +26,12 @@ method.init = function() {
   };
 
   this.requiredHistory = this.tradingAdvisor.historySize;
-
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   // define the indicators we need
   this.addIndicator('rsi', 'RSI', this.settings);
 }
+
+method.update = function(candle) {this.stopLoss.update(candle);}
 
 // for debugging purposes log the last
 // calculated parameters.
@@ -42,7 +44,7 @@ method.log = function(candle) {
   log.debug('\t', 'price:', candle.close.toFixed(digits));
 }
 
-method.check = function() {
+method.check = function(candle) {
   var rsi = this.indicators.rsi;
   var rsiVal = rsi.result;
 
@@ -100,6 +102,10 @@ method.check = function() {
 
     this.advice();
   }
+//stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    else {this.advice('long');}
 }
+
 
 module.exports = method;

@@ -1,3 +1,21 @@
+// File: strategies/YourStrategy.js
+
+
+
+this.init = function() {
+  
+};
+
+this.update = function(candle) {
+ 
+};
+
+this.check = function(candle) {
+  
+};
+
+
+
 //https://www.investopedia.com/articles/active-trading/031914/how-traders-can-utilize-cci-commodity-channel-index-trade-stock-trends.asp
 var _ = require('lodash');
 var log = require('../core/log.js');
@@ -29,8 +47,7 @@ method.init = function() {
 }
 
 // what happens on every new candle?
-method.update = function(candle) { this.stopLoss.update(candle);
-}
+method.update = function(candle) { this.stopLoss.update(candle);}
 
 // for debugging purposes: log the last calculated
 // EMAs and diff.

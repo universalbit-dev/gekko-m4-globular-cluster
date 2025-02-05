@@ -4,23 +4,21 @@ var log = require('../core/log.js');
 
 // let's create our own method
 var method = {};
-
+const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
   this.name = 'DEMA';
 
   this.currentTrend;
   this.requiredHistory = this.tradingAdvisor.historySize;
-
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   // define the indicators we need
   this.addIndicator('dema', 'DEMA', this.settings);
   this.addIndicator('sma', 'SMA', this.settings.weight);
 }
 
 // what happens on every new candle?
-method.update = function(candle) {
-  // nothing!
-}
+method.update = function(candle) { this.stopLoss.update(candle);}
 
 // for debugging purposes: log the last calculated
 // EMAs and diff.
@@ -68,6 +66,9 @@ method.check = function(candle) {
     log.debug('we are currently not in an up or down trend', message);
     this.advice();
   }
+    //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    else {this.advice('long');}
 }
 
 module.exports = method;
