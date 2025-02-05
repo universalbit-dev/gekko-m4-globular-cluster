@@ -4,12 +4,12 @@ var log = require('../core/log.js');
 
 // let's create our own method
 var method = {};
-
+const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
   this.currentTrend;
   this.requiredHistory = this.tradingAdvisor.historySize;
-
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   this.age = 0;
   this.trend = {
     direction: 'undefined',
@@ -29,7 +29,7 @@ method.init = function() {
 }
 
 // what happens on every new candle?
-method.update = function(candle) {
+method.update = function(candle) { this.stopLoss.update(candle);
 }
 
 // for debugging purposes: log the last calculated
@@ -120,6 +120,10 @@ method.check = function(candle) {
     }
 
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
+    
+    //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    else {this.advice('long');}
 }
 
 module.exports = method;
