@@ -1,12 +1,8 @@
-/**
-* @see {@link https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/exchange/gekkoBroker.md|GitHub}
- */
+/*
+  The broker manages all communication with the exchange, delegating:
 
-/*  Copilot Enhancements:
-
-    Added JSDoc comments to all functions and the class to improve documentation and understanding.
-    Improved error handling
-    Modularized some inline functions for better readability.
+  - the management of the portfolio to the portfolioManager
+  - the management of actual trades to "orders".
 */
 
 const _ = require('lodash');
@@ -22,43 +18,41 @@ const exchangeUtils = require('./exchangeUtils');
 const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
 
-/**
- * Broker class to manage communication with the exchange.
- */
+
+
 class Broker {
-  /**
-   * Creates an instance of Broker.
-   * @param {Object} config - The configuration object.
-   */
   constructor(config) {
     this.config = config;
 
-    if (config.private) {
-      const tradeError = this.cantTrade();
-      if (tradeError) throw new Error(tradeError);
+    if(config.private) {
+      if(this.cantTrade()) {
+        throw new Error(this.cantTrade());
+      }
     } else {
-      const monitorError = this.cantMonitor();
-      if (monitorError) throw new Error(monitorError);
+      if(this.cantMonitor()) {
+        throw new Error(this.cantMonitor());
+      }
     }
 
     this.orders = {
-      // Contains current open orders
       open: [],
-      // Contains all closed orders
       closed: []
-    };
+    }
 
     const slug = config.exchange.toLowerCase();
+
     const API = require('./wrappers/' + slug);
+
     this.api = new API(config);
+
     this.capabilities = API.getCapabilities();
 
     this.marketConfig = _.find(this.capabilities.markets, (p) => {
       return _.first(p.pair) === config.currency.toUpperCase() &&
-             _.last(p.pair) === config.asset.toUpperCase();
+        _.last(p.pair) === config.asset.toUpperCase();
     });
 
-    if (config.customInterval) {
+    if(config.customInterval) {
       this.interval = config.customInterval;
       this.api.interval = config.customInterval;
       console.log(new Date, '[GB] setting custom interval to', config.customInterval);
@@ -66,85 +60,72 @@ class Broker {
       this.interval = this.api.interval || 1500;
     }
 
-    this.market = `${config.currency.toUpperCase()}${config.asset.toUpperCase()}`;
+    this.market = config.currency.toUpperCase() + config.asset.toUpperCase();
 
-    if (config.private) {
+    if(config.private) {
       this.portfolio = new Portfolio(config, this.api);
     }
 
-    bindAll(this);
+    _.bindAll(this,_.functions(this));
   }
 
-  /**
-   * Checks if trading is possible.
-   * @returns {string|undefined} - Returns error message if trading is not possible.
-   */
   cantTrade() {
     return checker.cantTrade(this.config);
   }
 
-  /**
-   * Checks if monitoring is possible.
-   * @returns {string|undefined} - Returns error message if monitoring is not possible.
-   */
   cantMonitor() {
     return checker.cantMonitor(this.config);
   }
 
-  /**
-   * Synchronizes data with the exchange.
-   * @param {Function} [callback] - Optional callback function.
-   */
   sync(callback) {
-    if (!this.private) {
+    if(!this.private) {
       this.setTicker();
       return;
     }
 
-    const tradeError = this.cantTrade();
-    if (tradeError) throw new errors.ExchangeError(tradeError);
+    if(this.cantTrade()) {
+      throw new errors.ExchangeError(this.cantTrade());
+    }
 
-    this.syncPrivateData(callback);
+    this.syncPrivateData();
   }
 
-  /**
-   * Synchronizes private data with the exchange.
-   * @param {Function} [callback] - Optional callback function.
-   */
-  syncPrivateData(callback) {
-    async.series([
-      this.setTicker,
-      next => setTimeout(next, this.interval),
-      this.portfolio.setFee.bind(this.portfolio),
-      next => setTimeout(next, this.interval),
-      this.portfolio.setBalances.bind(this.portfolio),
-      next => setTimeout(next, this.interval)
-    ], callback);
+  async syncPrivateData(callback) {
+  try {
+    await this.setTicker();
+    await new Promise(resolve => setTimeout(resolve, this.interval));
+    await this.portfolio.setFee();
+    await new Promise(resolve => setTimeout(resolve, this.interval));
+    await this.portfolio.setBalances();
+    await new Promise(resolve => setTimeout(resolve, this.interval));
+    callback();
+  } catch (error) {
+    callback(error);
   }
+}
+  
+  
 
-  /**
-   * Sets the ticker data.
-   * @param {Function} [callback] - Optional callback function.
-   */
   setTicker(callback) {
     this.api.getTicker((err, ticker) => {
-      if (err) {
-        console.log(this.api.name, err.message || 'err not wrapped in error:', err);
-        throw new errors.ExchangeError(err);
+
+      if(err) {
+        if(err.message) {
+          console.log(this.api.name, err.message);
+          throw err;
+        } else {
+          console.log('err not wrapped in error:', err);
+          throw new errors.ExchangeError(err);
+        }
       }
 
       this.ticker = ticker;
 
-      if (_.isFunction(callback)) callback();
+      if(_.isFunction(callback))
+        callback();
     });
   }
 
-  /**
-   * Validates if an order is valid.
-   * @param {number} amount - The order amount.
-   * @param {number} price - The order price.
-   * @returns {boolean} - Returns true if the order is valid.
-   */
   isValidOrder(amount, price) {
     return isValidOrder({
       market: this.marketConfig,
@@ -154,19 +135,15 @@ class Broker {
     });
   }
 
-  /**
-   * Creates an order.
-   * @param {string} type - The order type.
-   * @param {string} side - The order side (buy/sell).
-   * @param {number} amount - The order amount.
-   * @param {Object} parameters - The order parameters.
-   * @param {Function} handler - The order handler function.
-   * @returns {Object} - Returns the created order.
-   */
   createOrder(type, side, amount, parameters, handler) {
-    if (!this.config.private) throw new Error('Client not authenticated');
-    if (side !== 'buy' && side !== 'sell') throw new Error('Unknown side ' + side);
-    if (!orders[type]) throw new Error('Unknown order type');
+    if(!this.config.private)
+      throw new Error('Client not authenticated');
+
+    if(side !== 'buy' && side !== 'sell')
+      throw new Error('Unknown side ' + side);
+
+    if(!orders[type])
+      throw new Error('Unknown order type');
 
     const order = new orders[type]({
       api: this.api,
@@ -174,6 +151,7 @@ class Broker {
       capabilities: this.capabilities
     });
 
+    // todo: figure out a smarter generic way
     this.syncPrivateData(() => {
       order.setData({
         balances: this.portfolio.balances,
@@ -191,15 +169,7 @@ class Broker {
     return order;
   }
 
-  /**
-   * Creates a trigger.
-   * @param {Object} params - The trigger parameters.
-   * @param {string} params.type - The trigger type.
-   * @param {Function} params.onTrigger - The trigger function.
-   * @param {Object} params.props - The trigger properties.
-   * @returns {Object} - Returns the created trigger.
-   */
-  createTrigger({ type, onTrigger, props }) {
+  createTrigger({type, onTrigger, props}) {
     return new Trigger({
       api: this.api,
       type,
