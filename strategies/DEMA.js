@@ -1,95 +1,73 @@
-//const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+// helpers
+var _ = require('lodash');
 var log = require('../core/log.js');
-var config = require('../core/util.js').getConfig();
-var fs = require("fs-extra");fs.createReadStream('/dev/null');
 
-var settings = config.DEMA;this.settings=settings;
-var  {Chess} = require('chess.js');
-var math= require('mathjs');
+// let's create our own method
+var method = {};
 
-/* async fibonacci sequence */
-var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181'];
-var seqms = fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)];
-
-/* async keep calm and make something of amazing */
-var keepcalm = ms => new Promise(resolve => setTimeout(resolve,seqms));
-async function amazing() {console.log('keep calm and make something of amazing');await keepcalm;
-};
-
-function AuxiliaryIndicators(){
-   var directory = 'indicators/';
-   var extension = '.js';
-   var files = ['DEMA','SMA'];  
-   for (var file of files){ 
-       var auxiliaryindicators = require('./' + directory + file + extension);
-   }
- }
-
-function makeoperator() {
-var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
-var result = Math.floor(Math.random() * operator.length);
-console.log("\t\t\t\tcourtesy of... "+ operator[result]);
-}
-
-var method = {
-init : function() {
-  AuxiliaryIndicators();
-  startTime = new Date();
+// prepare everything our method needs
+method.init = function() {
   this.name = 'DEMA';
+
   this.currentTrend;
-  this.requiredHistory = config.tradingAdvisor.historySize;
-  this.addTulipIndicator('dema', 'dema', {optInTimePeriod: this.settings.DEMA});
-  this.addTulipIndicator('sma', 'sma', {optInTimePeriod: this.settings.SMA});
-},
+  this.requiredHistory = this.tradingAdvisor.historySize;
 
-update : function(candle) {_.noop;},
-
-log : function(candle) {
-//general purpose log data
-    fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + '_' + this.name + '_' + startTime + '.csv',
-    candle.start + "," + candle.open + "," + candle.high + "," + candle.low + "," + candle.close + "," + candle.vwp + "," + candle.volume + "," + candle.trades + "\n", function(err) {
-    if (err) {return console.log(err);}
-    });
-},
-
- fxchess : function(){
-  const chess = new Chess()
-  while (!chess.isGameOver()) {
-  const moves = chess.moves()
-  const move = moves[Math.floor(Math.random() * moves.length)]
-  chess.move(move)
+  // define the indicators we need
+  this.addIndicator('dema', 'DEMA', this.settings);
+  this.addIndicator('sma', 'SMA', this.settings.weight);
 }
-return console.table(chess.pgn())
-},
 
-check : function(candle) {
+// what happens on every new candle?
+method.update = function(candle) {
+  // nothing!
+}
 
-  log.debug("Operator ");makeoperator();
-  log.debug("Random game of Chess");this.fxchess();
-  dema =  this.tulipIndicators.dema.result.result;sma = this.tulipIndicators.sma.result.result;var price = this.candle.close;this.price=price;
-  if(dema && sma != null) {var meanmatrix= math.mean(dema,sma); 
-  var matrix=(meanmatrix - price) / price * 100; /* */
-  this.matrix=matrix;
-  }
-
-  switch (true){
-  case(this.matrix  < this.settings.thresholds.down && sma != 'undefined' && this.matrix < 0): 
-  return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');break;
-  case(this.matrix > this.settings.thresholds.up && sma != 'undefined' && this.matrix > 0): 
-  return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');break;
-  default: _.noop;
-  }
+// for debugging purposes: log the last calculated
+// EMAs and diff.
+method.log = function() {
+  let dema = this.indicators.dema;
+  let sma = this.indicators.sma;
   
   log.debug('Calculated DEMA and SMA properties for candle:');
-  log.debug('DEMA:', dema);
-  log.debug('SMA:', sma);
-  log.debug('\t MATRIX:', this.matrix);
-},
+  log.debug('\t Inner EMA:', dema.inner.result.toFixed(8));
+  log.debug('\t Outer EMA:', dema.outer.result.toFixed(8));
+  log.debug('\t DEMA:', dema.result.toFixed(5));
+  log.debug('\t SMA:', sma.result.toFixed(5));
+  log.debug('\t DEMA age:', dema.inner.age, 'candles');
+}
 
+method.check = function(candle) {
+  let dema = this.indicators.dema;
+  let sma = this.indicators.sma;
+  let resDEMA = dema.result;
+  let resSMA = sma.result;
+  let price = candle.close;
+  let diff = resSMA - resDEMA;
 
-end : function() {log.info('THE END');}
+  let message = '@ ' + price.toFixed(8) + ' (' + resDEMA.toFixed(5) + '/' + diff.toFixed(5) + ')';
 
-};
+  if(diff > this.settings.thresholds.up) {
+    log.debug('we are currently in uptrend', message);
+
+    if(this.currentTrend !== 'up') {
+      this.currentTrend = 'up';
+      this.advice('long');
+    } else
+      this.advice();
+
+  } else if(diff < this.settings.thresholds.down) {
+    log.debug('we are currently in a downtrend', message);
+
+    if(this.currentTrend !== 'down') {
+      this.currentTrend = 'down';
+      this.advice('short');
+    } else
+      this.advice();
+
+  } else {
+    log.debug('we are currently not in an up or down trend', message);
+    this.advice();
+  }
+}
 
 module.exports = method;
