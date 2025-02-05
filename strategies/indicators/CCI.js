@@ -1,129 +1,75 @@
-//https://www.investopedia.com/articles/active-trading/031914/how-traders-can-utilize-cci-commodity-channel-index-trade-stock-trends.asp
-var _ = require('lodash');
-var log = require('../core/log.js');
+/*
+ * CCI
+ */
+var log = require('../../core/log');
 
-// let's create our own method
-var method = {};
-const StopLoss = require('./indicators/StopLoss');
-// prepare everything our method needs
-method.init = function() {
-  this.currentTrend;
-  this.requiredHistory = this.tradingAdvisor.historySize;
-  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
-  this.age = 0;
-  this.trend = {
-    direction: 'undefined',
-    duration: 0,
-    persisted: false,
-    adviced: false
-  };
-  this.historySize = this.settings.history;
-  this.ppoadv = 'none';
-  this.uplevel = this.settings.thresholds.up;
-  this.downlevel = this.settings.thresholds.down;
-  this.persisted = this.settings.thresholds.persistence;
-
-  // log.debug("CCI started with:\nup:\t", this.uplevel, "\ndown:\t", this.downlevel, "\npersistence:\t", this.persisted);
-  // define the indicators we need
-  this.addIndicator('cci', 'CCI', this.settings);
+var Indicator = function(settings) {
+  this.input = 'candle';
+  this.tp = 0.0;
+  this.result = false;
+  this.hist = []; // needed for mean?
+  this.mean = 0.0;
+  this.size = 0;
+  this.constant = settings.constant;
+  this.maxSize = settings.history;
+  for (var i = 0; i < this.maxSize; i++)
+      this.hist.push(0.0);
 }
 
-// what happens on every new candle?
-method.update = function(candle) { this.stopLoss.update(candle);
-}
+Indicator.prototype.update = function(candle) {
+  
+  // We need sufficient history to get the right result. 
 
-// for debugging purposes: log the last calculated
-// EMAs and diff.
-method.log = function(candle) {
-    var cci = this.indicators.cci;
-    if (typeof(cci.result) == 'boolean') {
-        log.debug('Insufficient data available. Age: ', cci.size, ' of ', cci.maxSize);
-        return;
-    }
+  var tp = (candle.high + candle.close + candle.low) / 3;
+  if (this.size < this.maxSize) {
+      this.hist[this.size] = tp;
+      this.size++;
+  } else {
+      for (var i = 0; i < this.maxSize-1; i++) {
+          this.hist[i] = this.hist[i+1];
+      }
+      this.hist[this.maxSize-1] = tp;
+  }
 
-    log.debug('calculated CCI properties for candle:');
-    log.debug('\t', 'Price:\t\t', candle.close.toFixed(8));
-    log.debug('\t', 'CCI tp:\t', cci.tp.toFixed(8));
-    log.debug('\t', 'CCI tp/n:\t', cci.avgtp.toFixed(8));
-    log.debug('\t', 'CCI md:\t', cci.mean.toFixed(8));
-    if (typeof(cci.result) == 'boolean' )
-        log.debug('\t In sufficient data available.');
-    else
-        log.debug('\t', 'CCI:\t\t', cci.result.toFixed(2));
+  if (this.size < this.maxSize) {
+      this.result = false;
+  } else {
+      this.calculate(tp);
+  }
 }
 
 /*
- *
+ * Handle calculations
  */
-method.check = function(candle) {
+Indicator.prototype.calculate = function(tp) {
 
-    var lastPrice = candle.close;
+   var sumtp = 0.0
+	
+	 for (var i = 0; i < this.size; i++) {
+     sumtp = sumtp + this.hist[i];
+	 }
 
-    this.age++;
-    var cci = this.indicators.cci;
+    this.avgtp = sumtp / this.size;
+   
+    this.tp = tp;
 
-    if (typeof(cci.result) == 'number') {
+    var sum = 0.0;
+    // calculate tps
+    for (var i = 0; i < this.size; i++) {
+        
+        var z = (this.hist[i] - this.avgtp);
+        if (z < 0) z = z * -1.0;
+        sum = sum + z;
 
-        // overbought?
-        if (cci.result >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'overbought' ) {
-            this.trend.adviced = true;
-            this.trend.duration++;
-            this.advice('short');
-        } else if (cci.result >= this.uplevel && this.trend.direction != 'overbought') {
-            this.trend.duration = 1;
-            this.trend.direction = 'overbought';
-            this.trend.persisted = false;
-            this.trend.adviced = false;
-            if (this.persisted == 0) {
-                this.trend.adviced = true;
-                this.advice('short');
-            }
-        } else if (cci.result >= this.uplevel) {
-            this.trend.duration++;
-            if (this.trend.duration >= this.persisted) {
-                this.trend.persisted = true;
-            }
-        } else if (cci.result <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction == 'oversold') {
-            this.trend.adviced = true;
-            this.trend.duration++;
-            this.advice('long');
-        } else if (cci.result <= this.downlevel && this.trend.direction != 'oversold') {
-            this.trend.duration = 1;
-            this.trend.direction = 'oversold';
-            this.trend.persisted = false;
-            this.trend.adviced = false;
-            if (this.persisted == 0) {
-                this.trend.adviced = true;
-                this.advice('long');
-            }
-        } else if (cci.result <= this.downlevel) {
-            this.trend.duration++;
-            if (this.trend.duration >= this.persisted) {
-                this.trend.persisted = true;
-            }
-        } else {
-            if( this.trend.direction != 'nodirection') {
-                this.trend = {
-                    direction: 'nodirection',
-                    duration: 0,
-                    persisted: false,
-                    adviced: false
-                };
-            } else {
-                this.trend.duration++;
-            }
-            this.advice();
-        }
-
-    } else {
-        this.advice();
     }
 
-    log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
+    this.mean = (sum / this.size);
     
-    //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
-    else {this.advice('long');}
+
+
+    this.result = (this.tp - this.avgtp) / (this.constant * this.mean);
+
+    // log.debug("===\t", this.mean, "\t", this.tp, '\t', this.TP.result, "\t", sum, "\t", avgtp, '\t', this.result.toFixed(2));
 }
 
-module.exports = method;
+module.exports = Indicator;
