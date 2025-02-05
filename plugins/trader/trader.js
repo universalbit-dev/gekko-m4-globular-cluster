@@ -1,56 +1,98 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require('lodash');
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-const {EventEmitter} = require("events");
-const log=require("../../core/log.js");
-const async=require('async');
 
-var Broker=Promise.promisifyAll(require("../../exchange/gekkoBroker.js"));
-const TrailingStop=require('../../exchange/triggers/index.js');
+const log = require(dirs.core + 'log');
+const Broker = require(dirs.broker + '/gekkoBroker');
 
-var Trader = function(next) {
-  EventEmitter.call(this);
+require(dirs.gekko + '/exchange/dependencyCheck');
+
+const Trader = function(next) {
+
   _.bindAll(this,_.functions(this));
-  this.brokerConfig = {...config.trader,...config.watch,private: true};
-  this.propogatedTrades = 0;this.propogatedTriggers = 0;
 
-  try {this.broker = new Broker(this.brokerConfig);} 
-  catch(e) {util.die(e.message);}
+  this.brokerConfig = {
+    ...config.trader,
+    ...config.watch,
+    private: true
+  }
+  
 
-  if(!this.broker.capabilities.gekkoBroker) {util.die('This exchange is not yet supported');}
 
-  this.async(() => {
+  this.propogatedTrades = 0;
+  this.propogatedTriggers = 0;
+
+  try {
+    this.broker = new Broker(this.brokerConfig);
+  } catch(e) {
+    util.die(e.message);
+  }
+
+  if(!this.broker.capabilities.gekkoBroker) {
+    util.die('This exchange is not yet supported');
+  }
+
+  this.sync(() => {
     log.info('\t', 'Portfolio:');
     log.info('\t\t', this.portfolio.currency, this.brokerConfig.currency);
     log.info('\t\t', this.portfolio.asset, this.brokerConfig.asset);
     log.info('\t', 'Balance:');
     log.info('\t\t', this.balance, this.brokerConfig.currency);
     log.info('\t', 'Exposed:');
-    log.info('\t\t',this.exposed ? 'yes' : 'no',`(${(this.exposure * 100).toFixed(2)}%)`);next();
+    log.info('\t\t',
+      this.exposed ? 'yes' : 'no',
+      `(${(this.exposure * 100).toFixed(2)}%)`
+    );
+    next();
   });
-  this.cancellingOrder = false;this.sendInitialPortfolio = false;setInterval(this.async, 1000 * 60 * 10);
+
+  this.cancellingOrder = false;
+  this.sendInitialPortfolio = false;
+
+  setInterval(this.sync, 500 * 60 * 10);
 }
+
+// teach our trader events
 util.makeEventEmitter(Trader);
 
-Trader.prototype.async = function(next) {
+Trader.prototype.sync = function(next) {
   log.debug('syncing private data');
   this.broker.syncPrivateData(() => {
-    if(!this.price) {this.price = this.broker.ticker.bid;}
+    if(!this.price) {
+      this.price = this.broker.ticker.bid;
+    }
+
     const oldPortfolio = this.portfolio;
-    this.setPortfolio();this.setBalance();
-    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {this.relayPortfolioChange();}
-    if(next) {next();}
+
+    this.setPortfolio();
+    this.setBalance();
+
+    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
+      this.relayPortfolioChange();
+    }
+
+    // balance is relayed every minute
+    // no need to do it here.
+
+    if(next) {
+      next();
+    }
   });
 }
 
 Trader.prototype.relayPortfolioChange = function() {
-  this.deferredEmit('portfolioChange', {asset: this.portfolio.asset,currency: this.portfolio.currency});
+  this.deferredEmit('portfolioChange', {
+    asset: this.portfolio.asset,
+    currency: this.portfolio.currency
+  });
 }
 
 Trader.prototype.relayPortfolioValueChange = function() {
-  this.deferredEmit('portfolioValueChange', {balance: this.balance});
+  this.deferredEmit('portfolioValueChange', {
+    balance: this.balance
+  });
 }
 
 Trader.prototype.setPortfolio = function() {
@@ -69,8 +111,8 @@ Trader.prototype.setPortfolio = function() {
 Trader.prototype.setBalance = function() {
   this.balance = this.portfolio.currency + this.portfolio.asset * this.price;
   this.exposure = (this.portfolio.asset * this.price) / this.balance;
-  // if more than 20% of balance is in asset we are exposed
-  this.exposed = this.exposure > 0.2;
+  // if more than 10% of balance is in asset we are exposed
+  this.exposed = this.exposure > 0.1;
 }
 
 Trader.prototype.processCandle = function(candle, done) {
@@ -87,7 +129,13 @@ Trader.prototype.processCandle = function(candle, done) {
     });
   }
 
-  if(this.balance !== previousBalance) {this.relayPortfolioValueChange();}
+  if(this.balance !== previousBalance) {
+    // this can happen because:
+    // A) the price moved and we have > 0 asset
+    // B) portfolio got changed
+    this.relayPortfolioValueChange();
+  }
+
   done();
 }
 
@@ -324,7 +372,7 @@ Trader.prototype.createOrder = function(side, amount, advice, id) {
 }
 
 Trader.prototype.onStopTrigger = function(price) {
-  log.info(`TrailingStop trigger "${this.activeStopTrigger.id}"Observed price was ${price}`);
+  log.info(`TrailingStop trigger "${this.activeStopTrigger.id}" fired! Observed price was ${price}`);
 
   this.deferredEmit('triggerFired', {
     id: this.activeStopTrigger.id,
@@ -364,11 +412,3 @@ Trader.prototype.cancelOrder = function(id, advice, next) {
 }
 
 module.exports = Trader;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
