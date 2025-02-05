@@ -45,8 +45,8 @@ method.check = function(candle) {bbands=this.tulipIndicators.bbands;var price = 
   log.debug('Leaving zone: ',this.trend.zone)
   if (this.trend.zone == 'top')  this.advice('short'); /* */
   if (this.trend.zone == 'bottom') this.advice('long'); /* */
-  if (this.trend.zone == 'high') this.advice('sell');
-  if (this.trend.zone == 'low') this.advice('buy');
+  if (this.trend.zone == 'high') this.advice();
+  if (this.trend.zone == 'low') this.advice();
   //if (this.trend.zone == 'top') log.debug('>>> SIGNALING ADVICE SELL <<<');
   //if (this.trend.zone == 'bottom') log.debug('>>> SIGNALING ADVICE BUY  <<<');
   this.trend = {zone: zone,duration: 0,persisted: false}
