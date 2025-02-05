@@ -3,7 +3,6 @@ module.exports = {
     name: "import",
     script    : 'gekko.js',
     args      : '-c .env/import/import.js -i',
-    name      : '|- import exchange data -|',
     instances : "1",
     autorestart: false,
     exec_mode : "cluster",
