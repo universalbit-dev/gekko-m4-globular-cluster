@@ -22,15 +22,15 @@ var amount = 0.00; var price =0.00; var since='';var limit=0;var parameters = {}
 var limit_buy=0.00;var limit_sell=0.00;var stoporder=0.00;var takeorder=0.00;
 var currentPrice=0.00;var spread=0.00;
 
-var id = ''; /* Exchange Name */
+//var id = ''; /* Exchange Name */
 //ccxt histogram variables 
 var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0.00;var candle_volume=0.00;
 
-var exchange = new ccxt[id] ({
-        verbose: false,
-        apiKey: process.env.API_KEY || '',
-        secret: process.env.API_SECRET || '',
-    });
+//var exchange = new ccxt[id] ({
+//        verbose: false,
+//        apiKey: process.env.API_KEY || '',
+//        secret: process.env.API_SECRET || '',
+//    });
 
 var ohlcv = async function() {
 try {
