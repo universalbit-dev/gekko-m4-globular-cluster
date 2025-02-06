@@ -1,7 +1,7 @@
 var config = {};
 //General Settings
 config.debug =true;
-config.watch = {exchange: '',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: 'ccxt_exchanges',exchangeId:'',currency:'BTC',asset:'LTC'};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:50,method:'NEURALNETV2'};
 config.NEURALNETV2={threshold_buy :0.3,threshold_sell :-0.3,learning_rate :0.01,
