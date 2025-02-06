@@ -1,19 +1,23 @@
-/*  CODEPILOT EXPLAIN
-The candleManager.js file defines a Manager class responsible for handling the creation and relay of candlestick data from trade batches.
+/* 
+Imports and Initial Setup:
 
-Key components:
+    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, moment for date manipulation, fs-extra for file operations.
+    Internal modules log and CandleCreator are also imported.
 
-    Dependencies: Includes required modules such as Promise, underscore, EventEmitter, moment, fs-extra, and utility functions.
-    Constructor (Manager): Initializes the CandleCreator instance, binds functions, and sets up an event listener for 'candles' events.
-    Methods:
-        processTrades(tradeBatch): Passes a batch of trades to CandleCreator for processing.
-        relayCandles(candles): Emits 'candles' events with the created candlestick data.
+Manager Class:
 
-The class uses EventEmitter to handle and relay candlestick data events.
+    Constructor (Manager(candle)): Initializes the Manager instance. It extends EventEmitter, binds all functions to the instance using underscore, and sets up a CandleCreator instance.
+    The CandleCreator instance listens for candles events and calls the relayCandles method.
+    
+    processTrades(tradeBatch): Processes a batch of trades by writing them to the CandleCreator instance.
+    relayCandles(candles): Emits a candles event with the processed candles.
 
+Event Handling:
+
+    The class extends EventEmitter to emit events, allowing other components to listen and react to new candles.
+    This class coordinates the processing of trade data into candles and relays the resulting candles through events.
 */
-//https://en.wikipedia.org/wiki/Candlestick_chart
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ =require("underscore");
 const { EventEmitter } = require("events");
 var moment = require('moment');
 const fs = require("fs-extra");
@@ -30,7 +34,7 @@ var Manager = function(candle) {
   this.candleCreator
   .on('candles', this.relayCandles);
 };
-util.makeEventEmitter(Manager);
+util.makeEventEmitter(Manager);util.inherit(Event, Manager);
 
 Manager.prototype.processTrades = function(tradeBatch) {this.candleCreator.write(tradeBatch);}
 Manager.prototype.relayCandles = function(candles) {this.emit('candles', candles);}
