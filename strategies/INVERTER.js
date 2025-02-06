@@ -1,5 +1,5 @@
 const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");const _ =require("underscore");
+const _ =require("underscore");
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
@@ -43,12 +43,12 @@ this.trend = {direction: 'none',duration: 0,state:'none',ls:'none'};
 
 this.debug = true;
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA,optInFastPeriod:233,optInSlowPeriod:55});
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod: this.settings.long_EMA,optInFastPeriod:233,optInSlowPeriod:55});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod: this.settings.short_EMA,optInFastPeriod:233,optInSlowPeriod:55});
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFastPeriod:89,optInSlowPeriod:21});
+this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1,optInFastPeriod:233,optInSlowPeriod:55});
+this.addTulipIndicator('longema', 'ema', {optInTimePeriod:987,optInFastPeriod:233,optInSlowPeriod:55});
+this.addTulipIndicator('shortema', 'ema', {optInTimePeriod:55,optInFastPeriod:233,optInSlowPeriod:55});
+this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:14,optInFastPeriod:89,optInSlowPeriod:21});
 this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.DI});
-this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFastPeriod:70,optInSlowPeriod:50});
+this.addTulipIndicator('adx', 'adx',{optInTimePeriod:3,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
 this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
@@ -141,9 +141,6 @@ switch (true) {
     //trend moving up
     else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='long';}
     else _.noop;
-
-    //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action)
-    //  {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */
 
     //stoploss
     if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
