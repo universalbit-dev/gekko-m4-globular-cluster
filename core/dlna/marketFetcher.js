@@ -1,4 +1,27 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+/* copilot explain
+
+Imports and Initial Setup:
+    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, moment for date manipulation, util and log for utility and logging functions, and exchangeChecker for checking exchange settings.
+    The TradeBatcher class is also imported for batching trade data.
+
+Fetcher Class:
+    Constructor (Fetcher(config)): Initializes the Fetcher instance with a configuration object. It validates the configuration, sets up the data provider for the specified exchange,
+    and initializes the TradeBatcher instance. 
+    
+    It also sets up event handling and logging for the market being watched. 
+    If the trading advisor is enabled, it sets up the initial fetch time.
+    
+    _fetch(since): Internal method to fetch trades from the exchange starting from a specified time. It handles retry logic if the exchange returns an error.
+    fetch(): Public method to initiate fetching of trades. It handles the first fetch by using the initial fetch time if specified.processTrades(err, trades): Processes the fetched trades.
+
+    If there is an error or no trades are returned, it logs a warning and retries fetching after a short delay. Otherwise, it writes the trades to the TradeBatcher.
+    relayTrades(batch): Emits a trades batch event with the processed trade data batch.
+
+Event Handling:
+    The class extends EventEmitter to emit events, allowing other components to listen and react to new trade batches.
+
+*/
+const _ = require("underscore");
 const { EventEmitter } = require("events");
 const moment = require('moment');
 const utc = moment.utc;
