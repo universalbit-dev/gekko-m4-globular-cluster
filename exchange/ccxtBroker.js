@@ -20,9 +20,9 @@ This class integrates ccxt to manage communication with exchanges, enhancing the
 
 require('dotenv').config();
 const ccxt = require('ccxt');
-const _ = require('lodash');
+const _ = require('underscore');
 const async = require('async');
-const events = require('events');
+const {EventEmitter} = require("events");
 const moment = require('moment');
 const checker = require('./exchangeChecker');
 const errors = require('./exchangeErrors');
@@ -30,10 +30,9 @@ const Portfolio = require('./portfolioManager');
 const orders = require('./orders');
 const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
-const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
 
-class CcxtBroker extends events.EventEmitter {
+class CcxtBroker extends EventEmitter {
   constructor(config) {
     this.config = config;
 
@@ -75,7 +74,7 @@ class CcxtBroker extends events.EventEmitter {
     if (config.private) {
       this.portfolio = new Portfolio(config, this.api);
     }
-
+    exchangeUtils.bindAll(this, _.functions(this));
     _.bindAll(this,_.functions(this));
   }
 
@@ -87,17 +86,17 @@ class CcxtBroker extends events.EventEmitter {
     return checker.cantMonitor(this.config);
   }
 
-  async sync() {
-    if (!this.config.private) {
-      await this.setTicker();
+  sync(callback) {
+    if(!this.private) {
+      this.setTicker();
       return;
     }
 
-    if (this.cantTrade()) {
+    if(this.cantTrade()) {
       throw new errors.ExchangeError(this.cantTrade());
     }
 
-    await this.syncPrivateData();
+    this.syncPrivateData();
   }
 
   async syncPrivateData(callback) {
@@ -114,7 +113,7 @@ class CcxtBroker extends events.EventEmitter {
   }
 }
 
-  async setTicker() {
+   async setTicker() {
     try {
       const ticker = await this.api.fetchTicker(this.market);
       this.ticker = ticker;
@@ -123,6 +122,26 @@ class CcxtBroker extends events.EventEmitter {
       throw new errors.ExchangeError(err);
     }
   }
+  setTicker(callback) {
+    this.api.getTicker((err, ticker) => {
+
+      if(err) {
+        if(err.message) {
+          console.log(this.api.name, err.message);
+          throw err;
+        } else {
+          console.log('err not wrapped in error:', err);
+          throw new errors.ExchangeError(err);
+        }
+      }
+
+      this.ticker = ticker;
+
+      if(_.isFunction(callback))
+        callback();
+    });
+  }
+
 
   isValidOrder(amount, price) {
     return isValidOrder({
@@ -189,3 +208,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+

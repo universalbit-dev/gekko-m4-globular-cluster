@@ -4,10 +4,10 @@
   - the management of the portfolio to the portfolioManager
   - the management of actual trades to "orders".
 */
-
-const _ = require('lodash');
+require('dotenv').config();
+const _ = require('underscore');
 const async = require('async');
-const events = require('events');
+const {EventEmitter} = require("events");
 const moment = require('moment');
 const checker = require('./exchangeChecker');
 const errors = require('./exchangeErrors');
@@ -15,10 +15,7 @@ const Portfolio = require('./portfolioManager');
 const orders = require('./orders');
 const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
-const bindAll = exchangeUtils.bindAll;
 const isValidOrder = exchangeUtils.isValidOrder;
-
-
 
 class Broker {
   constructor(config) {
@@ -65,7 +62,7 @@ class Broker {
     if(config.private) {
       this.portfolio = new Portfolio(config, this.api);
     }
-
+    exchangeUtils.bindAll(this, _.functions(this));
     _.bindAll(this,_.functions(this));
   }
 
@@ -104,7 +101,15 @@ class Broker {
   }
 }
   
-  
+  async setTicker() {
+    try {
+      const ticker = await this.api.fetchTicker(this.market);
+      this.ticker = ticker;
+    } catch (err) {
+      console.log(this.api.name, err.message);
+      throw new errors.ExchangeError(err);
+    }
+  }
 
   setTicker(callback) {
     this.api.getTicker((err, ticker) => {
@@ -135,24 +140,23 @@ class Broker {
     });
   }
 
-  createOrder(type, side, amount, parameters, handler) {
-    if(!this.config.private)
+  createOrder(type, side, amount, parameters) {
+    if (!this.config.private)
       throw new Error('Client not authenticated');
 
-    if(side !== 'buy' && side !== 'sell')
+    if (side !== 'buy' && side !== 'sell')
       throw new Error('Unknown side ' + side);
 
-    if(!orders[type])
+    if (!orders[type])
       throw new Error('Unknown order type');
 
     const order = new orders[type]({
       api: this.api,
       marketConfig: this.marketConfig,
-      capabilities: this.capabilities
+      capabilities: this.capabilities,
     });
 
-    // todo: figure out a smarter generic way
-    this.syncPrivateData(() => {
+    this.syncPrivateData().then(() => {
       order.setData({
         balances: this.portfolio.balances,
         ticker: this.ticker,
@@ -161,7 +165,7 @@ class Broker {
       order.create(side, amount, parameters);
     });
 
-    order.on('completed', summary => {
+    order.on('completed', (summary) => {
       _.remove(this.orders.open, order);
       this.orders.closed.push(summary);
     });
@@ -176,6 +180,9 @@ class Broker {
       onTrigger,
       props
     });
+  }
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
