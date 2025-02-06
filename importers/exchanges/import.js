@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var moment = require('moment');
 var util = require('../../core/util.js');
 var log = require('../../core/log');
