@@ -1,35 +1,33 @@
-/* COPILOT EXPLAIN
-The core/dlna/dlna.js file is responsible for managing data flow and events within the Gekko trading bot. Here is an overview of its components:
+/* copilot explain
+Imports and Initial Setup:
 
-    Imports and Initial Setup:
-        Uses bluebird for promises and underscore for utility functions.
-        Imports EventEmitter for event handling and several utility files.
+    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, util for utility functions, and configuration settings.
+    Internal modules Heart, MarketDataProvider, and CandleManager are also imported.
 
-    Internal Modules:
-        Heart: Manages the timing of events and triggers.
-        MarketDataProvider: Fetches market data.
+Dlna Class:
+
+    Constructor (Dlna(config)): Initializes the Dlna instance with a configuration object. It extends EventEmitter and Readable stream with object mode enabled. The following internal 
+    modules are instantiated:
+        Heart: Manages regular ticks.
+        MarketDataProvider: Fetches market data based on the provided configuration.
         CandleManager: Processes trade data into candles.
 
-    Dlna Class:
-        Constructor: Initializes internal modules and sets up event relays.
-            Relays marketUpdate and marketStart events from MarketDataProvider.
-            Outputs candles from CandleManager.
-            Retrieves trade data on every tick using Heart.
-            Processes trade data into candles using CandleManager.
-            Starts the Heart to begin the event cycle.
-        pushCandles(candles): Pushes new candles to the stream.
-        _read(): A no-operation function required for the Readable stream.
+Event Handling:
 
-    Event Handling:
-        Utilizes EventEmitter to relay and handle various events related to market data and trade processing.
+        The marketDataProvider instance relays marketUpdate and marketStart events, which are emitted by the Dlna instance.
+        The candleManager instance outputs candles via the pushCandles method.
+        On every tick event from Heart, the marketDataProvider retrieves trade data.
+        On new trade data, the marketDataProvider processes the trades using candleManager.
+        The class extends EventEmitter to emit various events related to market updates and trade data processing.
+        This class coordinates the flow of market data, fetching trade data, processing it into candles, and emitting relevant events for other components to handle.
 
-The file sets up a flow where market data is fetched, processed into candles, and then relayed to other components or systems. This ensures real-time data processing and event-driven architecture within the Gekko trading bot.
+Dlna Prototype:
 
+    _read(): A no-operation function required by the Readable stream.
+    pushCandles(candles): Pushes each candle to the readable stream.
 */
 
-//https://github.com/petkaantonov/bluebird/blob/2.x/API.md#promisification
-var Promise = require("bluebird");
-const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const {EventEmitter} = require("events");
 
 var util = require('../util');
@@ -60,7 +58,7 @@ var Dlna = function(config) {
   this.marketDataProvider.on('trades',this.candleManager.processTrades);
   this.heart.pump();
 }
-util.makeEventEmitter(Dlna); 
+util.makeEventEmitter(Dlna);util.inherit(Event, Dlna);
 
 var Readable = require('stream').Readable;
 Dlna.prototype = Object.create(Readable.prototype, {constructor: { value: Dlna }});
