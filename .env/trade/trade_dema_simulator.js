@@ -1,17 +1,12 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC'};
 //Tick rate is the frequency of information
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'};
-
-config.api={interval:317811}; //5.29685 minutes
-config.expects={candle:987}; //987 seconds
-
-config.DEMA={SMA:55,DEMA:1,STOPLOSS:3,rl:0.3};
-config.DEMA.thresholds={down:-0.000001,up:0.000001};
+config.DEMA={weight:21,thresholds:[{down:-0.025,up:0.025}]};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
