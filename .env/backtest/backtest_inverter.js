@@ -2,7 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: '',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: 'exchangesimulator',currency:'BTC',asset:'LTC'};
 
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10};
