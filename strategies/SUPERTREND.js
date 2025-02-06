@@ -3,6 +3,7 @@ var Promise = require("bluebird");const _ = require("underscore");
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var config = require('../core/util.js').getConfig();
+const StopLoss = require('./indicators/StopLoss');
 
 var settings = config.SUPERTREND;this.settings=settings;
 const { Chess } = require('chess.js');
@@ -44,6 +45,7 @@ init : function() {
   log.info('Running', this.name);
   log.info('====================================');
   this.requiredHistory = this.tradingAdvisor.historySize;
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   this.addTulipIndicator('atr', 'atr', {optInTimePeriod: this.settings.ATR});
   this.bought = 0;
 
@@ -52,7 +54,8 @@ init : function() {
   this.lastCandleClose = 0;
 },
 
-update : function(candle) {_.noop;},
+update : function(candle) {this.stopLoss.update(candle);
+_.noop;},
 
 log : function(candle) {
 //general purpose log data
@@ -80,11 +83,11 @@ check : function(candle) {
   this.supertrend.lowerBandBasic = ((candle.high + candle.low) / 2) - (this.settings.bandFactor * atrResult);
 
   if(this.supertrend.upperBandBasic < this.lastSupertrend.upperBand || this.lastCandleClose > this.lastSupertrend.upperBand)
-    this.supertrend.upperBand = this.supertrend.upperBandBasic; 
+    this.supertrend.upperBand = this.supertrend.upperBandBasic;
   else
     this.supertrend.upperBand = this.lastSupertrend.upperBand;
   if(this.supertrend.lowerBandBasic > this.lastSupertrend.lowerBand || this.lastCandleClose < this.lastSupertrend.lowerBand)
-    this.supertrend.lowerBand = this.supertrend.lowerBandBasic; 
+    this.supertrend.lowerBand = this.supertrend.lowerBandBasic;
   else
     this.supertrend.lowerBand = this.lastSupertrend.lowerBand;
 
@@ -101,19 +104,22 @@ check : function(candle) {
   }
 
   if(this.supertrend.supertrend != 0 && this.candle.close > this.supertrend.supertrend && this.bought != 0)
-  {this.bought = 1;log.debug("Buy at: ", this.candle.close);return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');}
-  
-    
+  {this.bought = 1;log.debug("Buy at: ", this.candle.close);this.advice('long');}
+
+
   if(this.supertrend.supertrend !=0 && this.candle.close < this.supertrend.supertrend && this.bought != 1  )
-  {this.bought = 0;log.debug("Sell at: ", this.candle.close);return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');}
+  {this.bought = 0;log.debug("Sell at: ", this.candle.close);this.advice('short');}
 
   this.lastCandleClose = this.candle.close;
-  this.lastSupertrend = 
+  this.lastSupertrend =
   {
     upperBandBasic : this.supertrend.upperBandBasic,lowerBandBasic : this.supertrend.lowerBandBasic,
     upperBand : this.supertrend.upperBand,lowerBand : this.supertrend.lowerBand,
     supertrend : this.supertrend.supertrend,
   };
+  //stoploss
+  if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+  else {this.advice('long');}
 },
 
 end : function() {log.info('THE END');}
