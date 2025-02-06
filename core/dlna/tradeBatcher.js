@@ -1,23 +1,23 @@
-/*COPILOT EXPLAIN
-The TradeBatcher class processes batches of trades, filtering and converting trade data for further use.
+/* copilot explain
+The provided code defines a TradeBatcher class used for processing and batching trade data. Here's a detailed explanation of its components:
+Imports and Initial Setup
 
-Key components:
+    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, moment for date manipulation, util and log for utility and logging functions, nanospinner for creating spinners, and mathjs for mathematical operations.
 
-    Constructor (TradeBatcher): Initializes with a tid (trade ID), binds functions, and sets last to -1.
-    write method:
-        Validates the batch is an array and not empty.
-        Filters and converts trade dates.
-        Emits a 'new batch' event with batch details.
-        Updates last trade ID.
-    filter method:
-        Filters out trades with zero amount.
-        Ensures trades are processed only if their trade ID is greater than the last processed ID.
-    convertDates method: Converts Unix timestamps to moment.js date objects.
+TradeBatcher Class:
 
-The class uses EventEmitter to handle events and integrates various utility functions and libraries for processing.
+    Constructor: Initializes the TradeBatcher instance with a trade ID (tid). If tid is not a string, an error is thrown. Functions are bound to the instance using underscore.
+    write(batch): Processes a batch of trades. If the batch is not an array or is empty, appropriate actions are taken (error thrown or debug message logged). 
+    The batch is filtered and converted to moment dates. 
+    A spinner is created to indicate processing. The method emits a new batch event with the processed trade data.
+    filter(batch): Filters out trades with zero amounts and trades that have already been processed based on the last trade ID (tid).
+    convertDates(batch): Converts the trade dates to moment.js UTC dates.
+
+Event Handling:
+    The class extends EventEmitter to emit events, allowing other components to listen and react to new trade batches.
 */
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const { EventEmitter } = require("events");
 var moment = require("moment");
 var util = require('../util.js');var config = util.getConfig();
@@ -83,7 +83,6 @@ TradeBatcher.prototype.filter = function(batch) {
     util.die('trade tid is max int, Gekko can\'t process..');
 
 // remove trades that have zero amount
-// read more: https://github.com/askmike/gekko/issues/486
   batch = _.filter(batch, function(trade) {return trade.amount > 0;});
   return _.filter(batch, function(trade) {return this.last < trade[this.tid];},this);
 }
