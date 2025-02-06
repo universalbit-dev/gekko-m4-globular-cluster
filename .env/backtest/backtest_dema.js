@@ -2,19 +2,11 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: '',currency:'BTC',asset:'LTC',tickrate:60}; //frequency information [3 - 10 - 20 - 60]
-config.api={interval:317811}; //5.29685 minutes
-config.expects={candle:987}; //987 seconds
-
+config.watch = {exchange: '',currency:'BTC',asset:'LTC'};
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'};
+config.DEMA={weight:21,thresholds:[{down:-0.025,up:0.025}]};
 
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
-config.DEMA={SMA:55,DEMA:1,STOPLOSS:3,rl:0.3};
-config.DEMA.thresholds={down:-0.000001,up:0.000001};
-
-//Date.prototype.toISOString()
-//Previous Month
 var previous_month = new Date();
 previous_month.setDate(1);
 previous_month.setMonth(previous_month.getMonth()-1);
