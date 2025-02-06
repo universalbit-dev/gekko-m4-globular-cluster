@@ -1,0 +1,43 @@
+{
+  "assets": [
+    "LTC",
+    "BTC"
+  ],
+  "currencies": [
+    "BTC",
+    "USD",
+    "EUR"
+  ],
+  "markets": [
+    {
+      "pair": [
+        "BTC",
+        "LTC"
+      ],
+      "minimalOrder": {
+        "amount": "0.001",
+        "unit": "asset"
+      }
+    },
+    {
+      "pair": [
+        "USD",
+        "BTC"
+      ],
+      "minimalOrder": {
+        "amount": "0.00002",
+        "unit": "asset"
+      }
+    },
+    {
+      "pair": [
+        "EUR",
+        "BTC"
+      ],
+      "minimalOrder": {
+        "amount": "0.00002",
+        "unit": "asset"
+      }
+    }
+  ]
+}
