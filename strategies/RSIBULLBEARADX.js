@@ -3,7 +3,7 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var Promise = require("bluebird");const _ = require("underscore");
 const fs = require("fs-extra");fs.createReadStream('/dev/null');
-
+const StopLoss = require('./indicators/StopLoss');
 var settings = config.RSIBULLBEARADX;this.settings=settings;
 const { Chess } = require('chess.js');
 
@@ -56,6 +56,7 @@ var method = {
     this.BULL_MOD_low = this.settings.BULL_MOD_low;
     this.BEAR_MOD_high = this.settings.BEAR_MOD_high;
     this.BEAR_MOD_low = this.settings.BEAR_MOD_low;
+    this.stopLoss = new StopLoss(5); // 5% stop loss threshold
     // debug stuff
     this.startTime = new Date();
     // add min/max if debug
@@ -98,7 +99,9 @@ var method = {
     }
   },
 
-update : function(candle) {_.noop;},
+update : function(candle) {this.stopLoss.update(candle);
+_.noop;
+},
 
 log : function(candle) {
 /* general purpose log data */
@@ -154,24 +157,27 @@ return console.log(chess.pgn())
     }
     // add adx low/high if debug
     if (this.debug) this.lowHigh(adx, 'adx');
+    //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    else {this.advice('long');}
   },
 
   /* LONG  */
   long: function() {
     if(this.trend.direction != 'buy')
     this.trend = {duration: 0,direction: 'buy',longPos: true};
-    this.trend.duration++;this.advice('buy');
+    this.trend.duration++;this.advice('long');
     log.debug('-- UP --', this.trend.duration, 'candle(s)');
-    if (this.trend.duration == 3){return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');}
+    if (this.trend.duration == 3){this.advice('long');}
   },
 
   /* SHORT  */
   short: function() {
     if (this.trend.direction != 'sell') 
     this.trend = {duration: 0,direction: 'sell',longPos: false};
-    this.trend.duration++;this.advice('sell');
+    this.trend.duration++;this.advice('short');
     log.debug('-- DOWN --', this.trend.duration, 'candle(s)');
-    if (this.trend.duration == 3) {return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');}
+    if (this.trend.duration == 3) {this.advice('short');}
   },
 
 end : function() {log.info('THE END');}
