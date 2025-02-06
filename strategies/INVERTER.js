@@ -4,6 +4,7 @@ var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var settings = config.INVERTER;this.settings=settings;
+const StopLoss = require('./indicators/StopLoss');
 
 const { Chess } = require('chess.js')
 
@@ -49,6 +50,7 @@ this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFa
 this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.DI});
 this.addTulipIndicator('adx', 'adx',{optInTimePeriod: this.settings.ADX,optInFastPeriod:70,optInSlowPeriod:50});
 this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
+this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
 log.info('================================================');
 log.info('keep calm and make somethig of amazing');
@@ -60,7 +62,8 @@ this.requiredHistory = this.settings.historySize;
 log.info('Running', this.name);
 },
 
-update : function(candle) {_.noop;},
+update : function(candle) {this.stopLoss.update(candle);
+_.noop;},
 
 log : function(candle) {
 //general purpose log data
@@ -87,7 +90,7 @@ console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 return console.log(chess.pgn())
 },
 
-check: function()
+check: function(candle)
 {
 log.debug("Random game of Chess");this.fxchess();
 rsi=this.tulipIndicators.rsi.result.result;
@@ -100,8 +103,8 @@ this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
 /* https://www.investopedia.com/articles/active-trading/042114/overbought-or-oversold-use-relative-strength-index-find-out.asp */
 switch (true) {
-	case (rsi > 70 && rsi < 80):this.advice('sell');this.makeoperator();break;
-	case (rsi > 20 && rsi < 30):this.advice('buy');this.makeoperator();break;
+	case (rsi > 70 && rsi < 80):this.advice('short');this.makeoperator();break;
+	case (rsi > 20 && rsi < 30):this.advice('long');this.makeoperator();break;
 	case (rsi > 40 && rsi < 60):return _.noop;break;
 	default:_.noop;
 }
@@ -138,9 +141,13 @@ switch (true) {
     //trend moving up
     else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='long';}
     else _.noop;
-    
-    //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action) 
+
+    //if ('buy' === this.prevAction && this.settings.stoploss_enabled && 'stoploss' === this.indicators.stoploss.action)
     //  {this.stoplossCounter++;log.debug('>>> STOPLOSS triggered <<<');this.advice('sell');} /* */
+
+    //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+    else {this.advice('long');}
 },
 
 /* LONG  */
@@ -148,16 +155,16 @@ switch (true) {
     if (this.trend.direction.length != 0 && this.trend.direction !==  'buy')
     {
     this.trend.ls='long';
-    this.trend.direction = 'screw_up';return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('long');
+    this.trend.direction = 'screw_up';this.advice('long');
 	}
   },
 
 /* SHORT  */
-  short: function() { 
+  short: function() {
     if (this.trend.direction.length != 0 && this.trend.direction !== 'sell')
     {
     this.trend.ls='short';
-    this.trend.direction = 'screw_down';return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('short');
+    this.trend.direction = 'screw_down';this.advice('short');
     }
   },
 
