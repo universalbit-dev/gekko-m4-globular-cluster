@@ -3,6 +3,8 @@ var Promise = require("bluebird");const _ = require("underscore");
 var log = require('../core/log.js');
 const { Chess } = require('chess.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
+const StopLoss = require('./indicators/StopLoss');
+
 var method = {};
 
 method.makeoperator = function() {
@@ -29,6 +31,7 @@ method.update = function(candle) {
   if (candle.high < DarvasHigh) {DarvasHigh = candle.low;}
   this.candle_queue.push(candle);barscount++;
   if (this.candle_queue.length > 0) {candle.delta = candle.close - this.candle_queue[0].close;}
+  this.stopLoss.update(candle);
 }
 
 var percent = 35;
@@ -87,19 +90,22 @@ method.check = function(candle) {
     var MovingSlower = MovingTR[MovingTR.length - 2] > valid;
 
     switch(true){
-    
+
     case (CandeLow && !MovingSlower && valid > 0 && !this.is_buyin && this.candle.close > this.psar):
     this.price_buyin = candle.close;log.debug("valid : ", valid);
     this.candle_queue.length = 0;runningMin = 0;runninMax = 0;Downslow.length = 0;
-    this.is_buyin = true;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));this.advice('buy');break;/* */
-    
+    this.is_buyin = true;this.advice('long');break;/* */
+
     case(candle.close >= runninMax && this.is_buyin):
-    this.is_buyin = false;return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));this.advice('sell');break;/* */
-    
+    this.is_buyin = false;this.advice('short');break;/* */
+
     default:log.info();
     }
-    
+
   }
+  //stoploss
+  if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+  else {this.advice('long');}
 }
 
 module.exports = method;
