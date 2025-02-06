@@ -1,19 +1,28 @@
-/* COPILOT EXPLAIN
-The marketDataProvider.js file defines a Manager class to handle market data fetching and relaying.
+/* copilot explain
 
-Key components:
+Imports and Initial Setup:
 
-    Dependencies: Imports required modules such as Promise, underscore, EventEmitter, and utility functions.
-    Manager Constructor: Initializes the MarketFetcher with the provided configuration and binds all functions to the class instance.
-    Event Handling:
-        retrieve method fetches market data using MarketFetcher.
-        relayTrades method relays trade batches, emits 'marketUpdate' and 'trades' events.
-        sendMarketStart method emits a 'marketStart' event once with the date of the first trade in the batch.
+    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, and util for utility functions.
+    MarketFetcher is imported for fetching market trade data. config is set up by requiring util.js and calling its getConfig method.
 
-The class uses EventEmitter to manage and relay market data events.
+Manager Class:
+
+    Constructor (Manager(config)): Initializes the Manager instance with a configuration object. 
+    It binds all functions to the instance using underscore, sets up a MarketFetcher instance to fetch trades, and sets up event handling to relay newly fetched trades.
+    
+    retrieve(): Calls the fetch method of the MarketFetcher instance to retrieve market trades.
+    relayTrades(batch): Handles the relay of trade batches. It calls sendMarketStart once for the first batch, emits a marketUpdate event with the date of the last trade in the batch,
+    and emits a trades event with the entire batch.
+    
+    sendMarketStart(batch): Emits a marketStart event with the date of the first trade in the batch. This method is wrapped in _.once to ensure it is only called once.
+
+Event Handling:
+
+    The class extends EventEmitter to emit events, allowing other components to listen and react to new trade batches and market updates.
+    This class ensures that market trade data is fetched, processed, and emitted as events for other components to handle.
 */
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const { EventEmitter } = require("events");
 var util = require('../util');
 var config = require('../util.js').getConfig();
@@ -29,7 +38,7 @@ var Manager = function(config) {
   this.source
     .on('trades batch', this.relayTrades);
 }
-util.makeEventEmitter(Manager);
+util.makeEventEmitter(Manager);util.inherit(Event, Manager);
 // HANDLERS
 Manager.prototype.retrieve = function() {
   this.source.fetch();
@@ -47,6 +56,7 @@ Manager.prototype.sendMarketStart = _.once(function(batch) {
 });
 
 module.exports = Manager;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
