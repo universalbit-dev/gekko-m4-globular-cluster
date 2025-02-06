@@ -1,16 +1,12 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
-//Tick rate is the frequency of information
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC'};
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
 
-config.api={interval:317811}; //5.29685 minutes
-config.expects={candle:987}; //987 seconds
-
-config.SUPERTREND={ATR:7,bandFactor:3,STOPLOSS:3,RSI:8};
+config.SUPERTREND={ATR:7,bandFactor:3};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
@@ -20,7 +16,6 @@ config.adviceLogger={enabled:true};
 config.backtest = {enabled:true};
 config.backtestResultExporter = {enabled: false};
 config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 100,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
-//[under review papertrader reportInCurrency (asset:currency)]
 
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 config.importer = {enabled:false};

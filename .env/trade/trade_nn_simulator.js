@@ -1,16 +1,11 @@
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC',tickrate:3};
-//Tick rate is the frequency of information
+config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC'};
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:'',tickrate:3};
+exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};
 
-config.api={interval:317811}; //5.29685 minutes
-config.expects={candle:987}; //987 seconds
-
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 , 610 , 987
 config.NN={threshold_buy:0.2,threshold_sell:-0.2,method:'adadelta',learning_rate:0.01,momentum:0.0,
 l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:144,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1,SMMA:5,stoploss_enabled:true,stoploss_threshold:0.85,high:70,low:30};
 
@@ -22,7 +17,6 @@ config.adviceLogger={enabled:true};
 config.backtest = {enabled:true};
 config.backtestResultExporter = {enabled: false};
 config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 100,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
-//[under review papertrader reportInCurrency (asset:currency)]
 
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 config.importer = {enabled:false};
