@@ -24,7 +24,6 @@
   "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
   "humanize-duration": "^3.31.0",
-  "kraken-api": "^1.0.2",
   "lodash": "^4.17.21",
   "mathjs": "^12.4.0",
   "moment": "^2.29.4",
