@@ -29,7 +29,8 @@ const keepcalm = async function() {
     console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
     }
 };
- 
+const StopLoss = require('./indicators/StopLoss');
+
 var method = {};
 
 method.init = function() {
@@ -38,6 +39,7 @@ method.init = function() {
   this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFastPeriod:89,optInSlowPeriod:21});
   this.addTulipIndicator('stoch', 'stoch', {optInFastKPeriod: 89,optInSlowKPeriod:21,optInSlowDPeriod:this.settings.STOCH});
 
@@ -50,7 +52,8 @@ method.init = function() {
 startTime = new Date();
 }
 
-method.update = function(candle) {_.noop;}
+method.update = function(candle) {this.stopLoss.update(candle);
+_.noop;}
 
 method.log = function(candle) {
 //general purpose log data
@@ -78,7 +81,7 @@ return console.log(chess.pgn())
 
 method.check = function(candle)
 {
-    
+
     log.debug("Operator ");this.makeoperator();log.debug("Random game of Chess");this.fxchess();
     rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
     stoch=this.tulipIndicators.stoch.result.result;
@@ -98,8 +101,8 @@ method.check = function(candle)
 	}
 	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
 	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI !=100){this.trend.adviced = true;
-	return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersBuy.js"));}
-	
+	}
+
 	if((this.stochRSI < 30)&&(this.trend.direction !== 'short'))
 	{
 	this.trend = {duration: 0,persisted: false,direction: 'short',adviced: false};
@@ -115,6 +118,9 @@ method.check = function(candle)
     log.debug("StochRSI min:\t\t" + this.lowestRSI);
     log.debug("StochRSI max:\t\t" + this.highestRSI);
     log.debug("StochRSI value:\t\t" + this.stochRSI);
+    //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+    else {this.advice('long');}
 },
 method.end = function() {log.info('THE END');}
 
