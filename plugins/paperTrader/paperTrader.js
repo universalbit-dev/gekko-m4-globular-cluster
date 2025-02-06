@@ -1,83 +1,115 @@
-/*
+const _ = require('lodash');
 
-*/
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var util = require('../../core/util.js');const ENV = util.gekkoEnv();var config = util.getConfig();const dirs = util.dirs();
-var log = require('../../core/log.js');
+const util = require('../../core/util');
+const ENV = util.gekkoEnv();
 
-const {EventEmitter} = require("events");
-const calcConfig = config.paperTrader;const watchConfig = config.watch;
-const TrailingStop = require('../../exchange/triggers/trailingStop.js');
-const fs=require('fs-extra');
+const config = util.getConfig();
+const calcConfig = config.paperTrader;
+const watchConfig = config.watch;
+const dirs = util.dirs();
+const log = require(dirs.core + 'log');
+
+const TrailingStop = require(dirs.broker + 'triggers/trailingStop');
 
 const PaperTrader = function() {
   _.bindAll(this,_.functions(this));
-  EventEmitter.call(this);
-  if(calcConfig.feeUsing === 'maker') {this.rawFee = calcConfig.feeMaker;} 
-  else {this.rawFee = calcConfig.feeTaker;}
+
+  if(calcConfig.feeUsing === 'maker') {
+    this.rawFee = calcConfig.feeMaker;
+  } else {
+    this.rawFee = calcConfig.feeTaker;
+  }
+
   this.fee = 1 - this.rawFee / 100;
+
   this.currency = watchConfig.currency;
   this.asset = watchConfig.asset;
-  this.portfolio = {asset: calcConfig.simulationBalance.asset,currency: calcConfig.simulationBalance.currency,}
+
+  this.portfolio = {
+    asset: calcConfig.simulationBalance.asset,
+    currency: calcConfig.simulationBalance.currency,
+  }
+
   this.balance = false;
 
-  if(this.portfolio.asset > 0) {this.exposed = true;}
+  if(this.portfolio.asset > 0) {
+    this.exposed = true;
+  }
 
   this.propogatedTrades = 0;
   this.propogatedTriggers = 0;
+
   this.warmupCompleted = false;
+
   this.warmupCandle;
 }
-util.makeEventEmitter(PaperTrader);
 
 PaperTrader.prototype.relayPortfolioChange = function() {
-  this.deferredEmit('portfolioChange', {asset: this.portfolio.asset,currency: this.portfolio.currency});
+  this.deferredEmit('portfolioChange', {
+    asset: this.portfolio.asset,
+    currency: this.portfolio.currency
+  });
 }
 
 PaperTrader.prototype.relayPortfolioValueChange = function() {
-  this.deferredEmit('portfolioValueChange', {balance: this.getBalance()});
+  this.deferredEmit('portfolioValueChange', {
+    balance: this.getBalance()
+  });
 }
 
 PaperTrader.prototype.extractFee = function(amount) {
-  amount *= 1e8;amount *= this.fee;
-  amount = Math.floor(amount);amount /= 1e8;
+  amount *= 1e8;
+  amount *= this.fee;
+  amount = Math.floor(amount);
+  amount /= 1e8;
   return amount;
 }
 
-PaperTrader.prototype.setStartBalance = function() {this.balance = this.getBalance();}
+PaperTrader.prototype.setStartBalance = function() {
+  this.balance = this.getBalance();
+}
+
 // after every succesfull trend ride we hopefully end up
 // with more BTC than we started with, this function
 // calculates Gekko's profit in %.
 PaperTrader.prototype.updatePosition = function(what) {
 
-  let cost;let amount;
-  // virtually trade all {currency} to {asset} at the current price (minus fees)
+  let cost;
+  let amount;
+
+  // virtually trade all {currency} to {asset}
+  // at the current price (minus fees)
   if(what === 'long') {
     cost = (1 - this.fee) * this.portfolio.currency;
     this.portfolio.asset += this.extractFee(this.portfolio.currency / this.price);
     amount = this.portfolio.asset;
     this.portfolio.currency = 0;
+
     this.exposed = true;
     this.trades++;
   }
 
-  // virtually trade all {currency} to {asset} at the current price (minus fees)
+  // virtually trade all {currency} to {asset}
+  // at the current price (minus fees)
   else if(what === 'short') {
     cost = (1 - this.fee) * (this.portfolio.asset * this.price);
     this.portfolio.currency += this.extractFee(this.portfolio.asset * this.price);
     amount = this.portfolio.currency / this.price;
     this.portfolio.asset = 0;
+
     this.exposed = false;
     this.trades++;
   }
-  
+
   const effectivePrice = this.price * this.fee;
+
   return { cost, amount, effectivePrice };
 }
 
 PaperTrader.prototype.getBalance = function() {
   return this.portfolio.currency + this.price * this.portfolio.asset;
 }
+
 PaperTrader.prototype.now = function() {
   return this.candle.start.clone().add(1, 'minute');
 }
@@ -86,12 +118,20 @@ PaperTrader.prototype.processAdvice = function(advice) {
   let action;
   if(advice.recommendation === 'short') {
     action = 'sell';
+
     // clean up potential old stop trigger
-    if(this.activeStopTrigger) {this.deferredEmit('triggerAborted', {id: this.activeStopTrigger.id,date: advice.date});
+    if(this.activeStopTrigger) {
+      this.deferredEmit('triggerAborted', {
+        id: this.activeStopTrigger.id,
+        date: advice.date
+      });
+
       delete this.activeStopTrigger;
     }
 
-  } else if(advice.recommendation === 'long') {action = 'buy';
+  } else if(advice.recommendation === 'long') {
+    action = 'buy';
+
     if(advice.trigger) {
 
       // clean up potential old stop trigger
@@ -147,6 +187,7 @@ PaperTrader.prototype.createTrigger = function(advice) {
   const trigger = advice.trigger;
 
   if(trigger && trigger.type === 'trailingStop') {
+
     if(!trigger.trailValue) {
       return log.warn(`[Papertrader] ignoring trailing stop without trail value`);
     }
@@ -154,9 +195,13 @@ PaperTrader.prototype.createTrigger = function(advice) {
     const triggerId = 'trigger-' + (++this.propogatedTriggers);
 
     this.deferredEmit('triggerCreated', {
-      id: triggerId,at: advice.date,
+      id: triggerId,
+      at: advice.date,
       type: 'trailingStop',
-      proprties: {trail: trigger.trailValue,initialPrice: this.price,}
+      proprties: {
+        trail: trigger.trailValue,
+        initialPrice: this.price,
+      }
     });
 
     this.activeStopTrigger = {
@@ -236,11 +281,3 @@ PaperTrader.prototype.processCandle = function(candle, done) {
 }
 
 module.exports = PaperTrader;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
