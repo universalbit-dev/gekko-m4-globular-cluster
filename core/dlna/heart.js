@@ -1,23 +1,23 @@
-/*COPILOT EXPLAIN
-The core/dlna/heart.js file defines a Heart class responsible for generating regular ticks, which trigger events and actions within the system. Here is a detailed explanation of its components:
+/* copilot explain
+Imports and Initial Setup:
 
-    Imports and Initial Setup:
-        Uses bluebird for promises and underscore for utility functions.
-        Imports EventEmitter for event handling and several utility modules like util, log, and moment.
-        Defines a constant TICKRATE set to 20 seconds.
+    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, util and log for utility and logging functions, and moment for date and 
+    time manipulation.
+    A constant TICKRATE is set to 20 seconds, defining the interval between ticks.
 
-    Heart Class:
-        Constructor: Initializes the Heart instance, sets lastTick to false, and binds all functions to the instance using underscore.
-        pump(): Logs a debug message and schedules the ticks by calling scheduleTicks().
-        tick(): Checks if the last tick was too long ago (more than 5 times the TICKRATE). If so, it calls util.die() to terminate the process. Updates lastTick to the current time and emits a tick event.
-        scheduleTicks(): Sets an interval to call tick() every TICKRATE seconds and defers the first tick to start immediately.
+Heart Class:
 
-    Event Handling:
-        Utilizes EventEmitter to emit tick events regularly, which other components can listen to and act upon.
+    Constructor (Heart): Initializes the Heart instance. It extends EventEmitter, initializes lastTick to false, and binds all methods to the instance using underscore.
+    pump(): Logs a debug message and calls scheduleTicks() to start scheduling ticks.
+    tick(): Checks if the last tick was more than 5 times the TICKRATE ago. If so, it calls util.die() to terminate the process with an error message. 
+    It updates lastTick to the current time and emits a tick event.
+    scheduleTicks(): Sets an interval to call tick() every TICKRATE seconds and defers the first tick to start immediately.
 
-The Heart class ensures regular, timed events within the system, allowing other components to perform actions in response to these ticks.
+Event Handling:
+
+    The class extends EventEmitter to emit tick events regularly, allowing other components to perform actions in response to these ticks.
 */
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ =require("underscore");
 const { EventEmitter } = require("events");
 var util = require('../util');
 var config = util.getConfig();
