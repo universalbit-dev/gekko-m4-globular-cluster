@@ -2,7 +2,7 @@ var config = {};
 //General Settings
 config.debug =true;
 
-config.watch = {exchange: 'kraken',currency:'XBT',asset:'LTC',tickrate:20};
+config.watch = {exchange: '',currency:'BTC',asset:'LTC'};
 //Date.prototype.toISOString()
 
 //Previous Month
