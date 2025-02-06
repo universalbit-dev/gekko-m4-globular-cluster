@@ -1,7 +1,6 @@
 var config = {};
 config.debug =true;
 config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC'};
-//Tick rate is the frequency of information
 
 config.trader={enabled:false,
 exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
@@ -16,7 +15,6 @@ config.adviceLogger={enabled:true};
 config.backtest = {enabled:true};
 config.backtestResultExporter = {enabled: false};
 config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 100,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
-//[under review papertrader reportInCurrency (asset:currency)]
 
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 config.importer = {enabled:false};
