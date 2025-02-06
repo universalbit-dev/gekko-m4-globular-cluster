@@ -1,9 +1,9 @@
-const _ = require('lodash');
+const _ = require('underscore');
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-
+const {EventEmitter} = require("events");
 const log = require(dirs.core + 'log');
 const Broker = require(dirs.broker + '/gekkoBroker');
 
@@ -57,10 +57,17 @@ const Trader = function(next) {
 // teach our trader events
 util.makeEventEmitter(Trader);
 
+
 Trader.prototype.sync = function(next) {
   log.debug('syncing private data');
+  
+  if (typeof this.broker.syncPrivateData !== 'function') {
+    util.die('Broker does not support syncPrivateData');
+    return;
+  }
+  
   this.broker.syncPrivateData(() => {
-    if(!this.price) {
+    if (!this.price) {
       this.price = this.broker.ticker.bid;
     }
 
@@ -69,18 +76,15 @@ Trader.prototype.sync = function(next) {
     this.setPortfolio();
     this.setBalance();
 
-    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
+    if (this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
       this.relayPortfolioChange();
     }
 
-    // balance is relayed every minute
-    // no need to do it here.
-
-    if(next) {
+    if (next) {
       next();
     }
   });
-}
+};
 
 Trader.prototype.relayPortfolioChange = function() {
   this.deferredEmit('portfolioChange', {
