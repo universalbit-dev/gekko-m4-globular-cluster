@@ -1,7 +1,7 @@
 var config = {};
 //General Settings
 config.debug =true;
-config.watch = {exchange: '',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: 'ccxt_exchanges',exchangeId:'',currency:'BTC',asset:'LTC'};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 config.STOCHRSI={interval:10,high:70,low:30,persistence:5};
