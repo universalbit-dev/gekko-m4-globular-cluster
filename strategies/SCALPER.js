@@ -19,6 +19,7 @@ method.init = function() {
   this.candle_queue = [];
   this.is_buyin = false;
   this.price_buyin = 0;
+  this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 }
 
 var barscount = 0;
