@@ -87,7 +87,7 @@ class Broker {
     this.syncPrivateData();
   }
 
-  async syncPrivateData(callback) {
+  async syncPrivateData(callback = () => {}) {
   try {
     await this.setTicker();
     await new Promise(resolve => setTimeout(resolve, this.interval));
