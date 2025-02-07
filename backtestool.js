@@ -1,4 +1,4 @@
-/*
+/*copilot explain
 This script is a command-line tool for managing backtesting and paper trading sessions for cryptocurrency trading strategies. 
 Here is a breakdown of its components:
 
