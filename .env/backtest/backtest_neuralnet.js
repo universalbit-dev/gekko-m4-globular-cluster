@@ -3,8 +3,8 @@ var config = {};
 config.debug =true;
 config.watch = {exchange: 'ccxt_exchanges',exchangeId:'',currency:'BTC',asset:'LTC'};
 
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:50,method:'NEURALNETV2'};
-config.NEURALNETV2={threshold_buy :0.3,threshold_sell :-0.3,learning_rate :0.01,
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:50,method:'NEURALNET'};
+config.NEURALNET={threshold_buy :0.3,threshold_sell :-0.3,learning_rate :0.01,
 momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:4181,min_predictions :987};
 
 //Date.prototype.toISOString()
