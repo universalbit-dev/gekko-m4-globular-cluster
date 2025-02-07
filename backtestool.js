@@ -1,5 +1,6 @@
 /*
-This script is a command-line tool for managing backtesting and paper trading sessions for cryptocurrency trading strategies. Here is a breakdown of its components:
+This script is a command-line tool for managing backtesting and paper trading sessions for cryptocurrency trading strategies. 
+Here is a breakdown of its components:
 
     Imports:
         fs-extra: For file system operations.
@@ -21,7 +22,6 @@ This script is a command-line tool for managing backtesting and paper trading se
         Executes functions based on the provided command-line options, such as importing datasets, running PaperTrader, analyzing CSV files, or showing info.
 
 The script uses the Commander library to parse command-line options and execute the appropriate functions based on the user's input.
-
 */
 
 const fs = require('fs-extra');
