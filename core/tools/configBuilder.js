@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const _ = require("underscore");
 var util = require('../util');
 var config = require('../util.js').getConfig();
 
