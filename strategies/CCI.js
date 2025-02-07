@@ -1,4 +1,35 @@
+/*
+This JavaScript file (CCI.js) defines a trading strategy for the Gekko trading bot using the Commodity Channel Index (CCI). Here are the key components:
+
+    Dependencies:
+        lodash for utility functions.
+        log for logging.
+        StopLoss for implementing a stop loss mechanism.
+
+    Method Initialization (method.init):
+        Sets up initial properties such as currentTrend, requiredHistory, stopLoss, age, trend, and thresholds.
+        Adds the CCI indicator.
+
+    Candle Update (method.update):
+        Updates the stop loss with the new candle data.
+
+    Logging (method.log):
+        Logs the calculated CCI properties for debugging purposes.
+
+    Check Method (method.check):
+        Evaluates the CCI indicator and determines trading advice (buy/sell/hold) based on the trend.
+        Handles overbought/oversold conditions and updates the trend state.
+        Implements a stop loss check to sell if necessary.
+
+    Export:
+        The method object is exported for use in the Gekko trading bot.
+
+This strategy uses the CCI indicator to identify overbought and oversold conditions and makes trading decisions accordingly. 
+It also incorporates a stop loss mechanism to limit potential losses. You can view the full content here.
+
 //https://www.investopedia.com/articles/active-trading/031914/how-traders-can-utilize-cci-commodity-channel-index-trade-stock-trends.asp
+*/
+
 var _ = require('lodash');
 var log = require('../core/log.js');
 
