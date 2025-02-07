@@ -8,14 +8,13 @@
 require('../core/tulind');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 let fs = require('fs-extra');
 
 var method = {
 
   /* INIT */
   init: function() {
-
     this.name = 'CSVExport';
     this.requiredHistory = this.settings.historySize;
     this.startTime = new Date();
@@ -27,14 +26,11 @@ update: function(candle) {
     fs.appendFile('logs/csv/' + config.watch.asset + ':' + config.watch.currency + ' ' + this.startTime + '.csv', candle.high + "," + candle.low + "," + candle.close + "," + candle.volume + "," + candle.trades + "\n", function(err) {
       if (err) {return console.log(err);}
     });
-
   },
-
   /* CHECK */
   check: function() {_.noop;},
   /* END backtest */
   end: function() {_.noop;}
-
 };
 
 module.exports = method;
