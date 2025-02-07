@@ -1,7 +1,7 @@
 var BATCH_SIZE = 60; // minutes
 var MISSING_CANDLES_ALLOWED = 3; // minutes, per batch
 
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const _ = require("underscore");
 var moment = require('moment');
 var async = require('async');
 
