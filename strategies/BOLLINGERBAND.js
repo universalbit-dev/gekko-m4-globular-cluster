@@ -1,3 +1,29 @@
+/*copilot explain
+This JavaScript file (BOLLINGERBAND.js) defines a trading strategy for the Gekko trading bot using Bollinger Bands. Here are the key components:
+
+    Dependencies:
+        openvino-node for addon functionalities.
+        bluebird for promises.
+        underscore for utility functions.
+        log for logging.
+        fs-extra for file system operations.
+        StopLoss for implementing a stop-loss mechanism.
+
+    Method Initialization (method.init):
+        Sets up initial properties such as name, nsamples, trend, and requiredHistory.
+        Initializes a stop-loss with a 5% threshold.
+        Adds the Bollinger Bands indicator using Tulip Indicators.
+
+    Candle Update (method.update):
+        Logs calculated Bollinger Bands properties for each candle.
+        Updates the stop-loss with the new candle data.
+
+    Check Method (method.check):
+        Evaluates the Bollinger Bands and determines the current price zone (top, high, low, bottom).
+        Logs and updates the trend based on the current zone.
+        Issues trading advice based on trend changes and the stop-loss mechanism.
+*/
+
 /* BB strategy - okibcn 2018-01-03 */
 const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = require("underscore");
@@ -46,8 +72,8 @@ method.check = function(candle) {bbands=this.tulipIndicators.bbands;var price = 
   if (this.trend.zone == 'bottom') this.advice('long'); /* */
   if (this.trend.zone == 'high') this.advice();
   if (this.trend.zone == 'low') this.advice();
-  //if (this.trend.zone == 'top') log.debug('>>> SIGNALING ADVICE SELL <<<');
-  //if (this.trend.zone == 'bottom') log.debug('>>> SIGNALING ADVICE BUY  <<<');
+  //if (this.trend.zone == 'top') console.debug('>>> SIGNALING ADVICE SELL <<<');
+  //if (this.trend.zone == 'bottom') console.debug('>>> SIGNALING ADVICE BUY  <<<');
   this.trend = {zone: zone,duration: 0,persisted: false}
   }
   //stoploss
