@@ -1,3 +1,40 @@
+/*copilot explain
+This JavaScript file defines a Wrapper object that manages multiple trading strategies for the Gekko trading bot. Here is a breakdown of its main components:
+
+    Dependencies:
+        lodash is imported for utility functions.
+        Wrapper is initialized as an empty object.
+
+    Attributes:
+        Wrapper.children: An array to hold instances of child strategies.
+        Wrapper.requiredHistory: Set to -1, meaning no historical data is required.
+        Wrapper.age: Initialized to 0.
+
+    Method: createChild
+        Takes a strategy name (stratname) and settings.
+        Requires the baseTradingMethod from tradingAdvisor.
+        Imports the strategy file using the provided strategy name.
+        Copies all functions from the strategy file to the Consultant prototype.
+        Adds a custom collectAdvice method to handle advice.
+        Creates a new Consultant (strategy instance) with the provided settings.
+        Sets an event listener for 'advice' to call collectAdvice.
+        Adds the new strategy instance to children and returns it.
+
+    Method: checkChildren
+        Takes a candle (market data) as input.
+        Iterates over each child strategy, resets its lastAdvice, and calls the tick method with the candle data.
+
+    Method: listenAdvice
+        Takes a child strategy as input.
+        If the child has a lastAdvice, it calls advice with the recommendation.
+        Otherwise, it calls advice without arguments.
+
+    Exports:
+        The Wrapper object is exported for use in other modules.
+
+This setup allows for the dynamic creation and management of multiple trading strategies within the Gekko trading bot framework.
+*/
+
 var _ = require('lodash');
 
 var Wrapper = {};
