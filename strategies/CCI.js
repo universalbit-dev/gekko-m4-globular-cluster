@@ -1,4 +1,4 @@
-/*
+/*copilot explain
 This JavaScript file (CCI.js) defines a trading strategy for the Gekko trading bot using the Commodity Channel Index (CCI). Here are the key components:
 
     Dependencies:
@@ -26,8 +26,6 @@ This JavaScript file (CCI.js) defines a trading strategy for the Gekko trading b
 
 This strategy uses the CCI indicator to identify overbought and oversold conditions and makes trading decisions accordingly. 
 It also incorporates a stop loss mechanism to limit potential losses. You can view the full content here.
-
-//https://www.investopedia.com/articles/active-trading/031914/how-traders-can-utilize-cci-commodity-channel-index-trade-stock-trends.asp
 */
 
 var _ = require('lodash');
