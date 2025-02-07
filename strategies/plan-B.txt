@@ -4,11 +4,11 @@ gekko-m4-globular-cluster: https://github.com/universalbit-dev/gekko-m4-globular
 Here's a to-do list:
 - Learn about javascript and sustainable personal finance.
 - Make usable Community strategies.
-- Improve the examples [DEMA,INVERTER,NN,NEURALNETV2,NOOP,RSIBULLBEARADX,STOCHRSI,SUPERTREND] 
-- Async this strategies in a simulation environment. [exchange simulator realtime mode] 
+- Improve strategy examples.
+- Async and Merge this strategies in a simulation environment. [ExchangeSimulator Realtime Mode] 
 - Let's naturalize the cryptocurrency with the fibonacci sequence
 - Balanced risk tolerance: stop and take orders.
-- Develop Exchange Simulator fix bugs and runtime errors.
+- Develop ExchangeSimulator fix bugs and runtime errors.
 - Regularly nodejs app health check.
-- Adaptive neural learning based on "market changes".
+- Adaptive neural layers based on market changes.
 - Backtest your strategy,fix bugs and runtime errors. 
