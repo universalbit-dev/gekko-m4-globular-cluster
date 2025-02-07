@@ -35,7 +35,7 @@ var Manager = function(candle) {
   this.candleCreator
   .on('candles', this.relayCandles);
 };
-util.makeEventEmitter(Manager);util.inherit(Event, Manager);
+util.makeEventEmitter(this);
 
 Manager.prototype.processTrades = function(tradeBatch) {this.candleCreator.write(tradeBatch);}
 Manager.prototype.relayCandles = function(candles) {this.emit('candles', candles);}
