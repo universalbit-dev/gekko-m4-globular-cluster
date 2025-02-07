@@ -2,7 +2,7 @@
 var _ = require('lodash');
 var log = require('../core/log.js');
 
-// let's create our own method
+//let's create our own method
 var method = {};
 const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
@@ -12,10 +12,7 @@ method.init = function() {
   this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   this.age = 0;
   this.trend = {
-    direction: 'undefined',
-    duration: 0,
-    persisted: false,
-    adviced: false
+    direction: 'undefined',duration: 0,persisted: false,adviced: false
   };
   this.historySize = this.settings.history;
   this.ppoadv = 'none';
@@ -51,9 +48,6 @@ method.log = function(candle) {
         log.debug('\t', 'CCI:\t\t', cci.result.toFixed(2));
 }
 
-/*
- *
- */
 method.check = function(candle) {
 
     var lastPrice = candle.close;
@@ -108,15 +102,10 @@ method.check = function(candle) {
                     persisted: false,
                     adviced: false
                 };
-            } else {
-                this.trend.duration++;
-            }
+            } else {this.trend.duration++;}
             this.advice();
         }
-
-    } else {
-        this.advice();
-    }
+    } else {this.advice();}
 
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
     
