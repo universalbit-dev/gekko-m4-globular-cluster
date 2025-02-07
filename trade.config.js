@@ -1,9 +1,9 @@
 module.exports = {
   apps : [
   {
-  name: 'neuralnetv2',
+  name: 'neuralnet',
   script    : 'gekko.js',
-  args      : '-c .env/trade/trade_neuralnetv2_simulator.js',
+  args      : '-c .env/trade/trade_neuralnet_simulator.js',
   instances : "1",
   exec_mode : "cluster"
   },
@@ -14,7 +14,6 @@ module.exports = {
   instances : "1",
   exec_mode : "cluster"
   }
-
 ]
 
 }
