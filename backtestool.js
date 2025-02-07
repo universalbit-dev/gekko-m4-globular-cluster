@@ -11,20 +11,6 @@ This script is a command-line tool for managing backtesting and paper trading se
     Configuration:
         Extracts strategies, pairs, and warmup settings from the configuration.
 
-    Command-line Options:
-        -c, --config <file>: Path to the configuration file.
-        -o, --output <file>: CSV file name for results.
-        -f, --from <time>: Start time for datasets or import.
-        -t, --to <time>: End time for datasets or import.
-        -s, --strat <strategies>: List of strategies to backtest.
-        -p, --pair <pairs>: List of pairs to backtest.
-        -n, --candle <candles>: Candle size and warmup period.
-        -i, --import: Flag to import new datasets.
-        -g, --paper: Flag to start multiple sessions of PaperTrader.
-        -a, --analyze <file>: Perform analysis on strategies and pairs from a CSV file.
-        -q, --info <info>: Show information.
-        -h, --help: Show help.
-
     Functions:
         analyzeCsv(file): Analyze strategies and pairs from a CSV file.
         importDatasets(): Import new datasets.
