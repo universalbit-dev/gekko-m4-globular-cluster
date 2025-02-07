@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisify(require("underscore"));
+const _ = require("underscore");
 var fs = require('fs-extra');
 var moment = require('moment');
 
