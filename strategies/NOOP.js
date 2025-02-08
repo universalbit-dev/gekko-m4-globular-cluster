@@ -1,3 +1,31 @@
+/*
+
+This JavaScript file (NOOP.js) defines a "no-operation" strategy for the Gekko trading bot. Here are the key components:
+
+    Dependencies:
+        Various modules are imported, including openvino-node, log, util, fs-extra, underscore, and a strategy wrapper (strategyWrapperRules.js).
+
+    Settings:
+        The strategy settings are loaded from the configuration.
+
+    Helper Functions:
+        sequence: Logs a random number from the Fibonacci sequence.
+        keepcalm: Logs a motivational message.
+
+    Strategy Methods:
+        init: Initializes the strategy with default values and sets required history to -1.
+        update: No-operation function using _.noop.
+        log: No-operation function using _.noop.
+        check: Checks the child strategies, listens for advice, and calls the sequence and keepcalm functions.
+        end: No-operation function using _.noop.
+
+    Export:
+        The method object is exported for use in the Gekko trading bot.
+
+This strategy essentially performs no trading actions but includes logging and motivational messages. You can view the full content here.
+
+*/
+
 const { addon: ov } = require('openvino-node');
 var log = require('../core/log.js');
 var util= require('../core/util.js')
