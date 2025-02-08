@@ -1,30 +1,5 @@
 /* copilot explain
-Imports and Initial Setup:
 
-    Various modules are imported, including underscore for utility functions, EventEmitter for event handling, util for utility functions, and configuration settings.
-    Internal modules Heart, MarketDataProvider, and CandleManager are also imported.
-
-Dlna Class:
-
-    Constructor (Dlna(config)): Initializes the Dlna instance with a configuration object. It extends EventEmitter and Readable stream with object mode enabled. The following internal 
-    modules are instantiated:
-        Heart: Manages regular ticks.
-        MarketDataProvider: Fetches market data based on the provided configuration.
-        CandleManager: Processes trade data into candles.
-
-Event Handling:
-
-        The marketDataProvider instance relays marketUpdate and marketStart events, which are emitted by the Dlna instance.
-        The candleManager instance outputs candles via the pushCandles method.
-        On every tick event from Heart, the marketDataProvider retrieves trade data.
-        On new trade data, the marketDataProvider processes the trades using candleManager.
-        The class extends EventEmitter to emit various events related to market updates and trade data processing.
-        This class coordinates the flow of market data, fetching trade data, processing it into candles, and emitting relevant events for other components to handle.
-
-Dlna Prototype:
-
-    _read(): A no-operation function required by the Readable stream.
-    pushCandles(candles): Pushes each candle to the readable stream.
 */
 
 const _ = require("underscore");
