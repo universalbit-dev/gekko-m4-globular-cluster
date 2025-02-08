@@ -65,10 +65,10 @@ if (error)
 class Fetcher {
     constructor(config) {
         this.exchange = new ccxt[config.watch.exchange]({
-            apiKey: config.watch.key,
-            secret: config.watch.secret,
+            verbose: false,
+            apiKey: process.env.API_KEY || config.watch.key,
+            secret: process.env.API_SECRET || config.watch.secret,
         });
-        util.makeEventEmitter(this);
     }
 
     async getTrades(since, limit, handleFetch) {
