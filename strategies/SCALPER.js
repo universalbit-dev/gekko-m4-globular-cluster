@@ -1,3 +1,37 @@
+/* copilot explain
+This JavaScript code defines a trading strategy for the Gekko trading bot called "SCALPER". Here is an explanation of the code:
+
+    Imports and Variable Declarations:
+        Various modules are imported, including openvino-node,underscore, log, Chess, fs-extra, and StopLoss.
+
+    Utility Functions:
+        makeoperator: Logs a randomly selected arithmetic operator.
+        fxchess: Simulates a random game of chess and logs the game's progression.
+
+    Main Strategy Object (method):
+        init: Initializes the strategy, sets up necessary variables, and configures the Parabolic SAR (PSAR) indicator and stop loss.
+            Sets the strategy name to 'SCALPER'.
+            
+            Initializes a candle queue, buy-in status, and buy-in price.
+            Adds the PSAR indicator with specific settings.
+            Initializes a stop loss with a 5% threshold.
+        update: Updates the strategy with the current candle data.
+            Updates the PSAR and stop loss.
+            Tracks Darvas Box high and low values.
+            Calculates the delta of the candle close price.
+        check: The core logic for the strategy, which evaluates the indicators and makes buy/sell decisions.
+            Logs a random operator and a random game of chess for debugging purposes.
+            Checks if the candle queue length is sufficient for analysis.
+            Calculates running minimum and maximum candle close prices over a period.
+            Determines buy/sell signals based on various conditions, such as candle close price relative to PSAR, running minimum/maximum, and other computed values.
+            Resets relevant variables after a buy/sell decision is made.
+            Integrates a stop loss mechanism.
+        stopLoss: Updates the stop loss with the current candle data and makes buy/sell decisions based on the stop loss condition.
+        log: Logs the debug information.
+
+The strategy uses a combination of the PSAR indicator, Darvas Box, and custom logic to determine buy and sell signals. 
+It also includes debugging functionalities and a stop loss mechanism to manage risk.
+*/
 const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = require("underscore");
 var log = require('../core/log.js');
