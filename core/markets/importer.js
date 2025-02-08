@@ -1,4 +1,4 @@
-/*  
+/*  copilot explain
 This file, importer.js, is part of the universalbit-dev/gekko-m4-globular-cluster repository. It handles importing trade data from cryptocurrency exchanges using the ccxt library. Here is a breakdown of its components:
 
     Imports and Initial Setup:
