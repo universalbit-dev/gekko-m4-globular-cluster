@@ -81,5 +81,8 @@ The provided files contain various technical indicators used in trading strategi
 - **Logic**: Implements the Linear Regression Curve (LRC) indicator.
 - **Purpose**: Used to identify the general direction of a trend over a specified period by fitting a linear regression line to the price data.
 
+### DEMA.js (Double Exponential Moving Average)
+- **Logic**: Implements the Double Exponential Moving Average (DEMA) indicator.
+- **Purpose**: Used to reduce lag compared to a traditional Exponential Moving Average (EMA), providing a more responsive indicator to price changes.
 
 
