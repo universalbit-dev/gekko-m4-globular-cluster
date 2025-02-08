@@ -28,7 +28,37 @@ The provided files contain various technical indicators used in trading strategi
 - **Purpose**: Identifies trend direction and strength.
 - **Logic**: Uses the ADX indicator to calculate DI (Directional Index) values for trend identification.
 
-These indicators are typically used in conjunction to form trading strategies that signal buy or sell opportunities based on market conditions.
+### SMMA.js (Smoothed Moving Average)
+- **Purpose**: The Smoothed Moving Average (SMMA) is used to smooth out price data over a specified period, reducing noise and providing a clearer trend direction compared to a simple moving average.
+- **Logic**:
+  - Initializes with a specified weight and uses an instance of the Simple Moving Average (SMA) for initial calculations.
+  - Maintains an array of historical prices.
+  - Calculates the SMMA value using the formula: \( \text{SMMA} = \frac{\text{Previous SMMA} \times (\text{Weight} - 1) + \text{Current Price}}{\text{Weight}} \).
+  - Updates the SMMA value with each new price, incorporating both the current price and the previous SMMA value.
 
+### STC.js (Schaff Trend Cycle)
+- **Purpose**: The Schaff Trend Cycle (STC) is a momentum indicator that uses a combination of MACD and Stochastic Oscillator principles to identify trends and potential reversal points in the market.
+- **Logic**:
+  - Initializes with MACD settings (short, long, signal) and cycle/smooth factors.
+  - Updates MACD values for each new price.
+  - Applies Stochastic calculations twice to smooth MACD values, enhancing trend detection.
+  - Uses Welles Wilder's smoothing method to further refine the trend cycle.
+  - The final result is a smoothed trend cycle value indicating market momentum.
 
-////
+### STOCH.js (Stochastic Oscillator)
+- **Purpose**: The Stochastic Oscillator is a momentum indicator comparing a particular closing price of a security to a range of its prices over a certain period. It aims to predict price turning points by identifying overbought and oversold conditions.
+- **Logic**:
+  - Initializes with K and D period settings, and sets up a Simple Moving Average (SMA) for the D period.
+  - Maintains an array of historical candle data.
+  - For each new candle, calculates the lowest low (LL) and highest high (HH) over the K period.
+  - Computes the %K value using the formula: \( K = \frac{\text{Close} - LL}{HH - LL} \times 100 \).
+  - Updates the SMA with the %K value to obtain the %D value.
+  - The final result consists of the %K and %D values, indicating momentum and potential price reversals.
+
+### StopLoss.js
+- **Purpose**: The Stop Loss indicator is designed to limit an investor's loss on a position by specifying a price at which the position will be sold if the price drops below a certain threshold.
+- **Logic**:
+  - Initializes with a specified threshold percentage.
+  - Tracks the highest price reached by the asset.
+  - Updates the stop loss price based on the highest price and the specified threshold.
+  - Determines if the current price has fallen to or below the stop loss price, indicating it is time to sell.
