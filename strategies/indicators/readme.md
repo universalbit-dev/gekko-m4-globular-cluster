@@ -85,4 +85,10 @@ The provided files contain various technical indicators used in trading strategi
 - **Logic**: Implements the Double Exponential Moving Average (DEMA) indicator.
 - **Purpose**: Used to reduce lag compared to a traditional Exponential Moving Average (EMA), providing a more responsive indicator to price changes.
 
+### HMA.js (Hull Moving Average)
+- **Logic**: Implements the Hull Moving Average (HMA) indicator.
+- **Purpose**: Used to smooth price data while minimizing lag, providing a more responsive indicator to price changes.
+
+
+
 
