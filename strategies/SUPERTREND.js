@@ -1,5 +1,34 @@
+/* copilot explain
+This JavaScript code defines a trading strategy for the Gekko trading bot using the Supertrend indicator. Here is an explanation of the code:
+
+    Imports and Variable Declarations:
+        Various modules are imported, including openvino-node, underscore, log, fs-extra, config, and StopLoss.
+        Configuration settings are loaded and assigned to this.settings.
+        A Chess module is imported to simulate a random game of chess.
+
+    Utility Functions:
+        sequence: Logs a random number from the Fibonacci sequence.
+        keepcalm: Logs a motivational message.
+        makeoperator: Logs a randomly selected arithmetic operator.
+
+    Main Strategy Object (method):
+        init: Initializes the strategy, sets up necessary variables, and configures indicators like ATR and StopLoss. Logs the start of the strategy.
+        update: Updates the stop loss with the current candle data.
+        log: Logs candle data to a CSV file.
+        fxchess: Simulates a random game of chess and logs the game's progression.
+        
+        check: The core logic for the strategy. It calculates the Supertrend bands and determines buy/sell signals based on the close price and the Supertrend value. 
+        It also integrates a stop loss mechanism.
+            Calculations:
+                Computes upperBandBasic and lowerBandBasic using ATR.
+                Adjusts upperBand and lowerBand based on previous values and the current close price.
+                Determines the current Supertrend value.
+            Buy/Sell Logic:
+                Issues a "long" advice (buy) if the close price is above the Supertrend and no position is currently held.
+                Issues a "short" advice (sell) if the close price is below the Supertrend and a position is currently held.
+*/
 const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");const _ = require("underscore");
+const _ = require("underscore");
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var config = require('../core/util.js').getConfig();
