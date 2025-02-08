@@ -33,7 +33,7 @@ var Dlna = function(config) {
   this.marketDataProvider.on('trades',this.candleManager.processTrades);
   this.heart.pump();
 }
-util.makeEventEmitter(Dlna);util.inherit(EventEmitter, Dlna);
+util.makeEventEmitter(Dlna);
 
 var Readable = require('stream').Readable;
 Dlna.prototype = Object.create(Readable.prototype, {constructor: { value: Dlna }});
