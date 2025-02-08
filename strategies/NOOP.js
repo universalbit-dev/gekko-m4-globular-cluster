@@ -64,14 +64,14 @@ method.init = function() {
     this.children = [];
     this.currentTrend;
     this.requiredHistory = -1;
-    var STRATEGY = "NOOP";
+    var STRATEGY = "NOOP";this.STRATEGY=STRATEGY;
     _.noop; 
 }
 method.update = function(candle) {_.noop}
 method.log = function() {_.noop}
 method.check = function(candle) { 
     this.checkChildren(candle);
-    this.listenAdvice('NOOP');
+    this.listenAdvice(this.STRATEGY);
     sequence();keepcalm();
 }
 
