@@ -8,10 +8,6 @@ The provided files contain various technical indicators used in trading strategi
 - **Purpose**: Identifies the strength of a trend.
 - **Logic**: Uses True Range (ATR) and calculates directional movement (DM) values. It then computes the directional index (DI) and the DX value based on these.
 
-### UO.js (Ultimate Oscillator)
-- **Purpose**: Combines three different time frames to reduce false signals.
-- **Logic**: Calculates buying pressure (BP) and true range (TR) for three periods. It then combines these with specific weights to compute the ultimate oscillator value.
-
 ### ADX.js (Average Directional Movement Index)
 - **Purpose**: Measures the strength of a trend.
 - **Logic**: Uses the DX indicator to compute the ADX value, which smooths out the DX values over a period.
@@ -27,6 +23,10 @@ The provided files contain various technical indicators used in trading strategi
 ### DMI.js (Directional Movement Index)
 - **Purpose**: Identifies trend direction and strength.
 - **Logic**: Uses the ADX indicator to calculate DI (Directional Index) values for trend identification.
+
+### SMA.js (Simple Moving Average)
+- **Logic**: Implements the Simple Moving Average (SMA) indicator.
+- **Purpose**: Used to smooth out price data by calculating the average price over a specified window length, helping to identify trends.
 
 ### SMMA.js (Smoothed Moving Average)
 - **Purpose**: The Smoothed Moving Average (SMMA) is used to smooth out price data over a specified period, reducing noise and providing a clearer trend direction compared to a simple moving average.
@@ -56,3 +56,21 @@ The provided files contain various technical indicators used in trading strategi
   - Tracks the highest price reached by the asset.
   - Updates the stop loss price based on the highest price and the specified threshold.
   - Determines if the current price has fallen to or below the stop loss price, indicating it is time to sell.
+
+### TRANGE.js (True Range)
+- **Logic**: Implements the True Range (TR) indicator.
+- **Purpose**: Used to measure market volatility by calculating the largest range between the high and low prices, and the previous close price.
+
+### TRIX.js (Triple Exponential Average)
+- **Logic**: Implements the TRIX (Triple Exponential Average) indicator.
+- **Purpose**: Used to identify the rate of change in a triple exponentially smoothed moving average of a security's price, which helps in identifying momentum and potential trend reversals.
+
+### TSI.js (True Strength Index)
+- **Logic**: Implements the True Strength Index (TSI) indicator.
+- **Purpose**: Used to identify the strength of a trend by measuring momentum and smoothing it using exponential moving averages (EMAs).
+
+### UO.js (Ultimate Oscillator)
+- **Purpose**: Combines three different time frames to reduce false signals.
+- **Logic**: Calculates buying pressure (BP) and true range (TR) for three periods. It then combines these with specific weights to compute the ultimate oscillator value.
+
+
