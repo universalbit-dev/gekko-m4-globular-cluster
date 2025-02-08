@@ -1,4 +1,4 @@
-/*
+/* copilot explain
 This JavaScript code defines a trading strategy for the Gekko trading bot using a combination of RSI (Relative Strength Index), Bull and Bear indicators, and ADX (Average Directional Index) modifiers. 
 Here's a detailed explanation of the code:
 
