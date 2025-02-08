@@ -1,5 +1,21 @@
 /* copilot explain
 
+The file dlna.js defines a Dlna class which extends the Readable stream and uses various modules to manage market data and create candles. Here's a breakdown:
+
+    Dependencies: The code imports several modules: underscore, events, util, Heart, MarketDataProvider, and CandleManager.
+    
+    Dlna Constructor:
+        Binds all functions to the instance using _.bindAll.
+        Initializes internal modules (Heart, MarketDataProvider, CandleManager).
+        Sets up event listeners to relay market events (marketUpdate and marketStart).
+        Outputs candles through candleManager.
+        Retrieves trade data on every tick from heart.
+        Processes trades to create candles.
+        
+    Stream Implementation:
+        Extends Readable stream.
+        Implements a no-operation _read function.
+        Defines pushCandles to push candles data to the stream.
 */
 
 const _ = require("underscore");
