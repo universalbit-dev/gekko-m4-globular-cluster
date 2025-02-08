@@ -73,4 +73,9 @@ The provided files contain various technical indicators used in trading strategi
 - **Purpose**: Combines three different time frames to reduce false signals.
 - **Logic**: Calculates buying pressure (BP) and true range (TR) for three periods. It then combines these with specific weights to compute the ultimate oscillator value.
 
+### WMA.js (Weighted Moving Average)
+- **Logic**: Implements the Weighted Moving Average (WMA) indicator.
+- **Purpose**: Used to give more weight to recent prices in the calculation of the average, allowing for a more responsive indicator to recent price changes.
+
+
 
