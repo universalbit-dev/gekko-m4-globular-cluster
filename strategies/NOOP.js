@@ -1,4 +1,4 @@
-/*
+/* copilot explain
 
 This JavaScript file (NOOP.js) defines a "no-operation" strategy for the Gekko trading bot. Here are the key components:
 
@@ -22,7 +22,7 @@ This JavaScript file (NOOP.js) defines a "no-operation" strategy for the Gekko t
     Export:
         The method object is exported for use in the Gekko trading bot.
 
-This strategy essentially performs no trading actions but includes logging and motivational messages. You can view the full content here.
+This strategy essentially performs no trading actions but includes logging and motivational messages.
 
 */
 
