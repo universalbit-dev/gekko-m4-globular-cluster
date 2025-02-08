@@ -1,5 +1,33 @@
 /* copilot explain
+    Imports and Initial Setup:
+        Various modules are imported, including underscore for utility functions, EventEmitter for event handling, Readable for creating readable streams, and util for utility functions.
+        Internal modules Heart, MarketDataProvider, and CandleManager are imported for managing ticks, fetching market data, and processing trade data into candles, respectively.
 
+    Dlna Class:
+        The Dlna class extends Readable and EventEmitter:
+            Readable stream with objectMode enabled allows streaming of JavaScript objects.
+            EventEmitter enables the class to emit and listen to events.
+
+    Constructor (constructor):
+        Initializes the Dlna instance with a configuration object.
+        Calls EventEmitter and Readable constructors.
+        Binds all methods of the class to this using underscore.
+        Initializes internal modules (Heart, MarketDataProvider, CandleManager) within a try-catch block to handle initialization errors.
+        Sets up event handling by calling _setupEventHandling.
+        Starts the Heart module by calling this.heart.pump().
+
+    Event Handling (_setupEventHandling):
+        Sets up various event listeners within a try-catch block to handle errors.
+        Relays marketUpdate and marketStart events from MarketDataProvider to Dlna.
+        Outputs candles from CandleManager by calling this.pushCandles.
+        Retrieves trade data on every tick from Heart.
+        Processes new trade data into candles using CandleManager.
+
+    Readable Stream Methods:
+        _read(): A no-operation function required by the Readable stream.
+        pushCandles(candles): Pushes each candle to the readable stream using underscore.
+        
+This class coordinates the flow of market data, fetching trade data, processing it into candles, and emitting relevant events for other components to handle.
 */
 
 const _ = require("underscore");
