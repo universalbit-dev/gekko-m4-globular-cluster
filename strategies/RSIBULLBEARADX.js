@@ -1,7 +1,44 @@
+/*
+This JavaScript code defines a trading strategy for the Gekko trading bot using a combination of RSI (Relative Strength Index), Bull and Bear indicators, and ADX (Average Directional Index) modifiers. 
+Here's a detailed explanation of the code:
+
+    Imports and Variable Declarations:
+        Various modules are imported, including openvino-node, log, config, underscore, fs-extra, and StopLoss.
+        Configuration settings are loaded and assigned to this.settings.
+        A Chess module is imported to simulate a random game of chess.
+
+    Utility Functions:
+        sequence: Logs a random number from the Fibonacci sequence.
+        keepcalm: Logs a motivational message.
+        makeoperator: Logs a randomly selected arithmetic operator.
+
+    Main Strategy Object (method):
+        init: Initializes the strategy and sets up necessary variables and indicators.
+            Sets the required history size.
+            Adds Tulip indicators for SMA (Simple Moving Average), RSI, and ADX.
+            Initializes RSI modifiers and stop loss settings.
+            Logs the start of the strategy and warns users if the warmup period is insufficient.
+        resetTrend: Resets the trend state.
+        lowHigh: Tracks the low and high values for backtesting.
+        update: Updates the stop loss with the current candle data.
+        log: Logs candle data to a CSV file.
+        fxchess: Simulates a random game of chess and logs the game's progression.
+	
+        check: The core logic for the strategy, which evaluates the indicators and makes buy/sell decisions.Retrieves the indicator results.
+            Uses different RSI strategies depending on the longer trend (Bull/Bear) and modifies them based on ADX values.
+            Executes buy/sell logic based on the RSI and ADX values.
+            Integrates a stop loss mechanism.
+        long: Executes a "long" (buy) position.
+        short: Executes a "short" (sell) position.
+        end: Logs the end of the strategy.
+
+The strategy uses a combination of RSI and ADX indicators to determine market trends and make trading decisions, with additional modifications based on shorter-term Bull/Bear trends. 
+It also includes debugging, logging, and stop loss functionalities.
+*/
 const { addon: ov } = require('openvino-node');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-var Promise = require("bluebird");const _ = require("underscore");
+const _ = require("underscore");
 const fs = require("fs-extra");fs.createReadStream('/dev/null');
 const StopLoss = require('./indicators/StopLoss');
 var settings = config.RSIBULLBEARADX;this.settings=settings;
