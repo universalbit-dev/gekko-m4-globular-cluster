@@ -1,4 +1,38 @@
-/*  */
+/*  
+This file, importer.js, is part of the universalbit-dev/gekko-m4-globular-cluster repository. It handles importing trade data from cryptocurrency exchanges using the ccxt library. Here is a breakdown of its components:
+
+    Imports and Initial Setup:
+        The script imports various libraries and utilities, including lodash, moment, util, ccxt, and custom modules like TradeBatcher, CandleManager, and exchangeChecker.
+
+    Date Range Validation:
+        It validates the date range specified in the configuration. If the date range is invalid, it exits the script with an error message.
+
+    Exchange Checker:  //
+        It checks if the full history of the exchange can be fetched. If not, it exits the script.
+
+    Fetcher Class:
+        This class initializes an exchange instance using the ccxt library with API keys and secrets.
+        The getTrades method fetches trades from the exchange within a specified limit and date range.
+
+    Market Class:
+        This class extends Readable and integrates the Fetcher, TradeBatcher, and CandleManager.
+
+    Market Constructor:
+        Binds functions to the context.
+        Initializes the trade batcher, candle manager, and fetcher.
+        Sets up event listeners for fetching and processing trades.
+        Starts fetching trades by calling get().
+
+    Event Handling:
+        _read: A no-operation function required by the Readable stream.
+        pushCandles: Pushes candle data to the stream.
+        get: Fetches trades from the exchange.
+        handleFetch: Handles fetched trades, processes errors, and manages date ranges.
+        processTrades: Processes and batches trades, sends updates, and manages completion.
+
+In summary, this script sets up a system to fetch, process, and manage trade data from cryptocurrency exchanges using the ccxt library. 
+The data is batched and converted into candles for further analysis or usage.
+*/
 const _ = require('lodash');
 const moment = require('moment');
 const util = require('../util');
