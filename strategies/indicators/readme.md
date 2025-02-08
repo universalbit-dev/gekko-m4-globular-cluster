@@ -77,5 +77,9 @@ The provided files contain various technical indicators used in trading strategi
 - **Logic**: Implements the Weighted Moving Average (WMA) indicator.
 - **Purpose**: Used to give more weight to recent prices in the calculation of the average, allowing for a more responsive indicator to recent price changes.
 
+### LRC.js (Linear Regression Curve)
+- **Logic**: Implements the Linear Regression Curve (LRC) indicator.
+- **Purpose**: Used to identify the general direction of a trend over a specified period by fitting a linear regression line to the price data.
+
 
 
