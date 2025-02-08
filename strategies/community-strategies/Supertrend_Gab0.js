@@ -3,7 +3,7 @@ This JavaScript code defines a trading strategy for the Gekko trading bot, speci
 
     Imports and Variable Declarations:
         The code imports a logging module.
-        It defines an empty strategy object strat.
+        It defines an empty strategy object method.
 
     Initialization Function (method.init):
         Sets the required history size for the strategy.
