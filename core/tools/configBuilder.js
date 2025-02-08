@@ -7,7 +7,6 @@ module.exports = function() {
 
   switch(mode){
   case(mode === 'backtest'):return config;break;
-  case (mode === 'importer'):return config;break;
   case(mode === 'realtime'):return config;break;
   default:util.die('cannot find configuration file');
   }  
