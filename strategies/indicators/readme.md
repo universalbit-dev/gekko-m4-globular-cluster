@@ -89,6 +89,12 @@ The provided files contain various technical indicators used in trading strategi
 - **Logic**: Implements the Hull Moving Average (HMA) indicator.
 - **Purpose**: Used to smooth price data while minimizing lag, providing a more responsive indicator to price changes.
 
+### EMV.js (Ease of Movement)
+- **Logic**: Implements the Ease of Movement (EMV) indicator.
+- **Purpose**: Used to measure the relationship between price change and volume, indicating how easily a price is moving.
+
+
+
 
 
 
