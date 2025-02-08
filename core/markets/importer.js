@@ -7,9 +7,6 @@ This file, importer.js, is part of the universalbit-dev/gekko-m4-globular-cluste
     Date Range Validation:
         It validates the date range specified in the configuration. If the date range is invalid, it exits the script with an error message.
 
-    Exchange Checker:  //
-        It checks if the full history of the exchange can be fetched. If not, it exits the script.
-
     Fetcher Class:
         This class initializes an exchange instance using the ccxt library with API keys and secrets.
         The getTrades method fetches trades from the exchange within a specified limit and date range.
@@ -33,6 +30,7 @@ This file, importer.js, is part of the universalbit-dev/gekko-m4-globular-cluste
 In summary, this script sets up a system to fetch, process, and manage trade data from cryptocurrency exchanges using the ccxt library. 
 The data is batched and converted into candles for further analysis or usage.
 */
+
 const _ = require('lodash');
 const moment = require('moment');
 const util = require('../util');
@@ -42,16 +40,17 @@ const log = require(dirs.core + 'log');
 const ccxt = require('ccxt');
 
 const daterange = config.importer.daterange;
-const from = moment.utc(daterange.from);
-const to = daterange.to ? moment.utc(daterange.to) : moment.utc();
+const since = moment.utc(daterange.from).valueOf(); // Convert to timestamp in milliseconds
 
-if (!from.isValid())
+if (!moment.utc(daterange.from).isValid())
     util.die('invalid `from`');
 
-if (!to.isValid())
+const to = daterange.to ? moment.utc(daterange.to).valueOf() : moment.utc().valueOf();
+
+if (!moment.utc(daterange.to).isValid())
     util.die('invalid `to`');
 
-if (to <= from)
+if (to <= since)
     util.die('This daterange does not make sense.');
 
 const TradeBatcher = require(dirs.dlna + 'tradeBatcher');
@@ -103,7 +102,7 @@ class Market extends Readable {
         this.tradeBatcher.on('new batch', this.candleManager.processTrades);
         this.candleManager.on('candles', this.pushCandles);
 
-        this.get();
+        this.get(since);
     }
 
     _read() {
@@ -114,8 +113,8 @@ class Market extends Readable {
         _.each(candles, this.push);
     }
 
-    get() {
-        this.fetcher.getTrades(from, 500, this.handleFetch);
+    get(since) {
+        this.fetcher.getTrades(since, 500, this.handleFetch);
     }
 
     handleFetch(err, trades) {
@@ -130,18 +129,18 @@ class Market extends Readable {
             return this.fetcher.emit('trades', []);
         }
 
-        const last = moment.unix(_.last(trades).timestamp / 1000).utc();
-        const lastId = _.last(trades).timestamp;
+        const last = _.last(trades).timestamp;
+        const lastId = last;
 
-        if (last < from) {
-            log.debug('Skipping data, they are before from date', last.format());
-            return this.get();
+        if (last < since) {
+            log.debug('Skipping data, they are before from date', moment.utc(last).format());
+            return this.get(since);
         }
 
         if (last > to || lastId === prevLastId) {
             this.fetcher.emit('done');
-            const endUnix = to.unix();
-            trades = _.filter(trades, t => t.timestamp / 1000 <= endUnix);
+            const endUnix = to;
+            trades = _.filter(trades, t => t.timestamp <= endUnix);
         }
 
         prevLastId = lastId;
@@ -159,15 +158,16 @@ class Market extends Readable {
 
         if (_.size(trades)) {
             const lastAtTS = _.last(trades).timestamp;
-            const lastAt = moment.unix(lastAtTS / 1000).utc().format();
+            const lastAt = moment.utc(lastAtTS).format();
             process.send({ event: 'marketUpdate', payload: lastAt });
         }
 
-        setTimeout(this.get, 1000);
+        setTimeout(() => this.get(_.last(trades).timestamp), 1000);
     }
 }
 
 module.exports = Market;
+
 
 /*
 The MIT License (MIT)
