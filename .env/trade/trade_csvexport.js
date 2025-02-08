@@ -1,10 +1,26 @@
+/*
+The trade_csvexport.js file configures a trading bot with environment-specific settings. Here's a summary of its key sections:
+
+    General Settings: Enables debug mode.
+    Watch: Configures the bot to watch for market changes on the Kraken exchange for the LTC/BTC pair.
+    Trader: Enables the trader and disables paper trading.
+    Trading Advisor: Configures the trading advisor with a method CSVEXPORT.
+    Database: Uses SQLite for data storage.
+    Candle Writer & Advice Logger: Both are disabled.
+    Backtesting: Configuration for backtesting, currently disabled.
+    Backtest Result Exporter: Configures how backtest results are exported, currently disabled.
+    Performance Analyzer: Enabled with a specified risk-free return rate.
+    Importer: Configuration for importing data, currently disabled.
+
+The file ends with an MIT license and a disclaimer about using the software at your own risk.
+*/
 require('dotenv').config()
 var config = {};
 //General Settings
 config.debug =true;
 //Watch
 config.watch = {enabled:true,
-exchange:'ccxt_exchanges',exchangeId:'kraken',currency:'USD',asset:'BTC',key:'',secret:''
+exchange:'ccxt_exchanges',exchangeId:'kraken',currency:'BTC',asset:'LTC',key:'',secret:''
 };
 
 //Trader
