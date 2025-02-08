@@ -46,9 +46,9 @@ The provided files contain various technical indicators used in trading strategi
   - The final result is a smoothed trend cycle value indicating market momentum.
 
 ### STOCH.js (Stochastic Oscillator)
-- **Purpose**: The Stochastic Oscillator is a momentum indicator comparing a particular closing price of a security to a range of its prices over a certain period. It aims to predict price turning points by identifying overbought and oversold conditions.
-- **Logic**:
-  
+- **Logic**: Implements the Stochastic Oscillator Slow (STOCH) indicator.
+- **Purpose**: Used to identify overbought or oversold conditions by comparing a security's closing price to its price range over a specified period.
+
 ### StopLoss.js
 - **Purpose**: The Stop Loss indicator is designed to limit an investor's loss on a position by specifying a price at which the position will be sold if the price drops below a certain threshold.
 - **Logic**:
