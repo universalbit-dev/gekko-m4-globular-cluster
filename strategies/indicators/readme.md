@@ -93,6 +93,21 @@ The provided files contain various technical indicators used in trading strategi
 - **Logic**: Implements the Ease of Movement (EMV) indicator.
 - **Purpose**: Used to measure the relationship between price change and volume, indicating how easily a price is moving.
 
+### PPO.js (Percentage Price Oscillator)
+- **Logic**: Implements the Percentage Price Oscillator (PPO) indicator.
+- **Purpose**: Used to measure the difference between two moving averages as a percentage of the larger moving average, indicating potential buy and sell signals.
+
+### DPO.js (Detrended Price Oscillator)
+- **Logic**: Implements the Detrended Price Oscillator (DPO) indicator.
+- **Purpose**: Used to eliminate long-term trends from prices, focusing on short-term patterns and cycles.
+
+### EMA.js (Exponential Moving Average)
+- **Logic**: Implements the Exponential Moving Average (EMA) indicator.
+- **Purpose**: Used to smooth price data, giving more weight to recent prices, which helps in identifying trends more quickly compared to a Simple Moving Average (SMA).
+
+
+
+
 
 
 
