@@ -2,7 +2,7 @@ module.exports = {
   apps : [{
     name: "import",
     script    : 'gekko.js',
-    args      : '-c .env/import/import.js -i',
+    args      : '-c env/import/import.js -i',
     instances : "1",
     autorestart: false,
     exec_mode : "cluster",
