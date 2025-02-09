@@ -81,6 +81,10 @@ The provided files contain various technical indicators used in trading strategi
 - **Logic**: Implements the Linear Regression Curve (LRC) indicator.
 - **Purpose**: Used to identify the general direction of a trend over a specified period by fitting a linear regression line to the price data.
 
+### MACD.js (Moving Average Convergence Divergence)
+- **Logic**: Implements the Moving Average Convergence Divergence (MACD) indicator.
+- **Purpose**: Used to identify potential buy and sell signals by comparing short-term and long-term Exponential Moving Averages (EMAs) and their divergences.
+
 ### DEMA.js (Double Exponential Moving Average)
 - **Logic**: Implements the Double Exponential Moving Average (DEMA) indicator.
 - **Purpose**: Used to reduce lag compared to a traditional Exponential Moving Average (EMA), providing a more responsive indicator to price changes.
@@ -104,6 +108,18 @@ The provided files contain various technical indicators used in trading strategi
 ### EMA.js (Exponential Moving Average)
 - **Logic**: Implements the Exponential Moving Average (EMA) indicator.
 - **Purpose**: Used to smooth price data, giving more weight to recent prices, which helps in identifying trends more quickly compared to a Simple Moving Average (SMA).
+
+### BBANDS.js (Bollinger Bands)
+- **Logic**: Implements the Bollinger Bands (BBANDS) indicator.
+- **Purpose**: Used to measure market volatility and identify potential overbought or oversold conditions by plotting price bands around a Simple Moving Average (SMA).
+
+### MFI.js (Money Flow Index)
+- **Logic**: Implements the Money Flow Index (MFI) indicator.
+- **Purpose**: Used to measure the strength of money flowing in and out of a security by comparing positive and negative money flow over a specified time period.
+
+
+
+
 
 
 
