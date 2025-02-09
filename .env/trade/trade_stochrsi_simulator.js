@@ -1,6 +1,7 @@
+require('dotenv').config()
 var config = {};
 config.debug =true;
-config.watch = {exchange:'exchangesimulator',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
 exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};

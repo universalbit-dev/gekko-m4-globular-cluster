@@ -18,13 +18,10 @@ require('dotenv').config()
 var config = {};
 //General Settings
 config.debug =true;
-//Watch
-config.watch = {enabled:true,
-exchange:'ccxt_exchanges',exchangeId:'kraken',currency:'BTC',asset:'LTC',key:'',secret:''
-};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 //Trader
-config.trader={enabled:true};
+config.trader={enabled:false};
 config.paperTrader = {enabled: false};
 
 //Trading Advisor

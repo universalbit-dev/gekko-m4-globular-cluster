@@ -30,9 +30,10 @@ This JavaScript file, trade_neuralnet_simulator.js, contains configuration setti
         The file includes an MIT license and a disclaimer to use at your own risk.
 
 */
+require('dotenv').config()
 var config = {};
 config.debug =true;
-config.watch = {exchange:'ccxt_exchanges',exchangeId:'kraken',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
 exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
