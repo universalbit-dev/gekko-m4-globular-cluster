@@ -19,11 +19,11 @@ This import.js file is a configuration script for the Gekko trading bot. Here's 
 
 The script exports the config object for use in other parts of the application.
 */
+require('dotenv').config()
 var config = {};
 //General Settings
 config.debug =true;
-
-config.watch = {exchange: '',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 //Date.prototype.toISOString()
 
 //Previous Month
