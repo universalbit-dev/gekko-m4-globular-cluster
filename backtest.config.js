@@ -3,7 +3,7 @@ module.exports = {
   {
     name: 'inverter',
     script    : 'gekko.js',
-    args      : '-c .env/backtest/backtest_inverter.js -b',
+    args      : '-c env/backtest/backtest_inverter.js -b',
     instances : "1",
     exec_mode : "cluster",
     env: {NODE_ENV: "development",},
@@ -12,42 +12,42 @@ module.exports = {
   {
   name: 'stochrsi',
   script    : 'gekko.js',
-  args      : '-c .env/backtest/backtest_stochrsi.js -b',
+  args      : '-c env/backtest/backtest_stochrsi.js -b',
   instances : "1",
   exec_mode : "cluster"
   },
   {
   name: 'rsibullbearadx',
   script    : 'gekko.js',
-  args      : '-c .env/backtest/backtest_rsibullbearadx.js -b',
+  args      : '-c env/backtest/backtest_rsibullbearadx.js -b',
   instances : "1",
   exec_mode : "cluster"
   },
   {
   name: 'nn',
   script    : 'gekko.js',
-  args      : '-c .env/backtest/backtest_nn.js -b',
+  args      : '-c env/backtest/backtest_nn.js -b',
   instances : "1",
   exec_mode : "cluster"
   },
   {
   name: 'dema',
   script    : 'gekko.js',
-  args      : '-c .env/backtest/backtest_dema.js -b',
+  args      : '-c env/backtest/backtest_dema.js -b',
   instances : "1",
   exec_mode : "cluster"
   },
   {
   name: 'supertrend',
   script    : 'gekko.js',
-  args      : '-c .env/backtest/backtest_supertrend.js -b',
+  args      : '-c env/backtest/backtest_supertrend.js -b',
   instances : "1",
   exec_mode : "cluster"
   },
   {
   name: 'noop',
   script    : 'gekko.js',
-  args      : '-c .env/backtest/backtest_noop.js -b',
+  args      : '-c env/backtest/backtest_noop.js -b',
   instances : "1",
   exec_mode : "cluster"
   }
