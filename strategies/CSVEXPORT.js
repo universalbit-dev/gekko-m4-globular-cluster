@@ -12,13 +12,13 @@ let fs = require('fs-extra');fs.createReadStream('/dev/null');
 var Wrapper = require('../strategyWrapperRules.js');
 var method = Wrapper;
 
-var id = 'kraken'; /* Exchange Name */
+var id = process.env.exchangeId; /* Exchange Name */
 //ccxt histogram variables
 var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0.00;var candle_volume=0.00;
 var exchange = new ccxt[id] ({
         verbose: false,
-        apiKey: process.env.API_KEY || '',
-        secret: process.env.API_SECRET || '',
+        apiKey: process.env.key || '',
+        secret: process.env.secret || '',
     });
     
 /* INIT */
