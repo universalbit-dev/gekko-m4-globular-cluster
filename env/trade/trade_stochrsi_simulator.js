@@ -32,7 +32,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Disclaimer:
                               USE AT YOUR OWN RISK!
-The author of this project is NOT responsible for any damage or loss caused
+The author of this project and contributors are NOT responsible for any damage or loss caused
 by this software. There can be bugs and the bot may not perform as expected
 or specified. Please consider testing it first with paper trading and/or
 backtesting on historical data. Also look at the code to see what how
