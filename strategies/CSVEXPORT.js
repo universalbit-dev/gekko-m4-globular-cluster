@@ -3,7 +3,7 @@
   (CC-BY-SA 4.0) Rowan Griffin
   https://creativecommons.org/licenses/by-sa/4.0/
 */
-
+require('dotenv').config();
 const ccxt = require("ccxt");
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
@@ -11,7 +11,6 @@ let _ = require('../core/lodash');
 let fs = require('fs-extra');fs.createReadStream('/dev/null');
 var Wrapper = require('../strategyWrapperRules.js');
 var method = Wrapper;
-
 var id = process.env.exchangeId; /* Exchange Name */
 //ccxt histogram variables
 var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0.00;var candle_volume=0.00;
