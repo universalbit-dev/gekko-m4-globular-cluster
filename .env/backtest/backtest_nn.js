@@ -1,8 +1,8 @@
+require('dotenv').config()
 var config = {};
 //General Settings
 config.debug =true;
-
-config.watch = {exchange: 'ccxt_exchanges',exchangeId:'',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 //TradingAdvisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};
 

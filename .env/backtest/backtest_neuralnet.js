@@ -1,7 +1,8 @@
+require('dotenv').config()
 var config = {};
 //General Settings
 config.debug =true;
-config.watch = {exchange: 'ccxt_exchanges',exchangeId:'',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:50,method:'NEURALNET'};
 config.NEURALNET={threshold_buy :0.3,threshold_sell :-0.3,learning_rate :0.01,

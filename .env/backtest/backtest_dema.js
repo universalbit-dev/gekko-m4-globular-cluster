@@ -1,11 +1,13 @@
+require('dotenv').config()
 var config = {};
 //General Settings
 config.debug =true;
-
-config.watch = {exchange: 'ccxt_exchanges',exchangeId:'',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 //Trading Advisor
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'};
-config.DEMA={weight:21,thresholds:[{down:-0.025,up:0.025}]};
+config.DEMA={weight:21,thresholds:[{down:-0.025,up:0.025}]}
+
+
 
 var previous_month = new Date();
 previous_month.setDate(1);
