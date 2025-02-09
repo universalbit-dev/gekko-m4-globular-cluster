@@ -7,10 +7,10 @@
 	https://creativecommons.org/licenses/by-sa/4.0/
 */
 
-// req's
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-
+var Wrapper = require('../strategyWrapperRules.js');
+var strat = Wrapper;
 // strategy
 var strat = {
 	
