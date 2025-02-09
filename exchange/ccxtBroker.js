@@ -178,7 +178,7 @@ class CcxtBroker extends EventEmitter {
     });
 
     order.on('completed', (summary) => {
-      _.remove(this.orders.open, order);
+      _.reject(this.orders.open, order);
       this.orders.closed.push(summary);
     });
 
