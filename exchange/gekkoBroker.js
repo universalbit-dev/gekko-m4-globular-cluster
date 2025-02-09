@@ -17,7 +17,7 @@ const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
 const isValidOrder = exchangeUtils.isValidOrder;
 
-class Broker {
+class Broker extends EventEmitter{
   constructor(config) {
     this.config = config;
 
