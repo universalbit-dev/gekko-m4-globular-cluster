@@ -7,9 +7,11 @@
 	https://creativecommons.org/licenses/by-sa/4.0/
 */
 
+// req's
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var Wrapper = require('../strategyWrapperRules.js');
+const StopLoss = require('./indicators/StopLoss');
 var strat = Wrapper;
 // strategy
 var strat = {
@@ -19,6 +21,7 @@ var strat = {
 	{
 		// core
 		this.name = 'RSIBULLBEARADX';
+		this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 		this.requiredHistory = config.tradingAdvisor.historySize;
 		this.resetTrend();
 		
@@ -46,8 +49,6 @@ var strat = {
 		this.BULL_MOD_low = this.settings.BULL_MOD_low;
 		this.BEAR_MOD_high = this.settings.BEAR_MOD_high;
 		this.BEAR_MOD_low = this.settings.BEAR_MOD_low;
-		
-		
 		// debug stuff
 		this.startTime = new Date();
 		
@@ -73,7 +74,6 @@ var strat = {
 		{
 			log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
 		}
-		
 	}, // init()
 	
 	
@@ -89,6 +89,9 @@ var strat = {
 		this.trend = trend;
 	},
 	
+	update: function(candle) {
+    this.stopLoss.update(candle);
+    },
 	
 	/* get low/high for backtest-period */
 	lowHigh: function( val, type )
@@ -158,8 +161,12 @@ var strat = {
 		
 		// add adx low/high if debug
 		if( this.debug ) this.lowHigh( adx, 'adx');
+		
+    //stoploss
+    if (this.stopLoss.shouldSell(this.candle)) {this.advice('short');}
+    else {this.advice('long');}
 	
-	}, // check()
+	},
 	
 	
 	/* LONG */
