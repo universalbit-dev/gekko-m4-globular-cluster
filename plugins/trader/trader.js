@@ -1,50 +1,16 @@
-/*copilot explain
-This JavaScript file (trader.js) defines a Trader class for the Gekko trading bot, which automates trading actions based on advice received. Here is an overview of its main components:
-
-    Dependencies:
-        Various modules are imported, including underscore, util, moment, events, log, Broker, and a dependency check for exchanges.
-
-    Trader Class:
-
-        Constructor (Trader function):
-            Binds all functions to the instance.
-            Configures the broker with trader and watch settings.
-            Initializes trade and trigger counters.
-            Creates a broker instance and performs an initial sync of portfolio data.
-            Starts periodic portfolio sync.
-
-        Events:
-            The Trader class is made an event emitter using util.makeEventEmitter.
-
-        Methods:
-            sync: Syncs private data with the broker and updates portfolio and balance.
-            relayPortfolioChange: Emits an event when the portfolio changes.
-            relayPortfolioValueChange: Emits an event when the portfolio value changes.
-            setPortfolio: Updates the portfolio with current balances.
-            setBalance: Updates the balance and exposure based on current portfolio and price.
-            processCandle: Processes market data (candles) to update the price and portfolio.
-            processAdvice: Processes trading advice to buy or sell assets based on recommendations.
-            createOrder: Creates and manages a trade order based on advice.
-            onStopTrigger: Handles trailing stop triggers to sell assets.
-            cancelOrder: Cancels an existing order before creating a new one.
-
-    Export:
-        The Trader class is exported for use in other modules.
-
-This setup allows the Trader to receive trading advice, manage trade orders, and handle portfolio updates within the Gekko trading bot framework.
-*/
-const _ = require('underscore');
+const _ = require('../../core/lodash.js');
 const util = require('../../core/util.js');
 const config = util.getConfig();
 const dirs = util.dirs();
 const moment = require('moment');
-const {EventEmitter} = require("events");
+
 const log = require(dirs.core + 'log');
 const Broker = require(dirs.broker + '/gekkoBroker');
 
 require(dirs.gekko + '/exchange/dependencyCheck');
 
 const Trader = function(next) {
+
   _.bindAll(this,_.functions(this));
 
   this.brokerConfig = {
@@ -83,23 +49,16 @@ const Trader = function(next) {
   this.cancellingOrder = false;
   this.sendInitialPortfolio = false;
 
-  setInterval(this.sync, 500 * 60 * 10);
+  setInterval(this.sync, 1000 * 60 * 10);
 }
 
 // teach our trader events
 util.makeEventEmitter(Trader);
 
-
 Trader.prototype.sync = function(next) {
   log.debug('syncing private data');
-  
-  if (typeof this.broker.syncPrivateData !== 'function') {
-    util.die('Broker does not support syncPrivateData');
-    return;
-  }
-  
   this.broker.syncPrivateData(() => {
-    if (!this.price) {
+    if(!this.price) {
       this.price = this.broker.ticker.bid;
     }
 
@@ -108,15 +67,18 @@ Trader.prototype.sync = function(next) {
     this.setPortfolio();
     this.setBalance();
 
-    if (this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
+    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
       this.relayPortfolioChange();
     }
 
-    if (next) {
+    // balance is relayed every minute
+    // no need to do it here.
+
+    if(next) {
       next();
     }
   });
-};
+}
 
 Trader.prototype.relayPortfolioChange = function() {
   this.deferredEmit('portfolioChange', {
