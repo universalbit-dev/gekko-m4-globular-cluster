@@ -1,5 +1,5 @@
-const _ = require('lodash');
-
+const _ = require('underscore');
+const {EventEmitter} = require("events");class Event extends EventEmitter{};
 const util = require('../../core/util');
 const ENV = util.gekkoEnv();
 
@@ -43,6 +43,7 @@ const PaperTrader = function() {
 
   this.warmupCandle;
 }
+util.makeEventEmitter(PaperTrader);util.inherit(Event, PaperTrader);
 
 PaperTrader.prototype.relayPortfolioChange = function() {
   this.deferredEmit('portfolioChange', {
@@ -276,7 +277,6 @@ PaperTrader.prototype.processCandle = function(candle, done) {
   if(this.activeStopTrigger) {
     this.activeStopTrigger.instance.updatePrice(this.price);
   }
-
   done();
 }
 
