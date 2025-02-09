@@ -54,11 +54,10 @@ const Trader = function(next) {
 
 util.makeEventEmitter(Trader);util.inherit(Event, Trader);
 
-
 Trader.prototype.sync = function(next) {
   log.debug('syncing private data');
   this.broker.syncPrivateData(() => {
-    if(!this.price) {
+    if (!this.price) {
       this.price = this.broker.ticker.bid;
     }
 
@@ -67,14 +66,11 @@ Trader.prototype.sync = function(next) {
     this.setPortfolio();
     this.setBalance();
 
-    if(this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
+    if (this.sendInitialPortfolio && !_.isEqual(oldPortfolio, this.portfolio)) {
       this.relayPortfolioChange();
     }
 
-    // balance is relayed every minute
-    // no need to do it here.
-
-    if(next) {
+    if (next) {
       next();
     }
   });
