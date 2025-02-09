@@ -2,7 +2,7 @@
 The trade_csvexport.js file configures a trading bot with environment-specific settings. Here's a summary of its key sections:
 
     General Settings: Enables debug mode.
-    Watch: Configures the bot to watch for market changes on the Kraken exchange for the LTC/BTC pair.
+    Watch: Configures the bot to watch for market changes on exchange for the LTC/BTC pair.
     Trader: Enables the trader and disables paper trading.
     Trading Advisor: Configures the trading advisor with a method CSVEXPORT.
     Database: Uses SQLite for data storage.
