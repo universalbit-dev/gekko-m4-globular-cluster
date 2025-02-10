@@ -1,18 +1,18 @@
-/*COPILOT ENHANCE 
-
-To enhance the EXCHANGESIMULATOR function to calculate the price based on the BTC-LTC asset pair,
+/* copilot enhance
+To enhance the EXCHANGESIMULATOR function to calculate the price based on the LTC-BTC asset pair,
 we can integrate price fetching from an external exchange API. 
 Here is a potential enhancement to the EXCHANGESIMULATOR function:
 
-Import the necessary modules (ccxt library)for fetching BTC-LTC prices.
-Update the Trader function to fetch the latest BTC-LTC prices and use them in price calculations.
-
+Import the necessary modules (ccxt library)for fetching LTC-BTC prices.
+Update the Trader function to fetch the latest LTC-BTC prices and use them in price calculations.
 */
 const ccxt = require('ccxt'); // Import the ccxt library for exchange API
 const moment = require('moment');
 const _ = require('underscore');
 
-const TREND_DURATION = 10;
+var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
+var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);
+const TREND_DURATION = fibonacci_number;
 
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1) ) + min;
