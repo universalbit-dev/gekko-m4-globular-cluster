@@ -20,6 +20,7 @@ const { Chess } = require('chess.js')
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var tulind=require('../core/tulind');
+const StopLoss = require('./indicators/StopLoss');
 
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 
@@ -29,6 +30,11 @@ var symbol = '';var type='';var side='';
 var amount = 0.00; var price =0.00; var since='';var limit=0;var parameters = {};
 var limit_buy=0.00;var limit_sell=0.00;var stoporder=0.00;var takeorder=0.00;
 var currentPrice=0.00;var spread=0.00;
+var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0.00;var candle_volume=0.00;
+
+var bid_array=[];var ask_array=[];
+
+this.exchange = new ccxt.kraken({ enableRateLimit: true }); // Initialize the exchange instance without API keys
 
 var ohlcv = async function() {
 try {
@@ -127,6 +133,7 @@ var method = {
   init: function() {
     //ohlcv();
     this.name = 'NEURALNET';
+    this.stopLoss = new StopLoss(5); // 5% stop loss threshold
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
@@ -249,6 +256,7 @@ var method = {
   }, 
 
   update: function(candle) {
+    this.stopLoss.update(candle);
     if (1 === this.scale && 1 < candle.high && 0 === this.predictionCount) this.setNormalizeFactor(candle);
     this.candle = candle;
     this.priceBuffer.push([(candle.low / this.scale),(candle.high / this.scale),(candle.close / this.scale),(candle.open / this.scale),(candle.volume / 1000)]);
@@ -322,13 +330,15 @@ var method = {
     console.debug("-- Stop  -- :" + stoporder);console.debug("-- Take  -- :" + takeorder);
     console.debug("-- Spread  -- :" + spread);
     console.debug('-- Learning Method -- :' + this.settings.method);
-    
+    //stoploss
+    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    else {this.advice('long');}
   },
   end: function() {log.debug('THE END');}
 };
 module.exports = method;
 
-/*copilot explain
+/* copilot explain
 This file, `NEURALNET.js`, is a trading strategy for the Gekko trading bot. It leverages machine learning, specifically neural networks, for predicting market trends and making trading decisions. Here's a detailed breakdown of the code:
 
 ### Libraries and Modules
