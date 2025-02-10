@@ -8,7 +8,7 @@ It fetches market data, trains a neural network, and places buy/sell orders base
 The strategy also includes functions for debugging and random operations.
 */
 
-// universalbit-dev decentralized strategies */
+//universalbit-dev decentralized strategies */
 require('dotenv').config();
 const { addon: ov } = require('openvino-node');
 const ccxt = require("ccxt");
@@ -38,9 +38,9 @@ this.exchange = new ccxt.kraken({ enableRateLimit: true }); // Initialize the ex
 
 var ohlcv = async function() {
 try {
-    const since = await exchange.milliseconds() - 86400 * 1000; //last 24 hrs
+    const since = await this.exchange.milliseconds() - 86400 * 1000; //last 24 hrs
     symbol ='LTC/BTC';timeframe='45m';limit=100;parameters={};
-    const Ohlcv = await exchange.fetchOHLCV(symbol, timeframe, since, limit);
+    const Ohlcv = await this.exchange.fetchOHLCV(symbol, timeframe, since, limit);
     console.log (' -- ohlcv -- Wohoo! -- open -- high -- close -- volume --',Ohlcv);
     //ccxt Histogram -- open -- high -- low -- close -- volume --
     for (let i = 0; i <= _.size(limit)-1; i++) {
@@ -54,7 +54,7 @@ try {
     
     }
     catch (e) {
-    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (this.exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
     console.log (' ohlcv -- Error -- ');
     }
 };
@@ -63,11 +63,11 @@ try {
 const buy = async function() {
     try {
     symbol ='LTC/BTC';type='limit';side='buy';amount = 0.02;price=limit_buy;parameters={};
-    const orders = await exchange.createOrder(symbol,type,side,amount,price);
+    const orders = await this.exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Buy Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
     catch (e) {
-    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (this.exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
     console.log ('Submit Buy Order -- Error -- ');
     }
 };
@@ -75,11 +75,11 @@ const buy = async function() {
 const sell = async function() {
     try {
     symbol = 'LTC/BTC';type='limit';side='sell';amount = 0.02;price=limit_sell;parameters={};
-    const orders = await exchange.createOrder(symbol,type,side,amount,price);
+    const orders = await this.exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Sell Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
     catch (e) {
-    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (this.exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
     console.log ('Submit Sell Order -- Error -- ');
     }
 };
@@ -87,11 +87,11 @@ const sell = async function() {
 const stop = async function() {
     try {
     symbol = 'LTC/BTC';type='limit';side='sell';amount = 0.02;price=stoporder;parameters={};
-    const orders = await exchange.createOrder(symbol,type,side,amount,price);
+    const orders = await this.exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Stop Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
     catch (e) {
-    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (this.exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
     console.log ('Submit Stop Order -- Error -- ');
     }
 };
@@ -99,11 +99,11 @@ const stop = async function() {
 const take = async function() {
     try {
     symbol = 'LTC/BTC';type='limit';side='buy';amount = 0.02;price=takeorder;parameters={};
-    const orders = await exchange.createOrder(symbol,type,side,amount,price);
+    const orders = await this.exchange.createOrder(symbol,type,side,amount,price);
     console.log ('Submitted Take Order -- Wohoo! -- ',orders);this.predictionCount=0;
     }
     catch (e) {
-    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (this.exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
     console.log ('Submit Take Order -- Error -- ');
     }
 };
@@ -111,13 +111,13 @@ const take = async function() {
 const openOrders = async function() {
     try {
     symbol = 'LTC/BTC';
-    let since = await exchange.milliseconds() - 86400000 // -1 day from now (24 hours)
+    let since = await this.exchange.milliseconds() - 86400000 // -1 day from now (24 hours)
     let limit =20;parameters={};
-    const openorders = await exchange.fetchOpenOrders(symbol, since, limit, parameters);
+    const openorders = await this.exchange.fetchOpenOrders(symbol, since, limit, parameters);
     console.log ('OpenOrders -- Wohoo! -- ', openorders);
     }
     catch (e) {
-    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log (this.exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
     console.log ('OpenOrders -- Error -- ');
     }
 };
