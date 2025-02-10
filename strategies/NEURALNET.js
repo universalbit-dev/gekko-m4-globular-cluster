@@ -353,7 +353,7 @@ This file, `NEURALNET.js`, is a trading strategy for the Gekko trading bot. It l
 
 ### Configuration and Initialization
 - ** Settings and Variables **: Various settings and variables are initialized, including symbol, type, side, amount, price, and exchange-related variables.
-- ** Exchange Initialization **: Initializes an exchange object using ccxt with placeholders for API keys.
+- ** Exchange Initialization **: Initializes an exchange object using ccxt.
 
 ### Functions
 1. **OHLCV Data Fetching**:
