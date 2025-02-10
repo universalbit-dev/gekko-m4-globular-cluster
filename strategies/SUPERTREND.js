@@ -32,6 +32,7 @@ const _ = require("underscore");
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var config = require('../core/util.js').getConfig();
+var Wrapper = require('../strategyWrapperRules.js');
 const StopLoss = require('./indicators/StopLoss');
 
 var settings = config.SUPERTREND;this.settings=settings;
@@ -65,7 +66,8 @@ var result = Math.floor(Math.random() * operator.length);
 console.log("\t\t\t\tcourtesy of... "+ operator[result]);
 }
 
-var method = {
+var method = Wrapper;
+method = {
 init : function() {
   startTime= new Date();
   this.name = 'SUPERTREND';
@@ -152,7 +154,6 @@ check : function(candle) {
 },
 
 end : function() {log.info('THE END');}
-
 };
 
 module.exports = method;
