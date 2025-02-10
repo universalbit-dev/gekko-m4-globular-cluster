@@ -29,6 +29,7 @@ const { addon: ov } = require('openvino-node');
 const _ = require("underscore");
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
+var Wrapper = require('../strategyWrapperRules.js');
 var method = Wrapper;
 const StopLoss = require('./indicators/StopLoss');
 method.makeoperator = function() {
