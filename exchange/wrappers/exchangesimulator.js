@@ -1,21 +1,16 @@
-/* copilot enhance
-To enhance the EXCHANGESIMULATOR function to calculate the price based on the LTC-BTC asset pair,
-we can integrate price fetching from an external exchange API. 
-Here is a potential enhancement to the EXCHANGESIMULATOR function:
-
-Import the necessary modules (ccxt library)for fetching LTC-BTC prices.
-Update the Trader function to fetch the latest LTC-BTC prices and use them in price calculations.
+/* copilot explain
+exchangesimulator.js file use public endpoints of the exchange.
 */
 const ccxt = require('ccxt'); // Import the ccxt library for exchange API
 const moment = require('moment');
 const _ = require('underscore');
 
-var fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
+var fibonacci_sequence = ['0', '1', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '144', '233', '377', '610', '987', '1597', '2584', '4181', '6765'];
 var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);
 const TREND_DURATION = fibonacci_number;
 
 function getRndInteger(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) ) + min;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 const Trader = function() {
@@ -24,7 +19,7 @@ const Trader = function() {
     this.price = 10;
     this.trend = 'up';
     this.tid = 0;
-    this.exchange = new ccxt.kraken(); // Initialize the exchange instance
+    this.exchange = new ccxt.kraken({ enableRateLimit: true }); // Initialize the exchange instance without API keys
 };
 
 Trader.prototype.fetchLatestPrice = async function() {
@@ -58,19 +53,19 @@ Trader.prototype.getTrades = async function(since, cb) {
 };
 
 Trader.getCapabilities = function() {
-  return {
-    name: 'ExchangeSimulator',
-    slug: 'exchangesimulator',
-    currencies: ['BTC'],
-    assets: ['LTC'],
-    maxTradesAge: 60,
-    maxHistoryFetch: null,
-    markets: [{ pair: ['BTC', 'LTC'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
-    requires: ['key', 'secret', 'username'],
-    fetchTimespan: 60,
-    tid: 'tid',
-    tradable: false
-  };
+    return {
+        name: 'ExchangeSimulator',
+        slug: 'exchangesimulator',
+        currencies: ['BTC'],
+        assets: ['LTC'],
+        maxTradesAge: 60,
+        maxHistoryFetch: null,
+        markets: [{ pair: ['BTC', 'LTC'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
+        requires: [],
+        fetchTimespan: 60,
+        tid: 'tid',
+        tradable: false
+    };
 };
 
 module.exports = Trader;
@@ -81,11 +76,4 @@ Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-Disclaimer:
-                              USE AT YOUR OWN RISK!
-The author of this project and contributors are NOT responsible for any damage or loss caused
-by this software. There can be bugs and the bot may not perform as expected
-or specified. Please consider testing it first with paper trading and/or
-backtesting on historical data. Also look at the code to see what how
-it is working.
 */
