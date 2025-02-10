@@ -26,10 +26,10 @@ This JavaScript file (BOLLINGERBAND.js) defines a trading strategy for the Gekko
 
 /* BB strategy - okibcn 2018-01-03 */
 const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");const _ = require("underscore");
+const _ = require("underscore");
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
-var method = {};
+var method = Wrapper;
 const StopLoss = require('./indicators/StopLoss');
 method.makeoperator = function() {
 var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
