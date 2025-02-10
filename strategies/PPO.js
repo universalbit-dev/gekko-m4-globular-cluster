@@ -9,9 +9,9 @@
 // helpers
 var _ = require('lodash');
 var log = require('../core/log');
-
+var Wrapper = require('../strategyWrapperRules.js');
 // let's create our own method
-var method = {};
+var method = Wrapper;
 const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
