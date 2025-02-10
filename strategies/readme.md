@@ -14,6 +14,7 @@ npm install tulind --save
 
 #### Gekko Indicators Engine
 * [Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)
+* [Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)
 
 #### Useful info:
 ```
