@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-
+const _ = require('lodash');
 /**
  * Class representing a Trailing Stop mechanism.
  * Note: As of now only supports trailing the price going up (after a buy),
@@ -14,8 +14,8 @@ class TrailingStop extends EventEmitter {
    * @param {Function} params.onTrigger - Function to call when the stop triggers.
    */
   constructor({trail, initialPrice, onTrigger}) {
-    super();
-
+    super(api);
+    _.bindAll(this,_.functions(this));
     if (trail <= 0 || initialPrice <= 0) {
       throw new Error('Trail and initialPrice must be positive numbers.');
     }
