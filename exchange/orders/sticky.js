@@ -23,7 +23,7 @@ const states = require('./states');
 class StickyOrder extends BaseOrder {
   constructor({api, marketConfig, capabilities}) {
     super(api);
-    _.bindAll(this,_.functionsIn(this));
+    _.bindAll(this,_.functions(this));
     this.market = marketConfig;
     this.capabilities = capabilities;
 
