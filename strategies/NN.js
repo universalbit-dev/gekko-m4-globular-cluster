@@ -1,9 +1,8 @@
 const { addon: ov } = require('openvino-node');
-
 var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
-var Promise = require("bluebird");const _ = require("underscore");
+const _ = require("underscore");
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const StopLoss = require('./indicators/StopLoss');
 
@@ -56,7 +55,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
     this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
-    this.name = 'NN';
+    this.name = '';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
@@ -136,7 +135,7 @@ switch(this.settings.method)
     brain.epsilon_test_time = 0.0;brain.learning = true;
   },
 
-update : function() {this.stopLoss.update(candle);
+update : function() {this.stopLoss.update(this.candle);
 _.noop;},
 
 log : function(candle) {
@@ -249,7 +248,7 @@ if(this.predictionCount > this.settings.min_predictions)
     this.brain();
 
     //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+    if (this.stopLoss.shouldSell(this.candle)) {this.advice('short');}
     else {this.advice('long');}
     
 }, /* */
