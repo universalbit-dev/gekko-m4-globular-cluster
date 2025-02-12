@@ -5,13 +5,13 @@ var config = require('../core/util.js').getConfig();
 const _ = require("underscore");
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const StopLoss = require('./indicators/StopLoss');
-
+var Wrapper = require('../strategyWrapperRules.js');
 const { Chess } = require('chess.js');
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
 var convnetjs = require('../core/convnet.js');
 var deepqlearn= require('../core/deepqlearn');
-var math = require('mathjs');var uuid = require('uuid');
+var math = require('mathjs');
 
 var settings = config.NN;this.settings=settings;var chess_universe = [];
 var cov = require( 'compute-covariance' );
@@ -37,8 +37,8 @@ const keepcalm = async function() {
     console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
     }
 };
-
-var method = {
+var method = Wrapper;
+method = {
 predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait',hodl_threshold:1,
   init : function() {
     this.requiredHistory = this.settings.historySize;this.RSIhistory = [];
@@ -49,10 +49,10 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     //Date
     startTime = new Date();
     this.hodle_threshold = this.settings.hodle_threshold || 1;
-    //DEMA
-    this.addTulipIndicator('dema', 'dema', {optInTimePeriod:this.settings.DEMA});
+   //DEMA
+	this.addIndicator('dema', 'DEMA', this.settings.DEMA);
     //RSI
-    this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:this.settings.RSI});
+	this.addIndicator('rsi', 'RSI', {interval: this.settings.RSI});
     this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
     this.name = '';
@@ -69,14 +69,14 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
 
     const layers = [
-      {type:'input', out_sx:this.x, out_sy:y, out_depth:z},
-      {type:'conv', num_neurons:3, activation: 'relu'},
-      {type:'fc', num_neurons:3, activation:'sigmoid'},
-      {type:'regression', num_neurons:1}
+      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
+      {type:'conv', num_neurons:21, activation: 'relu'},
+      {type:'fc', num_neurons:21, activation:'sigmoid'},
+      {type:'regression', num_neurons:21}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
     this.nn.makeLayers(layers);
-
+    
 switch(this.settings.method)
 {
     case(this.settings.method == 'sgd'):
@@ -173,7 +173,7 @@ return console.log(chess.pgn())
 
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
-  rsi=this.tulipIndicators.rsi.result.result;dema=this.tulipIndicators.dema.result.result;
+  let ind = this.indicators,dema = ind.dema.result,rsi = ind.rsi.result;
   this.RSIhistory.push(rsi);
 
   if(_.size(this.RSIhistory) > 3){
@@ -193,7 +193,7 @@ return console.log(chess.pgn())
 if(this.stochRSI > this.settings.high) {
 //new trend detected
         this.trend = {duration: 0,persisted: false,direction: 'buy',adviced: false};
-		this.trend.duration++;this.advice('long');
+		this.trend.duration++;
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration)this.trend.persisted = true;
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100){this.trend.adviced = true;}
@@ -202,7 +202,7 @@ if(this.stochRSI > this.settings.high) {
 else if(this.stochRSI < this.settings.low) {
 		// new trend detected
 		this.trend = {duration: 0,persisted: false,direction: 'sell',adviced: false};
-		this.trend.duration++;this.advice('short');
+		this.trend.duration++;
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
@@ -238,22 +238,21 @@ if(this.predictionCount > this.settings.min_predictions)
     log.info("Beta:" + Beta)
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
-    if(Beta < 1){log.info('');}
+    
     }
-    if (this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
-    {var buyprice = this.candle.low;this.advice('long');/* */}
+    if (this.trend.adviced && this.stochRSI !== 0 && 'buy' != this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
+    {var buyprice = this.candle.low;this.advice('long');}
 
-    if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
-    {var sellprice = this.candle.high;this.advice('short');/* */}
+    if (this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
+    {var sellprice = this.candle.high;this.advice('short');}
     this.brain();
 
     //stoploss
     if (this.stopLoss.shouldSell(this.candle)) {this.advice('short');}
     else {this.advice('long');}
     
-}, /* */
+},
 
   end : function() {log.debug('THE END');}
 };
 module.exports = method;
-
