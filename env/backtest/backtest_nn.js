@@ -7,7 +7,7 @@ config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};
 
 config.NN={threshold_buy:0.2,threshold_sell:-0.2,method:'adadelta',learning_rate:0.01,momentum:0.0,duration:3,low:30,high:70,
-l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:144,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1,SMMA:5};
+l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:144,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1};
 
 //Date.prototype.toISOString()
 //Previous Month
