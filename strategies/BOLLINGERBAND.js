@@ -78,7 +78,7 @@ method.check = function(candle) {bbands=this.tulipIndicators.bbands;var price = 
   this.trend = {zone: zone,duration: 0,persisted: false}
   }
   //stoploss
-    if (this.stopLoss.update == 'stoploss') {this.advice('short');} 
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
 }
 
