@@ -6,7 +6,7 @@ const _ = require('lodash');
 const exchangeUtils = require('./exchangeUtils');
 const bindAll = exchangeUtils.bindAll;
 
-const triggers = require('./triggers');
+const triggers = require('./triggers/trailingStop');
 
 // @param api: a gekko broker wrapper instance
 // @param type: type of trigger to wrap
