@@ -248,7 +248,7 @@ if(this.predictionCount > this.settings.min_predictions)
     this.brain();
 
     //stoploss
-    if (this.stopLoss.shouldSell(this.candle)) {this.advice('short');}
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
     
 },
