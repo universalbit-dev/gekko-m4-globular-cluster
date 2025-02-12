@@ -11,17 +11,55 @@
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var Wrapper = require('../strategyWrapperRules.js');
-const StopLoss = require('./indicators/StopLoss');
-var strat = Wrapper;
+const { Chess } = require('chess.js');
+
+const sequence = async function() {
+    try {
+    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
+    var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);fibonacci_number = fibonacci_sequence[fibonacci_number];
+    await console.log ('Fibonacci Sequence -- Wohoo! -- Number: ',fibonacci_number);
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Fibonacci Sequence -- Error -- ');
+    }
+};
+
+const keepcalm = async function() {
+    try {
+    await console.log('Keep Calm and Make Something of Amazing -- Wohoo! --');
+    }
+    catch (e) {
+    console.log (exchange.iso8601 (Date.now ()), e.constructor.name, e.message);
+    console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
+    }
+};
+
+function makeoperator() {
+var operator = ['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>'];
+var result = Math.floor(Math.random() * operator.length);
+console.log("\t\t\t\tcourtesy of... "+ operator[result]);
+};
+
+function fxchess () {
+  const chess = new Chess()
+  while (!chess.isGameOver()) {
+  const moves = chess.moves()
+  const move = moves[Math.floor(Math.random() * moves.length)]
+  chess.move(move)
+}
+return console.log(chess.pgn())
+};
+
+var method = Wrapper;
 // strategy
-var strat = {
+var method = {
 	
 	/* INIT */
 	init: function()
 	{
 		// core
-		this.name = 'RSIBULLBEARADX';
-		this.stopLoss = new StopLoss(5); // 5% stop loss threshold
+		this.name = 'RSI Bull and Bear + ADX';
 		this.requiredHistory = config.tradingAdvisor.historySize;
 		this.resetTrend();
 		
@@ -49,6 +87,8 @@ var strat = {
 		this.BULL_MOD_low = this.settings.BULL_MOD_low;
 		this.BEAR_MOD_high = this.settings.BEAR_MOD_high;
 		this.BEAR_MOD_low = this.settings.BEAR_MOD_low;
+		
+		
 		// debug stuff
 		this.startTime = new Date();
 		
@@ -74,6 +114,7 @@ var strat = {
 		{
 			log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
 		}
+		
 	}, // init()
 	
 	
@@ -89,9 +130,6 @@ var strat = {
 		this.trend = trend;
 	},
 	
-	update: function(candle) {
-    this.stopLoss.update(candle);
-    },
 	
 	/* get low/high for backtest-period */
 	lowHigh: function( val, type )
@@ -118,6 +156,7 @@ var strat = {
 	/* CHECK */
 	check: function()
 	{
+	log.debug("Random game of Chess");fxchess();
 		// get all indicators
 		let ind = this.indicators,
 			maSlow = ind.maSlow.result,
@@ -161,12 +200,8 @@ var strat = {
 		
 		// add adx low/high if debug
 		if( this.debug ) this.lowHigh( adx, 'adx');
-		
-    //stoploss
-    if (this.stopLoss.shouldSell(this.candle)) {this.advice('short');}
-    else {this.advice('long');}
 	
-	},
+	}, // check()
 	
 	
 	/* LONG */
@@ -234,4 +269,4 @@ var strat = {
 	
 };
 
-module.exports = strat;
+module.exports = method;
