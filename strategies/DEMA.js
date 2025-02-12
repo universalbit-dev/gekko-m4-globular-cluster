@@ -67,7 +67,7 @@ method.check = function(candle) {
     this.advice();
   }
     //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');}  
     else {this.advice('long');}
 }
 
