@@ -119,7 +119,7 @@ method.check = function(candle)
     log.debug("StochRSI max:\t\t" + this.highestRSI);
     log.debug("StochRSI value:\t\t" + this.stochRSI);
     //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
 },
 method.end = function() {log.info('THE END');}
