@@ -1,9 +1,9 @@
 const EventEmitter = require('events');
-const _ = require('lodash');
+
 /**
  * Class representing a Trailing Stop mechanism.
- * Note: As of now only supports trailing the price going up (after a buy),
- * on trigger (when the price moves down) you should sell.
+ * Supports trailing the price both upwards and downwards.
+ * On trigger (when the price moves in the opposite direction), you should sell.
  */
 class TrailingStop extends EventEmitter {
   /**
@@ -13,9 +13,9 @@ class TrailingStop extends EventEmitter {
    * @param {number} params.initialPrice - Initial price, preferably buy price.
    * @param {Function} params.onTrigger - Function to call when the stop triggers.
    */
-  constructor({trail, initialPrice, onTrigger}) {
-    super(api);
-    _.bindAll(this,_.functions(this));
+  constructor({ trail, initialPrice, onTrigger }) {
+    super();
+
     if (trail <= 0 || initialPrice <= 0) {
       throw new Error('Trail and initialPrice must be positive numbers.');
     }
@@ -25,6 +25,11 @@ class TrailingStop extends EventEmitter {
     this.onTrigger = onTrigger;
     this.previousPrice = initialPrice;
     this.trailingPoint = initialPrice - this.trail;
+
+    this.updatePrice = this.updatePrice.bind(this);
+    this.updateTrail = this.updateTrail.bind(this);
+    this.trigger = this.trigger.bind(this);
+    this.reset = this.reset.bind(this);
   }
 
   /**
@@ -37,13 +42,17 @@ class TrailingStop extends EventEmitter {
       return;
     }
 
-    if (price > this.trailingPoint + this.trail) {
+    // Adjust the trailing point based on the new price
+    if (price > this.previousPrice) {
       this.trailingPoint = price - this.trail;
+    } else if (price < this.previousPrice) {
+      this.trailingPoint = price + this.trail;
     }
 
     this.previousPrice = price;
 
-    if (price <= this.trailingPoint) {
+    // Check if the trailing stop should trigger
+    if (price <= this.trailingPoint || price >= this.trailingPoint) {
       this.trigger();
     }
   }
@@ -86,6 +95,20 @@ class TrailingStop extends EventEmitter {
       }
     }
     this.emit('trigger', this.previousPrice);
+  }
+
+  /**
+   * Reset the trailing stop with a new initial price.
+   * @param {number} initialPrice - The new initial price.
+   */
+  reset(initialPrice) {
+    if (initialPrice <= 0) {
+      throw new Error('Initial price must be a positive number.');
+    }
+
+    this.isLive = true;
+    this.previousPrice = initialPrice;
+    this.trailingPoint = initialPrice - this.trail;
   }
 }
 
