@@ -331,7 +331,7 @@ var method = {
     console.debug("-- Spread  -- :" + spread);
     console.debug('-- Learning Method -- :' + this.settings.method);
     //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
   },
   end: function() {log.debug('THE END');}
