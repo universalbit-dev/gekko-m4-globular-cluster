@@ -139,7 +139,7 @@ method.check = function(candle) {
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
     
     //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
 }
 
