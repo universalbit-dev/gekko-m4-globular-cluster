@@ -16,12 +16,16 @@ var config = util.getConfig();
 var dirs = util.dirs();
 var ccxt = require('ccxt');
 
+var id = config.watch.exchange;
+var apikey=process.env.KEY;
+var apisecret=process.env.SECRET;
+
 var Fetcher = function(config) {
-    this.exchange = new ccxt[config.watch.exchange]({
-        apiKey: config.watch.key,
-        secret: config.watch.secret,
+    this.exchange = new ccxt[id]({
+        verbose: false,
+        apiKey: apikey,
+        secret: apisecret,
     });
-    util.makeEventEmitter(this);
 };
 
 Fetcher.prototype.getTrades = async function(since, handleFetch) {
