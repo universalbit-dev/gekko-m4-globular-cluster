@@ -3,8 +3,8 @@ This code snippet initializes an exchange object using the `ccxt` library and de
 1. **Exchange Initialization**:
 ```javascript
 var id = config.watch.exchange;
-var apikey=process.env.KEY;
-var apisecret=process.env.SECRET;
+var apikey=process.env.key;
+var apisecret=process.env.secret;
 var exchange = new ccxt[id] ({verbose: false,apiKey: apikey,secret: apisecret,});
 ```
 
