@@ -17,8 +17,8 @@ var dirs = util.dirs();
 var ccxt = require('ccxt');
 
 var id = config.watch.exchange;
-var apikey=process.env.KEY;
-var apisecret=process.env.SECRET;
+var apikey=process.env.key;
+var apisecret=process.env.secret;
 
 var Fetcher = function(config) {
     this.exchange = new ccxt[id]({
