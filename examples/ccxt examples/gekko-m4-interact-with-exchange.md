@@ -1,18 +1,13 @@
 This code snippet initializes an exchange object using the `ccxt` library and defines several asynchronous functions to interact with the exchange.
 
 1. **Exchange Initialization**:
-   ```javascript
-   var id = config.watch.exchange || '';
-   if (!ccxt.exchanges.includes(id)) {
-       throw new Error(`Exchange ${id} is not supported by ccxt`);
-   }
+```javascript
+var id = config.watch.exchange;
+var apikey=process.env.KEY;
+var apisecret=process.env.SECRET;
+var exchange = new ccxt[id] ({verbose: false,apiKey: apikey,secret: apisecret,});
+```
 
-   var exchange = new ccxt[id]({
-       verbose: false,
-       apiKey: config.watch.key || '',
-       secret: config.watch.secret || '',
-   });
-   ```
    - `id` is set to the exchange specified in the configuration or an empty string if not specified.
    - Checks if the exchange `id` is supported by `ccxt`. If not, it throws an error.
    - Initializes the exchange object with the provided API key and secret.
