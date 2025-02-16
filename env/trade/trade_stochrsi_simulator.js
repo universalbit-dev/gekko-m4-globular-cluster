@@ -4,7 +4,8 @@ config.debug =true;
 config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
+exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
+
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 
 config.STOCHRSI={interval:10,high:70,low:30,persistence:5,RSI:21,STOCH:21};
@@ -39,4 +40,3 @@ backtesting on historical data. Also look at the code to see what how
 it is working.
 
 */
-

@@ -1,10 +1,10 @@
 require('dotenv').config()
 var config = {};
 config.debug =true;
-config.watch = {enabled:true,exchange: 'ccxt_exchanges',exchangeId:'bitfinex',currency:'BTC',asset:'LTC'};
+config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
+exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NOOP'};
 config.NOOP={};

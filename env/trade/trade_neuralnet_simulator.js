@@ -36,7 +36,9 @@ config.debug =true;
 config.watch = {enabled:true,exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
-exchange:'exchangesimulator',currency:'BTC',asset:'LTC',key:'',secret:''};
+exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
+
+
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NEURALNET'};
 
 config.NEURALNET={method:'',threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,stop_order:0.2,take_order:0.2,
@@ -66,7 +68,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Disclaimer:
                               USE AT YOUR OWN RISK!
 The author and contributors of this project are NOT responsible for any damage or loss caused
-by this software. There can be bugs and the bot may not perform as expected or specified. 
-Please consider testing it first with paper trading and/or backtesting on historical data. 
+by this software. There can be bugs and the bot may not perform as expected or specified.
+Please consider testing it first with paper trading and/or backtesting on historical data.
 Also look at the code to see what how it is working.
 */
