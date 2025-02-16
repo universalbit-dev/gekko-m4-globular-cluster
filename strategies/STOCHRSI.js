@@ -34,14 +34,15 @@ const StopLoss = require('./indicators/StopLoss');
 var method = {};
 
 method.init = function() {
-  this.name = 'STOCHRSI';
+  this.name = '';
   log.info('Start' ,this.name);
   this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
   this.stopLoss = new StopLoss(5); // 5% stop loss threshold
-  this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod: this.settings.RSI,optInFastPeriod:89,optInSlowPeriod:21});
-  this.addTulipIndicator('stoch', 'stoch', {optInFastKPeriod: 89,optInSlowKPeriod:21,optInSlowDPeriod:this.settings.STOCH});
+  this.addIndicator('rsi', 'RSI', this.settings.RSI);
+  this.addIndicator('stoch', 'STOCH', this.settings.STOCH);
+
 
   RSIhistory=[];this.RSIhistory = RSIhistory;
 
@@ -83,11 +84,12 @@ method.check = function(candle)
 {
 
     log.debug("Operator ");this.makeoperator();log.debug("Random game of Chess");this.fxchess();
-    rsi=this.tulipIndicators.rsi.result.result;this.rsi=rsi;
-    stoch=this.tulipIndicators.stoch.result.result;
+    var rsi = this.indicators.rsi.result;
+    var stoch=this.indicators.stoch.result;
+    
     this.RSIhistory.push(this.rsi);
 
-    if(_.size(this.RSIhistory) > this.interval)
+    if(_.size(this.RSIhistory) > this.settings.interval)
     this.RSIhistory.shift();
     this.lowestRSI = _.min(this.RSIhistory);
     this.highestRSI = _.max(this.RSIhistory);
@@ -119,7 +121,7 @@ method.check = function(candle)
     log.debug("StochRSI max:\t\t" + this.highestRSI);
     log.debug("StochRSI value:\t\t" + this.stochRSI);
     //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');}
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
 },
 method.end = function() {log.info('THE END');}

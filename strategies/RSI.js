@@ -8,15 +8,15 @@
 // helpers
 var _ = require('lodash');
 var log = require('../core/log.js');
-
+var Wrapper = require('../strategyWrapperRules.js');
 var RSI = require('./indicators/RSI.js');
 
 // let's create our own method
-var method = {};
+var method = Wrapper;
 const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
-  this.name = 'RSI';
+  this.name = '';
 
   this.trend = {
     direction: 'none',
@@ -28,7 +28,7 @@ method.init = function() {
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   // define the indicators we need
-  this.addIndicator('rsi', 'RSI', this.settings);
+  this.addIndicator('rsi', 'RSI', this.settings.RSI);
 }
 
 method.update = function(candle) {this.stopLoss.update(candle);}
@@ -103,7 +103,7 @@ method.check = function(candle) {
     this.advice();
   }
 //stoploss
-    if (this.stopLoss.shouldSell(candle)) {this.advice('short');} 
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
 }
 
