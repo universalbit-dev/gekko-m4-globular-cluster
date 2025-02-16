@@ -51,9 +51,12 @@ class CcxtBroker extends EventEmitter {
       closed: [],
     };
 
-    const slug = config.exchange.toLowerCase();
-    this.api = new ccxt[slug](config);
-
+    //exchange initialization
+    const slug = config.watch.exchange;
+    var id = config.watch.exchange;
+    var apikey=process.env.key;
+    var apisecret=process.env.secret;
+    this.api = new ccxt[id] ({verbose: false,apiKey: apikey,secret: apisecret,});
     this.capabilities = this.api.has;
 
     this.marketConfig = {
