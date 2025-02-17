@@ -85,8 +85,8 @@ method.check = function(candle)
 {
 
     log.debug("Operator ");this.makeoperator();log.debug("Random game of Chess");this.fxchess();
-    var rsi = this.indicators.rsi.result;
-    var stoch=this.indicators.stoch.result;
+    let rsi = this.indicators.rsi.result;
+    let stoch=this.indicators.stoch.result;
     
     this.RSIhistory.push(this.rsi);
 
