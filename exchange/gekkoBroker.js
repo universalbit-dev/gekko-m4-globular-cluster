@@ -19,6 +19,7 @@ const isValidOrder = exchangeUtils.isValidOrder;
 
 class Broker extends EventEmitter{
   constructor(config) {
+    super(config);
     this.config = config;
 
     if(config.private) {
