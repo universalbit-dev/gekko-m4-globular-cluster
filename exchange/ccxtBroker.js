@@ -34,6 +34,7 @@ const isValidOrder = exchangeUtils.isValidOrder;
 
 class CcxtBroker extends EventEmitter {
   constructor(config) {
+    super(config);
     this.config = config;
 
     if (config.private) {
