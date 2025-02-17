@@ -1,11 +1,10 @@
 const { addon: ov } = require('openvino-node');
-var Promise = require("bluebird");const _ = require("underscore");
+const _ = require("underscore");
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const math= require('mathjs');
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 var settings = config.STOCHRSI;this.settings=settings;
-
 const { Chess } = require('chess.js');
 
 const sequence = async function() {
@@ -37,12 +36,10 @@ method.init = function() {
   this.name = '';
   log.info('Start' ,this.name);
   this.trend = {direction: 'none',duration: 0,persisted: false,adviced: false};
-//optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
   this.requiredHistory = this.settings.historySize;
   this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   this.addIndicator('rsi', 'RSI', this.settings.RSI);
   this.addIndicator('stoch', 'STOCH', this.settings.STOCH);
-
 
   RSIhistory=[];this.RSIhistory = RSIhistory;
 
@@ -125,5 +122,4 @@ method.check = function(candle)
     else {this.advice('long');}
 },
 method.end = function() {log.info('THE END');}
-
 module.exports = method;
