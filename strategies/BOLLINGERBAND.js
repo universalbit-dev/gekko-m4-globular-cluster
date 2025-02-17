@@ -1,3 +1,24 @@
+/* copilot explain
+This JavaScript file implements a Bollinger Bands trading strategy using the Gekko trading bot framework. Here is a breakdown of the code:
+
+1. **Imports and Initialization**:
+   - `log`: Used for logging information.
+   - `Wrapper`: A wrapper for strategy rules.
+   - `BBANDS`: Imports the Bollinger Bands indicator.
+
+2. **Method Initialization**:
+   - `method.init`: Initializes the strategy, setting up variables and adding the Bollinger Bands indicator to the strategy.
+
+3. **Logging Function**:
+   - `method.log`: Logs the Bollinger Bands properties (upper, middle, lower bands) for each candle (price data point).
+
+4. **Check Function**:
+   - `method.check`: Determines the current price zone (top, high, low, bottom) based on Bollinger Bands and advises whether to go long, short, or hold the position.
+
+This strategy analyzes the price movements in relation to the Bollinger Bands and makes trading decisions based on the defined zones and trends.
+*/
+
+
 /* BB strategy - okibcn 2018-01-03 */
 
 // helpers
