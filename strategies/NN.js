@@ -1,11 +1,14 @@
 const { addon: ov } = require('openvino-node');
+
 var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
-const _ = require("underscore");
+var _ = require('lodash');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const StopLoss = require('./indicators/StopLoss');
-var Wrapper = require('../strategyWrapperRules.js');
+const RSI=require('./indicators/RSI');
+const DEMA=require('./indicators/DEMA');
+
 const { Chess } = require('chess.js');
 
 //https://cs.stanford.edu/people/karpathy/convnetjs/started.html
@@ -14,7 +17,7 @@ var deepqlearn= require('../core/deepqlearn');
 var math = require('mathjs');
 
 var settings = config.NN;this.settings=settings;var chess_universe = [];
-var cov = require( 'compute-covariance' );
+var cov = require('compute-covariance');
 
 const sequence = async function() {
     try {
@@ -37,8 +40,8 @@ const keepcalm = async function() {
     console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
     }
 };
-var method = Wrapper;
-method = {
+
+var method = {
 predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait',hodl_threshold:1,
   init : function() {
     this.requiredHistory = this.settings.historySize;this.RSIhistory = [];
@@ -49,13 +52,11 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     //Date
     startTime = new Date();
     this.hodle_threshold = this.settings.hodle_threshold || 1;
-   //DEMA
-	this.addIndicator('dema', 'DEMA', this.settings.DEMA);
-    //RSI
-	this.addIndicator('rsi', 'RSI', {interval: this.settings.RSI});
+    this.addIndicator('dema', 'DEMA', {optInTimePeriod:this.settings.DEMA});
+    this.addIndicator('rsi', 'RSI', {optInTimePeriod:this.settings.RSI});
     this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
-    this.name = '';
+    this.name = 'NN';
     this.nn = new convnetjs.Net();
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
@@ -69,14 +70,14 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     console.debug('\t\t\t\tNeuralNet Layer: ' + '\tINPUT:'+ x + "\tHIDE:" + y + "\tOUT:" + z);
 
     const layers = [
-      {type:'input', out_sx:this.x, out_sy:this.y, out_depth:this.z},
-      {type:'conv', num_neurons:21, activation: 'relu'},
-      {type:'fc', num_neurons:21, activation:'sigmoid'},
-      {type:'regression', num_neurons:21}
+      {type:'input', out_sx:this.x, out_sy:y, out_depth:z},
+      {type:'conv', num_neurons:3, activation: 'relu'},
+      {type:'fc', num_neurons:3, activation:'sigmoid'},
+      {type:'regression', num_neurons:1}
       //https://cs.stanford.edu/people/karpathy/convnetjs/demo/regression.html
     ];
     this.nn.makeLayers(layers);
-    
+
 switch(this.settings.method)
 {
     case(this.settings.method == 'sgd'):
@@ -135,7 +136,7 @@ switch(this.settings.method)
     brain.epsilon_test_time = 0.0;brain.learning = true;
   },
 
-update : function() {this.stopLoss.update(this.candle);
+update : function(candle) {this.stopLoss.update(candle);
 _.noop;},
 
 log : function(candle) {
@@ -169,11 +170,11 @@ chess_universe.push([chess.pgn()]); /* */
 return console.log(chess.pgn())
 },
 
-  check :async function(candle) {
+  check :function(candle) {
 
   log.debug("Random game of Chess");this.fxchess();
   this.predictionCount=0;
-  let ind = this.indicators,dema = ind.dema.result,rsi = ind.rsi.result;
+  rsi=this.indicators.rsi;dema=this.indicators.dema;
   this.RSIhistory.push(rsi);
 
   if(_.size(this.RSIhistory) > 3){
@@ -193,7 +194,7 @@ return console.log(chess.pgn())
 if(this.stochRSI > this.settings.high) {
 //new trend detected
         this.trend = {duration: 0,persisted: false,direction: 'buy',adviced: false};
-		this.trend.duration++;
+		this.trend.duration++;this.advice('long');
 		log.debug('In high since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration)this.trend.persisted = true;
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !==100){this.trend.adviced = true;}
@@ -202,7 +203,7 @@ if(this.stochRSI > this.settings.high) {
 else if(this.stochRSI < this.settings.low) {
 		// new trend detected
 		this.trend = {duration: 0,persisted: false,direction: 'sell',adviced: false};
-		this.trend.duration++;
+		this.trend.duration++;this.advice('short');
 		log.debug('In low since', this.trend.duration, 'candle(s)');
 		if(this.trend.duration >= this.settings.duration){this.trend.persisted = true;}
 		if(this.trend.persisted && !this.trend.adviced && this.stochRSI !== 0){this.trend.adviced = true;}
@@ -238,21 +239,22 @@ if(this.predictionCount > this.settings.min_predictions)
     log.info("Beta:" + Beta)
     log.info("learning method:"+ this.settings.method);
     log.info('==================================================================');
-    
+    if(Beta < 1){log.info('');}
     }
-    if (this.trend.adviced && this.stochRSI !== 0 && 'buy' != this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
-    {var buyprice = this.candle.low;this.advice('long');}
+    if (this.trend.adviced && this.stochRSI !== 0 && 'buy' !== this.prevAction && signal === false && Alpha > this.settings.threshold_buy)
+    {var buyprice = this.candle.low;this.advice('long');/* */}
 
-    if (this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
-    {var sellprice = this.candle.high;this.advice('short');}
+    if ( this.trend.adviced && this.stochRSI !== 0 && signal === true && Alpha > this.settings.threshold_sell)
+    {var sellprice = this.candle.high;this.advice('short');/* */}
     this.brain();
 
     //stoploss
     if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
     
-},
+}, /* */
 
   end : function() {log.debug('THE END');}
 };
 module.exports = method;
+
