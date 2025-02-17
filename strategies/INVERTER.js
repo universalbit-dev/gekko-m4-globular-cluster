@@ -2,12 +2,18 @@ const { addon: ov } = require('openvino-node');
 const _ =require("underscore");
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
+var Wrapper = require('../strategyWrapperRules.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 var settings = config.INVERTER;this.settings=settings;
+
+const RSI=require('./indicators/RSI');
+const DEMA=require('./indicators/DEMA');
+const ADX=require('./indicators/ADX');
+const DX=require('./indicators/DX');
+const SMA=require('./indicators/SMA');
 const StopLoss = require('./indicators/StopLoss');
 
-const { Chess } = require('chess.js')
-
+const { Chess } = require('chess.js');
 const sequence = async function() {
     try {
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
@@ -29,10 +35,11 @@ const keepcalm = async function() {
     console.log ('Keep Calm and Make Something of Amazing  -- Error -- ');
     }
 };
+var method = Wrapper;
 
 //INIT
-var method = {
- prevPrice : 0,prevAction :'none',
+method = {
+prevPrice : 0,prevAction :'none',
 init:  function()
 {
 this.interval = this.settings.interval;
@@ -43,13 +50,12 @@ this.trend = {direction: 'none',duration: 0,state:'none',ls:'none'};
 
 this.debug = true;
 //optInTimePeriod : Fibonacci Sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377 ,610 ,987
-this.addTulipIndicator('dema', 'dema', {optInTimePeriod:1,optInFastPeriod:233,optInSlowPeriod:55});
-this.addTulipIndicator('longema', 'ema', {optInTimePeriod:987,optInFastPeriod:233,optInSlowPeriod:55});
-this.addTulipIndicator('shortema', 'ema', {optInTimePeriod:55,optInFastPeriod:233,optInSlowPeriod:55});
-this.addTulipIndicator('rsi', 'rsi', {optInTimePeriod:14,optInFastPeriod:89,optInSlowPeriod:21});
-this.addTulipIndicator('di', 'di', {optInTimePeriod : this.settings.DI});
-this.addTulipIndicator('adx', 'adx',{optInTimePeriod:3,optInFastPeriod:70,optInSlowPeriod:50});
-this.addTulipIndicator('dx', 'dx', {optInTimePeriod: this.settings.DX});
+this.addIndicator('dema', 'DEMA', {optInTimePeriod:1,optInFastPeriod:233,optInSlowPeriod:55});
+this.addIndicator('maFast', 'SMA', {optInTimePeriod:987,optInFastPeriod:233,optInSlowPeriod:55});
+this.addIndicator('maSlow', 'SMA', {optInTimePeriod:55,optInFastPeriod:233,optInSlowPeriod:55});
+this.addIndicator('rsi', 'RSI', {optInTimePeriod:14,optInFastPeriod:89,optInSlowPeriod:21});
+this.addIndicator('adx', 'ADX',{optInTimePeriod:3,optInFastPeriod:70,optInSlowPeriod:50});
+this.addIndicator('dx', 'DX', {optInTimePeriod: this.settings.DX});
 this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
 log.info('================================================');
@@ -93,11 +99,10 @@ return console.log(chess.pgn())
 check: function(candle)
 {
 log.debug("Random game of Chess");this.fxchess();
-rsi=this.tulipIndicators.rsi.result.result;
-adx=this.tulipIndicators.adx.result.result;dx=this.tulipIndicators.dx.result.result;
-longema = this.tulipIndicators.longema.result.result;shortema = this.tulipIndicators.shortema.result.result;
-di_plus = this.tulipIndicators.di.result.diPlus;di_minus = this.tulipIndicators.di.result.diMinus;
-dema = this.tulipIndicators.dema.result.result;
+  var rsi = this.indicators.rsi;
+var adx=this.indicators.adx;var dx=this.indicators.dx;
+var maFast = this.indicators.maFast;var maSlow = this.indicators.maSlow;
+var dema = this.indicators.dema;
 var adxstrength ='none';
 this.adxstrength =adxstrength;
 //RSI Indicator: Buy and Sell Signals
@@ -117,13 +122,6 @@ switch (true) {
 		case ((dx > 75)&&(dx < 100)):adxstrength='extremestrong';break;
 		default:_.noop;this.trend.direction ='none';adxstrength='weak';
 }
-//https://www.investopedia.com/ask/answers/121714/what-are-differences-between-divergence-and-convergence.asp
-	var diff = di_plus - di_minus;
-	switch(diff){
-	case diff > 0 :this.trend.state = 'long';break;
-	case diff < 0 :this.trend.state = 'short';break;
-	default:_.noop;
-	}
 
 	switch (true)
 	{
@@ -137,13 +135,13 @@ switch (true) {
 	default: _.noop;
 	}
 	//trend moving down
-    if ((longema < shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='short';}
+    if (maFast < maSlow){this.trend.ls ='short';}
     //trend moving up
-    else if ((longema > shortema)&&(di_plus != undefined)&&(di_minus != undefined)){this.trend.ls ='long';}
+    else if (maFast > maSlow){this.trend.ls ='long';}
     else _.noop;
 
     //stoploss
-    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 	
+    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
 },
 
@@ -182,7 +180,7 @@ universalBit-dev: https://github.com/universalbit-dev/gekko-m4-globular-cluster/
 INVERTER:
 Switch Case
 RSI Overbought/Oversold
-ADX Trend Strength (DI+ DI-)
+ADX Trend Strength 
 StopLoss
 
 resources:
