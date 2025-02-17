@@ -3,9 +3,13 @@ const _ = require("underscore");
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
 const math= require('mathjs');
 var log = require('../core/log.js');
+var Wrapper = require('../strategyWrapperRules.js');
 var config = require('../core/util.js').getConfig();
 var settings = config.STOCHRSI;this.settings=settings;
 const { Chess } = require('chess.js');
+
+var RSI = require('./indicators/RSI.js');
+var STOCH = require('./indicators/STOCH.js');
 
 const sequence = async function() {
     try {
@@ -30,7 +34,7 @@ const keepcalm = async function() {
 };
 const StopLoss = require('./indicators/StopLoss');
 
-var method = {};
+var method = Wrapper;
 
 method.init = function() {
   this.name = '';
@@ -108,15 +112,17 @@ method.check = function(candle)
     this.trend.duration++;
     log.debug('In low since', this.trend.duration, 'candle(s)');
 	if(this.trend.duration >= this.settings.persisted){this.trend.persisted = true;}
-	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI != 0){this.trend.adviced = true;
-	return Promise.promisifyAll(require("../exchange/wrappers/ccxt/ccxtOrdersSell.js"));}
+	
+	if(this.trend.persisted && this.trend.adviced != false && this.stochRSI != 0){this.trend.adviced = true;this.advice('long');}
 	else {this.trend.duration = 0;log.debug('In no trend');_.noop;}
 	}
+	
     log.debug('calculated StochRSI properties:');
     log.debug('\t', 'rsi:', rsi);
     log.debug("StochRSI min:\t\t" + this.lowestRSI);
     log.debug("StochRSI max:\t\t" + this.highestRSI);
     log.debug("StochRSI value:\t\t" + this.stochRSI);
+    
     //stoploss
     if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
     else {this.advice('long');}
