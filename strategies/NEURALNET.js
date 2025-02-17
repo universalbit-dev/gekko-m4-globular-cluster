@@ -9,7 +9,7 @@ The strategy also includes functions for debugging and random operations.
 */
 
 //universalbit-dev decentralized strategies */
-require('dotenv').config();
+
 const { addon: ov } = require('openvino-node');
 const ccxt = require("ccxt");
 var convnetjs = require('../core/convnet.js');
@@ -31,10 +31,7 @@ var amount = 0.00; var price =0.00; var since='';var limit=0;var parameters = {}
 var limit_buy=0.00;var limit_sell=0.00;var stoporder=0.00;var takeorder=0.00;
 var currentPrice=0.00;var spread=0.00;
 var candle_open=0.00;var candle_high=0.00;var candle_low=0.00;var candle_close=0.00;var candle_volume=0.00;
-
 var bid_array=[];var ask_array=[];
-
-this.exchange = new ccxt.kraken({ enableRateLimit: true }); // Initialize the exchange instance without API keys
 
 var ohlcv = async function() {
 try {
