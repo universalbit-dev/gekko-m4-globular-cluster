@@ -11,7 +11,7 @@ const marketData = require('./ccxt-markets.json');
 
 class Trader extends EventEmitter {
   constructor(config) {
-    super();
+    super(config);
     this.key = config.key;
     this.secret = config.secret;
     this.currency = config.currency;
