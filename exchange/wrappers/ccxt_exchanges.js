@@ -1,6 +1,8 @@
+require('dotenv').config()
 const ccxt = require('ccxt');
 const moment = require('moment');
-const _ = require('lodash');
+var config = require('../../core/util.js').getConfig();
+const _ = require('underscore');
 const exchangeUtils = require('../exchangeUtils');
 const retry = exchangeUtils.retry;
 
@@ -8,22 +10,18 @@ const marketData = require('./ccxt-markets.json');
 
 const Trader = function(config) {
   _.bindAll(this,_.functions(this));
-  
   if (_.isObject(config)) {
-    this.key = process.env.key;
-    this.secret = process.env.secret;
-    this.exchangeId = process.env.exchangeId; // Added exchangeId to config
-    this.asset = process.env.asset;
-    this.currency = process.env.currency;
+    var id = ''; /**/
+    var apiKey = ''; /**/
+    var secret =''; /**/
+    var asset = process.env.asset;
+    var currency = process.env.currency;
   }
   
-  // Check if the exchangeId is valid
-  if (!ccxt.exchanges.includes(this.exchangeId)) {
-    throw new Error(`Invalid exchangeId: ${this.exchangeId}`);
-  }
-  this.name = 'CCXT';
+  this.name = 'ccxt_exchanges';
   this.pair = asset +'/'+ currency;
-  this.api = new ccxt[id] ({verbose: false,apikey,apisecret,});
+  this.api = new ccxt[id] ({verbose: false,apiKey,secret});
+  this.capabilities = this.api.has;
   this.interval = 4000;
 };
 
@@ -166,7 +164,7 @@ Trader.prototype.cancelOrder = async function(order_id, callback) {
 
 Trader.getCapabilities = function() {
   return {
-    name: 'CCXT Exchange',
+    name: 'ccxt_exchanges',
     slug: 'ccxt',
     currencies: marketData.currencies,
     assets: marketData.assets,
