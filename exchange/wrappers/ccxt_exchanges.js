@@ -11,7 +11,7 @@ const marketData = require('./ccxt-markets.json');
 const Trader = function(config) {
   _.bindAll(this,_.functions(this));
   if (_.isObject(config)) {
-    var id = ''; /**/
+    var id = process.env.exchangeId;
     var apiKey = ''; /**/
     var secret =''; /**/
     var asset = process.env.asset;
