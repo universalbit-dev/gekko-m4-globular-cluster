@@ -22,7 +22,7 @@ const Trader = function(config) {
     throw new Error(`Invalid exchangeId: ${this.exchangeId}`);
   }
   this.name = 'CCXT';
-  this.pair = `${this.asset}/${this.currency}`;
+  this.pair = asset +'/'+ currency;
   this.api = new ccxt[id] ({verbose: false,apikey,apisecret,});
   this.interval = 4000;
 };
