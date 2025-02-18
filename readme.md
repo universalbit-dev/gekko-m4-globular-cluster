@@ -34,18 +34,27 @@ pm2 start trade.config.js
 #### gekko -- mode -- 
 means running the application to test and simulate your strategies
 
-* [backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
-* [realtime](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
+* [Backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
+* [Realtime](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
 
-
-
-### [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md):
-#### Method of buying and selling
-### [Indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md):
 
 ---
-#### Tulip Node provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
-* [tulip_indicators](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/strategies/tulip_indicators.md)
+
+* [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md)
+
+#### Gekko Indicators Engine
+* [Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)
+* [Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)
+#### Tulip Node
+Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100+ technical analysis indicator functions, such as: simple moving average, Bollinger Bands, MACD, Parabolic SAR, Stochastic Oscillator, and many more.
+##### install [Tulind Package](https://www.npmjs.com/package/tulind)
+```
+npm install tulind --save
+```
+* [TulipIndicator](https://tulipindicators.org/)
+
+---
+
 
 #### Resources:
 * ##### [PM2](https://pm2.keymetrics.io/) Process Manager
