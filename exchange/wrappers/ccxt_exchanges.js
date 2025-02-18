@@ -23,7 +23,7 @@ const Trader = function(config) {
   }
   this.name = 'CCXT';
   this.pair = `${this.asset}/${this.currency}`;
-  this.api = new ccxt[this.exchangeId]({ apiKey: this.key, secret: this.secret });
+  this.api = new ccxt[id] ({verbose: false,apikey,apisecret,});
   this.interval = 4000;
 };
 
