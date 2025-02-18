@@ -32,7 +32,7 @@ const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
 const isValidOrder = exchangeUtils.isValidOrder;
 
-class CcxtBroker extends EventEmitter {
+class CcxtBroker extends Broker {
   constructor(config) {
     super(config);
     this.config = config;
