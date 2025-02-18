@@ -21,7 +21,7 @@ node gekko.js -c .env/backtest/backtest_inverter.js -b
 ```
 ---
 
-* Plugins to Enable/Disable: [backtest_inverter.js](https://github.com/universalbit-dev/gekko-m4/blob/master/.env/backtest/backtest_inverter.js)
+* Plugins to Enable/Disable: [backtest_inverter.js](https://github.com/universalbit-dev/gekko-m4/blob/master/env/backtest/backtest_inverter.js)
 
 #### Resources:
 * [PM2](https://pm2.io/docs/runtime/guide/process-management/)  
