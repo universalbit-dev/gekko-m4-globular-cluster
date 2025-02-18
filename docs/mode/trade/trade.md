@@ -30,7 +30,7 @@ node gekko.js -c .env/trade/trade_inverter_simulator.js
 |INVERTER|-simulator-| > - Processing Exchange Data: 2024-11-30 01:13:16     
 ```
 
-* Plugins to Enable/Disable: [trade_inverter_simulator.js](https://github.com/universalbit-dev/gekko-m4/blob/master/.env/trade/trade_inverter_simulator.js)
+* Plugins to Enable/Disable: [trade_inverter_simulator.js](https://github.com/universalbit-dev/gekko-m4/blob/master/env/trade/trade_inverter_simulator.js)
 
 #### Resources:
 * [PM2](https://pm2.io/docs/runtime/guide/process-management/) Ecosystem Trade: 
