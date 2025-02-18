@@ -61,7 +61,7 @@ Trader.getCapabilities = function() {
         maxTradesAge: 60,
         maxHistoryFetch: null,
         markets: [{ pair: ['BTC', 'LTC'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
-        requires: [],
+        requires: ['key', 'secret', 'exchangeId'], // Added exchangeId to required fields
         fetchTimespan: 60,
         tid: 'tid',
         tradable: false
