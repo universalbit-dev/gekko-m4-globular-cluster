@@ -12,8 +12,8 @@ const Trader = function(config) {
   _.bindAll(this,_.functions(this));
   if (_.isObject(config)) {
     var id = process.env.exchangeId;
-    var apiKey = ''; /**/
-    var secret =''; /**/
+    var apiKey = process.env.key; /**/
+    var secret = process.env.secret;/**/
     var asset = process.env.asset;
     var currency = process.env.currency;
   }
