@@ -25,7 +25,7 @@ The core/pipeline.js file is responsible for implementing the full Gekko flow ba
 This pipeline manages the integration of plugins and the market stream, ensuring all components work together based on the provided configuration.
 */
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const {EventEmitter} = require("events");class Event extends EventEmitter {};
 var util = require('./util');
 var dirs = util.dirs();
