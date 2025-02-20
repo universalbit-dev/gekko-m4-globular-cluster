@@ -139,7 +139,7 @@ method.check = function(candle) {
 
   }
   //stoploss
-  if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
+  if (this.stopLoss.update(this.candle) == 'stoploss') {this.advice('short');} 
   else {this.advice('long');}
 }
 
