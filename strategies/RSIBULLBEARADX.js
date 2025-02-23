@@ -22,7 +22,7 @@ var strat = {
 		// core
 		this.name = 'RSIBULLBEARADX';
 		this.stopLoss = new StopLoss(5); // 5% stop loss threshold
-		this.requiredHistory = config.tradingAdvisor.historySize;
+		this.requiredHistory = 987;
 		this.resetTrend();
 		
 		// debug? set to false to disable all logging/messages/stats (improves performance in backtests)
