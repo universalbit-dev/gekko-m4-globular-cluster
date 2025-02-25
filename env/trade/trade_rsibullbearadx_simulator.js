@@ -6,7 +6,7 @@ config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId
 config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'RSIBULLBEARADX'};
+config.tradingAdvisor = {enabled:true,candleSize:1,historySize:987,method:'RSIBULLBEARADX'};
 config.RSIBULLBEARADX={SMA_long:1000,SMA_short:50,BULL_RSI:10,BULL_RSI_high:80,
 BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:60,BEAR_RSI_low:20,BULL_mod_high:5,BULL_mod_low :-5,BEAR_mod_high:15,BEAR_mod_low:-5,RSI:14,ADX:3,ADX_high:70,ADX_low:50};
 
