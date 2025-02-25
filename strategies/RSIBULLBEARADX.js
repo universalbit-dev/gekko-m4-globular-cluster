@@ -19,14 +19,12 @@ var strat = {
 	{
 		// core
 		this.name = 'RSI Bull and Bear + ADX';
-		this.requiredHistory = 987;
+		this.requiredHistory = config.tradingAdvisor.historySize;
 		this.resetTrend();
 		
 		// debug? set to false to disable all logging/messages/stats (improves performance in backtests)
-		this.debug = false;
+		this.debug = true;
 		
-		// performance
-		config.backtest.batchSize = 1000; // increase performance
 		config.silent = true;
 		config.debug = false;
 		
@@ -35,6 +33,7 @@ var strat = {
 		this.addIndicator('maFast', 'SMA', this.settings.SMA_short );
 		
 		// RSI
+		this.addIndicator('RSI', 'RSI', { interval: this.settings.RSI });
 		this.addIndicator('BULL_RSI', 'RSI', { interval: this.settings.BULL_RSI });
 		this.addIndicator('BEAR_RSI', 'RSI', { interval: this.settings.BEAR_RSI });
 		
@@ -68,13 +67,12 @@ var strat = {
 		log.info('====================================');
 		log.info("Make sure your warmup period matches SMA_long and that Gekko downloads data if needed");
 		
-		// warn users
-		if( this.requiredHistory < this.settings.SMA_long )
-		{
-			log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
-		}
+// warn users
+if( this.requiredHistory < this.settings.SMA_long ){
+log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
+}
 		
-	}, // init()
+}, // init()
 	
 	
 	/* RESET TREND */
@@ -119,45 +117,53 @@ var strat = {
 		let ind = this.indicators,
 			maSlow = ind.maSlow.result,
 			maFast = ind.maFast.result,
-			rsi,
-			adx = ind.ADX.result;
+			RSI = ind.RSI.result,
+			ADX = ind.ADX.result;
+			
+		if(true){
+		console.debug('Indicators value:');
+	        console.debug('SMA+ :',maFast);
+		console.debug('SMA- :',maSlow);
+		console.debug('RSI :',RSI);
+		console.debug('ADX :',ADX);
+		}
 		
 			
 		// BEAR TREND
 		if( maFast < maSlow )
 		{
-			rsi = ind.BEAR_RSI.result;
+			RSI = ind.BEAR_RSI.result;
 			let rsi_hi = this.settings.BEAR_RSI_high,
 				rsi_low = this.settings.BEAR_RSI_low;
 			
 			// ADX trend strength?
-			if( adx > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BEAR_MOD_high;
-			else if( adx < this.settings.ADX_low ) rsi_low = rsi_low + this.BEAR_MOD_low;
+			if( ADX > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BEAR_MOD_high;
+			else if( ADX < this.settings.ADX_low ) rsi_low = rsi_low + this.BEAR_MOD_low;
 				
-			if( rsi > rsi_hi ) this.short();
-			else if( rsi < rsi_low ) this.long();
+			if( RSI > rsi_hi ) this.short();
+			else if( RSI < rsi_low ) this.long();
 			
-			if(this.debug) this.lowHigh( rsi, 'bear' );
+			if(this.debug) this.lowHigh( RSI, 'bear' );
 		}
 
 		// BULL TREND
 		else
 		{
-			rsi = ind.BULL_RSI.result;
+			RSI = ind.BULL_RSI.result;
 			let rsi_hi = this.settings.BULL_RSI_high,
 				rsi_low = this.settings.BULL_RSI_low;
 			
 			// ADX trend strength?
-			if( adx > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BULL_MOD_high;		
-			else if( adx < this.settings.ADX_low ) rsi_low = rsi_low + this.BULL_MOD_low;
+			if( ADX > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BULL_MOD_high;		
+			else if( ADX < this.settings.ADX_low ) rsi_low = rsi_low + this.BULL_MOD_low;
 				
-			if( rsi > rsi_hi ) this.short();
-			else if( rsi < rsi_low )  this.long();
-			if(this.debug) this.lowHigh( rsi, 'bull' );
+			if( RSI > rsi_hi ) this.short();
+			else if( RSI < rsi_low )  this.long();
+			if(this.debug) this.lowHigh( RSI, 'bull' );
 		}
 		
 		// add adx low/high if debug
-		if( this.debug ) this.lowHigh( adx, 'adx');
+		if( this.debug ) this.lowHigh( ADX, 'adx');
 	
 	}, // check()
 	
