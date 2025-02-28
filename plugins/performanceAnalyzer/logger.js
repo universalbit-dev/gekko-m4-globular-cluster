@@ -44,6 +44,11 @@ Logger.prototype.logRoundtripHeading = function() {
 }
 
 Logger.prototype.logRoundtrip = function(rt) {
+  if (!rt.entryAt || !rt.exitAt) {
+    log.error('Roundtrip data is missing entry or exit times.');
+    return;
+  }
+
   const display = [
     rt.entryAt.utc().format('YYYY-MM-DD HH:mm'),
     rt.exitAt.utc().format('YYYY-MM-DD HH:mm'),
