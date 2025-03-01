@@ -3,20 +3,18 @@ var _ = require('lodash');
 var log = require('../core/log.js');
 var Wrapper = require('../strategyWrapperRules.js');
 // let's create our own method
-
-var DEMA = require('./indicators/DEMA.js');
+var method = {Wrapper};
 const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
-var method = Wrapper;
 method.init = function() {
   this.name = 'DEMA';
 
-  this.currentTrend;
+  this.currentTrend='up';
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   // define the indicators we need
-  this.addIndicator('dema', 'DEMA', this.settings);
-  this.addIndicator('sma', 'SMA', this.settings.weight);
+  this.addIndicator('DEMA', 'DEMA', this.settings);
+  this.addIndicator('SMA', 'SMA', this.settings.weight);
 }
 
 // what happens on every new candle?
@@ -25,52 +23,46 @@ method.update = function(candle) { this.stopLoss.update(candle);}
 // for debugging purposes: log the last calculated
 // EMAs and diff.
 method.log = function() {
-  let dema = this.indicators.dema;
-  let sma = this.indicators.sma;
+  let DEMA = this.indicators.DEMA;
+  let SMA = this.indicators.SMA.result;
   
-  log.debug('Calculated DEMA and SMA properties for candle:');
-  log.debug('\t Inner EMA:', dema.inner.result.toFixed(8));
-  log.debug('\t Outer EMA:', dema.outer.result.toFixed(8));
-  log.debug('\t DEMA:', dema.result.toFixed(5));
-  log.debug('\t SMA:', sma.result.toFixed(5));
-  log.debug('\t DEMA age:', dema.inner.age, 'candles');
+  console.debug('Indicators:');
+  console.debug('Inner EMA:', DEMA.inner.result);
+  console.debug('Outer EMA:', DEMA.outer.result);
+  console.debug('DEMA:', DEMA.result);
+  console.debug('SMA:', SMA);
+  console.debug('DEMA age:', DEMA.inner.age, 'candles');
+  console.debug('Stoploss:',StopLoss);
 }
 
-method.check = function(candle) {
-  let dema = this.indicators.dema;
-  let sma = this.indicators.sma;
-  let resDEMA = dema.result;
-  let resSMA = sma.result;
-  let price = candle.close;
+method.check = function() {
+  let DEMA = this.indicators.DEMA;
+  let SMA = this.indicators.SMA;
+  
+  let resDEMA = DEMA.result;
+  let resSMA = SMA.result;
+  let price = this.candle.close;
   let diff = resSMA - resDEMA;
-
-  let message = '@ ' + price.toFixed(8) + ' (' + resDEMA.toFixed(5) + '/' + diff.toFixed(5) + ')';
-
-  if(diff > this.settings.thresholds.up) {
-    log.debug('we are currently in uptrend', message);
-
-    if(this.currentTrend !== 'up') {
-      this.currentTrend = 'up';
-      this.advice('long');
-    } else
-      this.advice();
-
-  } else if(diff < this.settings.thresholds.down) {
-    log.debug('we are currently in a downtrend', message);
-
-    if(this.currentTrend !== 'down') {
-      this.currentTrend = 'down';
-      this.advice('short');
-    } else
-      this.advice();
-
-  } else {
-    log.debug('we are currently not in an up or down trend', message);
-    this.advice();
+  
+  switch(diff){
+  case(diff > this.settings.thresholds.up):this.currentTrend = 'up';break;
+  case(diff < this.settings.thresholds.down):this.currentTrend = 'down';break;
+  default:log.debug('--------------------------------------------');
   }
-    //stoploss
-    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');}  
-    else {this.advice('long');}
+  
+  let message = diff;
+  console.debug('Spread:',diff);
+
+  switch(diff > this.settings.thresholds.up){
+  case(this.currentTrend !== 'up'): this.currentTrend = 'up';this.advice('long');break;
+  default: log.debug('We are currently in Up trend');
+  }
+  
+  switch(diff < this.settings.thresholds.down){
+  case(this.currentTrend !== 'down'): this.currentTrend = 'down';this.advice('short');break; 
+  default: log.debug('We are currently in Down trend');
+  }
+  
 }
 
 module.exports = method;
