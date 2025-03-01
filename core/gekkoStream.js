@@ -24,7 +24,7 @@ This JavaScript file defines a class Gekko that extends the Writable stream clas
 
 In summary, this script sets up a stream-based processing system for financial candles, using plugins to handle the actual data processing and event handling.
 */
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var Writable = require('stream').Writable;
 
 var async = require('async');
