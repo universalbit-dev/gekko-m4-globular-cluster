@@ -6,8 +6,8 @@ config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId
 config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'};
-config.DEMA={weight:21,thresholds:[{down:-0.025,up:0.025}]};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'DEMA'};
+config.DEMA={weight:987,threshold:5,thresholds:[{down:-0.05,up:0.05}]};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
