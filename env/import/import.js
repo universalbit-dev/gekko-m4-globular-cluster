@@ -1,24 +1,4 @@
-/* copilot explain
-This import.js file is a configuration script for the Gekko trading bot. Here's an explanation of its key components:
-
-    General Settings:
-        config.debug: Enables debug mode.
-        config.watch: Specifies the exchange, currency, and asset to watch.
-
-    Date Range:
-        Sets config.from to the first day of the previous month.
-        Sets config.to to the first day of the current month.
-        config.importer: Specifies that importing is enabled and sets the date range.
-
-    Database Configuration:
-        config.adapter: Uses sqlite as the database adapter.
-        config.sqlite: Specifies the path, data directory, version, and dependencies for SQLite.
-
-    Candle Writer:
-        config.candleWriter: Enables the candle writer and sets the adapter to sqlite.
-
-The script exports the config object for use in other parts of the application.
-*/
+/* */
 require('dotenv').config()
 var config = {};
 //General Settings
