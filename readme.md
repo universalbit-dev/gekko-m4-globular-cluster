@@ -33,9 +33,9 @@ pm2 start trade.config.js
 
 #### gekko -- mode -- 
 means running the application to test and simulate your strategies
-
+* [Import](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/mode/import/import.md)
 * [Backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
-* [Realtime](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
+* [Exchange Simulator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
 
 
 ---
