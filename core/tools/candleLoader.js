@@ -104,7 +104,6 @@ const handleCandles = (err, data) => {
 const handleBatchedCandles = candle => {
   result.push(candle);
 }
-▋
 /*
 
 The MIT License (MIT)
