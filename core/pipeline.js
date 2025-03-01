@@ -7,24 +7,6 @@
   https://gekko.wizb.it/docs/internals/architecture.html
 */
 
-/* COPILOT EXPLAIN
-The core/pipeline.js file is responsible for implementing the full Gekko flow based on configuration and mode. Here is an overview of its key components:
-
-    Lines 1-11: File header with comments and links for more information.
-    Lines 12-14: Importing required modules, including bluebird, underscore, events, and custom utility functions.
-    Lines 19-40: Defining the pipeline function which initializes various components based on settings.
-    Lines 42-52: loadPlugins function loads and initializes all plugins.
-    Lines 57-65: referenceEmitters function stores references to emitting plugins.
-    Lines 67-158: subscribePlugins function subscribes plugins to events emitted by other plugins.
-    Lines 160-165: prepareMarket function prepares market data based on the mode.
-    Lines 167-179: setupMarket function initializes the market based on the configuration.
-    Lines 182-205: subscribePluginsToMarket function subscribes plugins to market events.
-    Lines 211-233: Setting up Gekko in the specified mode, creating and piping the market stream to GekkoStream.
-    Lines 238-246: MIT License information.
-
-This pipeline manages the integration of plugins and the market stream, ensuring all components work together based on the provided configuration.
-*/
-
 const _ = require("underscore");
 const {EventEmitter} = require("events");class Event extends EventEmitter {};
 var util = require('./util');
@@ -174,10 +156,10 @@ var pipeline = (settings) => {
   }
 
   var prepareMarket = function(next) {
-    if(mode === 'backtest' && config.backtest.daterange === 'scan')
-      require(dirs.core + 'prepareDateRange')(next);
-    else
-      next();
+  if (mode === 'backtest' && config.backtest && config.backtest.daterange === 'scan')
+    require(dirs.core + 'prepareDateRange')(next);
+  else
+    next();
   }
 
   var setupMarket = function(next) {
