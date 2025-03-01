@@ -1,11 +1,12 @@
 //https://en.wikipedia.org/wiki/Candlestick_chart
 const batchSize = 1000;
 
-const _ =require("underscore");
+const _ = require("underscore");
 const fs = require('fs-extra');
 const moment = require('moment');
 const { EventEmitter } = require("events");
-const util = require('../core/util');const dirs = util.dirs();
+const util = require('../core/util');
+const dirs = util.dirs();
 const config = util.getConfig();
 
 const log = require(dirs.core + '/log');
@@ -20,30 +21,33 @@ const to = moment.utc(daterange.to).startOf('minute');
 const from = moment.utc(daterange.from).startOf('minute');
 const toUnix = to.unix();
 
-if(to <= from)
-  util.die('This daterange does not make sense.')
+if (to <= from) {
+  util.die('This daterange does not make sense. `to` date must be after `from` date.');
+}
 
-if(!from.isValid())
-  util.die('invalid `from`');
+if (!from.isValid()) {
+  util.die('Invalid `from` date.');
+}
 
-if(!to.isValid())
-  util.die('invalid `to`');
+if (!to.isValid()) {
+  util.die('Invalid `to` date.');
+}
 
 let iterator = {
   from: from.clone(),
   to: from.clone().add(batchSize, 'm').subtract(1, 's')
 }
 
-var DONE = false;
+let DONE = false;
 
-var result = [];
-var reader = new Reader();
-var batcher;
-var next;
-var doneFn = () => {
+let result = [];
+let reader = new Reader();
+let batcher;
+let next;
+const doneFn = () => {
   process.nextTick(() => {
     next(result);
-  })
+  });
 };
 
 module.exports = function(candleSize, _next) {
@@ -61,7 +65,10 @@ const getBatch = () => {
     iterator.to.unix(),
     'full',
     handleCandles
-  )
+  ).catch(err => {
+    console.error('Failed to get batch:', err);
+    util.die('Failed to get batch.');
+  });
 }
 
 const shiftIterator = () => {
@@ -72,18 +79,18 @@ const shiftIterator = () => {
 }
 
 const handleCandles = (err, data) => {
-  if(err) {
-    console.error(err);
-    util.die('Encountered an error..')
+  if (err) {
+    console.error('Error handling candles:', err);
+    util.die('Encountered an error while handling candles.');
   }
 
-  if(_.size(data) && _.last(data).start >= toUnix || iterator.from.unix() >= toUnix)
+  if (_.size(data) && _.last(data).start >= toUnix || iterator.from.unix() >= toUnix)
     DONE = true;
 
   batcher.write(data);
   batcher.flush();
 
-  if(DONE) {
+  if (DONE) {
     reader.close();
 
     setTimeout(doneFn, 100);
@@ -97,7 +104,7 @@ const handleCandles = (err, data) => {
 const handleBatchedCandles = candle => {
   result.push(candle);
 }
-
+▋
 /*
 
 The MIT License (MIT)
