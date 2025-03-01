@@ -1,23 +1,20 @@
 <img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
 
-## -- Ecosystem Backtest -- 
+## -- Ecosystem Backtest -- [review]
 ### Backtest your strategies:
-#### any runtime strategies errors are detected by running gekko-m4 in backtest mode
+* runtime errors
 
-#### Run gekko-m4 backtest mode -- pm2 -- terminal commands
+#### -- pm2 -- terminal commands
 ```bash
 cd ~/gekko-m4-globular-cluster
 pm2 start backtest.config.js
-#runs all available strategies
-
 ```
 
 
-#### Run gekko-m4 backtest mode  -- node -- terminal commands
+#### -- node -- terminal commands
 ```bash
 cd ~/gekko-m4-globular-cluster
-node gekko.js -c .env/backtest/backtest_inverter.js -b
-#executes a strategy
+node gekko.js -c env/backtest/backtest_inverter.js -b
 ```
 ---
 
