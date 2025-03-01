@@ -38,11 +38,9 @@ config.watch = {enabled:true,exchange:process.env.exchange,exchangeId:process.en
 config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
-
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NEURALNET'};
-
-config.NEURALNET={method:'',threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,stop_order:0.2,take_order:0.2,
-momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:4181,min_predictions :28657};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'NEURALNET'};
+config.NEURALNET={SMA_long:987,SMA_short:50,threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,
+momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:1597,min_predictions :1597};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
