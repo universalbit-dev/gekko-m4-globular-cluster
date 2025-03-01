@@ -18,19 +18,21 @@ var strat = {
 	init: function()
 	{
 		// core
-		this.name = 'RSI Bull and Bear + ADX';
+		this.name = 'Simple Moving Average Rsi and Adx Modifiers ';
 		this.requiredHistory = config.tradingAdvisor.historySize;
 		this.resetTrend();
 		
 		// debug? set to false to disable all logging/messages/stats (improves performance in backtests)
 		this.debug = true;
 		
+		// performance
+		config.backtest.batchSize = 1000; // increase performance
 		config.silent = true;
 		config.debug = false;
 		
 		// SMA
-		this.addIndicator('maSlow', 'SMA', this.settings.SMA_long );
-		this.addIndicator('maFast', 'SMA', this.settings.SMA_short );
+		this.addIndicator('maFast', 'SMA', this.settings.SMA_long );
+		this.addIndicator('maSlow', 'SMA', this.settings.SMA_short );
 		
 		// RSI
 		this.addIndicator('RSI', 'RSI', { interval: this.settings.RSI });
@@ -67,12 +69,13 @@ var strat = {
 		log.info('====================================');
 		log.info("Make sure your warmup period matches SMA_long and that Gekko downloads data if needed");
 		
-// warn users
-if( this.requiredHistory < this.settings.SMA_long ){
-log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
-}
+		// warn users
+		if( this.requiredHistory < this.settings.SMA_long )
+		{
+			log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko does not download data automatically when running LIVE the strategy will default to BEAR-mode until it has enough data.");
+		}
 		
-}, // init()
+	}, // init()
 	
 	
 	/* RESET TREND */
@@ -119,14 +122,14 @@ log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko do
 			maFast = ind.maFast.result,
 			RSI = ind.RSI.result,
 			ADX = ind.ADX.result;
-			
-		if(true){
+	
 		console.debug('Indicators value:');
 	        console.debug('SMA+ :',maFast);
 		console.debug('SMA- :',maSlow);
 		console.debug('RSI :',RSI);
 		console.debug('ADX :',ADX);
-		}
+		console.debug('--------------------------------------------');
+		
 		
 			
 		// BEAR TREND
@@ -175,14 +178,14 @@ log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko do
 		{
 			this.resetTrend();
 			this.trend.direction = 'up';
-			this.advice('long');
+			this.advice('long');this.resetTrend();
 			if( this.debug ) log.info('Going long');
 		}
 		
 		if( this.debug )
 		{
 			this.trend.duration++;
-			log.info('Long since', this.trend.duration, 'candle(s)');
+			console.debug('Long since', this.trend.duration, 'candle(s)');
 		}
 	},
 	
@@ -195,14 +198,14 @@ log.warn("*** WARNING *** Your Warmup period is lower then SMA_long. If Gekko do
 		{
 			this.resetTrend();
 			this.trend.direction = 'down';
-			this.advice('short');
+			this.advice('short');this.resetTrend();
 			if( this.debug ) log.info('Going short');
 		}
 		
 		if( this.debug )
 		{
 			this.trend.duration++;
-			log.info('Short since', this.trend.duration, 'candle(s)');
+			console.debug('Short since', this.trend.duration, 'candle(s)');
 		}
 	},
 	
