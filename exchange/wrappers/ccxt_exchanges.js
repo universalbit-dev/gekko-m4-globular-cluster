@@ -5,24 +5,30 @@ var config = require('../../core/util.js').getConfig();
 const _ = require('underscore');
 const exchangeUtils = require('../exchangeUtils');
 const retry = exchangeUtils.retry;
-
+const daterange = config.importer.daterange;
+const since = moment.utc(daterange.from).valueOf(); // Convert to timestamp in milliseconds
+const limit=config.importer.limit;
+;
 const marketData = require('./ccxt-markets.json');
 
-const Trader = function(config) {
-  _.bindAll(this,_.functions(this));
+const Trader = function(config, since, limit) {
+  _.bindAll(this, _.functions(this));
   if (_.isObject(config)) {
-    var id = process.env.exchangeId;
     var apiKey = process.env.key; /**/
     var secret = process.env.secret;/**/
     var asset = process.env.asset;
     var currency = process.env.currency;
   }
-  
+  var id=process.env.exchangeId;
   this.name = 'ccxt_exchanges';
-  this.pair = asset +'/'+ currency;
-  this.api = new ccxt[id] ({verbose: false,apiKey,secret});
+  this.pair = asset + '/' + currency;
+  this.api = new ccxt[id]({ verbose: false, apiKey, secret });
   this.capabilities = this.api.has;
   this.interval = 4000;
+
+  // Add since and limit parameters
+  this.since = since;
+  this.limit = limit;
 };
 
 const recoverableErrors = [
@@ -67,9 +73,13 @@ Trader.prototype.handleResponse = function(funcName, callback, nonMutating, payl
   };
 };
 
-Trader.prototype.getTrades = async function(since, callback, descending) {
+Trader.prototype.getTrades = async function(since, limit, callback, descending) {
   try {
-    const data = await this.api.fetchTrades(this.pair);
+    const params = {
+      since: since,
+      limit: limit
+    };
+    const data = await this.api.fetchTrades(this.pair, params);
     const trades = data.map(trade => ({
       tid: trade.id,
       date: trade.timestamp,
@@ -77,6 +87,30 @@ Trader.prototype.getTrades = async function(since, callback, descending) {
       amount: trade.amount
     }));
     callback(null, descending ? trades : trades.reverse());
+  } catch (error) {
+    callback(error);
+  }
+};
+
+
+
+
+Trader.prototype.fetchHistoryTrades = async function(since, limit, callback) {
+  try {
+    const params = { since, limit };
+    const data = await this.api.fetchMyTrades(this.pair, since, limit, params);
+    const trades = data.map(trade => ({
+      id: trade.id,
+      timestamp: trade.timestamp,
+      datetime: trade.datetime,
+      symbol: trade.symbol,
+      type: trade.type,
+      side: trade.side,
+      price: trade.price,
+      amount: trade.amount,
+      cost: trade.cost
+    }));
+    callback(null, trades);
   } catch (error) {
     callback(error);
   }
@@ -124,6 +158,7 @@ Trader.prototype.submitOrder = async function(type, amount, price, callback) {
   }
 };
 
+const trader = new Trader(config, since, limit);
 Trader.prototype.buy = function(amount, price, callback) {
   this.submitOrder('buy', amount, price, callback);
 };
@@ -162,6 +197,7 @@ Trader.prototype.cancelOrder = async function(order_id, callback) {
   }
 };
 
+// Modify the capabilities to reflect the change
 Trader.getCapabilities = function() {
   return {
     name: 'ccxt_exchanges',
@@ -169,8 +205,8 @@ Trader.getCapabilities = function() {
     currencies: marketData.currencies,
     assets: marketData.assets,
     markets: marketData.markets,
-    requires: ['key', 'secret', 'exchangeId'], // Added exchangeId to required fields
-    providesHistory: false,
+    requires: ['key', 'secret', 'exchangeId'],
+    providesHistory: true, // Change to true since it now provides history
     tid: 'tid',
     tradable: true,
     gekkoBroker: 0.6
