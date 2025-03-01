@@ -14,7 +14,7 @@ pm2 start trade.config.js
 
 ```bash
 cd ~/gekko-m4-globular-cluster
-node gekko.js -c .env/trade/trade_inverter_simulator.js
+node gekko.js -c env/trade/trade_inverter_simulator.js
 #executes a strategy
 ```
 ---
