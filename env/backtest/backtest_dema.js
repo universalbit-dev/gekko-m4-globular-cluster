@@ -4,10 +4,8 @@ var config = {};
 config.debug =true;
 config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 //Trading Advisor
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'DEMA'};
-config.DEMA={weight:21,thresholds:[{down:-0.025,up:0.025}]}
-
-
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'DEMA'};
+config.DEMA={weight:21,threshold:5,thresholds:[{down:-0.05,up:0.05}]};
 
 var previous_month = new Date();
 previous_month.setDate(1);
