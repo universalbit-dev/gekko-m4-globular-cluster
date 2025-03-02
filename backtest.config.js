@@ -31,6 +31,13 @@ module.exports = {
   exec_mode : "cluster"
   },
   {
+  name: 'neuralnet',
+  script    : 'gekko.js',
+  args      : '-c env/backtest/backtest_neuralnet.js -b',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+  {
   name: 'dema',
   script    : 'gekko.js',
   args      : '-c env/backtest/backtest_dema.js -b',
