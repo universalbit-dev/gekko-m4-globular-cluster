@@ -9,7 +9,7 @@ const StopLoss = require('./indicators/StopLoss');
 method.init = function() {
   this.name = 'DEMA';
 
-  this.currentTrend='up';
+  this.currentTrend='';
   this.requiredHistory = this.tradingAdvisor.historySize;
   this.stopLoss = new StopLoss(5); // 5% stop loss threshold
   // define the indicators we need
@@ -44,14 +44,17 @@ method.check = function() {
   let price = this.candle.close;
   let diff = resSMA - resDEMA;
   let message = diff;console.debug('Spread:',diff);
-
-  switch(diff < this.settings.thresholds.down){
-  case(this.currentTrend !== 'up'): this.currentTrend ='up';this.advice('long');log.debug('We are currently in Up trend');break;
+  
+  if(DEMA.inner.result >  DEMA.outer.result){log.debug('We are currently in Up trend');this.currentTrend ='up';}
+  else if (DEMA.inner.result <  DEMA.outer.result){log.debug('We are currently in Down trend');this.currentTrend ='down';}
+  
+  switch(diff > this.settings.thresholds.up){
+  case(this.currentTrend !== 'up'):this.currentTrend ='up';this.advice('long');break;
   default: log.debug('--------------------------------------------');
   }
   
-  switch(diff > this.settings.thresholds.up){
-  case(this.currentTrend !== 'down'): this.currentTrend ='down';this.advice('short');log.debug('We are currently in Down trend');break; 
+  switch(diff < this.settings.thresholds.down){
+  case(this.currentTrend !== 'down'):this.currentTrend ='down';this.advice('short');log.debug('We are currently in Down trend');break; 
   default: log.debug('--------------------------------------------');
   }
   
