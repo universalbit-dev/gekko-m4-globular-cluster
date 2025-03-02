@@ -54,7 +54,7 @@ method.check = function() {
   }
   
   switch(diff < this.settings.thresholds.down){
-  case(this.currentTrend !== 'down'):this.currentTrend ='down';this.advice('short');log.debug('We are currently in Down trend');break; 
+  case(this.currentTrend !== 'down'):this.currentTrend ='down';this.advice('short');break; 
   default: log.debug('--------------------------------------------');
   }
   
