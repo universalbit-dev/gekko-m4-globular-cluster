@@ -11,7 +11,6 @@ Copilot Enhancements for backtest.js
     Refactor Code: Break down some of the larger functions into smaller, more manageable functions.
 */
 
-const Promise = require("bluebird");
 const _ = require("underscore");
 const moment = require('moment');
 const { Readable } = require('stream');
