@@ -32,11 +32,16 @@ if (error)
 var id=config.watch.exchange;
 class Fetcher {
     constructor(config) {
-        this.exchange = new ccxt[id]({
-            verbose: false,
-            apiKey: process.env.key || config.watch.key,
-            secret: process.env.secret || config.watch.secret,
-        });
+        try {
+            this.exchange = new ccxt[id]({
+                verbose: false,
+                apiKey: process.env.key || config.watch.key,
+                secret: process.env.secret || config.watch.secret,
+            });
+        } catch (err) {
+            log.error(`Failed to initialize exchange: ${err.message}`);
+            throw err; // Rethrow the error after logging
+        }
     }
 
     async getTrades(since, to, handleFetch) {
@@ -51,6 +56,7 @@ class Fetcher {
             }
             handleFetch(null, allTrades);
         } catch (err) {
+            log.error(`Error fetching trades: ${err.message}`);
             handleFetch(err, []);
         }
     }
@@ -78,7 +84,11 @@ class Market extends Readable {
         this.tradeBatcher.on('new batch', this.candleManager.processTrades);
         this.candleManager.on('candles', this.pushCandles);
 
-        this.get(since, to);
+        try {
+            this.get(since, to);
+        } catch (err) {
+            log.error(`Error during Market initialization: ${err.message}`);
+        }
     }
 
     _read() {
@@ -128,3 +138,11 @@ class Market extends Readable {
 }
 
 module.exports = Market;
+
+/*
+The MIT License (MIT)
+Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
