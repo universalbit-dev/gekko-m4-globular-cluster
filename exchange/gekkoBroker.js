@@ -101,16 +101,21 @@ class Broker extends EventEmitter{
     callback(error);
   }
 }
-  
+
   async setTicker() {
-    try {
-      const ticker = await this.api.fetchTicker(this.market);
-      this.ticker = ticker;
-    } catch (err) {
-      console.log(this.api.name, err.message);
-      throw new errors.ExchangeError(err);
+  try {
+    const ticker = await this.api.fetchTicker(this.market);
+    this.ticker = ticker;
+  } catch (err) {
+    console.log(this.api.name, err.message);
+    if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.message === 'socket hang up') {
+      console.log('Retrying fetchTicker due to socket hang up...');
+      await this.delay(1000); // Delay before retry
+      return this.setTicker(); // Retry fetching ticker
     }
+    throw new errors.ExchangeError(err);
   }
+}
 
   setTicker(callback) {
     this.api.getTicker((err, ticker) => {
