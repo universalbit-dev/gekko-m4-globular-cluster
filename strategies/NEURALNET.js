@@ -258,15 +258,15 @@ method = {
       
       if(Alpha.length != 0){
       
-      /* prediction and currentprice differ from positive spread */
-      if(prediction < currentPrice && median < matrix && (spread > 0 && spread < 55) && prediction != undefined && Beta < 1){
-      /* OpenPosition (buy order) price should --up-- */
+      /*  */
+      if(prediction > currentPrice && median > matrix && (spread > 0 && spread < 1) && prediction != undefined && Beta < 1){
+      /* (buy order) price should --up-- */
       if( maFast < maSlow ){{log.info('Nostradamus predict : --UP--');this.advice('long');median=0;}}
       }
       
-      /* prediction and currentprice differ from negative spread */
-      if(prediction > currentPrice && median > matrix && (spread > -55 && spread < 0) && prediction != undefined && Beta < 1){
-      /* ClosePosition (sell order) price should --down-- */
+      /*  */
+      if(prediction < currentPrice && median < matrix && (spread > -1 && spread < 0) && prediction != undefined && Beta < 1){
+      /* (sell order) price should --down-- */
       if( maFast > maSlow ){{log.info('Nostradamus predict : --DOWN--');this.advice('short');median=0;}}
       }
       }
