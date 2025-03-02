@@ -1,14 +1,20 @@
-var ForkTask = require('relieve').tasks.ForkTask;const { EventEmitter } = require("events");
-const fork = require('child_process').fork;
+var util = require(__dirname + '/../../util');
+const { EventEmitter } = require("events");
+var dirs = util.dirs();
+var ipc = require('relieve').IPCEE(process);
 
-module.exports = function(config, done) {
-  var debug = typeof v8debug === 'object';
-  if (debug) {process.execArgv = [];}
-  task = new ForkTask(fork(__dirname + '/child'));
-  this.send('start', config);
-  this.once('ranges', ranges => {return done(false, ranges);});
-  this.on('exit', code => {if(code !== 0) done('ERROR, unable to scan dateranges, please check the console.');});
-}
+this.on('start', config => {
+  util.setGekkoEnv('child_process');
+  config.debug = false;
+  util.setConfig(config);
+
+  var scan = require(dirs.tools + 'dateRangeScanner');
+  scan((err, ranges, reader) => {
+    reader.close();
+    this.send('ranges', ranges);
+    process.exit(0);
+  });
+});
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
