@@ -43,24 +43,16 @@ method.check = function() {
   let resSMA = SMA.result;
   let price = this.candle.close;
   let diff = resSMA - resDEMA;
-  
-  switch(diff){
-  case(diff > this.settings.thresholds.up):this.currentTrend = 'up';break;
-  case(diff < this.settings.thresholds.down):this.currentTrend = 'down';break;
-  default:log.debug('--------------------------------------------');
-  }
-  
-  let message = diff;
-  console.debug('Spread:',diff);
+  let message = diff;console.debug('Spread:',diff);
 
-  switch(diff > this.settings.thresholds.up){
-  case(this.currentTrend !== 'up'): this.currentTrend = 'up';this.advice('long');break;
-  default: log.debug('We are currently in Up trend');
+  switch(diff < this.settings.thresholds.down){
+  case(this.currentTrend !== 'up'): this.currentTrend ='up';this.advice('long');log.debug('We are currently in Up trend');break;
+  default: log.debug('--------------------------------------------');
   }
   
-  switch(diff < this.settings.thresholds.down){
-  case(this.currentTrend !== 'down'): this.currentTrend = 'down';this.advice('short');break; 
-  default: log.debug('We are currently in Down trend');
+  switch(diff > this.settings.thresholds.up){
+  case(this.currentTrend !== 'down'): this.currentTrend ='down';this.advice('short');log.debug('We are currently in Down trend');break; 
+  default: log.debug('--------------------------------------------');
   }
   
 }
