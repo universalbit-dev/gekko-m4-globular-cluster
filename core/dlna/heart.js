@@ -38,15 +38,20 @@ Heart.prototype.pump = function() {
 }
 
 Heart.prototype.tick = function() {
-  if(this.lastTick) {
-    if(this.lastTick < moment().unix() - TICKRATE * 5)
-      util.die('Failed to tick in time', true);
+  try {
+    if (this.lastTick) {
+      if (this.lastTick < moment().unix() - TICKRATE * 5) {
+        util.die('Failed to tick in time', true);
+      }
+    }
+    this.lastTick = moment().unix();
+    this.emit('tick');
+  } catch (error) {
+    log.error('Error during tick:', error);
+    // Additional error handling logic here
   }
+};
 
-  this.lastTick = moment().unix();
-  const emit = new EventEmitter();
-  this.emit('tick');
-}
 
 Heart.prototype.scheduleTicks = function() {
   setInterval(
