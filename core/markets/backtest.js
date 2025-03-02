@@ -1,16 +1,4 @@
-/**
-* @see {@link https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/core/markets/backtest.md|GitHub}
- */
-
-/*
-Copilot Enhancements for backtest.js
-
-    Add JSDoc Comments: Adding JSDoc comments will help to document the functions and improve code readability.
-    Use Modern JavaScript Syntax: Update the code to use ES6+ syntax, such as const, let, arrow functions, and destructuring.
-    Improve Error Handling: Add more detailed error handling and logging to help with debugging.
-    Refactor Code: Break down some of the larger functions into smaller, more manageable functions.
-*/
-
+/**/
 const _ = require("underscore");
 const moment = require('moment');
 const { Readable } = require('stream');
@@ -34,10 +22,6 @@ if (!config.paperTrader.enabled) util.die('You need to enable the "Paper Trader"
 if (!from.isValid()) util.die('invalid `from`');
 if (!to.isValid()) util.die('invalid `to`');
 
-/**
- * Market class to read historical market data and push it to the backtesting engine.
- * @extends Readable
- */
 class Market extends Readable {
   constructor() {
     super({ objectMode: true });
@@ -53,7 +37,13 @@ class Market extends Readable {
     log.info('\t=================================================');
     log.write('');
 
-    this.reader = new Reader();
+    try {
+      this.reader = new Reader();
+    } catch (err) {
+      log.error('Failed to initialize reader:', err);
+      util.die('Error initializing reader');
+    }
+
     log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', daterange.from, 'UTC');
 
     this.batchSize = config.backtest.batchSize;
@@ -63,39 +53,43 @@ class Market extends Readable {
     };
   }
 
-  /**
-   * Initiates the data retrieval process.
-   */
   _read() {
-    this.get();
+    try {
+      this.get();
+    } catch (err) {
+      log.error('Error in _read method:', err);
+      util.die('Error in _read method');
+    }
   }
 
-  /**
-   * Fetches a batch of historical data from the reader.
-   */
   get() {
     if (this.iterator.to >= to) {
       this.iterator.to = to;
       this.ended = true;
     }
 
-    this.reader.get(
-      this.iterator.from.unix(),
-      this.iterator.to.unix(),
-      'full',
-      this.processCandles.bind(this)
-    );
+    try {
+      this.reader.get(
+        this.iterator.from.unix(),
+        this.iterator.to.unix(),
+        'full',
+        this.processCandles.bind(this)
+      );
+    } catch (err) {
+      log.error('Error fetching data from reader:', err);
+      util.die('Error fetching data from reader');
+    }
   }
 
-  /**
-   * Processes the retrieved candles and pushes them to the backtesting engine.
-   * @param {Error} err - The error object if any.
-   * @param {Array} candles - The array of candle data.
-   */
   processCandles(err, candles) {
     if (err) {
       log.error('Error processing candles:', err);
       return;
+    }
+
+    if (!Array.isArray(candles)) {
+      log.error('Candles data is not an array:', candles);
+      util.die('Invalid candles data');
     }
 
     this.pushing = true;
@@ -132,7 +126,12 @@ class Market extends Readable {
 
     if (!this.closed) {
       setTimeout(() => {
-        this.get();
+        try {
+          this.get();
+        } catch (err) {
+          log.error('Error in get method:', err);
+          util.die('Error in get method');
+        }
       }, 5);
     }
   }
@@ -149,3 +148,5 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+
