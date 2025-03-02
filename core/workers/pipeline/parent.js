@@ -1,21 +1,55 @@
-var fork = require('child_process').fork;const { EventEmitter } = require("events");
+var fork = require('child_process').fork;
+const { EventEmitter } = require("events");
+
+var start = (mode, config) => {
+  var util = require(__dirname + '/../../util');
+  util.setGekkoEnv('child-process');
+  var dirs = util.dirs();
+  util.setGekkoMode(mode);
+  util.setConfig(config);
+  var pipeline = require(dirs.core + 'pipeline');
+  pipeline({ config: config, mode: mode });
+}
 
 module.exports = (mode, config, callback) => {
   var debug = typeof v8debug === 'object';
-  if (debug) {process.execArgv = [];}
-  
+  if (debug) {
+    process.execArgv = [];
+  }
+
   var child = fork(__dirname + '/child');
   var handle = require('./messageHandlers/' + mode + 'Handler')(callback);
-  var message = {what: 'start',mode: mode,config: config};
+  var message = { what: 'start', mode: mode, config: config };
 
-  this.on('message', function(m)
-  {
-  if(m==='ready')return this.send(message);
-  if(m==='done')return this.send({what:'exit'});handle.message(m);
-  })
-  
-  this.on('exit', handle.exit);return child;
+  this.on('message', function(m) {
+    if (m === 'ready') return this.send(message);
+    if (m === 'done') return this.send({ what: 'exit' });
+    handle.message(m);
+  });
+
+  this.on('exit', handle.exit);
+  return child;
 }
+
+this.send('ready');
+this.on('message', function(m) {
+  if (m.what === 'start') start(m.mode, m.config);
+  if (m.what === 'exit') process.exit(0);
+});
+this.on('disconnect', function() {
+  console.log('disconnect');
+  process.exit(-1);
+});
+this.on('unhandledRejection', (message, p) => {
+  console.error('unhandledRejection', message);
+  this.send({ type: 'error', message: message });
+});
+this.on('uncaughtException', err => {
+  console.error('uncaughtException', err);
+  process.send({ type: 'error', error: err });
+  process.exit(1);
+});
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
