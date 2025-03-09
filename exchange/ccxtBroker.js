@@ -82,6 +82,27 @@ class CcxtBroker extends Broker {
     _.bindAll(this,_.functions(this));
   }
 
+  async getPortfolioValue() {
+    if (!this.config.private) {
+      throw new Error('Client not authenticated');
+    }
+
+    try {
+      await this.setTicker(); // Ensure ticker is updated
+      const balances = await this.portfolio.getBalances(); // Fetch balances from Portfolio
+      const portfolioValue = balances.reduce((total, balance) => {
+        const ticker = this.ticker; // Assuming ticker has the current market prices
+        const assetValue = balance.amount * ticker[balance.asset].last; // Calculation based on current price
+        return total + assetValue;
+      }, 0);
+
+      return portfolioValue;
+    } catch (err) {
+      console.error(err);
+      throw new errors.ExchangeError(err.message);
+    }
+  }
+ 
   cantTrade() {
     return checker.cantTrade(this.config);
   }
