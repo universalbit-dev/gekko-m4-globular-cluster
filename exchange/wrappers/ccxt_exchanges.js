@@ -8,7 +8,6 @@ const retry = exchangeUtils.retry;
 const daterange = config.importer.daterange;
 const since = moment.utc(daterange.from).valueOf(); // Convert to timestamp in milliseconds
 const limit=config.importer.limit;
-;
 const marketData = require('./ccxt-markets.json');
 
 const Trader = function(config, since, limit) {
@@ -19,7 +18,7 @@ const Trader = function(config, since, limit) {
     var asset = process.env.asset;
     var currency = process.env.currency;
   }
-  var id=process.env.exchangeId;
+  var id=config.watch.exchange;
   this.name = 'ccxt_exchanges';
   this.pair = asset + '/' + currency;
   this.api = new ccxt[id]({ verbose: false, apiKey, secret });
