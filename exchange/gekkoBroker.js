@@ -16,6 +16,7 @@ const orders = require('./orders');
 const Trigger = require('./trigger');
 const exchangeUtils = require('./exchangeUtils');
 const isValidOrder = exchangeUtils.isValidOrder;
+const SocketConnection = require('./socketConnection');
 
 class Broker extends EventEmitter{
   constructor(config) {
@@ -101,17 +102,18 @@ class Broker extends EventEmitter{
     callback(error);
   }
 }
-
-  async setTicker() {
+  
+  async setTicker(retries = 3) {
+  const socketConn = new SocketConnection(this.api);
   try {
-    const ticker = await this.api.fetchTicker(this.market);
+    const ticker = await socketConn.fetchTickerWithRetry(this.market);
     this.ticker = ticker;
   } catch (err) {
     console.log(this.api.name, err.message);
-    if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.message === 'socket hang up') {
+    if (retries > 0 && (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT' || err.message === 'socket hang up')) {
       console.log('Retrying fetchTicker due to socket hang up...');
       await this.delay(1000); // Delay before retry
-      return this.setTicker(); // Retry fetching ticker
+      return this.setTicker(retries - 1); // Retry fetching ticker
     }
     throw new errors.ExchangeError(err);
   }
