@@ -30,9 +30,9 @@ It also incorporates a stop loss mechanism to limit potential losses. You can vi
 
 var _ = require('lodash');
 var log = require('../core/log.js');
-
+var Wrapper = require('../strategyWrapperRules.js');
 //let's create our own method
-var method = {};
+var method = {Wrapper};
 const StopLoss = require('./indicators/StopLoss');
 // prepare everything our method needs
 method.init = function() {
@@ -67,14 +67,14 @@ method.log = function(candle) {
     }
 
     log.debug('calculated CCI properties for candle:');
-    log.debug('\t', 'Price:\t\t', candle.close.toFixed(8));
-    log.debug('\t', 'CCI tp:\t', cci.tp.toFixed(8));
-    log.debug('\t', 'CCI tp/n:\t', cci.avgtp.toFixed(8));
-    log.debug('\t', 'CCI md:\t', cci.mean.toFixed(8));
-    if (typeof(cci.result) == 'boolean' )
-        log.debug('\t In sufficient data available.');
+    log.debug('Price: ', candle.close);
+    log.debug('CCI tp: ', cci.tp);
+    log.debug('CCI avgtp: ', cci.avgtp);
+    log.debug('CCI mean: ', cci.mean);
+    if (typeof(cci.result) == 'boolean')
+        log.debug('no data available.');
     else
-        log.debug('\t', 'CCI:\t\t', cci.result.toFixed(2));
+        log.debug('CCI: ', cci.result);
 }
 
 method.check = function(candle) {
@@ -132,15 +132,10 @@ method.check = function(candle) {
                     adviced: false
                 };
             } else {this.trend.duration++;}
-            this.advice();
         }
-    } else {this.advice();}
+    }
 
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
-    
-    //stoploss
-    if (this.stopLoss.update(candle) == 'stoploss') {this.advice('short');} 
-    else {this.advice('long');}
 }
 
 module.exports = method;
