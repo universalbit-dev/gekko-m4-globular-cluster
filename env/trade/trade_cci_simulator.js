@@ -7,7 +7,7 @@ config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'CCI'};
-config.CCI={thresholds:[{up:100,down:-100,persistence:3}],constant:0.015,history:987};
+config.CCI={thresholds:[{up:100,down:-100,persistence:0}],constant:0.015,history:987};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
