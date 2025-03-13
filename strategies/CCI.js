@@ -1,4 +1,4 @@
-/*copilot explain
+/* copilot explain
 This JavaScript file (CCI.js) defines a trading strategy for the Gekko trading bot using the Commodity Channel Index (CCI). Here are the key components:
 
     Dependencies:
@@ -80,61 +80,34 @@ method.log = function(candle) {
 method.check = function(candle) {
 
     var lastPrice = candle.close;
-
     this.age++;
     var cci = this.indicators.cci;
 
-    if (typeof(cci.result) == 'number') {
-
-        // overbought?
-        if (cci.result >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction !== 'overbought' ) {
-            this.trend.adviced = true;
-            this.trend.duration++;
-            this.advice('short');
-        } else if (cci.result >= this.uplevel && this.trend.direction !== 'overbought') {
-            this.trend.duration = 1;
-            this.trend.direction = 'overbought';
-            this.trend.persisted = false;
-            this.trend.adviced = false;
-            if (this.persisted == 0) {
-                this.trend.adviced = true;
-                this.advice('short');
-            }
-        } else if (cci.result >= this.uplevel) {
-            this.trend.duration++;
-            if (this.trend.duration >= this.persisted) {
-                this.trend.persisted = true;
-            }
-        } else if (cci.result <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction !== 'oversold') {
-            this.trend.adviced = true;
-            this.trend.duration++;
-            this.advice('long');
-        } else if (cci.result <= this.downlevel && this.trend.direction !== 'oversold') {
-            this.trend.duration = 1;
-            this.trend.direction = 'oversold';
-            this.trend.persisted = false;
-            this.trend.adviced = false;
-            if (this.persisted == 0) {
-                this.trend.adviced = true;
-                this.advice('long');
-            }
-        } else if (cci.result <= this.downlevel) {
-            this.trend.duration++;
-            if (this.trend.duration >= this.persisted) {
-                this.trend.persisted = true;
-            }
-        } else {
-            if( this.trend.direction != 'nodirection') {
-                this.trend = {
-                    direction: 'nodirection',
-                    duration: 0,
-                    persisted: false,
-                    adviced: false
-                };
-            } else {this.trend.duration++;}
-        }
+    switch (typeof(cci.result) == 'number') {
+        case (cci.result >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction !== 'overbought' ): 
+        {this.trend.adviced = true;this.trend.duration++;this.advice('short');break;}
+        case (cci.result >= this.uplevel && this.trend.direction !== 'overbought'): 
+        {this.trend.duration = 1;this.trend.direction = 'overbought';this.trend.persisted = false;this.trend.adviced = false;break;}
+        case (this.persisted == 0): 
+        {this.trend.adviced = true;this.advice('short');break;}
+        case (cci.result >= this.uplevel): 
+        {this.trend.duration++;break;}
+        case (this.trend.duration >= this.persisted): 
+        {this.trend.persisted = true;break;}
+        case (cci.result <= this.downlevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction !== 'oversold'): 
+        {this.trend.adviced = true;this.trend.duration++;this.advice('long');break;}
+        case (cci.result <= this.downlevel && this.trend.direction !== 'oversold'): 
+        {this.trend.duration = 1;this.trend.direction = 'oversold';this.trend.persisted = false;this.trend.adviced = false;break;}
+        case (this.persisted == 0): 
+        {this.trend.adviced = true;this.advice('long');break;}
+        case (cci.result <= this.downlevel): 
+        {this.trend.duration++;break;}
+        case (this.trend.duration >= this.persisted): 
+        {this.trend.persisted = true;break;}
+        case (this.trend.direction !== 'nodirection'): 
+        {this.trend = {direction: 'nodirection',duration: 0,persisted: false,adviced: false};break;}
+        default: this.trend.duration++;
     }
-
     log.debug("Trend: ", this.trend.direction, " for ", this.trend.duration);
 }
 
