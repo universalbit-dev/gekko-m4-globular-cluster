@@ -31,29 +31,34 @@ const { EventEmitter } = require("events");
 var moment = require('moment');
 var util = require('../util.js');
 var config = util.getConfig();
-var expects=300;
+var expects = 300;
 
 var CandleCreator = function() {
   EventEmitter.call(this);
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this, _.functions(this));
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
 util.makeEventEmitter(CandleCreator);
 
 CandleCreator.prototype.write = function(batch) {
+  console.log("write method called with batch:", batch);
   var trades = batch.data;
-  if(_.isEmpty(trades))return;
+  if (_.isEmpty(trades)) return;
   trades = this.filter(trades);
+  console.log("Filtered trades:", trades);
   this.fillBuckets(trades);
   var candles = this.calculateCandles();
+  console.log("Calculated candles before adding empty:", candles);
 
   candles = this.addEmptyCandles(candles);
+  console.log("Candles after adding empty:", candles);
 
-  if(_.isEmpty(candles))
-    return;
+  if (_.isEmpty(candles)) return;
   this.threshold = candles.pop().start;
+  console.log("New threshold set to:", this.threshold);
   this.emit('candles', candles);
+  console.log("Emitted candles event");
 }
 
 CandleCreator.prototype.filter = function(trades) {
@@ -62,30 +67,31 @@ CandleCreator.prototype.filter = function(trades) {
   }, this);
 }
 
-// put each trade in a per second bucket
 CandleCreator.prototype.fillBuckets = function(trades) {
   _.each(trades, function(trade) {
     var second = trade.date.format('YYYY-MM-DD HH:mm:ss');
 
-    if(!(second in this.buckets))
+    if (!(second in this.buckets))
       this.buckets[second] = [];
 
     this.buckets[second].push(trade);
   }, this);
 
   this.lastTrade = _.last(trades);
+  console.log("Buckets filled:", this.buckets);
 }
+
 CandleCreator.prototype.calculateCandles = function() {
   var seconds = _.size(this.buckets);
   if (this.lastTrade !== undefined)
-  // create a string referencing the seconds of this trade happened 
-  var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss');
+    var lastSecond = this.lastTrade.date.format('YYYY-MM-DD HH:mm:ss');
 
-  var candles = _.map(this.buckets, function(bucket, name) 
-  {
-  var candle = this.calculateCandle(bucket);
-  if(name !== lastSecond)delete this.buckets[name];return candle;
+  var candles = _.map(this.buckets, function(bucket, name) {
+    var candle = this.calculateCandle(bucket);
+    if (name !== lastSecond) delete this.buckets[name];
+    return candle;
   }, this);
+  console.log("Candles calculated:", candles);
   return candles;
 }
 
@@ -114,12 +120,10 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   return candle;
 }
 
-//expects a candle every 3 second, if nothing happened will add empty candle.
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
-  if(!amount)return candles;
+  if (!amount) return candles;
 
-//iterator
   var start = _.first(candles).start.clone();
   var end = _.last(candles).start;
   var i, j = -1;
@@ -128,13 +132,13 @@ CandleCreator.prototype.addEmptyCandles = function(candles) {
     return +candle.start;
   });
 
-  while(start < end) {
+  while (start < end) {
     start.add(expects, 's');
     i = +start;
     j++;
 
-    if(_.contains(seconds, i))
-      continue; // we have a candle for 987 seconds
+    if (_.contains(seconds, i))
+      continue;
 
     var lastPrice = candles[j].close;
 
