@@ -83,7 +83,7 @@ method.check = function(candle) {
     this.age++;
     var cci = this.indicators.cci;
 
-    switch (typeof(cci.result) == 'number') {
+    switch (cci.result) {
         case (cci.result >= this.uplevel && (this.trend.persisted || this.persisted == 0) && !this.trend.adviced && this.trend.direction !== 'overbought' ): 
         {this.trend.adviced = true;this.trend.duration++;this.advice('short');break;}
         case (cci.result >= this.uplevel && this.trend.direction !== 'overbought'): 
