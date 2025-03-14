@@ -31,7 +31,7 @@ const { EventEmitter } = require("events");
 var moment = require('moment');
 var util = require('../util.js');
 var config = util.getConfig();
-var expects=3; /* */
+var expects=300;
 
 var CandleCreator = function() {
   EventEmitter.call(this);
@@ -39,7 +39,7 @@ var CandleCreator = function() {
   this.threshold = moment("1970-01-01 22:57:36", "YYYY-MM-DD HH:mm:ss");
   this.buckets = {};
 }
-util.makeEventEmitter(CandleCreator);util.inherit(Event, CandleCreator);
+util.makeEventEmitter(CandleCreator);
 
 CandleCreator.prototype.write = function(batch) {
   var trades = batch.data;
