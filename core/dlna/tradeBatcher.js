@@ -36,21 +36,21 @@ var TradeBatcher = function(tid) {
 util.makeEventEmitter(TradeBatcher);
 
 TradeBatcher.prototype.write = function(batch) {
-
   if(!_.isArray(batch))
     throw new Error('batch is not an array');
 
   if(_.isEmpty(batch))
     return log.debug('Trade fetch came back empty.');
 
+  log.debug('Incoming batch:', batch);
   var filterBatch = this.filter(batch);
-
   var amount = _.size(filterBatch);
-  if(!amount)
-    return; 
-    //log.debug('No new trades.');
+  log.debug('Filtered batch:', filterBatch);
 
+  if(!amount)return; 
   var momentBatch = this.convertDates(filterBatch);
+  log.debug('Converted dates batch:', momentBatch);
+
   var min=4000;var max=10000;
   var last = _.last(momentBatch);
   var first = _.first(momentBatch);
