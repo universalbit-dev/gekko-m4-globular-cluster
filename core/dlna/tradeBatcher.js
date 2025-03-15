@@ -56,7 +56,9 @@ TradeBatcher.prototype.write = function(batch) {
   var first = _.first(momentBatch);
   const spinner = createSpinner('Processing Exchange Data: '+first.date.format('YYYY-MM-DD HH:mm:ss')).start();
   setTimeout(() => {spinner.success()}, math.random(min,max));
-  spinner.update({text: 'Processed',color: 'yellow',stream: process.stdout,frames:['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>','...'],interval: math.random(min,max),});
+  spinner.update({text: 'Processed',color: 'yellow',stream: process.stdout,
+  frames:['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>','...'],
+  interval: math.random(min,max),});
 
   this.emit('new batch', {
     amount: amount,
