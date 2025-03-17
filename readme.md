@@ -4,42 +4,25 @@
 [![Hyperledger](https://img.shields.io/badge/hyperledger-2F3134?style=for-the-badge&logo=hyperledger&logoColor=white)](https://www.lfdecentralizedtrust.org/)
 ##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support) -- [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) -- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html) -- [Join Mastodon](https://mastodon.social/invite/wTHp2hSD) -- [Website](https://sites.google.com/view/universalbit-dev/home-page) -- [Content Delivery Network](https://universalbitcdn.it/) -- [Nodejs20](https://nodejs.org/en/blog/release/v20.15.0) -- [NVM](https://github.com/nvm-sh/nvm) -- [BTC TestNet](https://en.bitcoin.it/wiki/Testnet) -- [.ENV](https://www.dotenv.org/docs/frameworks/pm2/heroku)
 
-
 <img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="3%"></img>   
-##### sustainable personal finance
+##### thinking sustainable personal finance
 
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-codespaces.png" width="auto"></img>   
 
-## gekko-m4-globular-cluster
+## Gekko-m4-globular-cluster 
 Let's naturalize the cryptocurrency
 
-##### unlike easy gains and record price
-
+##### clone project and install packages
+ 
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
 cd gekko-m4-globular-cluster
 npm i && npm audit fix
 npm i pm2 -g
-npm i tulind --save
 ```
-#### start exchange simulator
-```bash
-pm2 start trade.config.js
-```
-
-* [troubleshooter](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/error/troubleshooter.md)
-<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/gif/gekko-m4-nodejs-installation.gif" width="auto"></img>
 ---
-
-#### gekko -- mode -- 
-means running the application to test and simulate your strategies
-* [Import](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/mode/import/import.md)
-* [Backtest](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/backtest/backtest.md) 
+#### Test and simulate your strategies
 * [Exchange Simulator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
-
-
----
-
 * [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md)
 
 #### Gekko Indicators Engine
@@ -51,11 +34,11 @@ Tulip Node is the official node.js wrapper for Tulip Indicators. It provides 100
 ```
 npm install tulind --save
 ```
-* [TulipIndicator](https://tulipindicators.org/)
-
+##### Start nodejs app
+```bash
+pm2 start simulator.config.js
+```
 ---
-
-
 #### Resources:
 * ##### [PM2](https://pm2.keymetrics.io/) Process Manager
 * ##### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
@@ -63,6 +46,7 @@ npm install tulind --save
 * ##### [Learning Together](https://www.esma.europa.eu/sites/default/files/2024-12/ESMA35-1872330276-1899_-_Final_report_on_GLs_on_reverse_solicitation_under_MiCA.pdf)
 * ##### [Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)
 * ##### [NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
+* ##### [TulipIndicator](https://tulipindicators.org/)
 * ##### [BlockChain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)
 
 
