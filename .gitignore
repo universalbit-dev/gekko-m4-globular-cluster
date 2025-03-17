@@ -1,4 +1,19 @@
-node_modules/
-strategies/
-exchange/
-env/
+# Numerous always-ignore extensions
+*.diff
+*.err
+*.orig
+*.log
+*.json
+*.csv
+*.rej
+*.swo
+*.swp
+*.vi
+*~
+*.sass-cache
+
+# Folders to ignore
+node_modules
+strategies
+exchange
+env
