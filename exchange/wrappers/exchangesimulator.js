@@ -20,9 +20,16 @@ const Trader = function(initialPrice = 10, initialTrend = 'up') {
 Trader.prototype.fetchLatestPrice = async function() {
     try {
         // Simulate fetching the latest price
-        this.price = this.price + getRndInteger(-2, 2); // Randomly adjust price for simulation
+        const priceChange = getRndInteger(-2, 2);
+        this.price = this.price + priceChange;
+
+        // Validate the new price
+        if (isNaN(this.price)) {
+            throw new Error('Price calculation resulted in NaN');
+        }
     } catch (error) {
         console.error('Error fetching latest price:', error);
+        this.price = 10; // Reset to a default value if NaN error occurs
     }
 };
 
@@ -46,6 +53,29 @@ Trader.prototype.getTrades = async function(since, cb) {
     console.log(`[EXCHANGE SIMULATOR] emitted ${amount} fake trades, up until ${this.at.format('YYYY-MM-DD HH:mm:ss')}.`);
     cb(null, trades);
 };
+
+Trader.prototype.generateOHLCV = async function(start, end, interval, cb) {
+    const ohlcvData = [];
+    let current = moment(start);
+    const endMoment = moment(end);
+
+    while (current.isBefore(endMoment)) {
+        const next = current.clone().add(interval, 'seconds');
+        const trades = _.filter(await this.getTrades(null, () => {}), trade => {
+            return moment.unix(trade.date).isBetween(current, next);
+        });
+
+        if (trades.length > 0) {
+            const candle = CandleCreator.prototype.calculateCandle(trades);
+            ohlcvData.push(candle);
+        }
+
+        current = next;
+    }
+
+    cb(null, ohlcvData);
+};
+
 
 Trader.getCapabilities = function() {
     return {
