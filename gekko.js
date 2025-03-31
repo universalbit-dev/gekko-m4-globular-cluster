@@ -9,30 +9,20 @@
   it is working.
 */
 
-/* COPILOT EXPLAIN
-The gekko.js file is the main entry point for the Gekko application. Here is a brief explanation of its components:
-
-    Lines 1-10: Disclaimer warning users about the potential risks of using the software.
-    Lines 15-16: Importing required modules, including openvino-node and utility functions from ./core/util.
-    Lines 17-20: Printing startup information to the console, including the version of Gekko.
-    Lines 22-25: Importing and executing the pipeline with the current configuration and mode.
-    Lines 29-35: MIT License information.
-*/
-
-
 const { addon: ov } = require('openvino-node');
-const util = require('./core/util');const config = util.getConfig();const dirs = util.dirs();
+const util = require('./core/util');
+const config = util.getConfig();
+const dirs = util.dirs();
+
 console.log('##########################################');
 console.log('UniversalBit Blockchain Powered by Gekko');
 console.log('\tGekko v' + util.getVersion());
 console.log('##########################################');
 
-const pipeline = require("./core/pipeline.js");
+const pipeline = require('./core/pipeline.js');
 const mode = util.gekkoMode();
 
-pipeline({config: config,mode: mode});
-
-
+pipeline({ config, mode });
 
 /*
 The MIT License (MIT)
