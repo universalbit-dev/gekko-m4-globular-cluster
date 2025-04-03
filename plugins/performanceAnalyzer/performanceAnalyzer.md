@@ -3,7 +3,7 @@
 The `performanceAnalyzer.js` file in the `gekko-m4-globular-cluster` repository is responsible for analyzing the performance of trading strategies. Here is a detailed explanation of its components and functionality:
 
 1. **Imports and Initialization**:
-    - It imports necessary modules like `bluebird`, `underscore`, `events`, `moment`, `stats-lite`, `util`, `fs-extra`, and a custom `Logger` class.
+    - It imports necessary modules like `underscore`, `events`, `moment`, `stats-lite`, `util`, `fs-extra`, and a custom `Logger` class.
     - It initializes configuration settings and directories using the `util` module.
 
 2. **PerformanceAnalyzer Class**:
