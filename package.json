@@ -9,7 +9,7 @@
  "license": "MIT",
  "dependencies": {
   "async": "^3.2.5",
-  "axios": "^1.7.9",
+  "axios": "^1.8.2",
   "bitcoin": "^3.0.3",
   "bluebird": "^3.7.2",
   "ccxt": "^4.3.88",
