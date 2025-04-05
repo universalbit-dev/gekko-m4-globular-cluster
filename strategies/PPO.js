@@ -1,12 +1,13 @@
 /*
+  PPO Strategy - cykedev 15/01/2014
+  
+  This strategy uses the Percentage Price Oscillator (PPO) to identify trends in the market.
+  It calculates the short-term and long-term Exponential Moving Averages (EMA) to determine 
+  the MACD and PPO values. Based on these values, it generates buy ('long') or sell ('short') 
+  signals when specific thresholds are crossed. Additionally, it includes a stop-loss feature 
+  to limit potential losses.
+*/
 
-  PPO - cykedev 15/01/2014
-
-  (updated a couple of times since, check git history)
-
- */
-
-// helpers
 var _ = require('lodash');
 var log = require('../core/log');
 var Wrapper = require('../strategyWrapperRules.js');
