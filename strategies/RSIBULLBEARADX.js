@@ -8,7 +8,6 @@
 	https://creativecommons.org/licenses/by-sa/4.0/
 */
 
-// req's
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 
@@ -22,7 +21,7 @@ var strat = {
 		this.name = 'Simple Moving Average Rsi and Adx Modifiers ';
 		this.requiredHistory = config.tradingAdvisor.historySize;
 		this.resetTrend();
-
+        this.candleHistory = [];
 		// debug? set to false to disable all logging/messages/stats (improves performance in backtests)
 		this.debug = false;
 
@@ -125,6 +124,15 @@ var strat = {
 		}
 		return levels;
 	},
+	
+	update: function(candle) {
+    // Push the new candle to the history
+    this.candleHistory.push(candle);
+    // Keep only the necessary number of candles
+    if (this.candleHistory.length > this.requiredHistory) {
+        this.candleHistory.shift();
+    }
+    },
 
 	/* CHECK */
 	check: function()
@@ -143,14 +151,14 @@ var strat = {
 		console.debug('ADX :',ADX);
 		console.debug('--------------------------------------------');
 
+		// Ensure candleHistory is defined and not empty
 		if (this.candleHistory && this.candleHistory.length > 0) {
 		let high = Math.max(...this.candleHistory.map(candle => candle.high));
-		let low = Math.min(...this.candleHistory.map(candle => candle.low));
-		let fibLevels = this.calculateFibonacciLevels(high, low);
-		} 
-		else {
-		console.error('Candle history is undefined or empty.');
-		}
+        let low = Math.min(...this.candleHistory.map(candle => candle.low));
+        let fibLevels = this.calculateFibonacciLevels(high, low);
+        // Further processing...
+        } 
+        else { console.error('Candle history is undefined or empty.'); }
 
 		// BEAR TREND
 		if( maFast < maSlow )
