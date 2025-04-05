@@ -1,6 +1,3 @@
-// stop loss as an indicator
-// originally created by scraqz. Thanks!
-
 var Indicator = function(settings) {
   this.input = 'candle';
   this.candle = null;
@@ -11,7 +8,14 @@ var Indicator = function(settings) {
 
 Indicator.prototype.update = function(candle) {
   this.candle = candle;
-  const stoploss = this.price * this.threshold;
+
+  // If price is zero, set it to the current candle close price
+  if (this.price === 0) {
+    this.price = candle.close;
+  }
+
+  const stoploss = this.price * (1 - this.threshold / 100); // calculate stop-loss price
+
   if (candle.close < stoploss) {
     if (!['stoploss', 'freefall'].includes(this.action)) { // new trend
       this.action = 'stoploss'; // sell
@@ -24,9 +28,11 @@ Indicator.prototype.update = function(candle) {
     this.action = 'continue'; // safe to continue with rest of strategy
   }
 }
+
 Indicator.prototype.updatePrice = function() {
   this.price = this.candle.close;
 }
+
 Indicator.prototype.long = function(price) {
   this.price = price;
   this.action = 'continue'; // reset in case we are in freefall before a buy
