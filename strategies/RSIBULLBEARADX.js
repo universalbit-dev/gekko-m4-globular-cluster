@@ -143,9 +143,14 @@ var strat = {
 		console.debug('ADX :',ADX);
 		console.debug('--------------------------------------------');
 
+		if (this.candleHistory && this.candleHistory.length > 0) {
 		let high = Math.max(...this.candleHistory.map(candle => candle.high));
 		let low = Math.min(...this.candleHistory.map(candle => candle.low));
 		let fibLevels = this.calculateFibonacciLevels(high, low);
+		} 
+		else {
+		console.error('Candle history is undefined or empty.');
+		}
 
 		// BEAR TREND
 		if( maFast < maSlow )
