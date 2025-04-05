@@ -1,15 +1,23 @@
-const util = require('./util');var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const util = require('./util');
 const {EventEmitter} = require("events");
-class Event extends EventEmitter{};const Emitter = new Event();
+const _ = require("underscore");
+
+class Event extends EventEmitter{};
+const Emitter = new Event();
 
 const GekkoEventEmitter = function() {
   EventEmitter.call(this);
   this.defferedEvents = [];
   _.bindAll(this, _.functions(this));
 }
-util.makeEventEmitter(GekkoEventEmitter);util.inherit(GekkoEventEmitter, EventEmitter);
 
-GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {this.defferedEvents.push({name, payload});}
+util.makeEventEmitter(GekkoEventEmitter);
+util.inherit(GekkoEventEmitter, EventEmitter);
+
+GekkoEventEmitter.prototype.deferredEmit = function(name, payload) {
+  this.defferedEvents.push({name, payload});
+}
+
 GekkoEventEmitter.prototype.broadcastDeferredEmit = function() {
   if(this.defferedEvents.length === 0) return false;
   const event = this.defferedEvents.shift();
@@ -18,6 +26,7 @@ GekkoEventEmitter.prototype.broadcastDeferredEmit = function() {
 }
 
 module.exports = GekkoEventEmitter;
+
 
 /*
 
