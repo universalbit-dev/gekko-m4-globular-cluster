@@ -144,8 +144,8 @@ var strat = {
 			ADX = ind.ADX.result;
 
 		console.debug('Indicators value:');
-		console.debug('SMA+ :',maFast);
-		console.debug('SMA- :',maSlow);
+                console.debug('SMA- :', maFast);
+                console.debug('SMA+ :', maSlow);
 		console.debug('RSI :',RSI);
 		console.debug('ADX :',ADX);
 		console.debug('--------------------------------------------');
