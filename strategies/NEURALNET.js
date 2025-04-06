@@ -273,8 +273,8 @@ method = {
       
       console.debug('--------------------------------------------');
       console.debug("-- Price -- :" , currentPrice);
-      console.debug('-- SMA+ :',maFast);
-      console.debug('-- SMA- :',maSlow);
+      console.debug('SMA- :', maFast);
+      console.debug('SMA+ :', maSlow);
       console.debug('-- Prediction --:' , prediction);
       console.debug("-- Spread  -- :" , spread);
       console.debug('-- Learning Method -- :' + this.settings.method);
