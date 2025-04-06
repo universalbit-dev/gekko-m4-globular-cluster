@@ -31,9 +31,8 @@ var strat = {
 		config.debug = false;
 
 		// SMA
-		this.addIndicator('maFast', 'SMA', this.settings.SMA_long );
-		this.addIndicator('maSlow', 'SMA', this.settings.SMA_short );
-
+		this.addIndicator('maFast', 'SMA', this.settings.SMA_short );
+		this.addIndicator('maSlow', 'SMA', this.settings.SMA_long );
 		// RSI
 		this.addIndicator('RSI', 'RSI', { interval: this.settings.RSI });
 		this.addIndicator('BULL_RSI', 'RSI', { interval: this.settings.BULL_RSI });
