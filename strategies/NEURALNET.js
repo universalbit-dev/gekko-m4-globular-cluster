@@ -1,5 +1,29 @@
-// Downloaded from: https://github.com/xFFFFF/Gekko-Strategies
-// Source: https://github.com/RJPGriffin/
+/**
+ * NEURALNET.js
+ * 
+ * This strategy file is part of the Gekko trading bot.
+ * It uses a neural network to predict price trends and make trading decisions.
+ * 
+ * Key Features:
+ * - Implements convolutional neural networks using convnetjs.
+ * - Uses reinforcement learning via deepqlearn.
+ * - Incorporates various indicators such as SMA for short and long periods.
+ * - Makes trading decisions based on predicted price trends.
+ * - Includes stop loss functionality to manage risk.
+ * 
+ * Configuration:
+ * - Configurable neural network layers and learning methods.
+ * - Customizable stop loss threshold.
+ * - SMA short and long periods can be set through settings.
+ * 
+ * For more information, visit:
+ * - https://github.com/xFFFFF/Gekko-Strategies
+ * - https://github.com/RJPGriffin/
+ * 
+ * Repository: https://github.com/universalbit-dev/gekko-m4-globular-cluster
+ * 
+ * Last Updated: 2025-04-06
+ */
 
 const { addon: ov } = require('openvino-node');
 const ccxt = require("ccxt");
