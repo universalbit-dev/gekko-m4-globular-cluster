@@ -111,7 +111,7 @@ method.log = function() {
   console.debug('DEMA:', DEMA.result);
   console.debug('SMA:', SMA);
   console.debug('DEMA age:', DEMA.inner.age, 'candles');
-  console.debug('Stoploss:', StopLoss);
+  //console.debug('Stoploss:', StopLoss);
 
   // Log Elliott Wave analysis
   console.debug('Elliott Wave Analysis:', this.ewAnalyzer.getWaveCounts());
