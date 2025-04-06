@@ -133,69 +133,72 @@ var strat = {
     }
     },
 
-	/* CHECK */
-	check: function()
-	{
-		// get all indicators
-		let ind = this.indicators,
-			maSlow = ind.maSlow.result,
-			maFast = ind.maFast.result,
-			RSI = ind.RSI.result,
-			ADX = ind.ADX.result;
+	
+/* CHECK */
+check: function()
+{
+    // get all indicators
+    let ind = this.indicators,
+        maSlow = ind.maSlow.result,
+        maFast = ind.maFast.result,
+        RSI = ind.RSI.result,
+        ADX = ind.ADX.result;
 
-		console.debug('Indicators value:');
-		console.debug('SMA- :', maFast);
-		console.debug('SMA+ :', maSlow);
-		console.debug('RSI :',RSI);
-		console.debug('ADX :',ADX);
-		console.debug('--------------------------------------------');
+    console.debug('Indicators value:');
+    console.debug('SMA- :', maFast);
+    console.debug('SMA+ :', maSlow);
+    console.debug('RSI :', RSI);
+    console.debug('ADX :', ADX);
+    console.debug('--------------------------------------------');
 
-		// Ensure candleHistory is defined and not empty
-		if (this.candleHistory && this.candleHistory.length > 0) {
-		let high = Math.max(...this.candleHistory.map(candle => candle.high));
+    // Ensure candleHistory is defined and not empty
+    if (this.candleHistory && this.candleHistory.length > 0) {
+        let high = Math.max(...this.candleHistory.map(candle => candle.high));
         let low = Math.min(...this.candleHistory.map(candle => candle.low));
         let fibLevels = this.calculateFibonacciLevels(high, low);
+        log.info('Fibonacci Levels:', fibLevels);
         // Further processing...
-        } 
-        else { console.error('Candle history is undefined or empty.'); }
+    } 
+    else { 
+        console.error('Candle history is undefined or empty.'); 
+    }
 
-		// BEAR TREND
-		if( maFast < maSlow )
-		{
-			RSI = ind.BEAR_RSI.result;
-			let rsi_hi = this.settings.BEAR_RSI_high,
-				rsi_low = this.settings.BEAR_RSI_low;
+    // BEAR TREND
+    if( maFast < maSlow )
+    {
+        RSI = ind.BEAR_RSI.result;
+        let rsi_hi = this.settings.BEAR_RSI_high,
+            rsi_low = this.settings.BEAR_RSI_low;
 
-			// ADX trend strength?
-			if( ADX > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BEAR_MOD_high;
-			else if( ADX < this.settings.ADX_low ) rsi_low = rsi_low + this.BEAR_MOD_low;
+        // ADX trend strength?
+        if( ADX > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BEAR_MOD_high;
+        else if( ADX < this.settings.ADX_low ) rsi_low = rsi_low + this.BEAR_MOD_low;
 
-			if( RSI > rsi_hi && this.candle.close < fibLevels[2]) this.short();
-			else if( RSI < rsi_low && this.candle.close > fibLevels[2]) this.long();
+        if( RSI > rsi_hi && this.candle.close < fibLevels[2]) this.short();
+        else if( RSI < rsi_low && this.candle.close > fibLevels[2]) this.long();
 
-			if(this.debug) this.lowHigh( RSI, 'bear' );
-		}
+        if(this.debug) this.lowHigh( RSI, 'bear' );
+    }
 
-		// BULL TREND
-		else
-		{
-			RSI = ind.BULL_RSI.result;
-			let rsi_hi = this.settings.BULL_RSI_high,
-				rsi_low = this.settings.BULL_RSI_low;
+    // BULL TREND
+    else
+    {
+        RSI = ind.BULL_RSI.result;
+        let rsi_hi = this.settings.BULL_RSI_high,
+            rsi_low = this.settings.BULL_RSI_low;
 
-			// ADX trend strength?
-			if( ADX > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BULL_MOD_high;
-			else if( ADX < this.settings.ADX_low ) rsi_low = rsi_low + this.BULL_MOD_low;
+        // ADX trend strength?
+        if( ADX > this.settings.ADX_high ) rsi_hi = rsi_hi + this.BULL_MOD_high;
+        else if( ADX < this.settings.ADX_low ) rsi_low = rsi_low + this.BULL_MOD_low;
 
-			if( RSI > rsi_hi && this.candle.close < fibLevels[2]) this.short();
-			else if( RSI < rsi_low && this.candle.close > fibLevels[2])  this.long();
-			if(this.debug) this.lowHigh( RSI, 'bull' );
-		}
+        if( RSI > rsi_hi && this.candle.close < fibLevels[2]) this.short();
+        else if( RSI < rsi_low && this.candle.close > fibLevels[2])  this.long();
+        if(this.debug) this.lowHigh( RSI, 'bull' );
+    }
 
-		// add adx low/high if debug
-		if( this.debug ) this.lowHigh( ADX, 'adx');
-
-	}, // check()
+    // add adx low/high if debug
+    if( this.debug ) this.lowHigh( ADX, 'adx');
+}, // check()
 
 
 	/* LONG */
