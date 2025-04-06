@@ -39,8 +39,8 @@ method = {
     this.stopLoss = new StopLoss(5); // 5% stop loss threshold
     
     // SMA
-    this.addIndicator('maFast', 'SMA', this.settings.SMA_long );
-    this.addIndicator('maSlow', 'SMA', this.settings.SMA_short );
+    this.addIndicator('maFast', 'SMA', this.settings.SMA_short );
+    this.addIndicator('maSlow', 'SMA', this.settings.SMA_long );
     
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
     fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
