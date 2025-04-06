@@ -1,10 +1,9 @@
 var moment = require('moment');
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
 var path = require('path');
 var fs = require('fs-extra');
 var semver = require('semver');
 var program = require('commander');
-
+const _ = require("underscore");
 var startTime = moment();
 
 var _config = false;
@@ -19,13 +18,13 @@ var _args = false;
 var util = {
   getConfig: function() {
     // cache
-    if(_config)
+    if (_config)
       return _config;
 
-    if(!program.config)
-        util.die('Please specify a config file.', true);
+    if (!program.config)
+      util.die('Please specify a config file.', true);
 
-    if(!fs.existsSync(util.dirs().gekko + program.config))
+    if (!fs.existsSync(util.dirs().gekko + program.config))
       util.die('Cannot find the specified config file.', true);
 
     _config = require(util.dirs().gekko + program.config);
@@ -36,7 +35,7 @@ var util = {
     _config = config;
   },
   setConfigProperty: function(parent, key, value) {
-    if(parent)
+    if (parent)
       _config[parent][key] = value;
     else
       _config[key] = value;
@@ -45,11 +44,10 @@ var util = {
     return util.getPackage().version;
   },
   getPackage: function() {
-    if(_package)
+    if (_package)
       return _package;
 
-
-    _package = JSON.parse( fs.readFileSync(__dirname + '/../package.json', 'utf8') );
+    _package = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf8'));
     return _package;
   },
   getRequiredNodeVersion: function() {
@@ -70,23 +68,23 @@ var util = {
   defer: function(fn) {
     return function(args) {
       var args = _.toArray(arguments);
-      return _.defer(function() { fn.apply(this, args) });
+      return setTimeout(function() { fn.apply(this, args) }, 0); // Use setTimeout instead of _.defer
     }
   },
   logVersion: function() {
-    return  `Gekko version: v${util.getVersion()}`
-    + `\nNodejs version: ${process.version}`;
+    return `Gekko version: v${util.getVersion()}`
+      + `\nNodejs version: ${process.version}`;
   },
   die: function(m, soft) {
 
-    if(_gekkoEnv === 'child-process') {
-      return process.send({type: 'error', error: '\n ERROR: ' + m + '\n'});
+    if (_gekkoEnv === 'child-process') {
+      return process.send({ type: 'error', error: '\n ERROR: ' + m + '\n' });
     }
 
     var log = console.log.bind(console);
 
-    if(m) {
-      if(soft) {
+    if (m) {
+      if (soft) {
         log('\n ERROR: ' + m + '\n\n');
       } else {
         log(`\nGekko encountered an error and can\'t continue`);
@@ -114,7 +112,7 @@ var util = {
       importers: ROOT + 'importers/exchanges/',
       tools: ROOT + 'core/tools/',
       workers: ROOT + 'core/workers/',
-      config: ROOT + '.env/',
+      config: ROOT + '.env',
       broker: ROOT + 'exchange/'
     }
   },
@@ -131,12 +129,12 @@ var util = {
     _gekkoMode = mode;
   },
   gekkoMode: function() {
-    if(_gekkoMode)
+    if (_gekkoMode)
       return _gekkoMode;
 
-    if(program['import'])
+    if (program['import'])
       return 'importer';
-    else if(program.backtest)
+    else if (program.backtest)
       return 'backtest';
     else
       return 'realtime';
@@ -167,7 +165,7 @@ program
   .parse(process.argv);
 
 // make sure the current node version is recent enough
-if(!util.recentNode())
+if (!util.recentNode())
   util.die([
     'Your local version of Node.js is too old. ',
     'You have ',
