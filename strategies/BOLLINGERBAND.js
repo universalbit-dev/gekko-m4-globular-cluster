@@ -1,6 +1,26 @@
-/* BB strategy - okibcn 2018-01-03 */
+/**
+ * BOLLINGERBAND Strategy
+ * 
+ * This strategy uses Bollinger Bands combined with GANN indicators and a Stop Loss mechanism.
+ * 
+ * Author: okibcn
+ * Date: 2018-01-03
+ * 
+ * Indicators:
+ * - BBANDS: Bollinger Bands
+ * - GANN: GANN indicators
+ * - StopLoss: Stop Loss mechanism
+ * 
+ * Methods:
+ * - init: Initializes the strategy with indicators and settings.
+ * - update: Updates the indicators with the latest candle data.
+ * - log: Logs the calculated Bollinger Bands and GANN signal for each candle.
+ * - check: Checks the current market conditions and provides trading advice.
+ * 
+ * Stop Loss:
+ * - Automatically advises 'short' if the Stop Loss threshold is reached.
+ */
 
-// helpers
 var log = require('../core/log.js');
 var Wrapper = require('../strategyWrapperRules.js');
 var BBANDS = require('./indicators/BBANDS.js');
