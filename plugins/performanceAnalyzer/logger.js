@@ -1,5 +1,5 @@
 // log trade performance results
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const moment = require('moment');
 const humanizeDuration = require('humanize-duration');
 var log = require('../../core/log.js');
@@ -9,14 +9,13 @@ const dirs = util.dirs();
 const mode = util.gekkoMode();
 
 const Logger = function(watchConfig) {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this, _.functions(this));
   this.currency = watchConfig.currency;
   this.asset = watchConfig.asset;
   this.roundtrips = [];
-  
 }
-util.makeEventEmitter(Logger);
 
+util.makeEventEmitter(Logger);
 
 Logger.prototype.round = function(amount) {
   return amount.toFixed(8);
@@ -60,25 +59,21 @@ Logger.prototype.logRoundtrip = function(rt) {
   log.info('', display.join('\t'));
 }
 
-if(mode === 'backtest') {
+if (mode === 'backtest') {
   Logger.prototype.handleTrade = function(trade) {
-    if(trade.action !== 'sell' && trade.action !== 'buy')
+    if (trade.action !== 'sell' && trade.action !== 'buy')
       return;
 
     var at = trade.date.format('YYYY-MM-DD HH:mm:ss');
 
-
-    if(trade.action === 'sell')
-
-        log.info(
-          `${at}: Paper trader simulated a SELL`,
-          `\t${this.round(trade.portfolio.currency)}`,
-          `${this.currency} <= ${this.round(trade.portfolio.asset)}`,
-          `${this.asset}`
-        );
-
-    else if(trade.action === 'buy')
-
+    if (trade.action === 'sell')
+      log.info(
+        `${at}: Paper trader simulated a SELL`,
+        `\t${this.round(trade.portfolio.currency)}`,
+        `${this.currency} <= ${this.round(trade.portfolio.asset)}`,
+        `${this.asset}`
+      );
+    else if (trade.action === 'buy')
       log.info(
         `${at}: Paper trader simulated a BUY`,
         `\t${this.round(trade.portfolio.currency)}`,
@@ -88,7 +83,6 @@ if(mode === 'backtest') {
   }
 
   Logger.prototype.finalize = function(report) {
-
     log.write('');
     log.info('\t=================================================');
     log.info('\tBACKTESTING FEATURE NEEDS PROPER TESTING');
@@ -130,7 +124,7 @@ if(mode === 'backtest') {
     this.roundtrips.push(rt);
   }
 
-} else if(mode === 'realtime') {
+} else if (mode === 'realtime') {
   Logger.prototype.handleTrade = Logger.prototype.logReport;
 
   Logger.prototype.handleRoundtrip = function(rt) {
@@ -141,6 +135,7 @@ if(mode === 'backtest') {
 }
 
 module.exports = Logger;
+
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
