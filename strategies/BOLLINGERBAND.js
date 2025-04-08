@@ -91,8 +91,9 @@ method.check = function(candle) {
 
   // GANN Indicator signal
   var gannSignal = this.gann.getSignal();
-
+  
   // Combining BBANDS and GANN signals
+  if (gannSignal !== null) {
   if (zone === 'top' && gannSignal === 'sell') {
     this.advice('short');
   } else if (zone === 'bottom' && gannSignal === 'buy') {
@@ -102,6 +103,7 @@ method.check = function(candle) {
   } else if (zone === 'low' && gannSignal === 'buy') {
     this.advice('long');
   }
+}
 
   // Stoploss
   if (this.stopLoss.update(candle) == 'stoploss') {
