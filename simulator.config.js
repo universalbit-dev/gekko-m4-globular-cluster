@@ -29,6 +29,13 @@ module.exports = {
   exec_mode : "cluster"
   },
   {
+  name: 'bollingerband_simulator',
+  script    : 'gekko.js',
+  args      : '-c env/simulator/trade_bollingerband_simulator.js',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+  {
   name: 'noop_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_noop_simulator.js',
