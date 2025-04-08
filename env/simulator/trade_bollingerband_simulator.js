@@ -7,7 +7,12 @@ config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'BOLLINGERBAND'};
-config.BOLLINGERBAND={bbands:[{TimePeriod: 20,NbDevUp: 2.25,NbDevDn: 2}]};
+
+config.BOLLINGERBAND={
+bbands:[{TimePeriod: 20,NbDevUp: 2.25,NbDevDn: 2}],
+SMA: 200,DEMA: 200,
+gannAngleRatios: [1, 2, 3]
+};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
