@@ -1,3 +1,25 @@
+/**
+ * AsyncIndicatorRunner is a utility class for managing asynchronous processing of financial indicators
+ * using the TA-Lib and Tulip libraries. It handles the caching of candle data, enforces indicator limits,
+ * and ensures processing is managed sequentially even when multiple candles are queued.
+ *
+ * Key Features:
+ * - Processes incoming candle data while maintaining a cache of the most recent candles.
+ * - Supports TA-Lib and Tulip indicators, ensuring only allowed indicators are used.
+ * - Handles asynchronous computation of indicators using the provided libraries.
+ * - Sequentially processes candles from a backlog to prevent overlapping calculations.
+ * - Provides methods for adding custom TA-Lib and Tulip indicators during initialization.
+ *
+ * Usage:
+ * - Add indicators using `addTalibIndicator` or `addTulipIndicator`.
+ * - Process candles with `processCandle`, which queues them and computes indicators.
+ * - Extensible for integration with trading strategies or other financial applications.
+ *
+ * License:
+ * The MIT License (MIT)
+ * Copyright (c) 2014-2017 Mike van Rossum
+ */
+
 const _ = require('underscore');
 const fs = require('fs-extra');
 const util = require('../../core/util');
@@ -148,11 +170,3 @@ AsyncIndicatorRunner.prototype.addTulipIndicator = function(name, type, paramete
 }
 
 module.exports = AsyncIndicatorRunner;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
