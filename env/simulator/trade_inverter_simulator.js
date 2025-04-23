@@ -1,3 +1,27 @@
+/**
+ * Trade Inverter Simulator is a key component for simulating inverted trades
+ * in the Gekko M4 trading ecosystem. This module is designed to test and
+ * validate trading strategies by flipping buy and sell signals, providing
+ * insights into the opposite market behavior under simulated conditions.
+ *
+ * Key Features:
+ * - Simulates inverted trades by swapping buy and sell signals.
+ * - Provides a controlled environment for testing strategy robustness.
+ * - Logs simulation results for analysis and debugging.
+ * - Integrates seamlessly with Gekko's trading strategy modules.
+ * - Supports customization for various trading scenarios and parameters.
+ *
+ * Usage:
+ * - Configure the simulator settings in the Gekko configuration file under `simulator`.
+ * - Ensure the input trade data is correctly formatted and compatible.
+ * - Use the simulator to evaluate the inverse performance of trading strategies.
+ * - Extensible for advanced simulation and analytics features.
+ *
+ * License:
+ * The MIT License (MIT)
+ * Copyright (c) 2014-2017 Mike van Rossum
+ */
+
 require('dotenv').config()
 var config = {};
 config.debug =true;
