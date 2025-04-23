@@ -6,7 +6,7 @@
 ### Run gekko-m4 Realtime Mode Using PM2 (Terminal Commands)
 ```bash
 cd ~/gekko-m4-globular-cluster
-pm2 start trade.config.js
+pm2 start simulator.config.js
 # Runs all available strategies
 ```
 
