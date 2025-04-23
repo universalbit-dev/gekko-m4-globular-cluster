@@ -9,16 +9,89 @@
 
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-codespaces.png" width="auto"></img>   
 
-## Gekko-m4-globular-cluster 
-Let's naturalize the cryptocurrency
+# Gekko M4 Globular Cluster
 
-##### Clone project and install packages
+**Feature-Rich [M4 NGC 6121]**
+
+---
+
+## Overview
+
+The **Gekko M4 Globular Cluster** repository is a feature-rich implementation designed for advanced algorithmic trading. It leverages the Gekko trading bot framework with added capabilities to manage multiple trading strategies seamlessly.
+
+---
+
+## Features
+
+- **Dynamic Strategy Management**: Create, manage, and execute multiple trading strategies within a single framework.
+- **Custom Advice Handling**: Collect and process trading advice from each strategy dynamically.
+- **Robust Base**: Built on top of Gekko's `tradingAdvisor` plugin for enhanced modularity.
+- **Scalable Architecture**: Easily extendable to incorporate additional strategies and configurations.
+
+---
+
+## Requirements
+
+Before setting up the project, make sure your environment meets the following requirements:
+
+1. **System**: Linux (Tested on `Linux 6.11.0-24-generic`)
+2. **Node.js**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
+   **Tested on Node.js version**: `v20.19.1`
+3. **Packages**: Required build tools
+   ```bash
+   sudo apt install -y build-essential
+   ```
+
+---
+
+## Installation & Setup
+
+### 1. Install Node.js Using `nvm`
+
+1. Install `nvm`:
+   ```bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
+   source ~/.nvm/nvm.sh
+   ```
+
+2. Install Node.js:
+   ```bash
+   nvm install node
+   ```
+
+3. Set default Node.js version:
+   ```bash
+   nvm use node
+   nvm alias default node
+   ```
+
+4. Verify installation:
+   ```bash
+   node -v
+   npm -v
+   ```
+
+### 2. Clone the Repository
+
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
 cd gekko-m4-globular-cluster
-npm i && npm audit fix
+```
+
+### 3. Install Dependencies
+
+```bash
+npm install && npm audit fix
+npm install tulind --save
 npm i pm2 -g
 ```
+Notes:
+### **PM2**
+PM2 is a production process manager for Node.js applications. It helps manage application processes, ensuring they restart automatically in case of crashes and supporting features like load balancing, log management, and monitoring.
+
+### **Tulind**
+Tulind (Ta-Lib for Node.js) is a library for technical analysis in financial trading. It provides a wide range of indicators, such as moving averages, RSI, and MACD, to analyze stock or cryptocurrency price trends.
+
 ---
 ##### Test and simulate your strategies
 * [Exchange Simulator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
@@ -28,18 +101,13 @@ npm i pm2 -g
 * [Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)
 * [Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)
 
-##### Install [Tulind Package](https://www.npmjs.com/package/tulind)
-```
-npm install tulind --save
-#Tulip Node is the official node.js wrapper for Tulip Indicators.
-#It provides 100+ technical analysis indicator functions.
+##### Start Nodejs app
 
-```
-##### Start nodejs app
 ```bash
 pm2 start simulator.config.js
 ```
----
+
+
 #### Resources:
 * ##### [PM2](https://pm2.keymetrics.io/) Process Manager
 * ##### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
