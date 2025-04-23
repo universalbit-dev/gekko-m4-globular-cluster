@@ -59,7 +59,7 @@ The `trader.js` module provides critical functionalities that enhance real-time 
 ---
 
 ### Plugins to Enable/Disable
-- [trade_inverter_simulator.js](https://github.com/universalbit-dev/gekko-m4/blob/master/env/trade/trade_inverter_simulator.js)
+- [trade_inverter_simulator.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/env/simulator/trade_inverter_simulator.js)
 
 ---
 
