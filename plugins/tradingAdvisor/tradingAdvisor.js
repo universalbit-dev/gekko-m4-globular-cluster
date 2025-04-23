@@ -1,3 +1,26 @@
+/**
+ * TradingAdvisor is a core component of the Gekko trading bot, responsible for managing trading strategies,
+ * handling real-time and historical data, and processing candles for strategy execution. It integrates with
+ * candle batching and custom strategies to provide a modular and extensible trading framework.
+ *
+ * Key Features:
+ * - Dynamically loads and initializes trading strategies based on user configuration.
+ * - Processes incoming candle data using a batching system for custom candle sizes.
+ * - Supports both real-time and historical data preparation for strategy execution.
+ * - Relays trading advice, strategy updates, and notifications to other components.
+ * - Handles trade completion events and propagates updates to trading strategies.
+ *
+ * Usage:
+ * - Configure the strategy in the Gekko configuration file under `tradingAdvisor`.
+ * - Ensure the strategy file exists in the methods directory with the correct name.
+ * - Process candles with `processCandle`, which interacts with the batching system and strategy.
+ * - Extensible for implementing new strategies and integrating with the Gekko ecosystem.
+ *
+ * License:
+ * The MIT License (MIT)
+ * Copyright (c) 2014-2017 Mike van Rossum
+ */
+
 const _ = require("underscore");
 const {EventEmitter} = require("events");class Event extends EventEmitter{};
 const fs = require("fs-extra");
@@ -89,12 +112,3 @@ Actor.prototype.relayAdvice = function(advice) {
 }
 
 module.exports = Actor;
-
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
