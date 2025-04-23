@@ -1,3 +1,27 @@
+/**
+ * Trader is a key plugin for the Gekko trading bot, responsible for executing trades on exchanges,
+ * managing portfolio balances, and handling trade-related events. It acts as the interface between
+ * Gekko's trading strategies and the real-world exchange APIs.
+ *
+ * Key Features:
+ * - Executes buy and sell orders on supported cryptocurrency exchanges.
+ * - Tracks and updates portfolio balances in real-time.
+ * - Handles trade completion events and propagates updates to other components.
+ * - Integrates with Gekko strategies to execute trading advice.
+ * - Supports error handling, retries, and exchange-specific adjustments.
+ *
+ * Usage:
+ * - Configure the trader settings in the Gekko configuration file under `trader`.
+ * - Ensure API credentials and exchange-specific configurations are correctly set.
+ * - Use `processAdvice` to handle and execute trading advice from strategies.
+ * - Extensible for adding support for new exchanges and advanced trading features.
+ *
+ * License:
+ * The MIT License (MIT)
+ * Copyright (c) 2014-2017 Mike van Rossum
+ */
+
+
 const _ = require('../../core/lodash.js');
 const util = require('../../core/util.js');
 const config = util.getConfig();
@@ -406,11 +430,3 @@ Trader.prototype.cancelOrder = function(id, advice, next) {
 }
 
 module.exports = Trader;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
