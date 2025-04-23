@@ -102,7 +102,6 @@ Tulind (Ta-Lib for Node.js) is a library for technical analysis in financial tra
 * [Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)
 
 ##### Start PM2 Ecosystem:
-Start the application using PM2:
 ```bash
 pm2 start simulator.config.js
 ```
@@ -111,8 +110,7 @@ pm2 start simulator.config.js
 ```bash
 pm2 monit
 ```
-### Troubleshooting Tulind Installation
-
+### Troubleshooting Tulind Installation:
 The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
 
 #### **Common Issues**
