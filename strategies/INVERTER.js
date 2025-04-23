@@ -1,3 +1,33 @@
+/**
+ * INVERTER Strategy Plugin for Gekko Trading Bot
+ *
+ * This strategy is designed to invert trading signals, effectively executing
+ * the opposite of what a standard strategy recommends. It incorporates key features like
+ * RSI Overbought/Oversold detection, ADX Trend Strength analysis, and StopLoss strategies.
+ *
+ * Key Features:
+ * - Inverts trading signals, switching between 'long' and 'short' recommendations.
+ * - Implements RSI for identifying overbought/oversold conditions.
+ * - Utilizes ADX for measuring trend strength.
+ * - Includes StopLoss mechanisms for risk management.
+ *
+ * Resources:
+ * - Some code sourced from: https://github.com/xFFFFF/Gekko-Strategies
+ *
+ * Authors:
+ * - _RSI and _ADX by (@TommieHansen) (CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/)
+ * - Additional contributions by Gabriel Araujo (@Gab0)
+ * - universalBit-dev: https://github.com/universalbit-dev/gekko-m4-globular-cluster/
+ *
+ * License:
+ * The MIT License (MIT)
+ * (c) 2025 universalBit-dev
+ *
+ * References:
+ * - [Gab0's Gekko Adapted Strategies](https://github.com/Gab0/gekko-adapted-strategies)
+ * - [Extra Indicators by Gabriel Araujo](https://github.com/Gab0/gekko-extra-indicators)
+ */
+
 const { addon: ov } = require('openvino-node');
 const _ =require("underscore");
 var log = require('../core/log.js');
