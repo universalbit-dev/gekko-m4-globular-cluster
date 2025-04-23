@@ -1,3 +1,28 @@
+/**
+ * @file baseTradingMethod.js
+ * @description This file defines the Base class, a foundational component for creating trading strategies
+ * within the Gekko framework. It provides core functionalities such as:
+ * - Managing custom indicators (both synchronous and asynchronous).
+ * - Handling real-time market data (candles) to generate actionable trading advice.
+ * - Emitting and handling strategy events, including warmup completion and strategy updates.
+ * 
+ * Key Features:
+ * - Dynamically loads indicator modules from the configured indicators directory.
+ * - Supports both synchronous and asynchronous calculation of indicators for flexibility.
+ * - Allows strategies to emit advice and notifications, facilitating integration with trading systems.
+ * - Ensures essential methods (`init` and `check`) are implemented by custom strategies.
+ * - Provides default implementations for optional methods like `update`, `end`, and `onTrade`.
+ * 
+ * Usage:
+ * This module is designed to be extended by custom trading strategies. Strategies must implement the 
+ * mandatory `init` and `check` methods to define their specific logic, while optionally overriding 
+ * other methods as needed.
+ * 
+ * @author Mike van Rossum
+ * @copyright 2014-2017
+ * @license MIT License
+ */
+
 const _ = require("underscore");
 var fs = require("fs-extra");
 const util = require('../../core/util');var config = util.getConfig();const dirs = util.dirs();
@@ -298,10 +323,4 @@ Base.prototype.finish = function(done) {
 }
 
 module.exports = Base;
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+
