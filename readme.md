@@ -101,12 +101,64 @@ Tulind (Ta-Lib for Node.js) is a library for technical analysis in financial tra
 * [Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)
 * [Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)
 
-##### Start Nodejs app
-
+##### Start PM2 Ecosystem:
+Start the application using PM2:
 ```bash
 pm2 start simulator.config.js
 ```
 
+##### To monitor the application and display real-time logs and system metrics, run the following command:
+```bash
+pm2 monit
+```
+### Troubleshooting Tulind Installation
+
+The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
+
+#### **Common Issues**
+1. **Build Errors**:
+   - The system may lack the necessary build tools to compile the native module.
+   - Missing or outdated dependencies can cause build failures.
+
+2. **Module Compatibility**:
+   - Incompatibility with the Node.js version being used.
+
+3. **Incomplete Installation**:
+   - The module may fail to install partially, leading to runtime errors.
+
+#### **Solutions**
+1. **Ensure Required Build Tools are Installed**:
+   Run the following command to install the necessary build tools on Linux:
+   ```bash
+   sudo apt install -y build-essential
+   ```
+
+2. **Reinstall `tulind`**:
+   Use the following commands to ensure a clean installation:
+   - Standard installation:
+     ```bash
+     npm i tulind --save
+     ```
+   - Force rebuild from source if pre-built binaries fail:
+     ```bash
+     npm i tulind --build-from-source
+     ```
+
+3. **Verify Node.js Version Compatibility**:
+   Ensure you're using a compatible Node.js version (e.g., `v20.19.1`). If needed, switch versions using `nvm`.
+
+4. **Clear npm Cache**:
+   If installation issues persist, clear the npm cache and attempt reinstallation:
+   ```bash
+   npm cache clean --force
+   npm i tulind --save
+   ```
+
+5. **Debug Logs**:
+   Run the installation with verbose logs to identify the root cause of the issue:
+   ```bash
+   npm i tulind --save --verbose
+   ```
 
 #### Resources:
 * ##### [PM2](https://pm2.keymetrics.io/) Process Manager
