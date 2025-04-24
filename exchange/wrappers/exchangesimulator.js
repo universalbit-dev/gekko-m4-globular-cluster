@@ -34,7 +34,12 @@ const Trader = function(initialPrice = 10, initialTrend = 'up') {
     this.trend = initialTrend;
     this.tid = 0;
     this.candleHistory = [];
+    this.balance = {
+        BTC: 0.0005,
+        LTC: 1,
+    };
 };
+
 
 Trader.prototype.fetchLatestPrice = async function() {
     try {
