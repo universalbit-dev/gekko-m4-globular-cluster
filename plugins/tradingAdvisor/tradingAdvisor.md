@@ -143,6 +143,10 @@ The `tradingAdvisor.js` is a crucial component of the Gekko trading bot that han
 - **`WrappedStrategy.js`**: Provides the wrapper for strategy methods.
 - **`CandleBatcher.js`**: Handles batching of market candles.
 
+## License
+
+This module is licensed under the MIT License. Copyright 2014-2017 Mike van Rossum.
+
 ---
 
 This documentation is designed to help developers and users better understand and utilize the `tradingAdvisor.js` module in the Gekko M4 trading bot.
