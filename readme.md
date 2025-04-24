@@ -82,7 +82,7 @@ cd gekko-m4-globular-cluster
 
 ```bash
 npm install && npm audit fix
-npm install tulind --save
+npm cache clean --force && npm i tulind --save
 npm i pm2 -g
 ```
 Notes:
