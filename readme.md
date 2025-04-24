@@ -48,24 +48,24 @@ Before setting up the project, make sure your environment meets the following re
 
 ### 1. Install Node.js Using `nvm`
 
-1. Install `nvm`:
+* Install `nvm`:
    ```bash
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
    source ~/.nvm/nvm.sh
    ```
 
-2. Install Node.js:
+* Install Node.js:
    ```bash
-   nvm install node
+   nvm install 20.19.1
    ```
 
-3. Set default Node.js version:
+* Set default Node.js version:
    ```bash
-   nvm use node
-   nvm alias default node
+   nvm use 20.19.1
+   nvm alias default 20.19.1
    ```
 
-4. Verify installation:
+* Verify installation:
    ```bash
    node -v
    npm -v
@@ -85,7 +85,6 @@ npm install && npm audit fix
 npm cache clean --force && npm i tulind --save
 npm i pm2 -g
 ```
-Notes:
 ### **PM2**
 PM2 is a production process manager for Node.js applications. It helps manage application processes, ensuring they restart automatically in case of crashes and supporting features like load balancing, log management, and monitoring.
 
@@ -110,6 +109,17 @@ pm2 start simulator.config.js
 ```bash
 pm2 monit
 ```
+The `pm2 monit` command is part of the [PM2 process manager](https://pm2.keymetrics.io/), a popular tool for managing and monitoring Node.js applications.
+
+### Features
+- The interface is divided into sections, each corresponding to a running application.
+- You can view:
+  - **Logs**: Check application output and errors.
+  - **Metrics**: Real-time CPU and memory usage.
+  - **Application State**: See if the application is online, stopped, or restarting.
+---
+
+
 ### Troubleshooting Tulind Installation:
 The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
 
