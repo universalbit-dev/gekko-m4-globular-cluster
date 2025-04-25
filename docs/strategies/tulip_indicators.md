@@ -95,6 +95,53 @@ git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
 cd gekko-m4-globular-cluster
 npm install tulind --build-from-source 
 ```
+### Troubleshooting Tulind Installation:
+The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
+
+#### **Common Issues**
+1. **Build Errors**:
+   - The system may lack the necessary build tools to compile the native module.
+   - Missing or outdated dependencies can cause build failures.
+
+2. **Module Compatibility**:
+   - Incompatibility with the Node.js version being used.
+
+3. **Incomplete Installation**:
+   - The module may fail to install partially, leading to runtime errors.
+
+#### **Solutions**
+1. **Ensure Required Build Tools are Installed**:
+   Run the following command to install the necessary build tools on Linux:
+   ```bash
+   sudo apt install -y build-essential
+   ```
+
+2. **Reinstall `tulind`**:
+   Use the following commands to ensure a clean installation:
+   - Standard installation:
+     ```bash
+     npm i tulind --save
+     ```
+   - Force rebuild from source if pre-built binaries fail:
+     ```bash
+     npm i tulind --build-from-source
+     ```
+
+3. **Verify Node.js Version Compatibility**:
+   Ensure you're using a compatible Node.js version (e.g., `v20.19.1`). If needed, switch versions using `nvm`.
+
+4. **Clear npm Cache**:
+   If installation issues persist, clear the npm cache and attempt reinstallation:
+   ```bash
+   npm cache clean --force
+   npm i tulind --save
+   ```
+
+5. **Debug Logs**:
+   Run the installation with verbose logs to identify the root cause of the issue:
+   ```bash
+   npm i tulind --save --verbose
+   ```
 
 ## Example:
 
