@@ -170,7 +170,7 @@ The `tulind` package may encounter some issues during installation due to missin
 
 #### Resources:
 * ##### [PM2](https://pm2.keymetrics.io/) Process Manager
-* ##### [Ecosystem Files](https://pm2.keymetrics.io/docs/usage/application-declaration/)
+* ##### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
 * ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
 * ##### [Learning Together](https://www.esma.europa.eu/sites/default/files/2024-12/ESMA35-1872330276-1899_-_Final_report_on_GLs_on_reverse_solicitation_under_MiCA.pdf)
 * ##### [Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)
