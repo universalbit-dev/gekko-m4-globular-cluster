@@ -86,8 +86,13 @@ Trader.prototype.manageFetchError = function(error) {
 
 Trader.prototype.getTrades = async function(since, cb) {
     await this.fetchLatestPrice(); // Fetch the latest price before generating trades
-    const amount = moment().diff(this.at, 's');
-    const trades = _.range(amount).map(() => {
+
+    // Randomize the number of trades to simulate
+    const minTrades = 1; // Minimum number of trades
+    const maxTrades = 10; // Maximum number of trades
+    const numberOfTrades = getRndInteger(minTrades, maxTrades);
+
+    const trades = _.range(numberOfTrades).map(() => {
         this.tid++;
 
         // Ensure the first trade is emitted
@@ -113,11 +118,12 @@ Trader.prototype.getTrades = async function(since, cb) {
         return {
             date: this.at.add(1, 'seconds').unix(),
             price: this.price,
-            amount: Math.floor(Math.random() * 2),
+            amount: getRndInteger(1, 5), // Randomize trade volumes between 1 and 5
             tid: this.tid
         };
     });
-    console.log(`[EXCHANGE SIMULATOR] emitted ${amount} fake trades, up until ${this.at.format('YYYY-MM-DD HH:mm:ss')}.`);
+
+    console.log(`[EXCHANGE SIMULATOR] emitted ${numberOfTrades} fake trades, up until ${this.at.format('YYYY-MM-DD HH:mm:ss')}.`);
     cb(null, trades);
 };
 
