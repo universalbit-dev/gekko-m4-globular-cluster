@@ -82,7 +82,7 @@ cd gekko-m4-globular-cluster
 
 ```bash
 npm install && npm audit fix
-npm cache clean --force && npm i tulind --save
+npm cache clean --force && npm i tulind --build-from-source
 npm i pm2 -g
 ```
 ##### [Troubleshooting Tulind Installation](https://github.com/universalbit-dev/gekko-m4-globular-cluster?tab=readme-ov-file#troubleshooting-tulind-installation)
