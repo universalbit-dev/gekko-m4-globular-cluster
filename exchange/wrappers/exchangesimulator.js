@@ -1,3 +1,13 @@
+/*
+ * exchangesimulator.js
+ * 
+ * This file simulates exchange operations for testing purposes within the Gekko M4 Globular Cluster project.
+ * 
+ * Description:
+ * Provides a simulated exchange wrapper to mimic the behavior of real exchange APIs,
+ * enabling testing and debugging without live market dependencies.
+ */ 
+
 const moment = require('moment');
 const _ = require('underscore');
 
