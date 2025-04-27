@@ -85,6 +85,8 @@ npm install && npm audit fix
 npm cache clean --force && npm i tulind --save
 npm i pm2 -g
 ```
+##### [Troubleshooting Tulind Installation](https://github.com/universalbit-dev/gekko-m4-globular-cluster?tab=readme-ov-file#troubleshooting-tulind-installation)
+
 ### **PM2**
 PM2 is a production process manager for Node.js applications. It helps manage application processes, ensuring they restart automatically in case of crashes and supporting features like load balancing, log management, and monitoring.
 
