@@ -2,9 +2,6 @@
 
 ## Table of Contents
 
-Here is the list of directories and files available in the `/docs` folder of the repository.
-
-### Directories
 - [**commandline/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/commandline): Guides and examples for managing the project via the command line.
 - [**extending/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/extending): Instructions on extending the project with new features or modules.
 - [**features/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/features): Details about the features and capabilities of the project.
