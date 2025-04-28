@@ -1,3 +1,5 @@
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png" width="200" />
+
 # Exchange Simulator for Gekko M4
 
 The Exchange Simulator module in Gekko M4 provides a simulated trading environment for testing strategies, debugging, and analyzing performance without relying on live market data. It replicates exchange behavior, enabling seamless integration for backtesting and real-time simulations.
