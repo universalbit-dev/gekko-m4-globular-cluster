@@ -46,8 +46,8 @@ this.addTulipIndicator('bbands', 'bbands', { optInNbStdDevs: this.settings.nb, o
 this.addTulipIndicator('ps', 'psar', { optInAcceleration: this.settings.accel, optInMaximum: this.settings.max});
 ```
 
-- Example settings: [RSIBullBearADX Simulator](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/env/trade/trade_rsibullbearadx_simulator.js)
-- Additional examples: [Trade Environment](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/env/trade)
+- Example settings: [RSIBullBearADX Simulator](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/env/simulator/trade_rsibullbearadx_simulator.js)
+- Additional examples: [Trade Environment](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/env/simulator)
 
 ---
 
