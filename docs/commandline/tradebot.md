@@ -10,8 +10,6 @@ You can set Gekko up as a tradebot, this will instruct Gekko to:
 
 ## Configuration
 
-First, set up Gekko for commandline usage (see [this document](./about_the_commandline.md) for details). After that, configure the following plugins:
-
 - `config.watch` - the market to trade on.
 - `candleWriter` - (optional) also store market data to disk.
 - `tradingAdvisor` - configure the strategy and candle properties.
@@ -22,4 +20,4 @@ Turn off the paperTrader (there can only be 1 trade plugin active per instance).
 
 Once done, run Gekko like so:
 
-    node gekko --config your-config-file.js
+    node gekko --config /env/simulator/your-config-file.js
