@@ -95,7 +95,7 @@ Tulind (Ta-Lib for Node.js) is a library for technical analysis in financial tra
 
 ---
 ##### Test and simulate your strategies
-* [Exchange Simulator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/trade/trade.md) 
+* [Exchange Simulator](https://github.com/universalbit-dev/gekko-m4/blob/master/docs/mode/simulator/simulator.md) 
 * [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md)
 
 ##### Gekko Indicators Engine
