@@ -101,7 +101,7 @@ The plugin emits the following events:
 ## Example Use Cases
 
 1. **Backtesting**:
-   - Use historical data to simulate trades and evaluate strategy performance.
+   - Use data to simulate trades and evaluate strategy performance.
 
 2. **Strategy Debugging**:
    - Test strategies in a risk-free environment before live deployment.
