@@ -1,57 +1,26 @@
-# Gekko UI
+# UI Interface Cancelled
 
-When you launch Gekko UI, you start a basic nodejs webserver with 3 components:
+Currently, the Gekko UI interface is cancelled. This means all operations and functionalities must be performed directly through the terminal. 
 
-- It will serve frontend (HTML/CSS/JS) files for frontend written as a [vuejs app](https://vuejs.org/) (v2.5.16).
-- It will will handle API requests as [koa](http://koajs.com/) (v1) routes, it will also start a websocket server used to broadcast messages in realtime (used for long lived processes Importing and Live Gekkos for example). The server API documentation can be found [here](./server_api.md).
+## What Does This Mean?
 
-## Gekko UI Frontend
+- **No Graphical Interface**: You will not be able to interact with Gekko through a web-based or graphical interface.
+- **Terminal-Only Operations**: All commands, configurations, and outputs will need to be managed via the command line.
 
-The frontend is setup as a very basic vue app. Additionally the following libraries are used:
+## How to Work in Console Mode
 
-- [Reconnecting websocket](https://github.com/joewalnes/reconnecting-websocket)
-- [Moment](http://momentjs.com/)
-- [d3.js](https://d3js.org/)
-- [toml](https://github.com/BinaryMuse/toml-node)
-- [humanizeDuration](https://github.com/EvanHahn/HumanizeDuration.js)
+1. **Run Commands**: Use the terminal to execute Gekko commands. For example:
+   ```bash
+   node gekko --config config.js
+   ```
+   Replace `config.js` with your specific configuration file.
 
-The vue app itself uses the following libraries:
+2. **Configure Settings**: Make adjustments to configuration files manually. These files are usually found under the `env/` directory.
 
-- [marked](https://github.com/chjj/marked)
-- [pug](https://github.com/pugjs) (all html is either written in pug of markdown)
-- [vue-router](https://github.com/vuejs/vue-router)
-- [vuex](https://github.com/vuejs/vuex)
-- [superagent](https://github.com/visionmedia/superagent) (cross browser ajax)
+3. **View Output**: All logs, errors, and outputs will be displayed directly in the terminal.
 
-### Developing for the Gekko UI frontend
+## Benefits of Terminal Mode
 
-You first need to install all developer dependencies so the frontend app can be recompiled on your machine.
-
-    cd gekko/web/vue
-    npm install
-
-After this you can launch a hot reload version of the app which will automatically recompile the frontend and reload your browser:
-
-    # path to webserver
-    cd gekko/web
-    # launch the server - we use this API
-    node server
-
-    # path to vue app
-    cd vue
-    npm run serve
-
-Gekko UI is now served from port 8080, the webpack dev server will compile the vue app (in memory) and intercept all calls to the app itself (`/dist/js/app.xxx.js`) and serve the in memory app. It is important to note that this UI still talks to the API served from the `node server` command (on default http://localhost:3000/api).
-
-
-If you have configured Gekko to run on non standards ports (using the UIconfig), you can have your config applied to the development environment by copying `gekko/web/vue/dist/UIconfig.js` to `gekko/web/vue/public/UIconfig.js`.
-
-### Compiling the Gekko UI frontend
-
-*Note: as part of the compilation process Gekko will reset the UIconfig in both `gekko/web/vue/dist/UIconfig.js` and `gekko/web/vue/public/UIconfig.js`. Only compile if you are ready to lose your personal changes.*
-
-When you are done developing you can compile the app using these instructions:
-
-    # path to vue app
-    cd gekko/web/vue
-    npm run build
+- **Lightweight Operation**: Terminal mode consumes fewer system resources compared to running a full UI.
+- **Greater Control**: Direct access to commands and logs provides advanced users with more control over Gekko's behavior.
+- **Easier Debugging**: Errors and logs are immediately accessible in the terminal for troubleshooting.
