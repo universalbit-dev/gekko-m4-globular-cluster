@@ -29,11 +29,12 @@
  * License: MIT
  */
 
+
 const axios = require('axios');
 const moment = require('moment');
 const _ = require('underscore');
 
-// Define the URL for the API  (NGC6121)
+// Define the URL for the API call NGC6121
 const apiUrl = 'https://api.noctuasky.com/api/v1/skysources/name/M%204';
 let firstTradeEmitted = false; // Initialize the flag to track the first trade emission
 
@@ -132,6 +133,7 @@ Trader.prototype.fetchSkySourceData = async function() {
 };
 
 // Fetch Latest Price (Sky Source Data)
+// Fetch Latest Price (Sky Source Data)
 Trader.prototype.fetchLatestPrice = async function() {
     try {
         const maxWaitTime = 5000; // Max wait time in milliseconds
@@ -155,6 +157,9 @@ Trader.prototype.fetchLatestPrice = async function() {
         if (skySourceData && skySourceData.coordinates) {
             const coordinateFactor = (skySourceData.coordinates.ra + skySourceData.coordinates.dec) % 5;
             this.price += coordinateFactor * 0.1; // Add a small factor based on coordinates
+            
+            // Log the updated price with Sky Source influence
+            console.log(`Updated price with Sky Source influence: ${this.price.toFixed(2)} (RA: ${skySourceData.coordinates.ra}, Dec: ${skySourceData.coordinates.dec})`);
         }
 
         // Validate price before applying the change
@@ -175,6 +180,7 @@ Trader.prototype.fetchLatestPrice = async function() {
         this.manageFetchError(error);
     }
 };
+
 
 Trader.prototype.manageFetchError = function(error) {
     // Log the error to a monitoring service, send an alert, etc.
