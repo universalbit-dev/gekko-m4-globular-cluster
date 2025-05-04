@@ -1,13 +1,14 @@
-[![CodeQL](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/github-code-scanning/codeql)
- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
-[![Hyperledger](https://img.shields.io/badge/hyperledger-2F3134?style=for-the-badge&logo=hyperledger&logoColor=white)](https://www.lfdecentralizedtrust.org/)
-##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support) -- [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) -- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html) -- [Join Mastodon](https://mastodon.social/invite/wTHp2hSD) -- [Website](https://sites.google.com/view/universalbit-dev/home-page) -- [Content Delivery Network](https://universalbitcdn.it/) -- [Nodejs20](https://nodejs.org/en/blog/release/v20.15.0) -- [NVM](https://github.com/nvm-sh/nvm) -- [BTC TestNet](https://en.bitcoin.it/wiki/Testnet) -- [.ENV](https://www.dotenv.org/docs/frameworks/pm2/heroku)
+---
 
-<img src="https://github.com/universalbit-dev/universalbit-dev/blob/main/docs/assets/images/geppo.png" width="3%"></img>   
+## 📢 Support the UniversalBit Project
+Help us grow and continue innovating!  
+- [Support the UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support)  
+- [Learn about Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation)  
+- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/)
+
+
 ##### thinking sustainable personal finance
-
-<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/gekko-m4-codespaces.png" width="auto"></img>   
+<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/snail.png" width="auto"></img>   
 
 # Gekko M4 Globular Cluster
 
