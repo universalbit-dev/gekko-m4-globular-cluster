@@ -133,7 +133,6 @@ Trader.prototype.fetchSkySourceData = async function() {
 };
 
 // Fetch Latest Price (Sky Source Data)
-// Fetch Latest Price (Sky Source Data)
 Trader.prototype.fetchLatestPrice = async function() {
     try {
         const maxWaitTime = 5000; // Max wait time in milliseconds
