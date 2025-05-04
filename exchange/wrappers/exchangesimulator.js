@@ -6,11 +6,35 @@
  * Description:
  * Provides a simulated exchange wrapper to mimic the behavior of real exchange APIs,
  * enabling testing and debugging without live market dependencies.
- */ 
+ * 
+ * Features:
+ * - Simulates price trends using Fibonacci sequence durations.
+ * - Generates fake trades and OHLCV (Open-High-Low-Close-Volume) data for testing.
+ * - Fetches sky source data for M4 (NGC 6121) from an external API and integrates it into price calculations.
+ * 
+ * M4 Coordinate Influence:
+ * - The M4 globular cluster's coordinates (Right Ascension "ra" and Declination "dec") are fetched from the Noctua Sky API.
+ * - These coordinates are used to introduce a deterministic factor in price fluctuations:
+ *   - The sum of the RA and Dec values is taken.
+ *   - A small adjustment to the price is applied based on the modulo of this sum (mod 5).
+ *   - This creates a unique external factor to simulate celestial influence on market behavior.
+ * 
+ * Usage:
+ * - Initialize a Trader instance to simulate a trading environment.
+ * - Call `fetchSkySourceData` to fetch and cache M4 coordinate data.
+ * - The `fetchLatestPrice` method integrates the M4 influence into simulated price trends.
+ * 
+ * Author: universalbit-dev
+ * Repository: https://github.com/universalbit-dev/gekko-m4-globular-cluster
+ * License: MIT
+ */
 
+const axios = require('axios');
 const moment = require('moment');
 const _ = require('underscore');
 
+// Define the URL for the API  (NGC6121)
+const apiUrl = 'https://api.noctuasky.com/api/v1/skysources/name/M%204';
 let firstTradeEmitted = false; // Initialize the flag to track the first trade emission
 
 // Fibonacci sequence and random initialization for trends
@@ -48,9 +72,66 @@ const Trader = function(initialPrice = 10, initialTrend = 'up') {
         BTC: 0.0005,
         LTC: 1,
     };
+    this.skySourceData = null; // Holds fetched Sky Source data
+    this.skySourceExpiresAt = null; // Expiry timestamp for cached data
 };
 
+// Fetch Sky Source Data with Caching
+Trader.prototype.fetchSkySourceData = async function() {
+    const cacheDuration = 60 * 60 * 1000; // Cache Sky Source data for 1 hour
 
+    // Check if cached data is still valid
+    if (this.skySourceData && this.skySourceExpiresAt > Date.now()) {
+        console.log('[INFO] Using cached Sky Source Data.');
+        return this.skySourceData;
+    }
+
+    try {
+        // Fetch new Sky Source data
+        const response = await axios.get(apiUrl, {
+            timeout: 5000,
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'gekko-m4-globular-cluster/1.0',
+            },
+        });
+
+        if (response.status === 200 && response.data) {
+            console.log('[INFO] Sky Source Data successfully fetched:', response.data);
+
+            // Update cache
+            this.skySourceData = response.data;
+            this.skySourceExpiresAt = Date.now() + cacheDuration;
+
+            return response.data;
+        } else {
+            console.warn('[WARNING] Unexpected response status or empty data:', response.status);
+        }
+    } catch (error) {
+        if (error.code === 'ECONNABORTED') {
+            console.error('[ERROR] Request timeout while fetching Sky Source Data:', error.message);
+        } else if (error.response) {
+            console.error('[ERROR] API responded with error:', {
+                status: error.response.status,
+                data: error.response.data,
+            });
+        } else {
+            console.error('[ERROR] Network or other error occurred:', error.message);
+        }
+    }
+
+    // Fallback to default data on failure
+    console.warn('[WARNING] Falling back to default Sky Source Data.');
+    return {
+        name: 'Default Sky Source',
+        coordinates: {
+            ra: 0,
+            dec: 0,
+        },
+    };
+};
+
+// Fetch Latest Price (Sky Source Data)
 Trader.prototype.fetchLatestPrice = async function() {
     try {
         const maxWaitTime = 5000; // Max wait time in milliseconds
@@ -68,6 +149,13 @@ Trader.prototype.fetchLatestPrice = async function() {
 
         // Simulate fetching the latest price
         const priceChange = getRndInteger(-2, 2);
+
+        // Adjust price based on Sky Source data
+        const skySourceData = await this.fetchSkySourceData();
+        if (skySourceData && skySourceData.coordinates) {
+            const coordinateFactor = (skySourceData.coordinates.ra + skySourceData.coordinates.dec) % 5;
+            this.price += coordinateFactor * 0.1; // Add a small factor based on coordinates
+        }
 
         // Validate price before applying the change
         if (isNaN(this.price)) {
