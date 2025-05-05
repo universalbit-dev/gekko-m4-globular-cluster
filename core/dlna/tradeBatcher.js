@@ -45,11 +45,11 @@ TradeBatcher.prototype.write = function(batch) {
   log.debug('Incoming batch:', batch);
   var filterBatch = this.filter(batch);
   var amount = _.size(filterBatch);
-  log.debug('Filtered batch:', filterBatch);
+  //log.debug('Filtered batch:', filterBatch);
 
   if(!amount)return; 
   var momentBatch = this.convertDates(filterBatch);
-  log.debug('Converted dates batch:', momentBatch);
+  //log.debug('Converted dates batch:', momentBatch);
 
   var min=4000;var max=10000;
   var last = _.last(momentBatch);
