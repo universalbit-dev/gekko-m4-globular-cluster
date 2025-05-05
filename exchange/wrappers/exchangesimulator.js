@@ -104,6 +104,7 @@ Trader.prototype.fetchSkySourceData = async function() {
 
         if (response.status === 200 && response.data) {
             console.log('[INFO] Sky Source Data successfully fetched:', response.data);
+            return this.skySourceData;
 
             // Update cache
             this.skySourceData = response.data;
@@ -163,7 +164,7 @@ Trader.prototype.fetchLatestPrice = async function() {
             this.price += coordinateFactor * 0.1; // Add a small factor based on coordinates
             
             // Log the updated price with Sky Source influence
-            console.log(`Updated price with Sky Source influence: ${this.price.toFixed(2)} (RA: ${skySourceData.coordinates.ra}, Dec: ${skySourceData.coordinates.dec})`);
+            console.log(`Updated price with Sky Source influence: ${this.price.toFixed(2)} (RA: ${skySourceData.coordinates.ra}, Dec: ${skySourceData.coordinates.de})`);
         }
 
         // Validate price before applying the change
