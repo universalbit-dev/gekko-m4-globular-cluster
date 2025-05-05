@@ -42,21 +42,21 @@ var CandleCreator = function() {
 util.makeEventEmitter(CandleCreator);
 
 CandleCreator.prototype.write = function(batch) {
-  console.log("write method called with batch:", batch);
+  //console.log("write method called with batch:", batch);
   var trades = batch.data;
   if (_.isEmpty(trades)) return;
   trades = this.filter(trades);
-  console.log("Filtered trades:", trades);
+  //console.log("Filtered trades:", trades);
   this.fillBuckets(trades);
   var candles = this.calculateCandles();
-  console.log("Calculated candles before adding empty:", candles);
+  //console.log("Calculated candles before adding empty:", candles);
 
   candles = this.addEmptyCandles(candles);
-  console.log("Candles after adding empty:", candles);
+  //console.log("Candles after adding empty:", candles);
 
   if (_.isEmpty(candles)) return;
   this.threshold = candles.pop().start;
-  console.log("New threshold set to:", this.threshold);
+  //console.log("New threshold set to:", this.threshold);
   this.emit('candles', candles);
   console.log("Emitted candles event");
 }
@@ -78,7 +78,7 @@ CandleCreator.prototype.fillBuckets = function(trades) {
   }, this);
 
   this.lastTrade = _.last(trades);
-  console.log("Buckets filled:", this.buckets);
+  //console.log("Buckets filled:", this.buckets);
 }
 
 CandleCreator.prototype.calculateCandles = function() {
@@ -91,7 +91,7 @@ CandleCreator.prototype.calculateCandles = function() {
     if (name !== lastSecond) delete this.buckets[name];
     return candle;
   }, this);
-  console.log("Candles calculated:", candles);
+  //console.log("Candles calculated:", candles);
   return candles;
 }
 
@@ -99,12 +99,13 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   var first = _.first(trades);
 
   var f = parseFloat;
+  var price = f(first.price); // Use a single value for open, high, low, and close
   var candle = {
     start: first.date.clone().startOf('second'),
-    open: f(first.price),
-    high: f(first.price),
-    low: f(first.price),
-    close: f(_.last(trades).price),
+    open: price,
+    high: price,
+    low: price,
+    close: price, // Set close to the same value
     vwp: 0,
     volume: 0,
     trades: _.size(trades)
@@ -118,7 +119,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
   });
   candle.vwp /= candle.volume;
   return candle;
-}
+};
 
 CandleCreator.prototype.addEmptyCandles = function(candles) {
   var amount = _.size(candles);
