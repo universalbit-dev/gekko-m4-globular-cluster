@@ -51,6 +51,7 @@ function getRndInteger(min, max) {
 }
 
 const CandleCreator = function() {};
+
 CandleCreator.prototype.calculateCandle = function(trades) {
     const open = trades[0].price;
     const close = trades[trades.length - 1].price;
@@ -59,7 +60,11 @@ CandleCreator.prototype.calculateCandle = function(trades) {
     const volume = trades.reduce((acc, t) => acc + t.amount, 0);
     const vwp = trades.reduce((acc, t) => acc + (t.price * t.amount), 0) / volume;
 
-    return { open, high, low, close, vwp, volume };
+    const candle = { open, high, low, close, vwp, volume };
+
+    // Log the OHLCV data as a table
+    console.table(candle);
+    return candle;
 };
 
 const Trader = function(initialPrice = 10, initialTrend = 'up') {
