@@ -105,16 +105,23 @@ method.log = function() {
   let DEMA = this.indicators.DEMA;
   let SMA = this.indicators.SMA.result;
 
-  console.debug('Indicators:');
-  console.debug('Inner EMA:', DEMA.inner.result);
-  console.debug('Outer EMA:', DEMA.outer.result);
-  console.debug('DEMA:', DEMA.result);
-  console.debug('SMA:', SMA);
-  console.debug('DEMA age:', DEMA.inner.age, 'candles');
-  //console.debug('Stoploss:', StopLoss);
+  // Log  in  table format
+const TableData = [
+  { Metric: 'Inner EMA', Value: DEMA.inner.result },
+  { Metric: 'Outer EMA', Value: DEMA.outer.result },
+  { Metric: 'DEMA', Value: DEMA.result },
+  { Metric: 'SMA', Value: SMA },
+  { Metric: 'DEMA Age (candles)', Value: DEMA.inner.age }
+];
 
-  // Log Elliott Wave analysis
-  console.debug('Elliott Wave Analysis:', this.ewAnalyzer.getWaveCounts());
+// Display the table
+console.table(TableData);
+  // Log Elliott Wave analysis in a table with clear labels
+const waveCounts = this.ewAnalyzer.getWaveCounts();
+console.table([
+  { WaveType: 'Impulse', Count: waveCounts.impulse },
+  { WaveType: 'Corrective', Count: waveCounts.corrective }
+]);
 }
 
 method.check = function(candle) {
