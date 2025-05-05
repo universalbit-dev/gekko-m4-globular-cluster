@@ -132,7 +132,7 @@ Trader.prototype.fetchSkySourceData = async function() {
         name: 'Default Sky Source',
         coordinates: {
             ra: 0,
-            dec: 0,
+            de: 0,
         },
     };
 };
@@ -159,7 +159,7 @@ Trader.prototype.fetchLatestPrice = async function() {
         // Adjust price based on Sky Source data
         const skySourceData = await this.fetchSkySourceData();
         if (skySourceData && skySourceData.coordinates) {
-            const coordinateFactor = (skySourceData.coordinates.ra + skySourceData.coordinates.dec) % 5;
+            const coordinateFactor = (skySourceData.coordinates.ra + skySourceData.coordinates.de) % 5;
             this.price += coordinateFactor * 0.1; // Add a small factor based on coordinates
             
             // Log the updated price with Sky Source influence
