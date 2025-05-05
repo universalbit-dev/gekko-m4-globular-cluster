@@ -59,11 +59,7 @@ CandleCreator.prototype.calculateCandle = function(trades) {
     const low = Math.min(...trades.map(t => t.price));
     const volume = trades.reduce((acc, t) => acc + t.amount, 0);
     const vwp = trades.reduce((acc, t) => acc + (t.price * t.amount), 0) / volume;
-
     const candle = { open, high, low, close, vwp, volume };
-
-    // Log the OHLCV data as a table
-    console.table(candle);
     return candle;
 };
 
@@ -89,7 +85,6 @@ Trader.prototype.fetchSkySourceData = async function() {
     // Check if cached data is still valid
     if (this.skySourceData && this.skySourceExpiresAt > Date.now()) {
         console.log('[INFO] Using cached Sky Source Data.');
-        return this.skySourceData;
     }
 
     try {
@@ -103,16 +98,14 @@ Trader.prototype.fetchSkySourceData = async function() {
         });
 
         if (response.status === 200 && response.data) {
-            console.log('[INFO] Sky Source Data successfully fetched:', response.data);
+            console.log('[INFO] Sky Source Data successfully fetched:');
             return this.skySourceData;
-
             // Update cache
             this.skySourceData = response.data;
             this.skySourceExpiresAt = Date.now() + cacheDuration;
-
             return response.data;
         } else {
-            console.warn('[WARNING] Unexpected response status or empty data:', response.status);
+        console.warn('[WARNING] Unexpected response status or empty data:', response.status);
         }
     } catch (error) {
         if (error.code === 'ECONNABORTED') {
@@ -164,7 +157,7 @@ Trader.prototype.fetchLatestPrice = async function() {
             this.price += coordinateFactor * 0.1; // Add a small factor based on coordinates
             
             // Log the updated price with Sky Source influence
-            console.log(`Updated price with Sky Source influence: ${this.price.toFixed(2)} (RA: ${skySourceData.coordinates.ra}, Dec: ${skySourceData.coordinates.de})`);
+            console.log(`Updated price with Sky Source influence: ${this.price} (RA: ${skySourceData.coordinates.ra}, Dec: ${skySourceData.coordinates.de})`);
         }
 
         // Validate price before applying the change
@@ -185,7 +178,6 @@ Trader.prototype.fetchLatestPrice = async function() {
         this.manageFetchError(error);
     }
 };
-
 
 Trader.prototype.manageFetchError = function(error) {
     // Log the error to a monitoring service, send an alert, etc.
