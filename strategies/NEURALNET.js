@@ -264,7 +264,7 @@ method = {
   }
   
   if (this.predictionCount > this.settings.min_predictions ) 
-    {
+  {
       this.predictionCount=0;
       var prediction = this.predictCandle() * this.scale;
       currentPrice = this.candle.close;
@@ -295,15 +295,16 @@ method = {
       }
       }
       
-      console.debug('--------------------------------------------');
-      console.debug("-- Price -- :" , currentPrice);
-      console.debug('-- SMA- -- :', maFast);
-      console.debug('-- SMA+ -- :', maSlow);
-      console.debug('-- Prediction -- :' , prediction);
-      console.debug("-- Spread  -- :" , spread);
-      console.debug('-- Learning Method -- :' + this.settings.method);
-      console.debug('--------------------------------------------');
-    }
+  console.table({
+  'Price': currentPrice,
+  'SMA-': maFast,
+  'SMA+': maSlow,
+  'Prediction': prediction,
+  'Spread': spread,
+  'Learning Method': this.settings.method
+  });
+    
+  }
       
   },
   
