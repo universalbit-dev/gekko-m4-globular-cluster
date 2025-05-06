@@ -71,8 +71,8 @@ const Trader = function(initialPrice = 10, initialTrend = 'up') {
     this.tid = 0;
     this.candleHistory = [];
     this.balance = {
-        NUT: 0.0005,
-        BOLT: 1,
+        GaiaNut: 0.0005,
+        GaiaBolt: 1,
     };
     this.skySourceData = null; // Holds fetched Sky Source data
     this.skySourceExpiresAt = null; // Expiry timestamp for cached data
@@ -258,7 +258,7 @@ Trader.getCapabilities = function() {
         assets: ['BOLT'],
         maxTradesAge: 60,
         maxHistoryFetch: null,
-        markets: [{ pair: ['NUT', 'BOLT'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
+        markets: [{ pair: ['GaiaNut', 'GaiaBolt'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
         requires: [],
         fetchTimespan: 60,
         tid: 'tid',
