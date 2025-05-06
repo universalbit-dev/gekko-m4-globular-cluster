@@ -1,4 +1,4 @@
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 var async = require('async');
 var Emitter = require('./emitter');
 
