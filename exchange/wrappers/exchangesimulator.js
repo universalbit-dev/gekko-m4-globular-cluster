@@ -254,8 +254,8 @@ Trader.getCapabilities = function() {
     return {
         name: 'ExchangeSimulator',
         slug: 'exchangesimulator',
-        currencies: ['NUT'],
-        assets: ['BOLT'],
+        currencies: ['GaiaNut'],
+        assets: ['GaiaBolt'],
         maxTradesAge: 60,
         maxHistoryFetch: null,
         markets: [{ pair: ['GaiaNut', 'GaiaBolt'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
