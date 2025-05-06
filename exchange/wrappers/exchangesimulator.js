@@ -71,8 +71,8 @@ const Trader = function(initialPrice = 10, initialTrend = 'up') {
     this.tid = 0;
     this.candleHistory = [];
     this.balance = {
-        BTC: 0.0005,
-        LTC: 1,
+        NUT: 0.0005,
+        BOLT: 1,
     };
     this.skySourceData = null; // Holds fetched Sky Source data
     this.skySourceExpiresAt = null; // Expiry timestamp for cached data
@@ -254,11 +254,11 @@ Trader.getCapabilities = function() {
     return {
         name: 'ExchangeSimulator',
         slug: 'exchangesimulator',
-        currencies: ['BTC'],
-        assets: ['LTC'],
+        currencies: ['NUT'],
+        assets: ['BOLT'],
         maxTradesAge: 60,
         maxHistoryFetch: null,
-        markets: [{ pair: ['BTC', 'LTC'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
+        markets: [{ pair: ['NUT', 'BOLT'], minimalOrder: { amount: 0.01, unit: 'assets' } }],
         requires: [],
         fetchTimespan: 60,
         tid: 'tid',
@@ -267,3 +267,4 @@ Trader.getCapabilities = function() {
 };
 
 module.exports = Trader;
+
