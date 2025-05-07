@@ -2,8 +2,8 @@ const EventEmitter = require('events');
 
 /**
  * Class representing a Trailing Stop mechanism.
- * Supports trailing the price both upwards and downwards.
- * On trigger (when the price moves in the opposite direction), you should sell.
+ * Supports trailing the price in a single direction (upward or downward).
+ * On trigger (when the price moves in the opposite direction), you should take action (e.g., sell).
  */
 class TrailingStop extends EventEmitter {
   /**
@@ -12,19 +12,27 @@ class TrailingStop extends EventEmitter {
    * @param {number} params.trail - Fixed offset from the price.
    * @param {number} params.initialPrice - Initial price, preferably buy price.
    * @param {Function} params.onTrigger - Function to call when the stop triggers.
+   * @param {'up'|'down'} params.direction - Direction of the trailing stop ('up' for upward, 'down' for downward).
    */
-  constructor({ trail, initialPrice, onTrigger }) {
+  constructor({ trail, initialPrice, onTrigger, direction = 'down' }) {
     super();
 
     if (trail <= 0 || initialPrice <= 0) {
       throw new Error('Trail and initialPrice must be positive numbers.');
+    }
+    if (!['up', 'down'].includes(direction)) {
+      throw new Error("Direction must be either 'up' or 'down'.");
     }
 
     this.trail = trail;
     this.isLive = true;
     this.onTrigger = onTrigger;
     this.previousPrice = initialPrice;
-    this.trailingPoint = initialPrice - this.trail;
+    this.trailingPoint =
+      direction === 'up'
+        ? initialPrice + this.trail
+        : initialPrice - this.trail;
+    this.direction = direction;
 
     this.updatePrice = this.updatePrice.bind(this);
     this.updateTrail = this.updateTrail.bind(this);
@@ -42,19 +50,26 @@ class TrailingStop extends EventEmitter {
       return;
     }
 
+    if (price <= 0) {
+      throw new Error('Price must be a positive number.');
+    }
+
     // Adjust the trailing point based on the new price
-    if (price > this.previousPrice) {
-      this.trailingPoint = price - this.trail;
-    } else if (price < this.previousPrice) {
+    if (this.direction === 'up' && price > this.previousPrice) {
       this.trailingPoint = price + this.trail;
+    } else if (this.direction === 'down' && price < this.previousPrice) {
+      this.trailingPoint = price - this.trail;
+    }
+
+    // Check if the trailing stop should trigger
+    if (
+      (this.direction === 'up' && price < this.trailingPoint) ||
+      (this.direction === 'down' && price > this.trailingPoint)
+    ) {
+      this.trigger();
     }
 
     this.previousPrice = price;
-
-    // Check if the trailing stop should trigger
-    if (price <= this.trailingPoint || price >= this.trailingPoint) {
-      this.trigger();
-    }
   }
 
   /**
@@ -72,7 +87,10 @@ class TrailingStop extends EventEmitter {
     }
 
     this.trail = trail;
-    this.trailingPoint = this.previousPrice - this.trail;
+    this.trailingPoint =
+      this.direction === 'up'
+        ? this.previousPrice + this.trail
+        : this.previousPrice - this.trail;
     // Recheck whether moving the trail triggered.
     this.updatePrice(this.previousPrice);
   }
@@ -92,6 +110,7 @@ class TrailingStop extends EventEmitter {
         this.onTrigger(this.previousPrice);
       } catch (error) {
         console.error('Error in onTrigger callback:', error);
+        throw error; // Re-throw the error for further debugging
       }
     }
     this.emit('trigger', this.previousPrice);
@@ -108,7 +127,10 @@ class TrailingStop extends EventEmitter {
 
     this.isLive = true;
     this.previousPrice = initialPrice;
-    this.trailingPoint = initialPrice - this.trail;
+    this.trailingPoint =
+      this.direction === 'up'
+        ? initialPrice + this.trail
+        : initialPrice - this.trail;
   }
 }
 
