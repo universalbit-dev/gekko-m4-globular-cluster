@@ -25,7 +25,7 @@
   "gekko-broker": "file:exchange",
   "humanize-duration": "^3.31.0",
   "lodash": "^4.17.21",
-  "mathjs": "^12.4.0",
+  "mathjs": "^14.4.0",
   "moment": "^2.29.4",
   "nanospinner": "^1.1.0",
   "node-noop": "^1.0.0",
