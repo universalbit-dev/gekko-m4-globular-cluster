@@ -121,6 +121,12 @@ The `pm2 monit` command is part of the [PM2 process manager](https://pm2.keymetr
   - **Metrics**: Real-time CPU and memory usage.
   - **Application State**: See if the application is online, stopped, or restarting.
 ---
+### Advanced Charting
+
+For details on implementing advanced charting for this project, refer to the dedicated documentation:  
+**[Advanced Charting](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/ngc6121_advanced_charting.md)**
+
+---
 
 ### Troubleshooting Tulind Installation:
 The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
