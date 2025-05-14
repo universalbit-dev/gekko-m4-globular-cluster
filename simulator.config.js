@@ -41,6 +41,13 @@ module.exports = {
   args      : '-c env/simulator/trade_noop_simulator.js',
   instances : "1",
   exec_mode : "cluster"
+  },
+  {
+  name: 'neuralnet_refinements_simulator',
+  script    : 'gekko.js',
+  args      : '-c env/simulator/trade_neuralnet_simulator.js',
+  instances : "1",
+  exec_mode : "cluster"
   }
 ]
 }
