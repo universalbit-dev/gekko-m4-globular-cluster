@@ -35,19 +35,20 @@ The **Gekko M4 Globular Cluster** repository is a feature-rich implementation de
 
 Before setting up the project, make sure your environment meets the following requirements:
 
-1. **System**: Linux (Tested on `Linux 6.11.0-24-generic`)
-2. **Node.js**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
-   **Tested on Node.js version**: `v20.19.1`
-3. **Packages**: Required build tools
+- **System**: Linux (Tested on `Linux 6.11.0-24-generic`)
+- **Node.js**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
+- **Tested on Node.js version**: `v20.19.1`
+- **Packages**: Required build tools
    ```bash
    sudo apt install -y build-essential
    ```
-
 ---
 
-## Installation & Setup
+#### **Installation & Setup**
 
-### 1. Install Node.js Using `nvm`
+##### Install Node.js Using `nvm`
+
+To manage and install Node.js, use `nvm` (Node Version Manager):
 
 * Install `nvm`:
    ```bash
@@ -55,76 +56,74 @@ Before setting up the project, make sure your environment meets the following re
    source ~/.nvm/nvm.sh
    ```
 
-* Install Node.js:
+* Install Node.js version `20.19.1`:
    ```bash
    nvm install 20.19.1
    ```
 
-* Set default Node.js version:
+* Set it as the default version:
    ```bash
    nvm use 20.19.1
    nvm alias default 20.19.1
    ```
 
-* Verify installation:
+* Verify the installation:
    ```bash
    node -v
    npm -v
    ```
 
-### 2. Clone the Repository
+##### Clone the Repository
+
+Download the project by cloning the repository:
 
 ```bash
 git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
 cd gekko-m4-globular-cluster
 ```
 
-### 3. Install Dependencies
+##### Install Dependencies
+
+Install all required Node.js packages and dependencies:
 
 ```bash
-npm install && npm audit fix
-npm cache clean --force && npm i tulind --build-from-source
-npm i pm2 -g
-```
+npm i
+``` 
+
+This will ensure that all necessary modules are installed and the application is ready to run.
+
 ##### [Troubleshooting Tulind Installation](https://github.com/universalbit-dev/gekko-m4-globular-cluster?tab=readme-ov-file#troubleshooting-tulind-installation)
 
-### **PM2**
-PM2 is a production process manager for Node.js applications. It helps manage application processes, ensuring they restart automatically in case of crashes and supporting features like load balancing, log management, and monitoring.
-
-### **Tulind**
-Tulind (Ta-Lib for Node.js) is a library for technical analysis in financial trading. It provides a wide range of indicators, such as moving averages, RSI, and MACD, to analyze stock or cryptocurrency price trends.
-
 ---
-##### Test and simulate your strategies
-* [Exchange Simulator](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/mode/simulator/readme.md) 
-* [Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md)
 
-##### Gekko Indicators Engine
-* [Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)
-* [Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)
+#### **Test and simulate your strategies**
+- **[Exchange Simulator](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/mode/simulator/readme.md)** 
+- **[Strategies](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/introduction.md)**
 
-##### Start PM2 Ecosystem:
+#### **Gekko Indicators Engine**
+- **[Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)**
+- **[Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)**
+
+#### **Start PM2 Ecosystem**
+
+To run the PM2 process manager with the specified configuration file:
+
 ```bash
 pm2 start simulator.config.js
 ```
 
-##### To monitor the application and display real-time logs and system metrics, run the following command:
+This command will start the PM2 ecosystem using the `simulator.config.js` file, which defines the processes and settings required for your application.
+
+#### **Monitor your application and display real-time logs**:
 ```bash
 pm2 monit
 ```
 The `pm2 monit` command is part of the [PM2 process manager](https://pm2.keymetrics.io/), a popular tool for managing and monitoring Node.js applications.
 
-### Features
-- The interface is divided into sections, each corresponding to a running application.
-- You can view:
-  - **Logs**: Check application output and errors.
-  - **Metrics**: Real-time CPU and memory usage.
-  - **Application State**: See if the application is online, stopped, or restarting.
----
-### Advanced Charting
+#### **Advanced Charting**
 
 For details on implementing advanced charting for this project, refer to the dedicated documentation:  
-**[Advanced Charting](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/ngc6121_advanced_charting.md)**
+- **[Advanced Charting](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/ngc6121_advanced_charting.md)**
 
 ---
 
@@ -132,24 +131,24 @@ For details on implementing advanced charting for this project, refer to the ded
 The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
 
 #### **Common Issues**
-1. **Build Errors**:
+- **Build Errors**:
    - The system may lack the necessary build tools to compile the native module.
    - Missing or outdated dependencies can cause build failures.
 
-2. **Module Compatibility**:
+- **Module Compatibility**:
    - Incompatibility with the Node.js version being used.
 
-3. **Incomplete Installation**:
+- **Incomplete Installation**:
    - The module may fail to install partially, leading to runtime errors.
 
 #### **Solutions**
-1. **Ensure Required Build Tools are Installed**:
+**Ensure Required Build Tools are Installed**:
    Run the following command to install the necessary build tools on Linux:
    ```bash
    sudo apt install -y build-essential
    ```
 
-2. **Reinstall `tulind`**:
+**Reinstall `tulind`**:
    Use the following commands to ensure a clean installation:
    - Standard installation:
      ```bash
@@ -160,33 +159,29 @@ The `tulind` package may encounter some issues during installation due to missin
      npm i tulind --build-from-source
      ```
 
-3. **Verify Node.js Version Compatibility**:
+**Verify Node.js Version Compatibility**:
    Ensure you're using a compatible Node.js version (e.g., `v20.19.1`). If needed, switch versions using `nvm`.
 
-4. **Clear npm Cache**:
+**Clear npm Cache**:
    If installation issues persist, clear the npm cache and attempt reinstallation:
    ```bash
    npm cache clean --force
    npm i tulind --save
    ```
 
-5. **Debug Logs**:
+**Debug Logs**:
    Run the installation with verbose logs to identify the root cause of the issue:
    ```bash
    npm i tulind --save --verbose
    ```
+   
+#### **Resources**
 
-#### Resources:
-* ##### [PM2](https://pm2.keymetrics.io/) Process Manager
-* ##### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
-* ##### [Thanks developers](https://github.com/askmike/gekko/graphs/contributors).
-* ##### [Learning Together](https://www.esma.europa.eu/sites/default/files/2024-12/ESMA35-1872330276-1899_-_Final_report_on_GLs_on_reverse_solicitation_under_MiCA.pdf)
-* ##### [Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)
-* ##### [NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)
-* ##### [TulipIndicator](https://tulipindicators.org/)
-* ##### [BlockChain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)
-
-
-
-
-
+* ##### [PM2](https://pm2.keymetrics.io/) - Process Manager for Node.js applications.
+* ##### [Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/) - Guide to defining PM2 application declarations.
+* ##### [Thanks Developers](https://github.com/askmike/gekko/graphs/contributors) - Acknowledgment to contributors of the Gekko project.
+* ##### [Learning Together](https://www.esma.europa.eu/sites/default/files/2024-12/ESMA35-1872330276-1899_-_Final_report_on_GLs_on_reverse_solicitation_under_MiCA.pdf) - Educational resources on financial regulations and MiCA.
+* ##### [Project Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md) - Additional resources related to this project.
+* ##### [NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin) - Explore Bitcoin-specific blockchain nodes.
+* ##### [TulipIndicators](https://tulipindicators.org/) - Technical analysis indicators for financial data.
+* ##### [Blockchain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain) - Resources on blockchain and mining.
