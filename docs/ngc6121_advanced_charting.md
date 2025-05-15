@@ -118,9 +118,10 @@ PM2 includes a built-in **API endpoint** that you can enable to access logs, met
 PM2 includes the HTTP API as part of its **PM2 Plus** feature. 
 You can enable it like this:
 
-**Default**
+**Setup Permission**
+#### Ensure Permissions are Correct: If you're still facing issues, check the permissions of the .pm2 directory
 ```bash
-pm2 install pm2-logrotate
+sudo chmod -R 755 ~/.pm2
 ```
 
 **Manually Install pm2-logrotate**
@@ -129,7 +130,7 @@ cd ~/.pm2/modules
 git clone https://github.com/keymetrics/pm2-logrotate.git
 cd pm2-logrotate
 npm install
-pm2 start pm2-logrotate
+pm2 start app.js
 ```
 
 ---
