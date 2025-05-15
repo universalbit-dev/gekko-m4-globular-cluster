@@ -1,6 +1,5 @@
 ### Gekko-M4-Globular-Cluster [NGC 6121]
 #### Log Management **Grafana Advanced Charting**
-[work in progress]
 
 ---
 **Why Grafana for Advanced Charting?**
@@ -92,66 +91,84 @@ When you log in to Grafana for the first time with the default credentials (`use
 
 ---
 
-#### PM2 HTTP API for Logs and Metrics
-PM2 includes a built-in **API endpoint** that you can enable to access logs, metrics, and process information over HTTP. By enabling this API, you can bypass the need for Filebeat or other log shippers because your application logs and metrics can be queried directly by tools like Grafana or any custom Grafana Infinity Datasource client.
+### **PM2 HTTP API for Logs and Metrics**
+
+PM2 provides a simple and effective way to manage logs and metrics through its built-in **HTTP API**. This feature allows you to expose application logs and metrics over HTTP, making it easy to integrate with monitoring tools like Grafana or any custom client using Grafana Infinity Datasource.
+
+By utilizing this setup, you can streamline your logging process and eliminate the need for external log-shipping tools like Filebeat or Logstash.
 
 ---
 
-#### Benefits of Using PM2's HTTP API
-**Reduced Dependencies**:
-- No need for external tools like Filebeat or Logstash to ship logs.
-- PM2 directly exposes logs and metadata over HTTP.
+### **Benefits of Using PM2's HTTP API**
 
-**Real-Time Access**:
-- The PM2 API provides real-time access to logs and process metrics, which can be directly consumed by your monitoring tools.
+**1. Simplified Log Management**:
+- No need to install or configure external log shippers like Filebeat or Logstash.
+- PM2 directly handles logs and exposes them over HTTP for easy consumption.
 
-**Integrates with Grafana**:
-- Use Grafana’s **Grafana Infinity Datasource JSON** to query the PM2 HTTP endpoint and visualize logs and metrics.
+**2. Real-Time Access**:
+- Logs and metrics are accessible in real time, enabling seamless integration with monitoring and debugging tools.
 
-**Simplified Setup**:
-   - You don’t need to set up and configure log shippers or additional pipelines.
+**3. Grafana Integration**:
+- Use Grafana's **Infinity Datasource Plugin** to directly query PM2's logs and metrics endpoint, making visualization straightforward.
+
+**4. Easy to Configure**:
+- PM2 simplifies the setup process with built-in support for serving static files over HTTP.
 
 ---
 
-#### How to Enable PM2 HTTP API
-**Install the PM2 Plus Module**:
-PM2 includes the HTTP API as part of its **PM2 Plus** feature. 
-You can enable it like this:
+### **How to Enable PM2 HTTP API**
 
-**Setup Permission**
-#### Ensure Permissions are Correct: If you're still facing issues, check the permissions of the .pm2 directory
+#### Step 1: Start All Configured Processes
+Ensure that all processes defined in your PM2 configuration are started with merged logs and a readable log date format. Use the following command:
 ```bash
-sudo chmod -R 755 ~/.pm2
-```
-
-**Manually Install pm2-logrotate**
-```bash
-cd ~/.pm2/modules
-git clone https://github.com/keymetrics/pm2-logrotate.git
-cd pm2-logrotate
-npm install
-pm2 start app.js
+pm2 start simulator.config.js --merge-logs --log-date-format "YYYY-MM-DD HH:mm:ss"
 ```
 
 ---
 
-**Start PM2 in API Mode**:
-- Start PM2 with the API server enabled:
+#### Step 2: Process and Store Logs in Real Time
+To maintain a valid JSON file (`simulator.json`) for logs, use a custom `realTimeProcessor.js` script to:
+1. Read the existing content of `simulator.json`.
+2. Append new log entries to the existing data.
+3. Rewrite the file to ensure it remains valid JSON.
+
+Run the following command to pipe PM2 logs into your log processor:
+```bash
+pm2 logs --json | node realTimeProcessor.js >> simulator.json
+```
+
+---
+
+#### Step 3: Serve Logs via HTTP
+PM2 can serve static files using its `pm2 serve` feature. To expose `simulator.json` over HTTP, use the following command:
+
+```bash
+pm2 serve . 9561 simulator.json
+```
+
+The logs **[simulator.json]** will now be accessible via:
+```
+http://localhost:9561/simulator.json
+```
+
+---
+
+### **Additional Notes**
+- Ensure that the `.pm2` directory has proper permissions to avoid runtime issues:
    ```bash
-   pm2 start simulator.config.js --watch
+   sudo chmod -R 755 ~/.pm2
    ```
 
-**Access Logs via HTTP**:
-- The logs will be available through the PM2 HTTP endpoint. By default, this API listens on port **9615**, but you can configure it if needed.
+- If needed, you can rotate logs using the `pm2-logrotate` module:
+   ```bash
+   cd ~/.pm2/modules
+   git clone https://github.com/keymetrics/pm2-logrotate.git
+   cd pm2-logrotate
+   npm install
+   pm2 start app.js
+   ```
 
-### **Known Issues and Alternatives**
-- If you encounter issues with enabling the HTTP API or using `pm2-logrotate`, there are alternative ways to achieve similar results.
-- For example, you can directly generate JSON-formatted logs using:
-  ```bash
-  pm2 logs --json
-  ```
-[work in progress]
-
+For more details on serving files with PM2, refer to the [PM2 Serve Documentation](https://pm2.keymetrics.io/docs/usage/expose/).
 
 ---
 
@@ -176,10 +193,10 @@ pm2 start app.js
    - Search for and select **Infinity Datasource** from the list.
 
 **Configure the Data Source**:
-   - Fill in the required fields:
-     - **Name**: Assign a name to your data source (e.g., `Simulator API`).
-     - **Source Type**: Select `URL`.
-     - **URL**: Base URL of your PM2 API (e.g., `http://localhost:9615` for the PM2 HTTP API).
+- Fill in the required fields:
+- **Name**: Assign a name to your data source (e.g., `Simulator API`).
+- **Source Type**: Select `URL`.
+- **URL**: Base URL of your PM2 API (e.g., `http://localhost:9561/simulator.json` for the PM2 HTTP API).
      - **Method**: Choose `GET`.
 
 **Optional Authentication**:
@@ -200,11 +217,6 @@ Once the data source is configured, you can create panels in Grafana to visualiz
    - Click on **Create > Dashboard** and add a new panel.
    - Choose the **Infinity Datasource** as the data source.
 
-**Define the Query**:
-   - Select the **Format** (e.g., JSON) based on your PM2 API response.
-   - Enter the API endpoint path (e.g., `/api/v1/metrics` or `/logs`).
-   - Set any query parameters required by your API.
-
 **Visualize the Data**:
    - Use Grafana's built-in visualization tools (e.g., time-series graphs, tables, gauges) to display your data.
    - You can also apply transformations or create alerts based on your data.
@@ -220,12 +232,11 @@ Once the data source is configured, you can create panels in Grafana to visualiz
   - Support for dynamic variables and templating.
 **Use PM2 API for Dynamic Data**
    - If you're running your simulator with PM2, leverage the **PM2 HTTP API** to access real-time metrics and logs.
-   - Enable the PM2 API to expose an endpoint, such as `/api/v1/metrics`, which provides process information and logs.
-   - Ensure the PM2 API is configured to return structured data, including fields like `timestamp`, `metric_name`, and `value` for easy integration with monitoring tools like Grafana.
 
 ---
 
-#### Nodejs Winston Library Ad Hoc JSON logs:
+[work in progress ]
+#### Nodejs Winston Library for each strategy simulation logs:
 This JSON format represents structured logs generated by the Winston library, providing detailed information about the simulator's state at a specific timestamp. 
 
 ### Fields:
@@ -288,7 +299,7 @@ logSimulatorData();
    - The log entry is saved in JSON format, making it easy to parse and analyze.
    
 2. **Multiple Transports**:
-   - Logs are written to both the console and a file (`simulator.log`).
+   - Logs are written to both the console and a file.
 
 3. **Timestamp**:
    - Automatically generates the current timestamp in ISO 8601 format.
@@ -298,7 +309,7 @@ logSimulatorData();
 
 ---
 
-### Output in `simulator.log`:
+### Json code example Output:
 ```json
 {
   "timestamp": "2025-05-14T14:45:00.000Z",
