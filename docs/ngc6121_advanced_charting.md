@@ -150,6 +150,7 @@ The logs **[simulator.json]** will now be accessible via:
 ```
 http://localhost:9561/simulator.json
 ```
+![Simulator JSON](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/simulator_json.png)
 
 ---
 
@@ -207,7 +208,7 @@ For more details on serving files with PM2, refer to the [PM2 Serve Documentatio
 **Test the Connection**:
    - Click **Save & Test** to verify the connection.
    - Ensure that the data source is able to fetch data successfully from your PM2 API.
-
+![Grafana Table](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/grafana_table.png)
 ---
 
 #### **Querying Data Using Grafana Infinity Datasource**
