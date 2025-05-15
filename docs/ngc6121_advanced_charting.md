@@ -127,7 +127,7 @@ pm2 set pm2-logrotate:retain 10
 **Start PM2 in API Mode**:
 - Start PM2 with the API server enabled:
    ```bash
-   pm2 start pm2-logrotate --watch
+   pm2 start simulator.config.js --watch
    ```
 
 **Access Logs via HTTP**:
@@ -145,8 +145,8 @@ pm2 set pm2-logrotate:retain 10
 **Install the Plugin**:
 - To install the Grafana Infinity Datasource plugin, run the following command:
      ```bash
-     grafana-cli plugins install yesoreyeram-infinity-datasource
-     systemctl restart grafana-server
+     sudo grafana-cli plugins install yesoreyeram-infinity-datasource
+     sudo systemctl restart grafana-server
      ```
 
 **Add Data Source in Grafana**:
