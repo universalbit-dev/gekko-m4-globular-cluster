@@ -118,11 +118,21 @@ PM2 includes a built-in **API endpoint** that you can enable to access logs, met
 PM2 includes the HTTP API as part of its **PM2 Plus** feature. 
 You can enable it like this:
 
+**Default**
 ```bash
 pm2 install pm2-logrotate
-pm2 set pm2-logrotate:max_size 10M
-pm2 set pm2-logrotate:retain 10
 ```
+
+**Manually Install pm2-logrotate**
+```bash
+cd ~/.pm2/modules
+git clone https://github.com/keymetrics/pm2-logrotate.git
+cd pm2-logrotate
+npm install
+pm2 start pm2-logrotate
+```
+
+---
 
 **Start PM2 in API Mode**:
 - Start PM2 with the API server enabled:
