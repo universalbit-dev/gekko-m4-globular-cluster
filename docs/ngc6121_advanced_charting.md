@@ -144,6 +144,15 @@ pm2 start app.js
 **Access Logs via HTTP**:
 - The logs will be available through the PM2 HTTP endpoint. By default, this API listens on port **9615**, but you can configure it if needed.
 
+### **Known Issues and Alternatives**
+- If you encounter issues with enabling the HTTP API or using `pm2-logrotate`, there are alternative ways to achieve similar results.
+- For example, you can directly generate JSON-formatted logs using:
+  ```bash
+  pm2 logs --json
+  ```
+[work in progress]
+
+
 ---
 
 #### **Add Grafana Infinity Datasource as a Data Source**
