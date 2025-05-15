@@ -109,7 +109,7 @@ This will ensure that all necessary modules are installed and the application is
 To run the PM2 process manager with the specified configuration file:
 
 ```bash
-pm2 start simulator.config.js
+pm2 start simulator.config.js --merge-logs --log-date-format "YYYY-MM-DD HH:mm:ss"
 ```
 
 This command will start the PM2 ecosystem using the `simulator.config.js` file, which defines the processes and settings required for your application.
