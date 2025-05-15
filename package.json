@@ -10,9 +10,8 @@
  "dependencies": {
   "async": "^3.2.5",
   "axios": "^1.7.9",
-  "bitcoin": "^3.0.3",
   "bluebird": "^3.7.2",
-  "ccxt": "^4.3.88",
+  "ccxt": "^4.4.80",
   "chess.js": "^1.0.0-beta.6",
   "child_process": "^1.0.2",
   "commander": "^6.2.0",
@@ -39,10 +38,13 @@
   "sqlite3": "^5.1.7",
   "stats-lite": "^2.2.0",
   "stream": "^0.0.2",
+  "tulind": "^0.8.20",
   "underscore": "^1.13.7",
   "util": "^0.12.5",
-  "uuid": "^9.0.1",
-  "ws": "^8.18.0"
+  "uuid": "^9.0.1"
+ },
+ "scripts": {
+  "postinstall": "npm audit fix && npm install tulind --build-from-source && npm install -g pm2 && npm link exchange"
  },
  "engines": {
   "node": ">=20"
@@ -65,8 +67,5 @@
  "homepage": "https://github.com/universalbit-dev/gekko-m4-globular-cluster/",
  "directories": {
   "doc": "docs"
- },
- "scripts": {
-  "postinstall": "npm link exchange"
  }
 }
