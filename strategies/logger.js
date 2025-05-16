@@ -1,4 +1,12 @@
-// strategies/logger.js
+/**
+ * logger.js - Standardized Winston Logger for Strategies
+ *
+ * This module provides a pre-configured Winston logger to be used across all trading strategies.
+ * It ensures consistent logging format, log levels, and output destinations for easier debugging and monitoring.
+ * By using this standardized logger, strategies can uniformly record important events, errors, and analytics,
+ * improving maintainability and traceability throughout the codebase.
+ */
+
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs-extra');
