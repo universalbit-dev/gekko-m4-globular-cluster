@@ -124,6 +124,7 @@ The `pm2 monit` command is part of the [PM2 process manager](https://pm2.keymetr
 
 For details on implementing advanced charting for this project, refer to the dedicated documentation:  
 - **[Advanced Charting](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/ngc6121_advanced_charting.md)**
+- **[Quick HTTPS Setup](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/ssl)**
 
 ---
 
