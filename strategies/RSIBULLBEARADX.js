@@ -135,7 +135,7 @@ var strat = {
 //Winston Logger
 logTrade: function(candle, indicators, advice) {
 const output = {
-    time: candle.start,
+    timestamp: new Date(candle.start).getTime(), //standard Unix epoch timestamp
     open: candle.open,
     high: candle.high,
     low: candle.low,
@@ -172,7 +172,7 @@ check: function()
     if (this.candleHistory && this.candleHistory.length > 0) {
         let high = Math.max(...this.candleHistory.map(candle => candle.high));
         let low = Math.min(...this.candleHistory.map(candle => candle.low));
-        let fibLevels = this.calculateFibonacciLevels(high, low);
+        const fibLevels = this.calculateFibonacciLevels(high, low);
         log.info('Fibonacci Levels:', fibLevels);
         } 
     else { 
