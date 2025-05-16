@@ -11,6 +11,8 @@
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
 
+const { logger, appendToJsonFile } = require('./logger')('rsibullbearadx');
+
 // strategy
 var strat = {
 
@@ -22,7 +24,6 @@ var strat = {
 		this.requiredHistory = config.tradingAdvisor.historySize;
 		this.resetTrend();
         this.candleHistory = [];
-		// debug? set to false to disable all logging/messages/stats (improves performance in backtests)
 		this.debug = false;
 
 		// performance
@@ -78,7 +79,6 @@ var strat = {
 
 	}, // init()
 
-
 	/* RESET TREND */
 	resetTrend: function()
 	{
@@ -90,7 +90,6 @@ var strat = {
 
 		this.trend = trend;
 	},
-
 
 	/* get low/high for backtest-period */
 	lowHigh: function( val, type )
@@ -132,8 +131,22 @@ var strat = {
         this.candleHistory.shift();
     }
     },
-
-	
+    
+//Winston Logger
+logTrade: function(candle, indicators, advice) {
+const output = {
+    time: candle.start,
+    open: candle.open,
+    high: candle.high,
+    low: candle.low,
+    close: candle.close,
+    volume: candle.volume,
+    advice,
+    ...indicators
+  };
+  logger.info(output);
+  appendToJsonFile(output);
+},
 /* CHECK */
 check: function()
 {
@@ -143,13 +156,17 @@ check: function()
         maFast = ind.maFast.result,
         RSI = ind.RSI.result,
         ADX = ind.ADX.result;
-
+    
     console.debug('Indicators value:');
     console.debug('SMA- :', maFast);
     console.debug('SMA+ :', maSlow);
     console.debug('RSI :', RSI);
     console.debug('ADX :', ADX);
     console.debug('--------------------------------------------');
+    this.logTrade(this.candle, {
+  RSI: this.indicators.RSI.result,ADX: this.indicators.ADX.result,
+  maFast: this.indicators.maFast.result,maSlow : this.indicators.maSlow.result,
+}, this.trend.direction);
 
     // Ensure candleHistory is defined and not empty
     if (this.candleHistory && this.candleHistory.length > 0) {
@@ -157,8 +174,7 @@ check: function()
         let low = Math.min(...this.candleHistory.map(candle => candle.low));
         let fibLevels = this.calculateFibonacciLevels(high, low);
         log.info('Fibonacci Levels:', fibLevels);
-        // Further processing...
-    } 
+        } 
     else { 
         console.error('Candle history is undefined or empty.'); 
     }
@@ -208,7 +224,8 @@ check: function()
 		{
 			this.resetTrend();
 			this.trend.direction = 'up';
-			this.advice('long');this.resetTrend();
+			this.advice('long');
+			this.resetTrend();
 			if( this.debug ) log.info('Going long');
 		}
 
@@ -228,7 +245,8 @@ check: function()
 		{
 			this.resetTrend();
 			this.trend.direction = 'down';
-			this.advice('short');this.resetTrend();
+			this.advice('short');
+			this.resetTrend();
 			if( this.debug ) log.info('Going short');
 		}
 
