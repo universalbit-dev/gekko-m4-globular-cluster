@@ -365,8 +365,8 @@ this.logTrade(this.candle, {
 #### **Summary Table of Fields to Log for Advanced Charting**
 
 | Field       | Description                  | Example             |
-|-------------|-----------------------------|---------------------|
-| time        | Candle start time            | 2025-05-16T16:30:00Z|
+|-------------|------------------------------|---------------------|
+| timestamp   | Candle start time            | 1747437523000       |
 | open        | Candle open price            | 12345.67            |
 | high        | Candle high price            | 12400.00            |
 | low         | Candle low price             | 12200.00            |
