@@ -46,32 +46,14 @@ Before setting up the project, make sure your environment meets the following re
 
 #### **Installation & Setup**
 
-##### Install Node.js Using `nvm`
-
+##### Install Node.js Using [`nvm`](https://github.com/nvm-sh/nvm)
 To manage and install Node.js, use `nvm` (Node Version Manager):
-
-* Install `nvm`:
-   ```bash
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
-   source ~/.nvm/nvm.sh
-   ```
 
 * Install Node.js version `20.19.1`:
    ```bash
    nvm install 20.19.1
    ```
-
-* Set it as the default version:
-   ```bash
-   nvm use 20.19.1
-   nvm alias default 20.19.1
-   ```
-
-* Verify the installation:
-   ```bash
-   node -v
-   npm -v
-   ```
+#### Feel free to test installation and contribute using **Node.js** versions 20, 21, 22, 23, or 24.  
 
 ##### Clone the Repository
 
