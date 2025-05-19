@@ -74,7 +74,7 @@ npm i && npm audit fix && npm i pm2 -g
 
 This will ensure that all necessary modules are installed and the application is ready to run.
 
-##### [Troubleshooting Tulind Installation](https://github.com/universalbit-dev/gekko-m4-globular-cluster?tab=readme-ov-file#troubleshooting-tulind-installation)
+##### [Troubleshooting Tulind Installation](#troubleshooting-tulind-installation-1)
 
 ---
 
