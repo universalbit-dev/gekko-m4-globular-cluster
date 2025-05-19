@@ -87,7 +87,7 @@ cd gekko-m4-globular-cluster
 Install all required Node.js packages and dependencies:
 
 ```bash
-npm i && npm audit fix && npm i pm2 -g && npm i tulind --build-from-source
+npm i && npm audit fix && npm i pm2 -g 
 ``` 
 
 This will ensure that all necessary modules are installed and the application is ready to run.
