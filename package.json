@@ -66,6 +66,6 @@
   "doc": "docs"
  },
  "scripts": {
-  "postinstall": "npm link exchange"
+  "postinstall": "npm link exchange && npm i winston"
  }
 }
