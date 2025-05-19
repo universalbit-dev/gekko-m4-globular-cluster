@@ -53,7 +53,7 @@ To manage and install Node.js, use `nvm` (Node Version Manager):
    ```bash
    nvm install 20.19.1
    ```
-#### Feel free to test installation and contribute using **Node.js** versions 20, 21, 22, 23, or 24.  
+#### Feel free to test installation and contribute using **Node.js** versions 24.  
 
 ##### Clone the Repository
 
