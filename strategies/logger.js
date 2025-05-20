@@ -1,3 +1,14 @@
+/**
+ * logger.js - Standardized Winston Logger  Strategies
+ *
+ *  - Consistent logging format and field order (OHLCV fields always first)
+ *  - Uniform recording of events, errors, and analytics
+ *  - Enhanced maintainability and traceability across feature-rich strategy modules
+ *
+ * @author universalbit-dev
+ * @date 2025-05-20
+ * @license MIT
+ */
 const winston = require('winston');
 const path = require('path');
 const fs = require('fs-extra');
