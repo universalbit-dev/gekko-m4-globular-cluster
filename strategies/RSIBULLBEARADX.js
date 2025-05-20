@@ -133,20 +133,45 @@ var strat = {
     },
     
 //Winston Logger
-logTrade: function(candle, indicators, advice) {
-const output = {
-    timestamp: new Date(candle.start).getTime(), //standard Unix epoch timestamp
+logTrade: async function(candle, indicators, advice, fibLevels, trend) {
+  //Get indicators
+  let _ind = this.indicators,
+  maSlow = _ind.maSlow.result,
+  maFast = _ind.maFast.result,
+  RSI = _ind.RSI.result,
+  ADX = _ind.ADX.result;
+  // Build up comments array
+  const comments = [];
+  if (maFast !== undefined && maSlow !== undefined) {
+    comments.push((maFast < maSlow) ? 'BEAR' : 'BULL');
+  }
+  if (RSI !== undefined) {
+    if (RSI > 80) comments.push('RSI Oversold');
+    else if (RSI < 30) comments.push('RSI Overbought');
+    else comments.push('RSI Weak');
+  }
+  if (ADX !== undefined) {
+    comments.push((ADX > 25) ? 'ADX Strong' : 'ADX Weak');
+  }
+
+  const output = {
+    timestamp: new Date(candle.start).getTime(),
     open: candle.open,
     high: candle.high,
     low: candle.low,
     close: candle.close,
     volume: candle.volume,
-    advice,
-    ...indicators
+    advice: advice,
+    trend: trend.direction,
+    fibLevels: fibLevels,
+    comments: comments,               
+    ...indicators                     
   };
+
   logger.info(output);
-  appendToJsonFile(output);
+  await appendToJsonFile(output);
 },
+
 /* CHECK */
 check: function()
 {
@@ -163,10 +188,7 @@ check: function()
     console.debug('RSI :', RSI);
     console.debug('ADX :', ADX);
     console.debug('--------------------------------------------');
-    this.logTrade(this.candle, {
-  RSI: this.indicators.RSI.result,ADX: this.indicators.ADX.result,
-  maFast: this.indicators.maFast.result,maSlow : this.indicators.maSlow.result,
-}, this.trend.direction);
+    this.logTrade(this.candle,this.indicators,this.advice,this.fibLevels,this.trend.direction);
 
     // Ensure candleHistory is defined and not empty
     if (this.candleHistory && this.candleHistory.length > 0) {
