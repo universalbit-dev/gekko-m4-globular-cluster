@@ -133,13 +133,13 @@ var strat = {
     },
     
 //Winston Logger
-logTrade: async function(candle, indicators, advice, fibLevels, trend) {
-  //Get indicators
-  let _ind = this.indicators,
-  maSlow = _ind.maSlow.result,
-  maFast = _ind.maFast.result,
-  RSI = _ind.RSI.result,
-  ADX = _ind.ADX.result;
+logTrade: function(candle, indicators, advice, fibLevels, trend) {
+  // Ensure required indicator values are extracted
+  const maFast = indicators.maFast; 
+  const maSlow = indicators.maSlow;
+  const RSI = indicators.RSI;
+  const ADX = indicators.ADX;
+
   // Build up comments array
   const comments = [];
   if (maFast !== undefined && maSlow !== undefined) {
@@ -169,9 +169,8 @@ logTrade: async function(candle, indicators, advice, fibLevels, trend) {
   };
 
   logger.info(output);
-  await appendToJsonFile(output);
+  appendToJsonFile(output);
 },
-
 /* CHECK */
 check: function()
 {
@@ -188,7 +187,7 @@ check: function()
     console.debug('RSI :', RSI);
     console.debug('ADX :', ADX);
     console.debug('--------------------------------------------');
-    this.logTrade(this.candle,this.indicators,this.advice,this.fibLevels,this.trend.direction);
+    this.logTrade(this.candle,this.indicators,this.advice,this.fibLevels,this.trend);
 
     // Ensure candleHistory is defined and not empty
     if (this.candleHistory && this.candleHistory.length > 0) {
