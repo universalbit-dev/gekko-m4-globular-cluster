@@ -1,8 +1,7 @@
 /**
- * logger.js - Standardized Winston Logger for Strategies (with field ordering and rotation)
+ * logger.js - Standardized Winston Logger for Strategies (rotation only, no field reordering)
  *
  * This module provides a pre-configured Winston logger for all trading strategies, ensuring:
- *  - Consistent logging format and order (OHLCV fields always first)
  *  - Uniform recording of events, errors, and analytics
  *  - Maintainability and traceability
  *  - Automatic rotation of both .log and .json files (10MB, 5 files) ~50MB
@@ -17,27 +16,8 @@ const winston = require('winston');
 const path = require('path');
 const fs = require('fs-extra');
 
-const OHLCV_ORDER = [
-  "timestamp", "open", "high", "low", "close", "volume"
-];
-
 const MAX_JSON_SIZE = 10 * 1024 * 1024; // 10 MB
 const MAX_JSON_FILES = 5; // Keep up to 5 files
-
-function reorderFields(obj, ohlcvOrder = OHLCV_ORDER) {
-  const ordered = {};
-  for (const key of ohlcvOrder) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      ordered[key] = obj[key];
-    }
-  }
-  for (const key of Object.keys(obj)) {
-    if (!ohlcvOrder.includes(key)) {
-      ordered[key] = obj[key];
-    }
-  }
-  return ordered;
-}
 
 // Rotates JSON files: strategy.json -> strategy.json.1, etc.
 async function rotateJsonFiles(jsonFile) {
@@ -64,20 +44,9 @@ module.exports = function(strategyName) {
   fs.ensureDirSync(jsonDir);
   fs.ensureFileSync(jsonFile);
 
-  // Winston custom format for OHLCV reordering
-  const reorderFormat = winston.format((info) => {
-    if (info.message && typeof info.message === 'object') {
-      info.message = reorderFields(info.message);
-    }
-    return info;
-  });
-
   const logger = winston.createLogger({
     level: 'info',
-    format: winston.format.combine(
-      reorderFormat(),
-      winston.format.json()
-    ),
+    format: winston.format.json(),
     transports: [
       new winston.transports.File({
         filename: logFile,
@@ -87,7 +56,7 @@ module.exports = function(strategyName) {
     ]
   });
 
-  // Async, size-limited, rotated JSON file appender
+  // Async, size-limited, rotated JSON file appender (no field reordering)
   async function appendToJsonFile(data) {
     let fileData = [];
     try {
@@ -95,13 +64,13 @@ module.exports = function(strategyName) {
         const raw = await fs.readFile(jsonFile, 'utf8');
         fileData = JSON.parse(raw || '[]');
       }
-      fileData.push(reorderFields(data));
+      fileData.push(data); // No field reordering
       const jsonString = JSON.stringify(fileData, null, 2);
 
       // Rotate if the new file would be too big
       if (Buffer.byteLength(jsonString, 'utf8') > MAX_JSON_SIZE) {
         await rotateJsonFiles(jsonFile);
-        fileData = [reorderFields(data)];
+        fileData = [data]; // Only the most recent entry
       }
       await fs.writeFile(jsonFile, JSON.stringify(fileData, null, 2));
     } catch (err) {
