@@ -42,6 +42,8 @@
   "underscore": "^1.13.7",
   "util": "^0.12.5",
   "uuid": "^9.0.1",
+  "winston": "^3.17.0",
+  "winston-daily-rotate-file": "^5.0.0",
   "ws": "^8.18.0"
  },
  "engines": {
@@ -67,6 +69,6 @@
   "doc": "docs"
  },
  "scripts": {
-  "postinstall": "npm link exchange && npm i winston"
+  "postinstall": "npm link exchange"
  }
 }
