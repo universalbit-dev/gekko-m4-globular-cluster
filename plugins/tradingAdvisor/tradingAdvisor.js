@@ -29,6 +29,14 @@ const moment = require('moment');
 const log = require("../../core/log.js");
 
 var CandleBatcher = require('../../core/candleBatcher');
+// Helper to determine the warmup period
+function getWarmupPeriods() {
+  // Prefer user-specified warmupPeriods, else fallback to historySize * candleSize
+  if(typeof config.tradingAdvisor.warmupPeriods === 'number' && config.tradingAdvisor.warmupPeriods > 0)
+    return config.tradingAdvisor.warmupPeriods;
+  return config.tradingAdvisor.historySize * config.tradingAdvisor.candleSize;
+}
+
 
 var Actor = function(done){
   _.bindAll(this,_.functions(this));
@@ -36,6 +44,7 @@ var Actor = function(done){
   this.done = done;
   var batcher = new CandleBatcher(config.tradingAdvisor.candleSize);this.batcher=batcher;
   this.strategyName = config.tradingAdvisor.method;
+  this.warmupPeriods = getWarmupPeriods();
   this.setupStrategy();
   var mode = util.gekkoMode();
 
