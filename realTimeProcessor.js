@@ -1,3 +1,25 @@
+/**
+ * realTimeProcessor.js
+ * 
+ * This script processes real-time log data from PM2, accumulating JSON log entries piped via stdin,
+ * and appends them to a local file ('simulator.json'). It ensures that all incoming logs are parsed,
+ * buffered, and stored persistently. If the output file already exists, it loads and extends
+ * the existing log data.
+ * 
+ * Features:
+ * - Reads from PM2 logs via stdin.
+ * - Buffers incomplete lines to handle streaming data.
+ * - Parses each line as JSON and appends to logs array.
+ * - Handles existing log files and error cases gracefully.
+ * - Writes the full logs array back to 'simulator.json' on each new entry.
+ * 
+ * Dependencies:
+ * - fs-extra
+ * 
+ * Author: universalbit-dev
+ * Repository: https://github.com/universalbit-dev/gekko-m4-globular-cluster
+ */
+
 const fs = require('fs-extra');
 
 const outputFile = 'simulator.json';
