@@ -89,6 +89,7 @@ When you log in to Grafana for the first time with the default credentials (`use
 **Mandatory Best Practice:** 
 - Grafana enforces this as a best practice to ensure security from the first login.
 
+#### [Quick HTTPS Setup for Grafana](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/ssl)
 ---
 
 ### **PM2 HTTP API for Logs and Metrics**
