@@ -69,13 +69,6 @@ var strat = {
 		log.info("====================================");
 		log.info('Running', this.name);
 		log.info('====================================');
-		log.info("Make sure your warmup period matches SMA_long and that Gekko downloads data if needed");
-
-		// warn users
-		if( this.requiredHistory < this.settings.SMA_long )
-		{
-			log.warn("*** WARNING *** Your Warmup period is lower then SMA_long");
-		}
 
 	}, // init()
 
