@@ -97,16 +97,17 @@ Trader.prototype.fetchSkySourceData = async function() {
             },
         });
 
-        if (response.status === 200 && response.data) {
-            console.log('[INFO] Sky Source Data successfully fetched:');
-            return this.skySourceData;
-            // Update cache
-            this.skySourceData = response.data;
-            this.skySourceExpiresAt = Date.now() + cacheDuration;
-            return response.data;
-        } else {
-        console.warn('[WARNING] Unexpected response status or empty data:', response.status);
-        }
+    if (response.status === 200 && response.data) {
+    console.log('[INFO] Sky Source Data successfully fetched:');
+    // Update cache
+    this.skySourceData = response.data;
+    this.skySourceExpiresAt = Date.now() + cacheDuration;
+    return response.data;
+    }
+    else {
+    console.warn('[WARNING] Unexpected response status or empty data:',
+    response.status);
+    }
     } catch (error) {
         if (error.code === 'ECONNABORTED') {
             console.error('[ERROR] Request timeout while fetching Sky Source Data:', error.message);
