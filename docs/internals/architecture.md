@@ -1,44 +1,117 @@
-# Gekko's architecture
+# Gekko M4 Globular Cluster — Architecture
+[work in progress]
 
-![Gekko architecture](https://wizb.it/gekko/static/architecture.jpg)
+Welcome to the architecture overview of **Gekko M4 Globular Cluster**. This document highlights the modular, simulator-first design, advanced logging for visualization, and the streamlined plugin system at the heart of Gekko M4.
 
-Every Gekko instance has two core components:
+---
 
-- A market
-- A GekkoStream
+## Core Architectural Principles
 
-Communication between those two components is handled by Node.JS' [Stream API](https://nodejs.org/api/stream.html). The Market implements a Readable Stream interface while the GekkoStream implements a Writeable Stream interface.
+- **Simulator-Oriented:** A central simulation engine orchestrates data flow, trading logic, and analytics.
+- **Highly Modular:** Each functional area (market simulation, event handling, logging, TA, ML) is encapsulated in a dedicated module.
+- **Event-Driven:** Communication leverages Node.js’s EventEmitter, enabling decoupled and reactive system behavior.
+- **Pluggable Strategy and Analysis Layers:** Supports both rule-based and ML-driven strategies, with built-in TA libraries.
 
-## A Market
+---
 
-All markets in Gekko eventually output `candle` data. Where these candles come from and how old they are does not matter to the GekkoStream they get piped into. On default Gekko looks for markets in the [`core/markets/` directory](https://github.com/askmike/gekko/tree/stable/core/markets). The top orange block in the picture is a BudFox market (the default semi-realtime market that gets live data from exchanges).
+## Core Components
 
-Example Markets that come included with Gekko are:
+### 1. Simulation Engine
+- Orchestrates all workflows: feeds market data, triggers strategies, manages state, outputs results.
+- Provides APIs to plug in custom environments, RL agents, and strategy modules.
 
-- **BudFox** (a realtime market): this market stays on indefinitely and outputs candles from the live markets in semi-realtime (cryptocurrency exchanges run 24/7).
-- **backtest**: this market reads candles from a database and outputs them as fast as the GekkoStream is able to consume them (the GekkoStream will run TA strategies over these candles).
-- **importer**: the importer market will fetch historical data from an exchange and pass on (to the GekkoStream who inserts them in a database).
+### 2. Market Data & Candle Batching
+- **`core/candleBatcher.js`** aggregates fine-grained data into larger “candles” for analysis and strategy execution.
+- Supports both historical simulation and real-time streaming.
 
-## A GekkoStream
+### 3. Event System
+- **`core/emitter.js`** is the central event bus, using extended EventEmitter with deferred/batched event emission.
+- Enables loose coupling and easy extensibility between plugins, strategies, and analytics.
 
-A GekkoStream is nothing more than a collection of [plugins](../commandline/plugins.md). Plugins are simple modules that can subscribe to events, and do something based on event data. The most basic event every GekkoStream has is the "candle" event, this event comes from the market.
+### 4. Plugin and Strategy Loader
+- **`core/pluginUtil.js`** discovers and loads plugins/strategies as per configuration and simulation mode.
+- Supports async/sync initialization and dependency checks.
 
-However **plugins are allowed to broadcast their own events, which other plugins can subscribe to**. An example of this is the `tradingAdvisor` plugin. This plugin will implement a [strategy](../strategies/introduction.md) that will be fed candle data. As soon as the strategy suggests to take a certain position in the market ("I detect an uptrend, I advice to go **long**") it will broadcast an `advice` event. The `paperTrader` is a plugin that simulates trading using these advices, the `trader` is a plugin that creates real market orders based on these advices. You can decide to only turn the `paperTrader` on or to turn the `trader` on (you now have a live trading bot).
+### 5. Technical Analysis Libraries
+- **`core/talib.js`** and **`core/tulind.js`** integrate standard TA indicators for use in both rule-based and ML-driven strategies.
 
-When you run a backtest using Gekko the following things happen:
+### 6. Reinforcement Learning & Neural Networks
+- **`core/rl.js`** provides matrix operations/utilities for RL agents and deep learning.
+- **`core/convnetUtil.js`** offers utilities for ML model metrics and moving-window statistics.
 
-- Gekko configures a `backtest` market.
-- Gekko loads all configured plugins that are supported in the `backtest` mode* into a GekkoStream.
-- Gekko pipes the market into the GekkoStream and voila!
+### 7. Visualization
+- **`core/vis.js`** provides graphing utilities for simulation results, training metrics, and strategy performance.
 
-\*Gekko refuses to load plugins that are unsupported in specific modes. During backtests you **never** want to enable the real trader to enter market orders. Because if you would the advice would be based on specific moments in the backtest, not on the current state of the market.
+### 8. Logging and Utilities
+- **`core/log.js`** centralizes logging with environment-aware output.
+- **`core/util.js`** provides config management, error handling, and directory resolution.
 
-## Plugins & Adapters
+---
 
-Those two core components describe the majority of Gekko's flow. A lot "core functionality" like saving candles to disk are simply plugins that push all candles to a database.
+## 9. Standardized JSON Logging & Advanced Charting
 
-## Separated architecture
+**`strategies/logger.js`** is a critical, standardized module that outputs all simulation and trading data in structured JSON format.  
+This design enables seamless integration with modern visualization tools, especially **Grafana**.
 
-The modular nature of Gekko makes it very dynamic and allows for rapidly creating new plugins. However there is an ugly side to this story:
+### Purpose
 
-The `tradingAdvisor` runs TA strategies against a market. The problem however is that most TA indicators need some history before they can give accurate results. If you want to use an EMA (exponential moving average), you need some history to base the initial average on. But because the tradingAdvisor doesn't know what market data is going to be made available later by the market, it needs to do some fetching itself and compare that to locally available market data (stored in the local database) to see if it can stitch the two sources.
+- **Structured Logging:** All trading, simulation, and analytics events are logged in machine-readable JSON.
+- **Observability:** Logs are compatible with aggregators (e.g., Loki, Prometheus) and are visualized in Grafana dashboards.
+- **Monitoring:** Enables both deep debugging and high-level monitoring for strategies and the platform.
+
+### Integration Flow
+
+1. **Enable `logger.js`** in your strategy configuration.
+2. JSON logs are produced, ready for ingestion by log shippers or databases.
+3. Grafana (via Loki, Prometheus, etc.) consumes the logs.
+4. Visualize trades, metrics, and analytics in real time or historically.
+
+**See the [Advanced Charting Setup Guide](../ngc6121_advanced_charting.md) for step-by-step instructions.**
+
+---
+
+## Plugins: Simplified
+
+Gekko M4 uses a **plugin architecture** for extensibility.  
+For this cluster, only Gekko core plugin components are enabled by default. This ensures stability, performance, and a clear upgrade path.
+
+- **Active Plugins:**  
+  Only the following core plugin types are enabled:
+  - Data adapters (market connectors, candle batchers)
+  - Logger (JSON logger for Grafana integration)
+  - Strategy runner/executor
+  - Technical analysis adapters (TA-Lib, Tulip)
+  - Event emitters
+
+- **Why Simplified?**  
+  - Reduces attack surface and complexity.
+  - Ensures that all logging and analytics flow through standardized, observable interfaces.
+  - Simplifies extension and troubleshooting.
+
+- **How to Extend:**  
+  - New plugins can be added by developers, but must be registered and enabled in the configuration.
+  - All plugins must conform to the event-driven interface for maximum compatibility.
+
+---
+
+## Data Flow & Extensibility
+
+1. **Initialization:** Loads config, sets up markets, plugins, and strategies.
+2. **Market Data Ingestion:** Feeds raw/historical data through the candle batcher.
+3. **Processing & Event Broadcasting:** Batched candles/events trigger strategy evaluation and plugin logic.
+4. **Strategy Execution:** Strategies process data, issue trade signals, and log analytics.
+5. **Logging & Visualization:** All actions/results are logged; metrics are visualized in real-time or after simulation.
+
+---
+
+## Simulator-Driven Modes
+
+- **Backtesting:** Run strategies on historical data.
+- **Live Simulation:** Paper trading or dry runs using live exchange data.
+- **Reinforcement Learning:** Train AI agents in a controlled, repeatable environment.
+
+---
+
+**Gekko M4 Globular Cluster** — Modular, simulation-first quantitative research.  
+
+---
