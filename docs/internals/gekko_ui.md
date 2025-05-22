@@ -100,7 +100,11 @@ When using `pm2 serve`, be aware that anyone with network access can view the ex
    logger.info(output);
    appendToJsonFile(output);
    ```
+**Consistent Logging Example**
 
+To help maintain consistency and clarity in logging for visual analytics, you can refer to a fully implemented and working example using the Winston logger in the RSIBULLBEARADX strategy. This example demonstrates best practices for structured and effective logging, making it easier to track, debug, and visualize important events within your strategies.
+
+See: [RSIBULLBEARADX.js strategy implementation](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/RSIBULLBEARADX.js) for a reference on how to set up and use the logging system.
 ---
 
 ## Advanced Charting Features
