@@ -181,9 +181,10 @@ Stitcher.prototype.prepareHistoricalData = function(done) {
           );
         }
       }
-
-      done();
-
+      if (typeof done === 'function') {
+      done(someError, someResult);
+      }
+      
     }.bind(this));
   }.bind(this));
 }
