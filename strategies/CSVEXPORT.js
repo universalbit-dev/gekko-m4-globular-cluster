@@ -4,7 +4,7 @@
 */
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const log = require('../core/log.js');
 const config = require('../core/util.js').getConfig();
 const Wrapper = require('../strategyWrapperRules.js');
