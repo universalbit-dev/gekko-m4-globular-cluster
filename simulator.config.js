@@ -125,8 +125,16 @@ module.exports = {
      args      : '-c env/simulator/trade_csvexport.js',
      instances : "1",
      exec_mode : "cluster"
-   }
- 
-  
+  },
+  {
+    name: "ohlcv_data",
+    script: "serve",
+    env: {
+      PM2_SERVE_PATH: "./logs/csv",
+      PM2_SERVE_PORT: 9567,
+      PM2_SERVE_SPA: true,
+      PM2_SERVE_HOMEPAGE: "./logs/csv/ohlcv_data.csv"
+    }
+  }
 ]
 }
