@@ -308,6 +308,8 @@ And call your standardized logging function wherever needed.
 **This approach will save you hours on logging, reviewing, and charting output for any strategy!**  
 
 ---
+**Learning Together**
+For advanced data integration, see the [Grafana Infinity Datasource documentation](https://grafana.com/docs/plugins/yesoreyeram-infinity-datasource/latest/).
 
 [work in progress ]
 #### **Advanced Charting Features**
