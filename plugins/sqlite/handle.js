@@ -40,12 +40,18 @@ if (mode === 'realtime' || mode === 'importer') {
 
 module.exports = {
   initDB: () => {
-    var journalMode;
-    var syncMode;
+    var journalMode = adapter.journalMode || 'WAL';
+    var syncMode = adapter.syncMode || 'NORMAL';
   
     var db = new sqlite3.Database(fullPath);
-    db.run('PRAGMA synchronous = ' + syncMode);
-    db.run('PRAGMA journal_mode = ' + journalMode);
+
+    db.run('PRAGMA synchronous = ' + syncMode, function(err) {
+    if (err) console.error('PRAGMA synchronous error:', err);
+    });
+    db.run('PRAGMA journal_mode = ' + journalMode, function(err) {
+    if (err) console.error('PRAGMA journal_mode error:', err);
+    });
+
     db.configure('busyTimeout', 10000);
     return db;
   }
