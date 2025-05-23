@@ -19,7 +19,7 @@ ST                     = Rome
 L                      = Rome
 O                      = UniversalBit
 OU                     = universalbit
-CN 		       = localhost
+CN 		                 = localhost
 
 # certificate authority configuration
 [ ca_ext ]
