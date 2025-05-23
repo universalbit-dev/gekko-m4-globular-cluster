@@ -1,5 +1,4 @@
 # default section for variable definitions
-
 DN                 = ca_dn
 DISTINGUISHED_NAME = ${ENV::DN}
 
