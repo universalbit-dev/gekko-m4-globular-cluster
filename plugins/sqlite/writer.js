@@ -8,7 +8,7 @@ var util = require('../../core/util');
 var log = require('../../core/log');
 
 var Store = function(done, pluginMeta) {
-  _.bindAll(this,_.functions(this));
+  _.bindAll(this, _.functions(this));
   this.done = done;
 
   this.db = sqlite.initDB(false);
@@ -36,29 +36,38 @@ Store.prototype.upsertTables = function() {
     `,
   ];
 
-  var next = _.after(_.size(createQueries), this.done);
+  var next = _.after(_.size(createQueries), () => {
+  if (typeof this.done === 'function') {
+    this.done();
+  } else {
+    log.error('Store.done is not a function!');
+  }
+});
 
   _.each(createQueries, function(q) {
-    this.db.run(q, next);
+    this.db.run(q, function(err) {
+      if (err) {
+        log.error('Table creation error:', err);
+        return util.die('DB error at CREATE: ' + err);
+      }
+      next();
+    });
   }, this);
 }
 
 Store.prototype.writeCandles = function() {
-  if(_.isEmpty(this.cache))
+  if (_.isEmpty(this.cache))
     return;
 
   const transaction = () => {
-    this.db.run("BEGIN TRANSACTION");
+    this.db.run("BEGIN TRANSACTION", function(err) {
+      if (err) log.error('Begin transaction error:', err);
+    });
 
     var stmt = this.db.prepare(`
       INSERT OR IGNORE INTO ${sqliteUtil.table('candles')}
       VALUES (?,?,?,?,?,?,?,?,?)
-    `, function(err, rows) {
-        if(err) {
-          log.error(err);
-          return util.die('DB error at INSERT: '+ err);
-        }
-      });
+    `);
 
     _.each(this.cache, candle => {
       stmt.run(
@@ -70,14 +79,24 @@ Store.prototype.writeCandles = function() {
         candle.close,
         candle.vwp,
         candle.volume,
-        candle.trades
+        candle.trades,
+        function(err) {
+          if (err) log.error('Insert error:', err);
+        }
       );
     });
 
-    stmt.finalize();
-    this.db.run("COMMIT");
-    this.db.run("pragma wal_checkpoint;");
-    
+    stmt.finalize(function(err) {
+      if (err) log.error('Statement finalize error:', err);
+    });
+
+    this.db.run("COMMIT", function(err) {
+      if (err) log.error('commit error:', err);
+    });
+    this.db.run("pragma wal_checkpoint;", function(err) {
+      if (err) log.error('pragma wal_checkpoint; error:', err);
+    });
+
     this.cache = [];
   }
 
@@ -86,7 +105,7 @@ Store.prototype.writeCandles = function() {
 
 var processCandle = function(candle, done) {
   this.cache.push(candle);
-  if (!this.buffered || this.cache.length > 1000) 
+  if (!this.buffered || this.cache.length > 1000)
     this.writeCandles();
 
   done();
@@ -98,17 +117,9 @@ var finalize = function(done) {
   this.db = null;
 }
 
-if(config.candleWriter.enabled) {
+if (config.candleWriter.enabled) {
   Store.prototype.processCandle = processCandle;
   Store.prototype.finalize = finalize;
 }
 
 module.exports = Store;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
