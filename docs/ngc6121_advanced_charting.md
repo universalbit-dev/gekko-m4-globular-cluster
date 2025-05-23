@@ -153,6 +153,22 @@ http://localhost:9559/simulator.json
 ```
 ---
 
+#### **Serve Logs via HTTPS:**  
+While PM2’s serve command exposes static files over HTTP, you can also serve static files securely over **HTTPS**.  
+
+To make this easy, you can use the example script provided in this repository: [ssl/https_static_files.sh](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/ssl/https_static_files.sh).  
+This script sets up nginx to serve your files over HTTPS, offering enhanced security and browser compatibility.
+
+**To serve your static files over HTTPS:**
+
+1. Review and customize the [https_static_files.sh](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/ssl/https_static_files.sh) script for your needs.
+2. Run the script to install nginx and configure HTTPS.
+3. Access your static files securely using for example: **https://localhost/simulator/simulator.json**
+
+For more details, see the comments inside the script.
+
+---
+
 ### **Additional Notes**
 - Ensure that the `.pm2` directory has proper permissions to avoid runtime issues:
    ```bash
@@ -185,7 +201,8 @@ http://localhost:9559/simulator.json
 - **Name**: Assign a name to your data source (e.g., `Simulator API`).
 - **Source Type**: Select `URL`.
 - **URL**: Base URL of your PM2 API (e.g., `http://localhost:9559/simulator.json` for the PM2 HTTP API).
-     - **Method**: Choose `GET`.
+- **HTTPS URL**: Base URL of your HTTPS API (e.g., `https://localhost/simulator/simulator.json` **NGINX HTTPS API**) 
+- **Method**: Choose `GET`.
 
 **Optional Authentication**:
    - If your API requires authentication, configure it under **Authentication**:
