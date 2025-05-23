@@ -6,33 +6,30 @@
   Compatible with exchangesimulator and real-time/streaming candle data.
   (c) CC-BY-SA 4.0 Rowan Griffin, enhanced by GitHub Copilot Chat Assistant
 */
-
 const path = require('path');
-const fs = require('fs-extra');
+const rfs = require('rotating-file-stream');
 const log = require('../core/log.js');
 const config = require('../core/util.js').getConfig();
 const method = {};
 
 const LOG_DIR = path.join(__dirname, '..', 'logs', 'csv');
-const LOG_FILE = path.join(
-  LOG_DIR,
-  `${config.watch.asset}_${config.watch.currency}_${(new Date()).toISOString().replace(/[:.]/g, '-')}.csv`
-);
-
 const HEADER = 'timestamp,open,high,low,close,volume\n';
 
 // Ensure log directory exists
-if (!fs.existsSync(LOG_DIR)) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
-}
+require('fs-extra').ensureDirSync(LOG_DIR);
+
+// Create a rotating write stream (1 file per day, keep 30 days by default)
+const stream = rfs.createStream('ohlcv_data.csv', {
+  interval: '1d',          // rotate daily
+  path: LOG_DIR,
+  maxFiles: 30             // optional: keep last 30 days
+});
 
 let headerWritten = false;
 
 function ensureHeader() {
   if (!headerWritten) {
-    if (!fs.existsSync(LOG_FILE) || fs.statSync(LOG_FILE).size === 0) {
-      fs.writeFileSync(LOG_FILE, HEADER);
-    }
+    stream.write(HEADER);
     headerWritten = true;
   }
 }
@@ -40,13 +37,12 @@ function ensureHeader() {
 method.init = function() {
   this.name = 'CSVEXPORT';
   this.requiredHistory = this.settings.historySize || 0;
-  log.info(`CSVEXPORT: Logging OHLCV to ${LOG_FILE}`);
+  log.info(`CSVEXPORT: Logging OHLCV to daily-rotated file in ${LOG_DIR}`);
   ensureHeader();
 };
 
 method.update = function(candle) {
   ensureHeader();
-  // Format timestamp as ISO 8601 UTC string
   const timestamp = (candle.start instanceof Date)
     ? candle.start.toISOString()
     : new Date(candle.start).toISOString();
@@ -60,12 +56,12 @@ method.update = function(candle) {
     candle.volume
   ].join(',') + '\n';
 
-  fs.appendFile(LOG_FILE, row, err => {
-    if (err) log.error('CSVEXPORT error:', err);
-  });
+  stream.write(row);
 };
 
 method.check = function() {};
-method.end = function() {};
+method.end = function() {
+  stream.end();
+};
 
 module.exports = method;
