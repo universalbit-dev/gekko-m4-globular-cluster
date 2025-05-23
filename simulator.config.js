@@ -118,6 +118,15 @@ module.exports = {
       PM2_SERVE_SPA: true,
       PM2_SERVE_HOMEPAGE: "./logs/json/neuralnet_refinements.json"
     }
-  }
+  },
+  {
+     name: "csvexport",
+     script    : 'gekko.js',
+     args      : '-c env/simulator/trade_csvexport.js',
+     instances : "1",
+     exec_mode : "cluster"
+   }
+ 
+  
 ]
 }
