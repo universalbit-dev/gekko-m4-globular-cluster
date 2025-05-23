@@ -1,5 +1,11 @@
 /*
-  Enhanced CSVEXPORT Strategy: Exports OHLCV data to a standardized CSV for Grafana.
+  CSVEXPORT Strategy - Grafana Friendly
+  -------------------------------------
+  This strategy exports OHLCV data as a standardized CSV file for easy ingestion into Grafana dashboards.
+  - Timestamps are in ISO 8601 UTC format (`YYYY-MM-DDTHH:mm:ss.sssZ`), which is optimal for Grafana time series charting.
+  - Column order: timestamp, open, high, low, close, volume.
+  - Data is directly compatible with Grafana’s CSV import and time series visualization features.
+
   (CC-BY-SA 4.0) Rowan Griffin, enhanced by GitHub Copilot Chat Assistant
 */
 
