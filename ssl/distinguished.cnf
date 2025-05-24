@@ -29,9 +29,9 @@ keyUsage               = critical, keyCertSign, cRLSign
 
 # another distinguished name
 [ other_dn ]
-C                      = SE
-ST                     = Stockholm 
-L                      = Stockholm
-O                      = Organization
-OU                     = Unit
-CN                     = Name 2
+C  = US
+ST = California
+L  = Los Angeles
+O  = Your Organization
+OU = Your Unit
+CN = Your Common Name (e.g., domain or person)
