@@ -9,17 +9,21 @@
 #   - Sets up nginx to always redirect HTTP traffic to HTTPS
 #   - Configures nginx as a reverse proxy for the following endpoints:
 #
-#     https://localhost/neuralnet/neuralnet.json
-#     https://localhost/cci/cci.json
-#     https://localhost/dema/dema.json
-#     https://localhost/rsibullbearadx/rsibullbearadx.json
-#     https://localhost/bollingerband/bollingerband.json
-#     https://localhost/noop/noop.json
-#     https://localhost/neuralnet_refinements/neuralnet_refinements.json
-#     https://localhost/ohlcv_data/ohlcv_data.csv
+#     https://localhost/neuralnet/
+#     https://localhost/cci/
+#     https://localhost/dema/
+#     https://localhost/rsibullbearadx/
+#     https://localhost/bollingerband/
+#     https://localhost/noop/
+#     https://localhost/neuralnet_refinements/
+#     https://localhost/ohlcv_data/
 #
 # The script also ensures the SSL files are copied to /etc/nginx/ssl/ and overwrites the
 # nginx configuration to apply these reverse proxy rules.
+#
+# For instructions on adding HTTPS endpoints for table view and advanced visualization
+# (e.g. using Grafana Infinity Datasource), see:
+# https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/ngc6121_advanced_charting.md
 #
 # Intended for development and testing purposes. For production, use a valid SSL certificate.
 #
