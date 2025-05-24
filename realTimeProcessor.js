@@ -13,8 +13,10 @@
  * - Handles existing log files and error cases gracefully.
  * - Writes the full logs array back to 'simulator.json' on each new entry.
  * 
- * Dependencies:
- * - fs-extra
+ * Note:
+ * This script appends every new log entry to 'simulator.json' and rewrites the entire file upon each new entry.
+ * As the file grows without limit, this process becomes increasingly CPU and disk intensive.
+ * For long-running or high-volume scenarios, consider implementing a log rotation or size limit strategy to avoid performance degradation.
  * 
  * Author: universalbit-dev
  * Repository: https://github.com/universalbit-dev/gekko-m4-globular-cluster
