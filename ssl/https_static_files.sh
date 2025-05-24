@@ -9,15 +9,14 @@
 #   - Sets up nginx to always redirect HTTP traffic to HTTPS
 #   - Configures nginx as a reverse proxy for the following endpoints:
 #
-#     https://localhost/simulator/           →  http://127.0.0.1:9559/simulator.json
-#     https://localhost/neuralnet/           →  http://127.0.0.1:9560/neuralnet.json
-#     https://localhost/cci/                 →  http://127.0.0.1:9561/cci.json
-#     https://localhost/dema/                →  http://127.0.0.1:9562/dema.json
-#     https://localhost/rsibullbearadx/      →  http://127.0.0.1:9563/rsibullbearadx.json
-#     https://localhost/bollingerband/       →  http://127.0.0.1:9564/bollingerband.json
-#     https://localhost/noop/                →  http://127.0.0.1:9565/noop.json
-#     https://localhost/neuralnet_refinements/ → http://127.0.0.1:9566/neuralnet_refinements.json
-#     https://localhost/ohlcv_data/          →  http://127.0.0.1:9567/ohlcv_data.csv
+#     https://localhost/neuralnet/neuralnet.json
+#     https://localhost/cci/cci.json
+#     https://localhost/dema/dema.json
+#     https://localhost/rsibullbearadx/rsibullbearadx.json
+#     https://localhost/bollingerband/bollingerband.json
+#     https://localhost/noop/noop.json
+#     https://localhost/neuralnet_refinements/neuralnet_refinements.json
+#     https://localhost/ohlcv_data/ohlcv_data.csv
 #
 # The script also ensures the SSL files are copied to /etc/nginx/ssl/ and overwrites the
 # nginx configuration to apply these reverse proxy rules.
