@@ -163,7 +163,7 @@ This script sets up nginx to serve your files over HTTPS, offering enhanced secu
 
 1. Review and customize the [https_static_files.sh](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/ssl/https_static_files.sh) script for your needs.
 2. Run the script to install nginx and configure HTTPS.
-3. Access your static files securely using for example: **https://localhost/simulator/simulator.json**
+3. Access your static files securely using for example: **https://localhost/simulator/**
 
 For more details, see the comments inside the script.
 
