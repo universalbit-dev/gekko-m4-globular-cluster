@@ -1,3 +1,27 @@
+/**
+ * Trade Bollinger Band Simulator
+ * 
+ * This module simulates trading activity using the Bollinger Bands strategy.
+ * It's designed for users who want to test and analyze trading strategies
+ * without risking real funds or connecting to live markets.
+ * 
+ * Main Features:
+ * - Runs virtual trades using Bollinger Bands indicator on historical data.
+ * - Lets you configure exchange, asset, and strategy parameters via environment variables.
+ * - Logs and exports simulation results to help you assess your trading performance.
+ * - Supports backtesting and paper trading modes for safe experimentation.
+ * 
+ * How to Use:
+ * 1. Set your simulation settings in a .env file (such as exchange, asset, currency, API keys, etc.).
+ * 2. Run this configuration with the Gekko trading bot.
+ * 3. Analyze the simulation and backtest results in the output.
+ * 
+ * Note: This file is intended for users interested in algorithmic trading or strategy development.
+ * You do not need to understand the inner workings of Bollinger Bands to use it, but familiarity with trading concepts is recommended.
+ * 
+ * Disclaimer: This simulator is for educational and testing purposes only. No real trading is performed unless you explicitly enable it.
+ * Always test thoroughly before applying strategies to live markets.
+ */
 require('dotenv').config()
 var config = {};
 config.debug =true;
