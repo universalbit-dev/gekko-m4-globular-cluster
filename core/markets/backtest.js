@@ -1,4 +1,3 @@
-/**/
 const _ = require("underscore");
 const moment = require('moment');
 const { Readable } = require('stream');
@@ -8,33 +7,46 @@ const fs = require('fs-extra');
 const noop = require('node-noop').noop;
 
 const config = util.getConfig();
-const daterange = config.backtest.daterange;
-const requiredHistory = config.tradingAdvisor.candleSize;
-
 const Reader = require('../../plugins/sqlite/reader');
 
-const to = moment.utc(daterange.to);
-const from = moment.utc(daterange.from).subtract(requiredHistory, 'm');
+// Dynamically determine from/to
+Reader.prototype.getAvailableRange = function(callback) {
+  this.db.get('SELECT MIN(start) as min, MAX(start) as max FROM candles', (err, row) => {
+    if (err) return callback(err);
+    callback(null, row.min, row.max);
+  });
+};
 
-if (to <= from) util.die('This daterange does not make sense.');
-if (!config.paperTrader.enabled) util.die('You need to enable the "Paper Trader" first to run a backtest.');
+const reader = new Reader();
+reader.getAvailableRange((err, min, max) => {
+  if (err || min == null || max == null) {
+    log.error('No data available in database or DB error!');
+    process.exit(1);
+  }
+  const requiredHistory = config.tradingAdvisor.candleSize;
+  const batchSize = config.backtest.batchSize;
+  const from = moment.unix(min).utc().subtract(requiredHistory, 'm');
+  const to = moment.unix(max).utc();
+  log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', min, 'UTC');
 
-if (!from.isValid()) util.die('invalid `from`');
-if (!to.isValid()) util.die('invalid `to`');
+  const market = new Market(from, to, requiredHistory, batchSize);
+  market.on('data', (data) => { log.info('Handle Data'); });
+  market.on('end', () => { log.info('Backtest complete'); });
+});
 
-class Market extends Readable {
-  constructor() {
+class BacktestStream extends Readable {
+  constructor(from, to, requiredHistory, batchSize) {
     super({ objectMode: true });
-    _.bindAll(this, _.functions(this));
-    this.pushing = false;
-    this.ended = false;
-    this.closed = false;
+    this.from = moment.isMoment(from) ? from : moment.unix(from).utc();
+    this.to = moment.isMoment(to) ? to : moment.unix(to).utc();
+    this.requiredHistory = requiredHistory;
+    this.batchSize = batchSize;
 
     log.write('');
-    log.info('\t=================================================');
-    log.info('\tWARNING: BACKTESTING FEATURE NEEDS PROPER TESTING');
-    log.info('\tWARNING: ACT ON THESE NUMBERS AT YOUR OWN RISK!');
-    log.info('\t=================================================');
+    log.info('\t==============================================');
+    log.info('\t Backtest running! Results are for testing.');
+    log.info('\t Analyze and optimize your strategy here!');
+    log.info('\t==============================================');
     log.write('');
 
     try {
@@ -44,12 +56,9 @@ class Market extends Readable {
       util.die('Error initializing reader');
     }
 
-    log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', daterange.from, 'UTC');
-
-    this.batchSize = config.backtest.batchSize;
     this.iterator = {
-      from: from.clone(),
-      to: from.clone().add(this.batchSize, 'm').subtract(1, 's')
+      from: this.from.clone(),
+      to: this.from.clone().add(this.batchSize, 'm').subtract(1, 's')
     };
   }
 
@@ -63,8 +72,8 @@ class Market extends Readable {
   }
 
   get() {
-    if (this.iterator.to >= to) {
-      this.iterator.to = to;
+    if (this.iterator.to >= this.to) { 
+      this.iterator.to = this.to;
       this.ended = true;
     }
 
@@ -137,16 +146,4 @@ class Market extends Readable {
   }
 }
 
-util.makeEventEmitter(Market);
-
-module.exports = Market;
-
-/*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-
+module.exports = BacktestStream;
