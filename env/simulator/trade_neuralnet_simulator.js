@@ -1,35 +1,23 @@
-/*copilot explain
-
-This JavaScript file, trade_neuralnet_simulator.js, contains configuration settings for a Gekko trading bot using a neural network strategy. Here is an overview of its key components:
-
-    Debug Mode:
-        config.debug = true;
-
-    Market Watch Settings:
-        config.watch specifies the exchange (ccxt_exchanges), exchange ID (kraken), currency (BTC), and asset (LTC).
-
-    Trader Configuration:
-        config.trader is disabled and set to use an exchange simulator with BTC and LTC.
-
-    Trading Advisor Configuration:
-        config.tradingAdvisor is enabled, with a candle size of 5, history size of 10, and method set to NEURALNET.
-
-    Neural Network Settings:
-        config.NEURALNET includes various thresholds, learning rate, order limits, momentum, decay, hodl threshold, price buffer length, and minimum predictions.
-
-    Database Adapter:
-        config.adapter uses SQLite, defined in plugins/sqlite.
-
-    SQLite Configuration:
-        Includes path, data directory, version, and dependencies.
-
-    Additional Configurations:
-        config.candleWriter, config.adviceLogger, config.backtest, config.backtestResultExporter, config.paperTrader, config.performanceAnalyzer, and config.importer settings are specified.
-
-    Legal Disclaimer:
-        The file includes an MIT license and a disclaimer to use at your own risk.
-
-*/
+/**
+ * Trade Neuralnet Simulator
+ * 
+ * This module simulates trading activity using a neural network model.
+ * It's designed for users who want to test and analyze trading strategies
+ * without using real money or connecting to live markets.
+ * 
+ * Main Features:
+ * - Runs virtual trades based on historical data or random scenarios.
+ * - Uses a neural network to make buy/sell decisions.
+ * - Outputs results to help you understand the performance of your strategy.
+ * 
+ * How to Use:
+ * 1. Configure your simulation settings.
+ * 2. Run the simulator.
+ * 3. Review the simulation results.
+ * 
+ * Note: This file is intended for intermediate users familiar with trading concepts,
+ * but you do not need to understand neural networks in depth to use it.
+ */
 require('dotenv').config()
 var config = {};
 config.debug =true;
