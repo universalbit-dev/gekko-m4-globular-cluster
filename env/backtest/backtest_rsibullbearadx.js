@@ -9,10 +9,7 @@ config.RSIBULLBEARADX={SMA_long:987,SMA_short:50,BULL_RSI:10,BULL_RSI_high:80,BU
 BULL_mod_low :-5,BEAR_mod_high:15,BEAR_mod_low:-5,RSI:13,ADX:8,ADX_high:70,ADX_low:50};
 
 //Backtest Exchange Data  FROM -- TO 
-config.backtest = {enabled:true,
-  daterange:{from:'',to:''},
-  batchSize: 1000
-};
+config.backtest = {enabled:true,batchSize: 1000};
 
 //DataBase
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';

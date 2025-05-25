@@ -7,24 +7,8 @@ config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SCALPER'};
 config.SCALPER={};
 
-//Date.prototype.toISOString()
-//Previous Month
-var previous_month = new Date();
-previous_month.setDate(1);
-previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(4);
-
-//Current Month
-var current_month = new Date();
-current_month.setDate(1);
-current_month.setMonth(current_month.getMonth());
-current_month.setDate(4);
-
-//Backtest Exchange Data  FROM previous month TO current month
-config.backtest = {enabled:true,
-  daterange:{from:previous_month,to:current_month},
-  batchSize: 1000
-};
+//Backtest Exchange Data  FROM -- TO 
+config.backtest = {enabled:true,batchSize: 1000};
 
 //DataBase
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
