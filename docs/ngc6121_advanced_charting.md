@@ -229,17 +229,14 @@ Once the data source is configured, you can create panels in Grafana to visualiz
 **Visualize the Data**:
    - Use Grafana's built-in visualization tools (e.g., time-series graphs, tables, gauges) to display your data.
    - You can also apply transformations or create alerts based on your data.
+
+![RSI Bull Bear ADX Simulator UTC](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/rsibullbearadx_simulator_utc.png)
+![RSI Bull Bear ADX Simulator Stats](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/exchangesimulator/rsibullbearadx_simulator_stat.png)
 ---
 
 #### **Why Use Grafana Infinity Datasource?**
 **Active Development**: The Infinity Datasource is actively maintained and regularly updated.
 **Multi-Format Support**: Supports JSON, CSV, XML, GraphQL, and HTML endpoints, making it versatile for various data sources.
-**Advanced Features**:
-  - Query chaining.
-  - Custom transformations.
-  - Support for dynamic variables and templating.
-**Use PM2 API for Dynamic Data**
-   - If you're running your simulator with PM2, leverage the **PM2 HTTP API** to access real-time metrics and logs.
 
 ---
 
