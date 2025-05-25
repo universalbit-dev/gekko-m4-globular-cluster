@@ -20,7 +20,7 @@ Node Version Manager (NVM) is a tool that allows developers to manage multiple v
 Before installing NVM, ensure that:
 - You have either `cURL` or `Wget` installed on your system.
 - You know which profile file your shell uses (e.g., `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`, or `~/.profile`).
-- The tested and recommended Node.js version for this project is **21.19.0**.
+- The tested and recommended Node.js version for this project is **21**.
 
 ---
 
@@ -31,7 +31,7 @@ Before installing NVM, ensure that:
 Run the following command to install or update NVM using cURL:
 
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/install.sh | bash
 ```
 
 ### Using Wget
@@ -39,7 +39,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 Alternatively, use Wget to install or update NVM:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
 ```
 
 Running either of the above commands downloads a script and executes it. The script:
@@ -82,13 +82,15 @@ To verify the installation:
 ## Example Usage
 
 Here are some common NVM commands:
+
+
 - **Install a specific Node.js version**:
   ```bash
-  nvm install 21.19.0
+  nvm install 21
   ```
 - **Switch to a specific Node.js version**:
   ```bash
-  nvm use 21.19.0
+  nvm use 21
   ```
 - **List installed Node.js versions**:
   ```bash
@@ -96,9 +98,18 @@ Here are some common NVM commands:
   ```
 - **Set a default Node.js version**:
   ```bash
-  nvm alias default 21.19.0
+  nvm alias default 21
   ```
+**Feel free to experiment with different Node.js versions during installation!**
 
+While this project should work with the recommended Node.js versions, you are welcome to try installing and running it with newer versions such as Node.js 24. If you encounter any issues or have feedback about compatibility, please share your experience.
+
+For example, to use Node.js 24 with nvm:
+
+```bash
+nvm install 24
+nvm use 24
+```
 ---
 
 ## Troubleshooting
