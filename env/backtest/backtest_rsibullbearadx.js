@@ -8,23 +8,9 @@ config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'RSIBUL
 config.RSIBULLBEARADX={SMA_long:987,SMA_short:50,BULL_RSI:10,BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,BULL_mod_high:5,
 BULL_mod_low :-5,BEAR_mod_high:15,BEAR_mod_low:-5,RSI:13,ADX:8,ADX_high:70,ADX_low:50};
 
-//Date.prototype.toISOString()
-//Previous Month
-var previous_month = new Date();
-previous_month.setDate(1);
-previous_month.setMonth(previous_month.getMonth()-1);
-previous_month.setDate(4); 
-
-//Current Month
-var current_month = new Date();
-current_month.setDate(1);
-current_month.setMonth(current_month.getMonth());
-current_month.setDate(4); 
-
-
-//Backtest Exchange Data  FROM previous month TO current month
+//Backtest Exchange Data  FROM -- TO 
 config.backtest = {enabled:true,
-  daterange:{from:previous_month,to:current_month},
+  daterange:{from:'',to:''},
   batchSize: 1000
 };
 
