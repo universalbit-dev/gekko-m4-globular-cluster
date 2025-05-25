@@ -1,23 +1,41 @@
 /*
   A pipeline implements a full Gekko Flow based on a config and 
   a mode. The mode is an abstraction that tells Gekko what market
-  to load (realtime, backtesting or importing) while making sure
+  to load (realtime or backtesting) while making sure
   all enabled plugins are actually supported by that market.
   Read more here:
   https://gekko.wizb.it/docs/internals/architecture.html
 */
 
 const _ = require("underscore");
-const {EventEmitter} = require("events");class Event extends EventEmitter {};
+const { EventEmitter } = require("events"); class Event extends EventEmitter {};
 var util = require('./util');
 var dirs = util.dirs();
 
 var async = require('async');
 var log = require(dirs.core + 'log');
+
 var pipeline = (settings) => {
 
   var mode = settings.mode;
+  if(mode === 'import' || mode === 'importer') {
+    throw new Error('ERROR: "import" mode is deprecated and has been removed.');
+  }
   var config = settings.config;
+
+  // Validate backtest daterange early, help avoid invalid moments
+  if(mode === 'backtest') {
+    const daterange = config.backtest && config.backtest.daterange;
+    if(!daterange || !daterange.from || !daterange.to) {
+      throw new Error('Backtest mode requires a valid daterange in config.backtest.daterange (with "from" and "to" fields).');
+    }
+    const momentFrom = require('moment')(daterange.from);
+    const momentTo = require('moment')(daterange.to);
+    if(!momentFrom.isValid() || !momentTo.isValid()) {
+      throw new Error('BacktestStream: from or to is invalid moment: ' + momentFrom + ' ' + momentTo);
+    }
+  }
+
   // prepare a GekkoStream
   var GekkoStream = require(dirs.core + 'gekkoStream');
   // all plugins
@@ -111,7 +129,7 @@ var pipeline = (settings) => {
                 emitterMessage += sub.emitters.join(', ');
                 emitterMessage += ' ] are disabled.';
               } else {
-                emitterMessage += 'the emitting plugin (' + sub.emitter;
+                emitterMessage = 'the emitting plugin (' + sub.emitter;
                 emitterMessage += ')is disabled.'
               }
 
@@ -156,10 +174,10 @@ var pipeline = (settings) => {
   }
 
   var prepareMarket = function(next) {
-  if (mode === 'backtest' && config.backtest && config.backtest.daterange === 'scan')
-    require(dirs.core + 'prepareDateRange')(next);
-  else
-    next();
+    if (mode === 'backtest' && config.backtest && config.backtest.daterange === 'scan')
+      require(dirs.core + 'prepareDateRange')(next);
+    else
+      next();
   }
 
   var setupMarket = function(next) {
@@ -221,11 +239,10 @@ var pipeline = (settings) => {
 
       market
         .pipe(gekkoStream)
-
-        // convert JS objects to JSON string
-        // .pipe(new require('stringify-stream')())
-        // output to standard out
-        // .pipe(process.stdout);
+      //   // convert JS objects to JSON string
+      //   // .pipe(new require('stringify-stream')())
+      //   // output to standard out
+      //   // .pipe(process.stdout);
 
       market.on('end', gekkoStream.finalize);
     }
@@ -238,7 +255,7 @@ module.exports = pipeline;
 /*
 The MIT License (MIT)
 Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, inc...
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRING...
 */
