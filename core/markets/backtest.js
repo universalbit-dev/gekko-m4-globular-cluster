@@ -19,17 +19,35 @@ Reader.prototype.getAvailableRange = function(callback) {
 
 const reader = new Reader();
 reader.getAvailableRange((err, min, max) => {
-  if (err || min == null || max == null) {
-    log.error('No data available in database or DB error!');
+  if (err || min == null || max == null || isNaN(min) || isNaN(max)) {
+    log.error('No valid data available in database or DB error!');
+    log.error(`Received min: ${min}, max: ${max}`);
     process.exit(1);
   }
+
   const requiredHistory = config.tradingAdvisor.candleSize;
   const batchSize = config.backtest.batchSize;
-  const from = moment.unix(min).utc().subtract(requiredHistory, 'm');
-  const to = moment.unix(max).utc();
-  log.debug('*** Requested', requiredHistory, 'minutes of warmup history data, so reading db since', from.format(), 'UTC', 'and start backtest at', min, 'UTC');
 
-  const market = new Market(from, to, requiredHistory, batchSize);
+  // Calculate UNIX seconds for from/to
+  const from = moment.unix(min).utc().subtract(requiredHistory, 'm').unix();
+  const to = moment.unix(max).utc().unix();
+
+  // Extra validation
+  if (isNaN(from) || isNaN(to)) {
+    log.error('from or to is NaN after date math:', from, to, 'min:', min, 'max:', max);
+    process.exit(1);
+  }
+  if (from > to) {
+    log.error('from is after to! from:', from, 'to:', to);
+    process.exit(1);
+  }
+
+  // Proper logging
+  log.info(
+    `[Backtest Range] Warmup: ${requiredHistory} minutes. DB read from ${moment.unix(from).utc().format()} UTC, start backtest at ${moment.unix(min).utc().format()} UTC, end at ${moment.unix(max).utc().format()} UTC`
+  );
+
+  const market = new BacktestStream(from, to, requiredHistory, batchSize);
   market.on('data', (data) => { log.info('Handle Data'); });
   market.on('end', () => { log.info('Backtest complete'); });
 });
@@ -41,6 +59,12 @@ class BacktestStream extends Readable {
     this.to = moment.isMoment(to) ? to : moment.unix(to).utc();
     this.requiredHistory = requiredHistory;
     this.batchSize = batchSize;
+
+    // Defensive: check validity
+    if (!this.from.isValid() || !this.to.isValid()) {
+      log.error('BacktestStream: from or to is invalid moment:', this.from, this.to);
+      util.die('BacktestStream initialized with invalid from/to');
+    }
 
     log.write('');
     log.info('\t==============================================');
@@ -60,6 +84,8 @@ class BacktestStream extends Readable {
       from: this.from.clone(),
       to: this.from.clone().add(this.batchSize, 'm').subtract(1, 's')
     };
+    this.ended = false;
+    this.closed = false;
   }
 
   _read() {
@@ -72,8 +98,14 @@ class BacktestStream extends Readable {
   }
 
   get() {
-    if (this.iterator.to >= this.to) { 
-      this.iterator.to = this.to;
+    // Defensive: check iterator validity
+    if (!this.iterator.from.isValid() || !this.iterator.to.isValid()) {
+      log.error('Iterator from/to is invalid:', this.iterator.from, this.iterator.to);
+      util.die('Iterator has invalid from/to');
+    }
+
+    if (this.iterator.to >= this.to) {
+      this.iterator.to = this.to.clone();
       this.ended = true;
     }
 
@@ -112,6 +144,7 @@ class BacktestStream extends Readable {
       } else {
         util.die('Query returned no candles (do you have local data for the specified range?)');
       }
+      return;
     }
 
     if (!this.ended && amount < this.batchSize) {
