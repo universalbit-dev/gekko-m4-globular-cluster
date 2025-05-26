@@ -115,10 +115,10 @@ const TableData = [
 ];
 
 // Display the table
-console.table(TableData);
+console.log(TableData);
   // Log Elliott Wave analysis in a table with clear labels
 const waveCounts = this.ewAnalyzer.getWaveCounts();
-console.table([
+console.log([
   { WaveType: 'Impulse', Count: waveCounts.impulse },
   { WaveType: 'Corrective', Count: waveCounts.corrective }
 ]);
