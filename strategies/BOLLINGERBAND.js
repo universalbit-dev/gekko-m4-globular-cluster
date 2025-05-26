@@ -54,19 +54,17 @@ method.update = function(candle) {
 method.log = function(candle) {
   var BBANDS = this.indicators.bbands;
   var gannSignal = this.gann.getSignal();
+  console.log('calculated BB properties for candle ', this.nsamples);
 
-  log.debug('______________________________________');
-  log.debug('calculated BB properties for candle ', this.nsamples);
-
-  if (BBANDS.upper > candle.close) log.debug('\t', 'Upper BB:', BBANDS.upper);
-  if (BBANDS.middle > candle.close) log.debug('\t', 'Mid   BB:', BBANDS.middle);
-  if (BBANDS.lower >= candle.close) log.debug('\t', 'Lower BB:', BBANDS.lower + '\t' + 'price:' + candle.close);
-  if (BBANDS.upper <= candle.close) log.debug('\t', 'Upper BB:', BBANDS.upper);
-  if (BBANDS.middle <= candle.close) log.debug('\t', 'Mid   BB:', BBANDS.middle);
-  if (BBANDS.lower < candle.close) log.debug('\t', 'Lower BB:', BBANDS.lower + '\t' + 'Band gap: ' + (BBANDS.upper - BBANDS.lower));
+  if (BBANDS.upper > candle.close) console.log('\t', 'Upper BB:', BBANDS.upper);
+  if (BBANDS.middle > candle.close) console.log('\t', 'Mid   BB:', BBANDS.middle);
+  if (BBANDS.lower >= candle.close) console.log('\t', 'Lower BB:', BBANDS.lower + '\t' + 'price:' + candle.close);
+  if (BBANDS.upper <= candle.close) console.log('\t', 'Upper BB:', BBANDS.upper);
+  if (BBANDS.middle <= candle.close) console.log('\t', 'Mid   BB:', BBANDS.middle);
+  if (BBANDS.lower < candle.close) console.log('\t', 'Lower BB:', BBANDS.lower + '\t' + 'Band gap: ' + (BBANDS.upper - BBANDS.lower));
 
   // Log Gann Signal
-  log.debug('Gann Signal:', gannSignal);
+  console.log('Gann Signal:', gannSignal);
 };
 
 method.check = function(candle) {
@@ -79,13 +77,13 @@ method.check = function(candle) {
   if ((price < BBANDS.upper) && (price >= BBANDS.middle)) zone = 'high';
   if ((price > BBANDS.lower) && (price < BBANDS.middle)) zone = 'low';
   if (price <= BBANDS.lower) zone = 'bottom';
-  log.debug('current zone:  ', zone);
+  console.log('current zone:  ', zone);
 
   if (this.trend.zone == zone) {
-    log.debug('persisted');
+    console.log('persisted');
     this.trend = {zone: zone, duration: this.trend.duration + 1, persisted: true};
   } else {
-    log.debug('Leaving zone: ', this.trend.zone);
+    console.log('Leaving zone: ', this.trend.zone);
     this.trend = {zone: zone, duration: 0, persisted: false};
   }
 
