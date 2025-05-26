@@ -295,7 +295,7 @@ method = {
       }
       }
       
-  console.table({
+  console.log({
   'Price': currentPrice,
   'SMA-': maFast,
   'SMA+': maSlow,
