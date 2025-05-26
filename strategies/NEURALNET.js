@@ -67,10 +67,10 @@ method = {
     this.addIndicator('maSlow', 'SMA', this.settings.SMA_long );
     
     //https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks#
-    fibonacci_sequence=['0','1','1','2','3','5','8','13','21','34','55','89','144','233','377','610','987','1597','2584','4181','6765'];
-    var x = Math.floor(Math.random() * fibonacci_sequence.length);this.x=x;
-    
-    while(x == 0){Math.floor(Math.random() * fibonacci_sequence.length);x = fibonacci_sequence[x];this.x=x;}
+    //removed '0' and large numbers from the sequence
+    const fibonacci_sequence = ['1','1','2','3','5','8','13','21','34','55','89','144','233'];
+    const x = parseInt(fibonacci_sequence[Math.floor(Math.random() * fibonacci_sequence.length)]);
+    this.x = x;
     
     var y = 1;y = fibonacci_sequence[y];this.y=y;var z = 1;z = fibonacci_sequence[z];this.z=z;
     console.debug('NeuralNet Layer: ' + '\t\tINPUT:'+ x + '\tHIDE:' + y + '\tOUT:' + z);
