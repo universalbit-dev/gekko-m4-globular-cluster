@@ -22,7 +22,6 @@ const { EventEmitter } = require("events");
 var moment = require("moment");
 var util = require('../util.js');var config = util.getConfig();
 var log = require('../log.js');
-const { createSpinner } =require('nanospinner');
 var math=require('mathjs');
 
 var TradeBatcher = function(tid) {
@@ -42,23 +41,16 @@ TradeBatcher.prototype.write = function(batch) {
   if(_.isEmpty(batch))
     return log.debug('Trade fetch came back empty.');
 
-  log.debug('Incoming batch:', batch);
+  //log.debug('Incoming batch:', batch);
   var filterBatch = this.filter(batch);
   var amount = _.size(filterBatch);
-  //log.debug('Filtered batch:', filterBatch);
 
   if(!amount)return; 
   var momentBatch = this.convertDates(filterBatch);
-  //log.debug('Converted dates batch:', momentBatch);
 
   var min=4000;var max=10000;
   var last = _.last(momentBatch);
   var first = _.first(momentBatch);
-  const spinner = createSpinner('Processing Exchange Data: ' + moment().format('YYYY-MM-DD HH:mm:ss')).start();
-  setTimeout(() => {spinner.success()}, math.random(min,max));
-  spinner.update({text: 'Processed',color: 'yellow',stream: process.stdout,
-  frames:['+','-','*','**','/','%','++','--','=','+=','*=','/=','%=','**=','==','===','!=','!==','>','<','>=','<=','?','&&','||','!','&','|','~','^','<<','>>','>>>','...'],
-  interval: math.random(min,max),});
 
   this.emit('new batch', {
     amount: amount,
@@ -68,18 +60,14 @@ TradeBatcher.prototype.write = function(batch) {
     first: first,
     data: momentBatch
   });
-
   this.last = last[this.tid];
 
-// we overwrote those, get unix ts back
   if(this.tid === 'date')
     this.last = this.last.unix();
-
 }
 
 TradeBatcher.prototype.filter = function(batch) {
-  // make sure we're not trying to count
-  // beyond infinity
+
   var lastTid = _.last(batch)[this.tid];
   if(lastTid === lastTid + 1)
     util.die('trade tid is max int, Gekko can\'t process..');
