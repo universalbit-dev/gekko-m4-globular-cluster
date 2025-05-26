@@ -135,7 +135,7 @@ To maintain a valid JSON file (`simulator.json`) for logs, use a custom `realTim
 
 Run the following command to pipe PM2 logs into your log processor:
 ```bash
-pm2 logs --json | node realTimeProcessor.js > simulator.json
+pm2 logs --json | node realTimeProcessor.js
 ```
 
 ---
