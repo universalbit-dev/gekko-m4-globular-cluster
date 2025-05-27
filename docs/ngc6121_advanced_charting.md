@@ -128,10 +128,7 @@ pm2 start simulator.config.js --merge-logs --log-date-format "YYYY-MM-DD HH:mm:s
 ---
 
 #### Step 2: Process and Store Logs in Real Time
-To maintain a valid JSON file (`simulator.json`) for logs, use a custom `realTimeProcessor.js` script to:
-1. Read the existing content of `simulator.json`.
-2. Append new log entries to the existing data.
-3. Rewrite the file to ensure it remains valid JSON.
+**For a complete explanation of how JSON logs are stored and accessed, please read the [logs/json README](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/logs/json/readme.md).**
 
 Run the following command to pipe PM2 logs into your log processor:
 ```bash
