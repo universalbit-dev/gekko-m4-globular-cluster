@@ -1,8 +1,8 @@
 /**
  * Simple realTimeProcessor.js
  * Streams JSON log lines from stdin, skips [INFO]/[DEBUG], and writes valid logs to generic.json.
- * Overwrites simulator.json entirely, ensuring only valid JSON is written.
- * If simulator.json contains invalid JSON, it is reset to an empty array.
+ * Overwrites generic.json entirely, ensuring only valid JSON is written.
+ * If generic.json contains invalid JSON, it is reset to an empty array.
  * 
  * Usage:
  *   pm2 logs --json | node realTimeProcessor.js
