@@ -10,7 +10,7 @@
 
 var log = require('../core/log.js');
 var config = require('../core/util.js').getConfig();
-
+var Wrapper = require('../strategyWrapperRules.js');
 const { logger, appendToJsonFile } = require('./logger')('rsibullbearadx');
 
 // strategy
@@ -127,40 +127,33 @@ var strat = {
     
 //Winston Logger
 logTrade: function(candle, indicators, advice, fibLevels, trend) {
-  // Ensure required indicator values are extracted
   const maFast = indicators.maFast; 
   const maSlow = indicators.maSlow;
   const RSI = indicators.RSI;
   const ADX = indicators.ADX;
 
-  // Build up comments array
   const comments = [];
-  if (maFast !== undefined && maSlow !== undefined) {
-    comments.push((maFast < maSlow) ? 'BEAR' : 'BULL');
-  }
+  if (maFast !== undefined && maSlow !== undefined) 
+  {comments.push((maFast < maSlow) ? 'BEAR' : 'BULL');}
   if (RSI !== undefined) {
-    if (RSI > 80) comments.push('RSI Oversold');
-    else if (RSI < 30) comments.push('RSI Overbought');
-    else comments.push('RSI Weak');
-  }
-  if (ADX !== undefined) {
-    comments.push((ADX > 25) ? 'ADX Strong' : 'ADX Weak');
-  }
+  if (RSI > 80) comments.push('RSI Oversold');
+  else if (RSI < 30) comments.push('RSI Overbought');
+  else comments.push('RSI Weak');}
+  if (ADX !== undefined) 
+  {comments.push((ADX > 25) ? 'ADX Strong' : 'ADX Weak');}
 
   const output = {
-    timestamp: new Date(candle.start).getTime(),
-    open: candle.open,
-    high: candle.high,
-    low: candle.low,
-    close: candle.close,
-    volume: candle.volume,
-    advice: advice,
-    trend: trend.direction,
-    fibLevels: fibLevels,
-    comments: comments,               
-    ...indicators                     
+  timestamp: new Date().toISOString(),
+  strategyName: 'rsibullbearadx',
+  type: 'DATA',
+  advice: advice,
+  pnl: pnl,
+  percentage: percentage,
+  trend: trend.direction,
+  indicators: { RSI, ADX, maFast, maSlow },
+  fibLevels,
+  comments                    
   };
-
   logger.info(output);
   appendToJsonFile(output);
 },
@@ -297,5 +290,5 @@ check: function()
 	}
 
 };
-
+strat.Wrapper = Wrapper;
 module.exports = strat;
