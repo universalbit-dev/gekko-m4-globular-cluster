@@ -74,7 +74,7 @@ const keepcalm = async function() {
 };
 
 // Define the main strategy method object
-var method = Wrapper;
+var method = {Wrapper};
 
 // Initialize the strategy
 method = {
