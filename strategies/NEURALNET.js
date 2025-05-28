@@ -48,7 +48,7 @@ var currentPrice=0.00;var spread=0.00;var digits = 8;
 //https://www.investopedia.com/terms/a/alpha.asp
 var Alpha=[];var min=0;var max=0;var median=0;var matrix=0;
 
-var method = Wrapper;
+var method = {Wrapper};
 method = {
   priceBuffer: [],predictionCount: 0,batchsize: 1,array_operator: [],array_chess: [],array_fibonacci:[],
   layer_neurons: 21,layer_activation: 'sigmoid',layer2_activation: 'relu',
