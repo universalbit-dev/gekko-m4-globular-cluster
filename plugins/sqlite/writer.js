@@ -6,11 +6,10 @@ var sqlite = require("./handle");
 var sqliteUtil = require('./util');
 var util = require('../../core/util');
 var log = require('../../core/log');
-
+ 
 var Store = function(done, pluginMeta) {
   _.bindAll(this, _.functions(this));
-  this.done = done;
-
+  this.done = typeof done === 'function' ? done : () => {};
   this.db = sqlite.initDB(false);
   this.db.serialize(this.upsertTables);
 
@@ -37,12 +36,12 @@ Store.prototype.upsertTables = function() {
   ];
 
   var next = _.after(_.size(createQueries), () => {
-  if (typeof this.done === 'function') {
-    this.done();
-  } else {
-    log.error('Store.done is not a function!');
-  }
-});
+    if (typeof this.done === 'function') {
+      this.done();
+    } else {
+      throw new Error('Store.done is not a function! Received: ' + typeof this.done);
+    }
+  });
 
   _.each(createQueries, function(q) {
     this.db.run(q, function(err) {
@@ -122,4 +121,5 @@ if (config.candleWriter.enabled) {
   Store.prototype.finalize = finalize;
 }
 
+Store.done = _.noop;
 module.exports = Store;
