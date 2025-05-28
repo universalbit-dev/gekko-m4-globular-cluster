@@ -28,7 +28,7 @@ const StopLoss = require('./indicators/StopLoss');
 var GANN = require('./indicators/GANN.js'); 
 
 // let's create our own method
-var method = Wrapper;
+var method = {Wrapper};
 
 method.init = function() {
   this.name = '';
