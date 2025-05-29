@@ -37,7 +37,7 @@ Before setting up the project, make sure your environment meets the following re
 
 - **System**: Linux (Tested on `Linux 6.11.0-24-generic`)
 - **Node.js**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
-- **Tested on Node.js version**: `v20.19.1`
+- **Tested on Node.js version**: `20`
 - **Packages**: Required build tools
    ```bash
    sudo apt install -y build-essential
@@ -49,9 +49,9 @@ Before setting up the project, make sure your environment meets the following re
 ##### Install Node.js Using [`nvm`](https://github.com/nvm-sh/nvm)
 To manage and install Node.js, use `nvm` (Node Version Manager):
 
-* Install Node.js version `20.19.1`:
+* Install Node.js version `20`:
    ```bash
-   nvm install 20.19.1
+   nvm install 20
    ```
 #### Feel free to test installation and contribute using **Node.js** version 24.  
 
@@ -143,7 +143,7 @@ The `tulind` package may encounter some issues during installation due to missin
      ```
 
 **Verify Node.js Version Compatibility**:
-   Ensure you're using a compatible Node.js version (e.g., `v20.19.1`). If needed, switch versions using `nvm`.
+   Ensure you're using a compatible Node.js version (e.g., `20`). If needed, switch versions using `nvm`.
 
 **Clear npm Cache**:
    If installation issues persist, clear the npm cache and attempt reinstallation:
