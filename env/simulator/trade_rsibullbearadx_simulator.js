@@ -11,6 +11,8 @@ config.tradingAdvisor = {enabled:true,warmupPeriods:200 ,candleSize:13,historySi
 config.RSIBULLBEARADX={SMA_long:200,SMA_short:50,BULL_RSI:10,BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
 BULL_mod_high:5,BULL_mod_low :-5,BEAR_mod_high:15,BEAR_mod_low:-5,RSI:13,ADX:8,ADX_high:70,ADX_low:50};
 
+config.stopLoss={enabled:true,'stopLossPercent': 5 };
+
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
