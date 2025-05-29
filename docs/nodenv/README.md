@@ -54,8 +54,8 @@ git clone https://github.com/nodenv/nodenv-aliases.git $(nodenv root)/plugins/no
 
 1. Install a Node.js version:
    ```bash
-   nodenv install 20.8.0
-   nodenv global 20
+   nodenv install 21
+   nodenv global 21
    ```
 
 2. Make shims available system-wide:
@@ -71,6 +71,23 @@ git clone https://github.com/nodenv/nodenv-aliases.git $(nodenv root)/plugins/no
    ```
 
 ---
+> **Note:**  
+> Both [`nodenv`](https://github.com/nodenv/nodenv) and [`nvm`](https://github.com/nvm-sh/nvm) are popular tools for managing multiple Node.js versions.  
+> 
+> - **nodenv** is a lightweight version manager that uses shims, similar to rbenv, and works well in Unix-like environments.
+> - **nvm** is a widely-used bash-based version manager, popular in the broader Node.js community.
+>
+> The command  
+> ```sh
+> nodenv install 21
+> ```
+> works similarly to  
+> ```sh
+> nvm install 21
+> ```
+> Both commands will install Node.js version `21` using their respective tools.  
+>
+> Choose the one that best fits your workflow or project requirements.
 
 ## Integration with Other Tools
 
