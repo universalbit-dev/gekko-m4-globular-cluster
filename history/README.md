@@ -1,28 +1,62 @@
-CandleStick
-* [Understanding Basic Candlestick Charts](https://www.investopedia.com/trading/candlestick-charting-what-is-it/)
-* [DB Browser for SQLite](https://sqlitebrowser.org/)
+# 📈 Candlestick History & SQLite Integration
+
+## 🔍 Resources
+- 📚 [Understanding Basic Candlestick Charts](https://www.investopedia.com/trading/candlestick-charting-what-is-it/)
+- 🗄️ [DB Browser for SQLite](https://sqlitebrowser.org/)
 
 ---
 
-The ".db" file extension typically indicates a database file. In the context of the `universalbit-dev/gekko-m4-globular-cluster` repository, the ".db" files are used with SQLite, a lightweight, disk-based database.
+## 💾 What are `.db` Files Used For?
 
-Here's an explanation based on the code references:
+The `.db` file extension indicates a **database file**. In this project, `.db` files use **SQLite** — a lightweight, file-based database — to store historical market data. This is crucial for **backtesting** and **strategy analysis**.
 
-1. **Database Initialization (handle.js)**:
-   - The database is initialized using `sqlite3`.
-   - The database name is formed using the exchange and version, e.g., `exchange_version.db`.
-   - The database is configured with specific PRAGMA settings for performance.
+> **Tip:** You can explore and query these files with tools like [DB Browser for SQLite](https://sqlitebrowser.org/).
 
-2. **Database Scanning (scanner.js)**:
-   - The script scans the database directory for `.db` files.
-   - It reads the database to identify tables and markets.
+---
 
-3. **Writing to Database (writer.js)**:
-   - Candlestick data (OHLCV) is written to the database using SQL INSERT statements.
-   - The data is stored in tables with candle information like start time, open, high, low, close, volume, etc.
+## 🧩 How Database Files Are Used in This Repository
 
-4. **Reading from Database (reader.js)**:
-   - The script reads candlestick data from the database.
-   - It provides methods to get the most recent window, table existence, data count, and database boundaries.
+| 📁 File          | 🔧 Role                                  | 📝 Description                                                      |
+|------------------|------------------------------------------|---------------------------------------------------------------------|
+| `handle.js`      | 🏗️ Database Initialization               | Sets up and configures the SQLite database                          |
+| `scanner.js`     | 🔍 Database Scanning                     | Finds all `.db` files and lists available historical market tables   |
+| `writer.js`      | ✍️ Writing Data                          | Inserts candlestick (OHLCV) data into the database                  |
+| `reader.js`      | 📖 Reading Data                          | Reads and retrieves candle data for backtesting and analysis        |
 
-In summary, the `.db` files store historical market data in SQLite format, which is used for backtesting and analysis.
+---
+
+## ⚙️ Overview of the Data Flow
+
+1. **Database Initialization (`handle.js`)**  
+   - Sets up the SQLite connection using `sqlite3`.
+   - Names databases based on exchange and version (e.g., `exchange_version.db`).
+   - Configures performance settings.
+
+2. **Database Scanning (`scanner.js`)**  
+   - Scans the history directory for all `.db` files.
+   - Identifies tables and available markets.
+
+3. **Writing Data (`writer.js`)**  
+   - Writes candlestick data (OHLCV) with SQL `INSERT` operations.
+   - Stores each candle’s start, open, high, low, close, and volume.
+
+4. **Reading Data (`reader.js`)**  
+   - Retrieves candles for analysis or backtesting.
+   - Offers methods for getting the latest data window, table existence checks, and counting records.
+
+---
+
+## 🧩 Want More Details?  
+👉 The plugin section has been updated!  
+See the full documentation for the SQLite plugin here:  
+[📖 plugins/sqlite/sqlite.md](../plugins/sqlite/sqlite.md)
+
+---
+
+## 🏁 Summary
+
+- `.db` files = SQLite databases with historical market data.
+- Used for efficient storage, backtesting, and analysis in Gekko M4.
+- Explore, edit, or query `.db` files with free tools like DB Browser for SQLite.
+
+---
