@@ -5,8 +5,8 @@ Node Version Manager (NVM) is a tool that allows developers to manage multiple v
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [Using cURL](#using-curl)
-  - [Using Wget](#using-wget)
+- [Using cURL](#using-curl)
+- [Using Wget](#using-wget)
 - [Post-Installation Configuration](#post-installation-configuration)
 - [Verification](#verification)
 - [Example Usage](#example-usage)
@@ -20,7 +20,9 @@ Node Version Manager (NVM) is a tool that allows developers to manage multiple v
 Before installing NVM, ensure that:
 - You have either `cURL` or `Wget` installed on your system.
 - You know which profile file your shell uses (e.g., `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`, or `~/.profile`).
-- The tested and recommended Node.js version for this project is **21**.
+
+- The tested and recommended Node.js version for this project is **20**.
+> 🧪 **Note:** Feel free to test the installation using Node.js version 24 and share your feedback!
 
 ---
 
@@ -86,11 +88,11 @@ Here are some common NVM commands:
 
 - **Install a specific Node.js version**:
   ```bash
-  nvm install 21
+  nvm install 20
   ```
 - **Switch to a specific Node.js version**:
   ```bash
-  nvm use 21
+  nvm use 20
   ```
 - **List installed Node.js versions**:
   ```bash
@@ -98,7 +100,7 @@ Here are some common NVM commands:
   ```
 - **Set a default Node.js version**:
   ```bash
-  nvm alias default 21
+  nvm alias default 20
   ```
 **Feel free to experiment with different Node.js versions during installation!**
 
