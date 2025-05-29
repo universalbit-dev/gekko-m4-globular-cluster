@@ -9,19 +9,7 @@ flies to the moon as soon as the price hits X you should create a plugin for it.
 * **[paperTrader](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/paperTrader/paperTrader.md)**
 * **[tradingAdvisor](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/tradingAdvisor/tradingAdvisor.md)**
 * **[trader](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/trader/trader.md)**
-
-## Existing plugins:
-
-- Candle Store: save trades to disk.
-- Mailer: mail trading advice to your gmail account.
-- Pushbullet: send messages to Pushbullet devices.
-- Telegram: send messages over Telegram.
-- IRC bot: logs Gekko on in an irc channel and lets users communicate with it.
-- Paper Trader: simulates trades and calculates profit over these (and logs profit).
-- Trading advisor (internal): calculates advice based on market data.
-- Redis beacon (advanced): [see below!](#redis-beacon)
-
-*And more! Take a look in the `gekko/plugins folder.`*
+* **[sqlite](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/sqlite/sqlite.md)**
 
 ## Implementing a new plugin
 
