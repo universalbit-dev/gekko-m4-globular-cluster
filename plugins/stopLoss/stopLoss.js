@@ -6,21 +6,6 @@
  * when the asset price falls below a configurable stop-loss threshold relative to the
  * entry or highest price (trailing).
  *
- * Usage:
- * - Place this file in the plugins/ directory (e.g., plugins/stopLoss/stopLoss.js).
- * - Add to your Gekko configuration:
- * - config.stopLoss={enabled:true,'stopLossPercent': 5 };
- * - The plugin listens for trade events:
- *     - On "buy", sets entry and highest price.
- *     - On "sell", resets its state.
- * - On each new candle, it checks if the price has dropped below the trailing stop-loss threshold.
- * - When triggered, it emits a "short" advice (exit position).
- *
- * Methods:
- *   - init(): Initializes plugin and config.
- *   - onTrade(trade): Handles new trades, updates entry/highest price.
- *   - processCandle(candle): Monitors price; triggers stop-loss if needed.
- *
  * Notes:
  * - This is a basic example. Integration with your Gekko instance may require adjustments
  *
