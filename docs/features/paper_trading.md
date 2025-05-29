@@ -56,3 +56,5 @@ The `PaperTrader` module simulates cryptocurrency trading without executing real
 The `PaperTrader` module can be integrated into a Gekko instance to test trading strategies. It allows users to simulate trades, track performance, and evaluate strategies before deploying them in live trading.
 
 ---
+> ⚠️ **Note on Ambiguity:**  
+> Sometimes, terms like "real world" and "virtual space" can be confusing, especially when discussing simulated and real environments together. If you find yourself unsure about the meaning, check out [Word-sense disambiguation](https://en.wikipedia.org/wiki/Word-sense_disambiguation) for more context on how words can have multiple meanings depending on the context.
