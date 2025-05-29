@@ -1,6 +1,11 @@
 # Exchanges
 
-*This is a technical document about adding a new exchange to Gekko and Gekko Broker.*
+ **[exchangesimulator](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/exchange/wrappers/exchangesimulator.md)**
+* The exchangesimulator.js file provides a simulated exchange wrapper for the Gekko M4 Globular Cluster project. It mimics real exchange API behavior, generating fake trades, OHLCV data, and price trends for testing and debugging without using live markets. The simulator uniquely integrates celestial data from the M4 globular cluster (NGC 6121) via an external API, using its coordinates to influence price fluctuations, making simulations more dynamic and deterministic.
+
+---
+
+**This is a technical document about adding a new exchange to Gekko and Gekko Broker.**
 
 Gekko arranges all communication about when assets need to be bought or sold between the *strategy* and *Gekko Broker*. All differences between the different API's are abstracted away just below Gekko Broker inside an "exchange wrapper". This document describes all requirements for adding a new exchange wrapper (adding exchange support to Gekko).
 
