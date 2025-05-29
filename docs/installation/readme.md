@@ -9,7 +9,7 @@
 Before starting, make sure your system has:
 
 - **Operating System:** Windows, macOS, or Linux
-- **Node.js:** v20.19.1 (recommended)
+- **Node.js:** v20 (recommended)
 - **npm:** (comes bundled with Node.js)
 - **Git:** For cloning the repository
 - **nvm:** (Node Version Manager) - recommended for Node.js version management
