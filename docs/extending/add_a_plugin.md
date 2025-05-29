@@ -4,9 +4,11 @@ A plugin is a low level module or plugin that can act upon events bubbling
 through Gekko. If you want to have custom functionality so that your rocket
 flies to the moon as soon as the price hits X you should create a plugin for it.
 
-All plugins live in `gekko/plugins`.
-
-Note that in order to use custom plugins, you have to run Gekko over [the commandline](../commandline/about_the_commandline.md).
+* **[baseTradingMethod](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/tradingAdvisor/baseTradingMethod.md)**
+* **[asyncIndicatorRunner](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/tradingAdvisor/asyncIndicatorRunner.md)**
+* **[paperTrader](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/paperTrader/paperTrader.md)**
+* **[tradingAdvisor](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/tradingAdvisor/tradingAdvisor.md)**
+* **[trader](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/trader/trader.md)**
 
 ## Existing plugins:
 
