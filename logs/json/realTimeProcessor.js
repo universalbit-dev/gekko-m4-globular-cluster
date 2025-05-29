@@ -39,7 +39,8 @@ function writeLogs() {
   trimLogsToFitSize();
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(logs, null, 2));
 }
-//Exclude from Global Log This every line 
+// {Limit Log Size Output}
+//Exclude from Global Log This every line
 function processLine(line) {
   line = line.trim();
  if (
@@ -51,7 +52,7 @@ function processLine(line) {
   line.includes('[ERROR]') ||
   line.includes('Wohoo!') ||
   line.includes('(DEBUG)') ||
-  line.includes('Emitted candles event') ||
+  line.includes('Emitted candles event') || 
   line.includes('--------------------------------------------')
 ) return;
   try {
