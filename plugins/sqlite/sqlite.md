@@ -4,6 +4,25 @@ This plugin provides SQLite database integration for Gekko M4, enabling efficien
 Below you'll find an overview of each file and how they work together.
 
 ---
+> **Note: Understanding SQLite vs. sqlite3**
+>
+> - **SQLite** is a lightweight, serverless database engine that stores data in a single local file(history/exchangesimulator_5.1.1.db). It handles all the actual database operations and understands SQL queries.
+> - **sqlite3** is a programming library or module (commonly used in languages like JavaScript/Node.js and Python) that lets your code interact with an SQLite database. Through sqlite3, your application can send SQL queries to SQLite, receive results, and manage data.
+>
+> **In summary:**  
+> - SQLite is the database engine.  
+> - sqlite3 is the bridge that lets your code use SQLite.
+>
+> Example in JavaScript (Node.js):
+> ```js
+> const sqlite3 = require('sqlite3').verbose();
+> const db = new sqlite3.Database('mydb.sqlite');
+> db.all("SELECT * FROM users", [], (err, rows) => {
+>   if (err) throw err;
+>   console.log(rows);
+> });
+> ```
+> In this example, `sqlite3` is the Node.js module enabling your code to communicate with the SQLite database file.
 
 ## 📁 File Overview
 
