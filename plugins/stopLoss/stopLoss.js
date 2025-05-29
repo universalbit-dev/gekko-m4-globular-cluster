@@ -9,10 +9,7 @@
  * Usage:
  * - Place this file in the plugins/ directory (e.g., plugins/stopLoss/stopLoss.js).
  * - Add to your Gekko configuration:
- *     "stopLoss": {
- *       "enabled": true,
- *       "stopLossPercent": 5 // percentage stop-loss (default: 5%)
- *     }
+ * - config.stopLoss={enabled:true,'stopLossPercent': 5 };
  * - The plugin listens for trade events:
  *     - On "buy", sets entry and highest price.
  *     - On "sell", resets its state.
@@ -25,12 +22,9 @@
  *   - processCandle(candle): Monitors price; triggers stop-loss if needed.
  *
  * Notes:
- * - This is a basic example. Integration with your Gekko instance may require
- *   adjustments, especially for event emitting and advice communication.
- * - For a fixed (non-trailing) stop-loss, remove logic updating highestPrice.
+ * - This is a basic example. Integration with your Gekko instance may require adjustments
  *
  */
-
 
 const log = require('../../core/log');
 
