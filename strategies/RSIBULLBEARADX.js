@@ -147,8 +147,6 @@ logTrade: function(candle, indicators, advice, fibLevels, trend) {
   strategyName: 'rsibullbearadx',
   type: 'DATA',
   advice: advice,
-  pnl: pnl,
-  percentage: percentage,
   trend: trend.direction,
   indicators: { RSI, ADX, maFast, maSlow },
   fibLevels,
