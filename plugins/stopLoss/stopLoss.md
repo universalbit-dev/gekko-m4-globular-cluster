@@ -1,5 +1,33 @@
 # Stop Loss Plugin Documentation
 
+> ⚙️ **Configuration Quick Start**
+>
+> To enable and configure the Stop Loss plugin, add the following to your strategy config (for example, in `env/simulator/trade_rsibullbearadx_simulator.js`):
+>
+> ```js
+> config.stopLoss = {
+>   enabled: true,
+>   stopLossPercent: 5 // Trading will stop if your portfolio drops by 5%
+> };
+> ```
+>
+> 🧩 **Plugin Integration:**  
+> The plugin is registered in `plugins.js` at the project root:
+>
+> ```js
+> {
+>   name: 'Stop Loss',
+>   description: 'Stops trading when a defined loss is reached',
+>   slug: 'stopLoss',
+>   modes: ['realtime', 'backtest'],
+>   path: config => 'stopLoss/stopLoss.js',
+> }
+> ```
+>
+> ✅ This setup ensures the Stop Loss feature is active and visible in both real-time and backtest modes, helping safeguard your portfolio automatically.
+>
+> 💡 *Tip: Adjust `stopLossPercent` to set your personal risk tolerance!*
+
 The Stop Loss plugin for Gekko automatically halts trading when a predefined loss threshold is reached. This safety feature helps protect your portfolio by preventing further losses beyond your specified limit.
 
 ---
