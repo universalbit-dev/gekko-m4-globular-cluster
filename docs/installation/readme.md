@@ -21,9 +21,9 @@ Before starting, make sure your system has:
 ### macOS/Linux
 
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
 # Reload your shell
-source ~/.bashrc          # or source ~/.zshrc
+source ~/.bashrc
 nvm --version
 ```
 
@@ -38,14 +38,16 @@ nvm --version
 
 ---
 
-## 2. Install Node.js (20.19.1) via nvm
+## 2. Install Node.js (20) via nvm
 
 ```bash
-nvm install 20.19.1
-nvm use 20.19.1
-nvm alias default 20.19.1
-node --version   # Should display: v20.19.1
+nvm install 20
+nvm use 20
+nvm alias default 20
+node --version   # Should display: v20
 ```
+> 🧪 **Note:** Feel free to test the installation using Node.js version 24 and share your feedback!
+
 
 ---
 
