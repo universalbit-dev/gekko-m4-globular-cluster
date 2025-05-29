@@ -16,3 +16,5 @@ Gekko will run your strategy on the live market and automatically trade on your 
 By utilizing these tools and methods, you can build a more robust and adaptable trading system.
 
 ---
+> ⚠️ **Note on Ambiguity:**  
+> Sometimes, terms like "real world" and "virtual space" can be confusing, especially when discussing simulated and real environments together. If you find yourself unsure about the meaning, check out [Word-sense disambiguation](https://en.wikipedia.org/wiki/Word-sense_disambiguation) for more context on how words can have multiple meanings depending on the context.
