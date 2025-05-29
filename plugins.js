@@ -64,6 +64,13 @@ var plugins = [
     slug: 'childToParent',
     modes: ['realtime'],
   },
+  {
+  name: 'Stop Loss',
+  description: 'Stops trading when a defined loss is reached',
+  slug: 'stopLoss',
+  modes: ['realtime', 'backtest'],
+  path: config => 'stopLoss/stopLoss.js',
+},
 ];
 
 module.exports = plugins;
