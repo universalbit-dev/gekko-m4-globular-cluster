@@ -321,8 +321,9 @@ And call your standardized logging function wherever needed.
 ---
 
 **This approach will save you hours on logging, reviewing, and charting output for any strategy!**  
-
+##### **[Logging, Rotation, and Grafana Visualization in Gekko-M4](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/logs)**
 ---
+
 **Learning Together**
 For advanced data integration, see the [Grafana Infinity Datasource documentation](https://grafana.com/docs/plugins/yesoreyeram-infinity-datasource/latest/).
 
