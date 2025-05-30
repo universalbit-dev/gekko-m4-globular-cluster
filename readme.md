@@ -74,7 +74,7 @@ npm i && npm audit fix && npm i pm2 -g
 
 This will ensure that all necessary modules are installed and the application is ready to run.
 
-##### [Troubleshooting Tulind Installation](#troubleshooting-tulind-installation-1)
+##### [Troubleshooting Tulind Installation](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/troubleshooting_tulind_installation.md)
 
 ---
 
@@ -110,54 +110,6 @@ For details on implementing advanced charting for this project, refer to the ded
 - **[Design a Reusable Winston Logger](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/ngc6121_advanced_charting.md#design-a-reusable-winston-logger-module--loggerjs)**
 ---
 
-### Troubleshooting Tulind Installation:
-The `tulind` package may encounter some issues during installation due to missing dependencies, incorrect configurations, or build-related problems. Below are some common issues and their solutions:
-
-#### **Common Issues**
-- **Build Errors**:
-   - The system may lack the necessary build tools to compile the native module.
-   - Missing or outdated dependencies can cause build failures.
-
-- **Module Compatibility**:
-   - Incompatibility with the Node.js version being used.
-
-- **Incomplete Installation**:
-   - The module may fail to install partially, leading to runtime errors.
-
-#### **Solutions**
-**Ensure Required Build Tools are Installed**:
-   Run the following command to install the necessary build tools on Linux:
-   ```bash
-   sudo apt install -y build-essential
-   ```
-
-**Reinstall `tulind`**:
-   Use the following commands to ensure a clean installation:
-   - Standard installation:
-     ```bash
-     npm i tulind --save
-     ```
-   - Force rebuild from source if pre-built binaries fail:
-     ```bash
-     npm i tulind --build-from-source
-     ```
-
-**Verify Node.js Version Compatibility**:
-   Ensure you're using a compatible Node.js version (e.g., `20`). If needed, switch versions using `nvm`.
-
-**Clear npm Cache**:
-   If installation issues persist, clear the npm cache and attempt reinstallation:
-   ```bash
-   npm cache clean --force
-   npm i tulind --save
-   ```
-
-**Debug Logs**:
-   Run the installation with verbose logs to identify the root cause of the issue:
-   ```bash
-   npm i tulind --save --verbose
-   ```
-   
 #### **Resources**
 
 * ##### [PM2](https://pm2.keymetrics.io/) - Process Manager for Node.js applications.
