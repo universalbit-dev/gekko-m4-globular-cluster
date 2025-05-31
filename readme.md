@@ -111,12 +111,14 @@ For details on implementing advanced charting for this project, refer to the ded
 ---
 
 #### **Resources**
-* ##### **[Docs](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs)**  - Resources, guides, and references to understand, use, and extend the project 
-* ##### **[PM2](https://pm2.keymetrics.io/)** - Process Manager for Node.js applications.
-* ##### **[Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)** - Guide to defining PM2 application declarations.
-* ##### **[Thanks Developers](https://github.com/askmike/gekko/graphs/contributors)** - Acknowledgment to contributors of the Gekko project.
-* ##### **[Learning Together](https://www.esma.europa.eu/sites/default/files/2024-12/ESMA35-1872330276-1899_-_Final_report_on_GLs_on_reverse_solicitation_under_MiCA.pdf)** - Educational resources on financial regulations and MiCA.
-* ##### **[Project Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)** - Additional resources related to this project.
+* #### **[Docs](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs)**  - Resources, guides, and references to understand, use, and extend the project 
+* #### **[PM2](https://pm2.keymetrics.io/)** - Process Manager for Node.js applications.
+* #### **[Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)** - Guide to defining PM2 application declarations.
+* #### **[Thanks Developers](https://github.com/askmike/gekko/graphs/contributors)** - Acknowledgment to contributors of the Gekko project.
+* #### **[Learning Together](https://www.esma.europa.eu/sites/default/files/2024-12/ESMA35-1872330276-1899_-_Final_report_on_GLs_on_reverse_solicitation_under_MiCA.pdf)** - Educational resources on financial regulations and MiCA.  
+  - [MiCA Regulation & This Project](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/MICA_INFO.md)
+    
+* #### **[Project Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)** - Additional resources related to this project.
 * ##### **[NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)** - Explore Bitcoin-specific blockchain nodes.
-* ##### **[TulipIndicators](https://tulipindicators.org/)** - Technical analysis indicators for financial data.
-* ##### **[Blockchain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)** - Resources on blockchain and mining.
+* #### **[TulipIndicators](https://tulipindicators.org/)** - Technical analysis indicators for financial data.
+* #### **[Blockchain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)** - Resources on blockchain and mining.
