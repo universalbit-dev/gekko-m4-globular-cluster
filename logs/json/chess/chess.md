@@ -61,7 +61,20 @@ This documentation describes the workflow, file structure, and usage of the ches
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/en)
+> ℹ️ **You must provide your [jsonbin.io](https://jsonbin.io) X-Access-Key for API access.**  
+>
+> 1. Register or log in to [jsonbin.io](https://jsonbin.io) to obtain your X-Access-Key (API key).  
+> 2. In your [script](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/logs/json/chess/jsonbin_randomchess.js), add x-access-key to:  
+>    ```js
+>    const accessKey = ''; // <== Your jsonbin.io X-Access-Key
+>    ```
+> 3. This key is required for uploading random chess log data to your jsonbin.io cloud storage.
+>
+> 🔑 **Without the X-Access-Key, the upload process will not work.**
+>
+> For detailed instructions and setup examples, see this file (`chess.md`) and the accompanying code in the [`chess/`](./) directory.
+
+---
 
 ## Author
 
