@@ -1,5 +1,5 @@
 /**
- * pm2-cpu-watchdog.js
+ * pm2-cpu-watchdog.js (memory optimized)
  *
  * Monitors specified PM2 processes for sustained high CPU usage, and restarts them if CPU usage
  * exceeds a configurable threshold for a configurable duration.
@@ -22,9 +22,9 @@
  */
 
 const pm2 = require('pm2');
-const CPU_THRESHOLD = 100;// percent CPU usage to trigger restart
-const DURATION_THRESHOLD = 120;// seconds CPU usage must remain above threshold before restart
-const CHECK_INTERVAL = 10;// seconds between checks
+const CPU_THRESHOLD = 100; // percent CPU usage to trigger restart
+const DURATION_THRESHOLD = 120; // seconds CPU usage must remain above threshold before restart
+const CHECK_INTERVAL = 10; // seconds between checks
 
 const monitoredNames = [
   'neuralnet_simulator',
@@ -45,33 +45,55 @@ const monitoredNames = [
   'ohlcv_data'
 ];
 
-let highCpuSince = {};
+// Use Map instead of object for better memory handling
+const highCpuSince = new Map();
 
 function check() {
   pm2.connect(err => {
     if (err) return console.error(err);
     pm2.list((err, list) => {
-      if (err) return console.error(err);
+      if (err) {
+        pm2.disconnect();
+        return console.error(err);
+      }
       const now = Date.now();
       list.forEach(proc => {
         if (!monitoredNames.includes(proc.name)) return;
         if (proc.monit.cpu > CPU_THRESHOLD) {
-          if (!highCpuSince[proc.name]) highCpuSince[proc.name] = now;
-          const duration = (now - highCpuSince[proc.name]) / 1000;
+          if (!highCpuSince.has(proc.name)) highCpuSince.set(proc.name, now);
+          const duration = (now - highCpuSince.get(proc.name)) / 1000;
           if (duration > DURATION_THRESHOLD) {
             pm2.restart(proc.pm_id, err => {
               if (err) console.error('Restart failed:', err);
               else console.log(`Restarted ${proc.name} due to sustained high CPU usage.`);
-              highCpuSince[proc.name] = undefined;
+              highCpuSince.delete(proc.name);
             });
           }
         } else {
-          highCpuSince[proc.name] = undefined;
+          highCpuSince.delete(proc.name);
         }
       });
+      // Clean up process names that no longer exist
+      for (const name of Array.from(highCpuSince.keys())) {
+        if (!list.some(proc => proc.name === name)) {
+          highCpuSince.delete(name);
+        }
+      }
       pm2.disconnect();
     });
   });
 }
 
-setInterval(check, CHECK_INTERVAL * 1000);
+const interval = setInterval(check, CHECK_INTERVAL * 1000);
+
+// Optional: Clean shutdown (avoid leaks on exit)
+process.on('SIGINT', () => {
+  clearInterval(interval);
+  pm2.disconnect();
+  process.exit(0);
+});
+process.on('SIGTERM', () => {
+  clearInterval(interval);
+  pm2.disconnect();
+  process.exit(0);
+});
