@@ -4,6 +4,13 @@ This guide helps you process your log data, filter out unwanted lines, and gener
 
 ---
 
+> ℹ️ **Info**  
+> The [`chess/`](./chess/) directory provides a fully working example for filtering, manipulating, and uploading JSON log data to cloud storage, such as [jsonbin.io](https://jsonbin.io/).
+>
+> 📝 Use [`chess.md`](./chess/chess.md) as a template for documenting your own workflow!
+
+---
+
 ## 1️⃣ **Prepare Your Environment**  
 - Make sure you have **Node.js** installed (`node -v` to check).
 - Place `realTimeProcessor.js` in your project directory.
