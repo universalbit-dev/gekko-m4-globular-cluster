@@ -1,0 +1,31 @@
+{
+  "name": "chess-log-jsonbin-uploader",
+  "version": "1.0.0",
+  "description": "Processes and uploads filtered chess logs to jsonbin.io for gekko-m4 and financial analysis pipelines.",
+  "main": "realTimeChessProcessor.js",
+  "scripts": {
+    "process-logs": "pm2 logs --json | node realTimeChessProcessor.js",
+    "upload-json": "node jsonbin_randomchess.js"
+  },
+  "author": "universalbit-dev",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^2.6.7"
+  },
+  "keywords": [
+    "chess",
+    "jsonbin",
+    "gekko-m4",
+    "financial-analysis",
+    "logs",
+    "cron",
+    "json",
+    "uploader"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/universalbit-dev/gekko-m4-globular-cluster"
+  }
+}
