@@ -61,8 +61,7 @@ This documentation describes the workflow, file structure, and usage of the ches
 
 ## Requirements
 
-- Node.js
-- npm i && npm i pm2 -g
+- [Node.js](https://nodejs.org/en)
 
 ## Author
 
