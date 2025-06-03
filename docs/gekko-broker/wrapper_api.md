@@ -1,31 +1,21 @@
-# Wrapper API
+![Horizontal Scalability Architecture](../../images/horizontal%20scalability.png)
 
-Gekko Broker is a library that sits between trading applications and Gekko Broker Exchange Wrappers. Which means it has two APIs to communicate with other code:
+## Horizontal Scalability
 
-![diagram describing Gekko Broker API interface](https://user-images.githubusercontent.com/969743/41892153-566293a0-7941-11e8-9998-7a5b5b554ffd.png)
+scale your simulation environment by running multiple broker instances in parallel. This architecture lets you distribute workloads across processes or servers, enabling robust, high-performance operations for demanding tasks.
 
-This document descibres the API layer between the exchange wrappers and Gekko Broker.
+## Event-Driven Architecture
 
-## Wrapper API spec
+The broker is built on Node.js’s EventEmitter. This means your application can listen for **key events** and respond instantly. This event-driven approach makes your integration seamless, responsive, and easy to extend.
 
-The current API documentation is currently located [here](../extending/add_an_exchange.md).
+## Unified Exchange Interface
 
-## Wrapper API Changelog
-
-### Gekko 0.5.x to Gekko (Broker) 0.6.0
-
-NOTE: this API design might still have minor changes leading up to the release of Gekko 0.6. See [this thread](https://forum.gekko.wizb.it/thread-57279-post-59207.html) for more information.
-
-- The wrapper files are now nested different (from `gekko/exchanges` to `gekkobroker/wrappers` (which equals `gekko/exchange/wrappers` for Gekko users).
-- cancelOrder now requires a second parameter to be passed (that indicates whether the order was filled before it was canceled), see [details](https://github.com/askmike/gekko/commit/0e301f7d66e24ec97327f5f01380f691cc2d3725#diff-dbfe320ca090e208be32459d98fc11ed).
-- checkOrder now expects an object with a few properties to be returned, see [details](https://github.com/askmike/gekko/commit/e0d4a7362cd74b4b4f50759b1012ce489ea44a0c#diff-dbfe320ca090e208be32459d98fc11ed).
-- Error handling has gotten a lot more complex, with an updated error interface between a retry system (provided by Gekko) and the exchange wrapper. [Read more here](https://github.com/askmike/gekko/commit/e0d4a7362cd74b4b4f50759b1012ce489ea44a0c#diff-dbfe320ca090e208be32459d98fc11ed).
+Switch effortlessly between **Simulated** and **Public** live market data environments. The broker abstracts away exchange details so you can use **ExchangeSimulator** in development and testing or the **[The CCXT](https://github.com/ccxt/ccxt)** with minimal code changes.
 
 ---
-## [CCXT Library](https://www.npmjs.com/package/ccxt)
-#### Coin Exchange Platform
-* [Kraken](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/exchange/wrappers/api/kraken)
 
-#### CCXT EXAMPLES
-* [javascript examples](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/examples)
+# Architectural Overview
 
+The core broker is designed as a class that extends EventEmitter, providing a modular backbone for scalable, distributed trading systems. By decoupling exchange logic and supporting both simulated and live environments, this approach gives you flexibility.
+
+---
