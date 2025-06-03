@@ -23,6 +23,5 @@ You also need to add an entry for your plugin inside `plugins.js` which register
       enabled: true
     }
 
-Besides enabled you can also add other configurables here which users can set themselves. 
-
-That's it! Don't forget to create a pull request of the awesome plugin you've just created!
+> 💡 **Note:**  
+> [plugins/ccxtMarketData/ccxtMarketData.md](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/ccxtMarketData/ccxtMarketData.md) is a working example of adding a plugin.
