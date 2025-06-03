@@ -172,7 +172,7 @@ log.debug(this.settings.my_custom_setting); // Logs 10
 
 ### Using External Libraries
 
-You can use libraries like [lodash](http://lodash.com/) and [async](https://caolan.github.io/async/):
+You can use libraries like [underscore](https://www.npmjs.com/package/underscore),[lodash](http://lodash.com/) and [async](https://caolan.github.io/async/):
 
 ```js
 var _ = require('underscore');
@@ -189,6 +189,7 @@ For debug logs, use Gekko's logger:
 var log = require('../core/log.js');
 log.debug('hello world');
 ```
+> ℹ️ **Note:** For standardized logging in your strategies, you can also use the built-in Winston library provided in this repository. See the implementation in [strategies/logger.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/logger.js) for details. Winston offers advanced logging features, consistent log levels, and flexible output options, making it a robust alternative to Gekko's basic logger.
 
 ---
 
