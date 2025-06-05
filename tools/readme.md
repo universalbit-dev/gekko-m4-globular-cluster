@@ -19,7 +19,7 @@ pm2 start tools.config.js
 Or, using the ecosystem shortcut:
 
 ```bash
-pm2 start ecosystem.config.js
+pm2 start tools.config.js
 ```
 
 ---
