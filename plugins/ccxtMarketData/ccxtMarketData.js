@@ -1,3 +1,30 @@
+/**
+ * ccxtMarketData.js
+ *
+ * This module provides a class for fetching OHLCV (Open, High, Low, Close, Volume) market data
+ * from a cryptocurrency exchange using the ccxt library, and appending it to a rotating CSV log file.
+ *
+ * Features:
+ * - Loads exchange and symbol configuration from environment variables and settings at the top.
+ * - Fetches market data at a configurable interval (default: 1 minute).
+ * - Writes new data rows to a CSV file, avoiding duplicate entries.
+ * - Rotates log files to keep only recent data (max 30 files).
+ * - Handles graceful shutdown on SIGINT (Ctrl+C).
+ *
+ * Dependencies:
+ * - ccxt: Cryptocurrency exchange trading library
+ * - fs-extra: File system utilities
+ * - rotating-file-stream: For handling CSV file rotation
+ * - dotenv: Loads environment variables from .env file
+ *
+ * Usage:
+ *   - Configure EXCHANGE_MARKET_DATA_ID in your environment.
+ *   - Adjust SYMBOL, OHLCV_INTERVAL, and INTERVAL_MS as needed.
+ *   - Run the script to start logging market data to CSV.
+ *
+ * Exports:
+ *   - CCXTMarketData class for use in other modules.
+ */
 require('dotenv').config();
 const ccxt = require('ccxt');
 const fs = require('fs-extra');
