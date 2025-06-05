@@ -71,6 +71,13 @@ var plugins = [
   modes: ['realtime', 'backtest'],
   path: config => 'stopLoss/stopLoss.js',
 },
+{
+  name: 'CCXT Market Data',
+  description: 'Fetches live market data from a public exchange endpoint',
+  slug: 'ccxtMarketData',
+  modes: ['realtime', 'backtest'],
+  path: config => 'ccxtMarketData/ccxtMarketData.js',
+},
 ];
 
 module.exports = plugins;
