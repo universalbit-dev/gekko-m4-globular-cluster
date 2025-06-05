@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const ConvNet = require('../core/convnet.js'); //adjust path if needed
+const ConvNet = require('../core/convnet.js'); // adjust path if needed
 
-const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
-const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ohlcv'); //Directory
-const OUT_CSV_PATH = path.join(__dirname, './ohlcv_data_prediction.csv');
+const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
+const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
+const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv'); // Directory
+const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
 const LABELS = ['bull', 'bear', 'idle'];
 
 const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes

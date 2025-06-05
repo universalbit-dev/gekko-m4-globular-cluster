@@ -1,4 +1,4 @@
-// train_ohlcv.js
+// train_ccxt_ohlcv.js
 const fs = require('fs');
 const ConvNet = require('../core/convnet.js'); // Adjust path as needed
 
@@ -7,9 +7,9 @@ const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes (900,000 ms), adjust as needed
 function trainAndSave() {
   let data;
   try {
-    data = JSON.parse(fs.readFileSync('../logs/json/ohlcv/ohlcv_data.json', 'utf8'));
+    data = JSON.parse(fs.readFileSync('../logs/json/ohlcv/ohlcv_ccxt_data.json', 'utf8'));
   } catch (e) {
-    console.error('Failed to read or parse ohlcv_data.json:', e.message);
+    console.error('Failed to read or parse ohlcv_ccxt_data.json:', e.message);
     return;
   }
 
@@ -45,15 +45,15 @@ function trainAndSave() {
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `./trained_ohlcv/trained_ohlcv_${timestamp}.json`;
+  const filename = `./trained_ccxt_ohlcv/trained_ccxt_ohlcv_${timestamp}.json`;
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
 /*
 output files:
-trained_ohlcv/trained_ohlcv_2025-06-05T07-00-00-000Z.json
-trained_ohlcv/trained_ohlcv_2025-06-05T08-00-00-000Z.json
+trained_ccxt_ohlcv/trained_ccxt_ohlcv_2025-06-05T07-00-00-000Z.json
+trained_ccxt_ohlcv/trained_ccxt_ohlcv_2025-06-05T08-00-00-000Z.json
 */
 
 // Initial run
