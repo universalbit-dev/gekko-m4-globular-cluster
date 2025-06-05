@@ -29,7 +29,11 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'NEURALNET'};
 config.NEURALNET={SMA_long:987,SMA_short:50,threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,
 momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:1597,min_predictions :1597};
-config.stopLoss={enabled:true,'stopLossPercent': 5 };
+config.ccxtMarketData = {
+  enabled: false,
+  exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
+  };
+  
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };

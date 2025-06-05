@@ -9,12 +9,18 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'CCI'};
 config.CCI={thresholds:[{up:100,down:-100,persistence:0}],constant:0.015,history:987};
 
+config.ccxtMarketData = {
+  enabled: false,
+  exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
+  };
+  
+
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
 config.candleWriter={enabled:true,adapter:'sqlite'};
 config.adviceLogger={enabled:true};
-config.backtest = {enabled:true};
+config.backtest = {enabled:false};
 config.backtestResultExporter = {enabled: false};
 config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 100,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
 

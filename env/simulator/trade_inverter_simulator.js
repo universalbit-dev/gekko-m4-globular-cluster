@@ -55,7 +55,11 @@ config.tradingAdvisor = {
   historySize: 10,     // Number of historical candles to analyze
   method: 'INVERTER'   // Strategy method to use
 };
-
+config.ccxtMarketData = {
+  enabled: false,
+  exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
+  };
+  
 // Settings specific to the INVERTER strategy
 config.INVERTER = {
   DI: 13,  // Directional Indicator parameter

@@ -9,7 +9,11 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 
 config.STOCHRSI={interval:10,high:70,low:30,persistence:5,RSI:21,STOCH:21};
-
+config.ccxtMarketData = {
+  enabled: false,
+  exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
+  };
+  
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };

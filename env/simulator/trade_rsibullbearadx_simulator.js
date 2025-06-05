@@ -1,12 +1,17 @@
 require('dotenv').config()
 var config = {};
 config.debug =true;
-config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
+config.watch = {exchange: process.env.SIMULATOR_DATA_ID,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
-exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
+exchange:process.env.exchange,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
 config.tradingAdvisor = {enabled:true,warmupPeriods:200 ,candleSize:13,historySize:21,method:'RSIBULLBEARADX'};
+
+config.ccxtMarketData = {
+  enabled: true,
+  exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
+  };
 
 config.RSIBULLBEARADX={SMA_long:200,SMA_short:50,BULL_RSI:10,BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
 BULL_mod_high:5,BULL_mod_low :-5,BEAR_mod_high:15,BEAR_mod_low:-5,RSI:13,ADX:8,ADX_high:70,ADX_low:50};
