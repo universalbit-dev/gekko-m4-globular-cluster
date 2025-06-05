@@ -135,6 +135,11 @@ module.exports = {
       PM2_SERVE_SPA: true,
       PM2_SERVE_HOMEPAGE: "./logs/csv/ohlcv_data.csv"
     }
-  }
+  },
+  {
+    name: "pm2-cpu-watchdog",
+    script: "./pm2-cpu-watchdog.js",
+    watch: false
+  },
 ]
 }
