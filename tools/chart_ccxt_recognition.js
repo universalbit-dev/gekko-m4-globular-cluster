@@ -1,3 +1,16 @@
+/**
+ * chart_ccxt_recognition.js
+ *
+ * Description: Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data (fetched via CCXT) using trained ConvNet models.
+ * - Loads OHLCV data from CSV (CCXT source)
+ * - Converts to JSON and saves
+ * - Loads models from MODEL_DIR
+ * - Makes predictions and writes enhanced CSV with predictions
+ * - Runs every 15 minutes by default
+ *
+ * Note: This script overwrites the output CSV file on each run to avoid file size growth.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js'); // adjust path if needed
@@ -63,30 +76,24 @@ function predictAll(candles, model) {
   });
 }
 
-// Append OHLCV data + prediction + model file name
-function writeEnhancedCsv(rows, predictions, outCsvPath, modelName) {
+// Overwrite output file each time to prevent file growth
+function writeEnhancedCsv(rows, predictions, modelName) {
   const header = 'timestamp,open,high,low,close,volume,prediction,model\n';
   const out = rows.map((row, i) => `${row},${predictions[i]},${modelName}`).join('\n');
-  // Check if file exists to avoid duplicating header
-  if (!fs.existsSync(outCsvPath)) {
-    fs.writeFileSync(outCsvPath, header + out + '\n');
-  } else {
-    fs.appendFileSync(outCsvPath, out + '\n');
-  }
-  console.log('Wrote predicted CSV:', outCsvPath);
+  fs.writeFileSync(OUT_CSV_PATH, header + out + '\n');
+  console.log('Wrote predicted CSV:', OUT_CSV_PATH);
 }
 
 function runRecognition() {
   try {
     const rows = loadCsvRows(CSV_PATH);
     const candles = csvToJson(rows, JSON_PATH);
-
     const models = loadAllModels(MODEL_DIR);
 
     if (models.length) {
       for (const { net, filename } of models) {
         const predictions = predictAll(candles, net);
-        writeEnhancedCsv(rows, predictions, OUT_CSV_PATH, filename);
+        writeEnhancedCsv(rows, predictions, filename);
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
@@ -99,6 +106,5 @@ function runRecognition() {
 
 // Initial run
 runRecognition();
-
 // Repeat every INTERVAL_MS (15 minutes by default)
 setInterval(runRecognition, INTERVAL_MS);

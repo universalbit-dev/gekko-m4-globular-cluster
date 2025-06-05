@@ -1,10 +1,24 @@
+/**
+ * chart_recognition.js
+ *
+ * Description: Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data using trained ConvNet models.
+ * - Loads OHLCV data from CSV
+ * - Converts to JSON and saves
+ * - Loads models from MODEL_DIR
+ * - Makes predictions and writes enhanced CSV with predictions
+ * - Runs every 15 minutes by default
+ *
+ * Note: This script is designed to minimize output data growth. The output CSV is overwritten on each run,
+ * so it always contains only the most recent predictions.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js'); //adjust path if needed
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ohlcv'); //Directory
+const MODEL_DIR = path.join(__dirname, './trained_ohlcv'); // Directory
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_data_prediction.csv');
 const LABELS = ['bull', 'bear', 'idle'];
 
@@ -63,16 +77,11 @@ function predictAll(candles, model) {
   });
 }
 
-// Append OHLCV data + prediction + model file name
+// Overwrite output file each time to prevent file growth
 function writeEnhancedCsv(rows, predictions, outCsvPath, modelName) {
   const header = 'timestamp,open,high,low,close,volume,prediction,model\n';
   const out = rows.map((row, i) => `${row},${predictions[i]},${modelName}`).join('\n');
-  // Check if file exists to avoid duplicating header
-  if (!fs.existsSync(outCsvPath)) {
-    fs.writeFileSync(outCsvPath, header + out + '\n');
-  } else {
-    fs.appendFileSync(outCsvPath, out + '\n');
-  }
+  fs.writeFileSync(outCsvPath, header + out + '\n'); // Always overwrite
   console.log('Wrote predicted CSV:', outCsvPath);
 }
 
@@ -86,7 +95,7 @@ function runRecognition() {
     if (models.length) {
       for (const { net, filename } of models) {
         const predictions = predictAll(candles, net);
-        writeEnhancedCsv(rows, predictions, OUT_CSV_PATH, filename);
+        writeEnhancedCsv(rows, predictions, OUT_CSV_PATH, filename); // Always overwrites
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
