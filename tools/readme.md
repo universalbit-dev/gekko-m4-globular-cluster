@@ -16,12 +16,6 @@ Start all tools as background processes with:
 pm2 start tools.config.js
 ```
 
-Or, using the ecosystem shortcut:
-
-```bash
-pm2 start tools.config.js
-```
-
 ---
 
 ## 📄 Tool Overview
