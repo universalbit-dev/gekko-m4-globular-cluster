@@ -9,6 +9,7 @@
  * - Runs every 15 minutes by default
  *
  * Note: This script overwrites the output CSV file on each run to avoid file size growth.
+ * It also appends only signal transitions (state changes) to ccxt_signal.log.
  */
 
 const fs = require('fs');
@@ -19,8 +20,8 @@ const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv'); // Directory
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
+const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
-
 const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 function loadCsvRows(csvPath) {
@@ -47,7 +48,6 @@ function csvToJson(rows, jsonPath) {
     };
   });
   fs.writeFileSync(jsonPath, JSON.stringify(candles, null, 2));
-  console.log('Wrote JSON:', jsonPath);
   return candles;
 }
 
@@ -84,16 +84,64 @@ function writeEnhancedCsv(rows, predictions, modelName) {
   console.log('Wrote predicted CSV:', OUT_CSV_PATH);
 }
 
+// Append signal changes only (timestamp\tprediction) to log file
+function appendSignalTransitions(timestamps, predictions, logPath) {
+  let lastPrediction = null;
+  let lines = [];
+  for (let i = 0; i < predictions.length; i++) {
+    if (predictions[i] !== lastPrediction && predictions[i] !== undefined) {
+      // Convert epoch millis to ISO string if not already
+      let isoTime = timestamps[i];
+      // If the timestamp is a number or a string of digits, convert:
+      if (/^\d+$/.test(isoTime)) {
+        isoTime = new Date(Number(isoTime)).toISOString();
+      }
+      lines.push(`${isoTime}\t${predictions[i]}`);
+      lastPrediction = predictions[i];
+    }
+  }
+  if (lines.length > 0) {
+    fs.appendFileSync(logPath, lines.join('\n') + '\n');
+    console.log('Appended signal transitions to', logPath);
+  }
+}
+
 function runRecognition() {
   try {
     const rows = loadCsvRows(CSV_PATH);
     const candles = csvToJson(rows, JSON_PATH);
+
+    // Deduplicate candles by timestamp
+    const uniqueCandles = [];
+    const seenTimestamps = new Set();
+    for (const candle of candles) {
+      if (!seenTimestamps.has(candle.timestamp)) {
+        uniqueCandles.push(candle);
+        seenTimestamps.add(candle.timestamp);
+      }
+    }
+
+    const timestamps = uniqueCandles.map(c => c.timestamp);
+
     const models = loadAllModels(MODEL_DIR);
 
     if (models.length) {
       for (const { net, filename } of models) {
-        const predictions = predictAll(candles, net);
-        writeEnhancedCsv(rows, predictions, filename);
+        const predictions = predictAll(uniqueCandles, net);
+        // Write CSV: only use the original row for each unique candle
+        // (if you want the CSV to also be deduped, you could do)
+        const uniqueRows = [];
+        const seen = new Set();
+        for (let i = 0; i < rows.length; i++) {
+          const ts = rows[i].split(',')[0];
+          if (!seen.has(ts)) {
+            uniqueRows.push(rows[i]);
+            seen.add(ts);
+          }
+        }
+        writeEnhancedCsv(uniqueRows, predictions, filename);
+        appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH);
+        deduplicateLogFile(logPath);
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
@@ -102,6 +150,21 @@ function runRecognition() {
   } catch (err) {
     console.error('Error:', err.message);
   }
+}
+
+function deduplicateLogFile(logPath) {
+  if (!fs.existsSync(logPath)) return;
+  const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n');
+  const seen = new Set();
+  const deduped = [];
+  for (const line of lines) {
+    const ts = line.split('\t')[0];
+    if (!seen.has(ts)) {
+      deduped.push(line);
+      seen.add(ts);
+    }
+  }
+  fs.writeFileSync(logPath, deduped.join('\n') + '\n');
 }
 
 // Initial run

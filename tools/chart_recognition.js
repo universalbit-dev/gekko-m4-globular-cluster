@@ -1,27 +1,27 @@
 /**
- * chart_recognition.js
+ * chart_ccxt_recognition.js
  *
- * Description: Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data using trained ConvNet models.
- * - Loads OHLCV data from CSV
+ * Description: Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data (ExchangeSimulator) using trained ConvNet models.
+ * - Loads OHLCV data from CSV (ExchangeSimulator)
  * - Converts to JSON and saves
  * - Loads models from MODEL_DIR
  * - Makes predictions and writes enhanced CSV with predictions
  * - Runs every 15 minutes by default
  *
- * Note: This script is designed to minimize output data growth. The output CSV is overwritten on each run,
- * so it always contains only the most recent predictions.
+ * Note: This script overwrites the output CSV file on each run to avoid file size growth.
+ * It also appends only signal transitions (state changes) to exchangesimulator_signal.log.
  */
 
 const fs = require('fs');
 const path = require('path');
-const ConvNet = require('../core/convnet.js'); //adjust path if needed
+const ConvNet = require('../core/convnet.js'); // adjust path if needed
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
 const MODEL_DIR = path.join(__dirname, './trained_ohlcv'); // Directory
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_data_prediction.csv');
+const SIGNAL_LOG_PATH = path.join(__dirname, './exchangesimulator_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
-
 const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 function loadCsvRows(csvPath) {
@@ -48,7 +48,6 @@ function csvToJson(rows, jsonPath) {
     };
   });
   fs.writeFileSync(jsonPath, JSON.stringify(candles, null, 2));
-  console.log('Wrote JSON:', jsonPath);
   return candles;
 }
 
@@ -78,24 +77,44 @@ function predictAll(candles, model) {
 }
 
 // Overwrite output file each time to prevent file growth
-function writeEnhancedCsv(rows, predictions, outCsvPath, modelName) {
+function writeEnhancedCsv(rows, predictions, modelName) {
   const header = 'timestamp,open,high,low,close,volume,prediction,model\n';
   const out = rows.map((row, i) => `${row},${predictions[i]},${modelName}`).join('\n');
-  fs.writeFileSync(outCsvPath, header + out + '\n'); // Always overwrite
-  console.log('Wrote predicted CSV:', outCsvPath);
+  fs.writeFileSync(OUT_CSV_PATH, header + out + '\n');
+  console.log('Wrote predicted CSV:', OUT_CSV_PATH);
+}
+
+// Append signal changes only (timestamp\tprediction) to log file
+function appendSignalTransitions(timestamps, predictions, logPath) {
+  let lastPrediction = null;
+  let lines = [];
+  for (let i = 0; i < predictions.length; i++) {
+    if (predictions[i] !== lastPrediction && predictions[i] !== undefined) {
+      lines.push(`${timestamps[i]}\t${predictions[i]}`);
+      lastPrediction = predictions[i];
+    }
+  }
+  if (lines.length > 0) {
+    // Append new lines to the log file
+    fs.appendFileSync(logPath, lines.join('\n') + '\n');
+    console.log('Appended signal transitions to', logPath);
+  }
 }
 
 function runRecognition() {
   try {
     const rows = loadCsvRows(CSV_PATH);
     const candles = csvToJson(rows, JSON_PATH);
+    const timestamps = candles.map(c => c.timestamp);
 
     const models = loadAllModels(MODEL_DIR);
 
     if (models.length) {
       for (const { net, filename } of models) {
         const predictions = predictAll(candles, net);
-        writeEnhancedCsv(rows, predictions, OUT_CSV_PATH, filename); // Always overwrites
+        writeEnhancedCsv(rows, predictions, filename);
+        appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH);
+        deduplicateLogFile(logPath);
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
@@ -106,8 +125,22 @@ function runRecognition() {
   }
 }
 
+function deduplicateLogFile(logPath) {
+  if (!fs.existsSync(logPath)) return;
+  const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n');
+  const seen = new Set();
+  const deduped = [];
+  for (const line of lines) {
+    const ts = line.split('\t')[0];
+    if (!seen.has(ts)) {
+      deduped.push(line);
+      seen.add(ts);
+    }
+  }
+  fs.writeFileSync(logPath, deduped.join('\n') + '\n');
+}
+
 // Initial run
 runRecognition();
-
 // Repeat every INTERVAL_MS (15 minutes by default)
 setInterval(runRecognition, INTERVAL_MS);
