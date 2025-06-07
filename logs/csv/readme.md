@@ -1,46 +1,107 @@
-# 📊 CSV Data Export for Grafana Advanced Charting
+# 🗂️ OHLCV CSV Deduplication Guide
 
-## Why Use CSV Export Instead of JSON?
+## 📄 Overview
 
-While JSON files are great for storing detailed data, they can quickly become very large and unwieldy for visualization tools like Grafana. CSV (Comma-Separated Values) files provide a lighter, more focused alternative—making your data easier to manage and visualize.
-
-**Benefits of CSV for Grafana:**
-- **Smaller File Size:** CSV contains only the data you need for charting, without the extra structure and metadata of JSON.
-- **Faster Processing:** Grafana and other BI tools can read and plot CSV data much more quickly.
-- **Easier to Optimize:** You can select only relevant columns (such as timestamp, open, high, low, close, volume) for more efficient visualizations.
-
-## How Does the CSV Export Work?
-
-- The strategy automatically creates or updates a file called `ohlcv_data.csv` as market data is processed.
-- Each row in the CSV corresponds to a single market "candle" and includes:
-  - `timestamp`
-  - `open`
-  - `high`
-  - `low`
-  - `close`
-  - `volume`
-- The file is managed with a rotating file stream, ensuring your logs don’t grow indefinitely—old data can be archived or compressed as needed.
-
-## Example: CSV File Format
-```csv
-timestamp,open,high,low,close,volume
-2025-05-23T20:01:03.000Z,34000,34500,33900,34400,1.23
-2025-05-23T20:02:03.000Z,34400,34600,34200,34550,1.10
-```
-
-## Optimizing CSV for Visualization
-
-- **Select Only Needed Columns:** Remove unnecessary fields to keep the file lean and focused.
-- **Aggregate Data if Needed:** You can export data at different time intervals (1m, 5m, 1h) depending on your charting requirements.
-- **Keep Time Format Consistent:** Use timestamps or ISO date strings that Grafana can parse easily.
-
-## Importing CSV into Grafana
-
-Grafana supports CSV data sources via plugins such as the [CSV Data Source plugin](https://grafana.com/grafana/plugins/marcusolsson-csv-datasource/). Simply point Grafana to your `ohlcv_data.csv` file and start building your advanced charts!
+This module helps you **remove duplicate rows** from OHLCV CSV files, keeping only the earliest entry for each timestamp. This is especially useful when working with market data that might contain duplicates due to polling APIs.
 
 ---
 
-**Summary:**  
-Exporting OHLCV market data to CSV is a practical, efficient alternative to bulky JSON files—especially when your goal is fast, flexible visualization in Grafana. Keep your CSV files clean and organized for the best charting experience!
+## ⚙️ Components
+
+### 1. `deduplicate_csv.config.js`  
+**Configures deduplication jobs for different CSV files.**
+
+- **Job 1:**  
+  - 🏷️ **Name:** `ohlcv CSV data deduplicate`  
+  - 📜 **Script:** `deduplicate_ohlcv_csv.js`  
+  - 📂 **Input/Output:** `ohlcv_data.csv` → deduplicated
+
+- **Job 2:**  
+  - 🏷️ **Name:** `ohlcv ccxt CSV data deduplicate`  
+  - 📜 **Script:** `deduplicate_ohlcv_csv.js`  
+  - 📂 **Input/Output:** `ohlcv_ccxt_data.csv` → deduplicated
+
+> Both jobs use **cluster mode** and run a single instance.
+
+---
+
+### 2. `deduplicate_ohlcv_csv.js`  
+**Performs the actual deduplication.**
+
+#### 🚀 Features
+- Reads a CSV file with market OHLCV data (header expected).
+- Removes duplicate rows based on the **timestamp** (first column).
+- Outputs a **tab-separated** CSV with only the first five columns:  
+  `timestamp`, `open`, `high`, `low`, `close`.
+- Output filename is the original name with `_deduped.csv` appended before the extension.
+- Can be run as a script or used as a module in other Node.js code.
+
+---
+
+## 🛠️ Usage
+
+### 🎛️ As a CLI Tool
+
+```bash
+node deduplicate_ohlcv_csv.js <input.csv> <output.csv>
+```
+- Example:  
+  ```bash
+  node deduplicate_ohlcv_csv.js ohlcv_data.csv ohlcv_data_deduped.csv
+  ```
+
+### 🧩 As a Module
+
+```js
+const dedupOhlcvCSV = require('./deduplicate_ohlcv_csv.js');
+dedupOhlcvCSV('ohlcv_data.csv', 'ohlcv_data_deduped.csv');
+```
+
+- Overwriting the source file is supported:  
+  ```js
+  dedupOhlcvCSV('ohlcv_data.csv', 'ohlcv_data.csv');
+  ```
+
+---
+
+## 💡 Notes
+
+- 📌 The script expects the **first line to be a header**.
+- 🏷️ Only the first five columns are kept; the volume column (if present) is removed.
+- 📑 Output is **tab-separated** for compatibility with data analysis tools.
+- 🔄 Running with the same input and output filename will overwrite the original file.
+
+---
+
+## 👤 Author
+
+- **universalbit-dev**
+- 📅 Last updated: June 2025
+
+---
+
+## 🧭 File Locations
+
+- **Config:** [`logs/csv/deduplicate_csv.config.js`](./deduplicate_csv.config.js)
+- **Script:** [`logs/csv/deduplicate_ohlcv_csv.js`](./deduplicate_ohlcv_csv.js)
+  
+---
+
+## ⏰ Automatic Hourly Restart with PM2
+
+To keep your deduplication jobs running smoothly, you can schedule an automatic restart every hour using PM2. This helps free up resources and ensures consistent performance.
+
+### 🚀 How To Set Up Hourly Restart
+
+```bash
+pm2 start deduplicate_csv.config.js --cron-restart="0 * * * *"
+```
+
+- This command tells PM2 to **restart all deduplication jobs every hour** (at minute 0).
+- 📌 Make sure you have [PM2](https://pm2.keymetrics.io/) installed globally.
+
+---
+
+Enjoy clean, deduplicated OHLCV data! 🚀📊
 
 ---
