@@ -85,7 +85,7 @@ function writeEnhancedCsv(rows, predictions, modelName) {
 }
 
 // Append signal changes only (timestamp\tprediction) to log file
-function appendSignalTransitions(timestamps, predictions, logPath) {
+function appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH) {
   let lastPrediction = null;
   let lines = [];
   for (let i = 0; i < predictions.length; i++) {
@@ -101,8 +101,8 @@ function appendSignalTransitions(timestamps, predictions, logPath) {
     }
   }
   if (lines.length > 0) {
-    fs.appendFileSync(logPath, lines.join('\n') + '\n');
-    console.log('Appended signal transitions to', logPath);
+    fs.appendFileSync(SIGNAL_LOG_PATH, lines.join('\n') + '\n');
+    console.log('Appended signal transitions to', SIGNAL_LOG_PATH);
   }
 }
 
@@ -141,7 +141,7 @@ function runRecognition() {
         }
         writeEnhancedCsv(uniqueRows, predictions, filename);
         appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH);
-        deduplicateLogFile(logPath);
+        deduplicateLogFile(SIGNAL_LOG_PATH);
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
@@ -152,9 +152,9 @@ function runRecognition() {
   }
 }
 
-function deduplicateLogFile(logPath) {
-  if (!fs.existsSync(logPath)) return;
-  const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n');
+function deduplicateLogFile(SIGNAL_LOG_PATH) {
+  if (!fs.existsSync(SIGNAL_LOG_PATH)) return;
+  const lines = fs.readFileSync(SIGNAL_LOG_PATH, 'utf8').trim().split('\n');
   const seen = new Set();
   const deduped = [];
   for (const line of lines) {
@@ -164,7 +164,7 @@ function deduplicateLogFile(logPath) {
       seen.add(ts);
     }
   }
-  fs.writeFileSync(logPath, deduped.join('\n') + '\n');
+  fs.writeFileSync(SIGNAL_LOG_PATH, deduped.join('\n') + '\n');
 }
 
 // Initial run
