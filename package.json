@@ -16,7 +16,7 @@
   "child_process": "^1.0.2",
   "commander": "^6.2.0",
   "compute-covariance": "^1.0.1",
-  "core-js": "^3.36.0",
+  "core-js": "^3.42.0",
   "crypto-js": "^4.2.0",
   "dotenv": "^16.4.5",
   "events": "^3.3.0",
