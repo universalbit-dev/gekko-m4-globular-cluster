@@ -1,15 +1,13 @@
+// train_ccxt_ohlcv.js
 const fs = require('fs');
-const path = require('path');
-const ConvNet = require('../core/convnet.js');// Adjust path as needed
+const ConvNet = require('../core/convnet.js'); // Adjust path as needed
 
-const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
-const DATA_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
+const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes (900,000 ms), adjust as needed
 
 function trainAndSave() {
   let data;
   try {
-    data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
+    data = JSON.parse(fs.readFileSync('../logs/json/ohlcv/ohlcv_ccxt_data.json', 'utf8'));
   } catch (e) {
     console.error('Failed to read or parse ohlcv_ccxt_data.json:', e.message);
     return;
@@ -22,14 +20,6 @@ function trainAndSave() {
       input: [candle.open, candle.high, candle.low, candle.close, candle.volume],
       output: candle.label // integer: 0, 1, or 2
     }));
-
-  if (trainingSet.length === 0) {
-    console.warn('No labeled data found for training.');
-    return;
-  }
-
-  // Ensure model directory exists
-  fs.mkdirSync(MODEL_DIR, { recursive: true });
 
   // Create network
   const net = new ConvNet.Net();
@@ -46,19 +36,27 @@ function trainAndSave() {
     l2_decay: 0.001
   });
 
-  for (let epoch = 0; epoch < 10; epoch++) {
+  // Training loop (simple)
+  for(let epoch = 0; epoch < 10; epoch++) {
     trainingSet.forEach(example => {
       trainer.train(example.input, example.output);
     });
-    console.log(`Epoch ${epoch + 1} complete`);
+    console.log(`Epoch ${epoch+1} complete`);
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = path.join(MODEL_DIR, `trained_ccxt_ohlcv_${timestamp}.json`);
+  const filename = `./trained_ohlcv/trained_ohlcv_ccxt_${timestamp}.json`;
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
+/*
+example output:
+[2025-06-07T07-27-55-047Z] Model Saved as ./trained_ohlcv/trained_ohlcv_ccxt_2025-06-07T07-27-55-047Z.json
+*/
+
 // Initial run
 trainAndSave();
+
+// Repeat every INTERVAL_MS
 setInterval(trainAndSave, INTERVAL_MS);

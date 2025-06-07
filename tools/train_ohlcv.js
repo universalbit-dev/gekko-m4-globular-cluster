@@ -51,8 +51,8 @@ function trainAndSave() {
 }
 
 /*
-output example:
-[2025-06-07T06-42-15-338Z] Model Saved as ./trained_ohlcv/trained_ohlcv_2025-06-07T06-42-15-338Z.json
+example output:
+[2025-06-07T07-31-03-634Z] Model Saved as ./trained_ohlcv/trained_ohlcv_2025-06-07T07-31-03-634Z.json
 */
 
 // Initial run
