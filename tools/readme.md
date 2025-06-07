@@ -56,6 +56,20 @@ pm2 start tools.config.js
 ```
 
 ---
+## ⏰ Automatic Hourly Restart with PM2
+
+To keep your jobs running smoothly, you can schedule an automatic restart every hour using PM2. This helps free up resources and ensures consistent performance.
+
+### 🚀 How To Set Up Hourly Restart
+
+```bash
+pm2 start tools.config.js --cron-restart="0 * * * *"
+```
+
+- This command tells PM2 to **restart all jobs every hour** (at minute 0).
+- 📌 Make sure you have [PM2](https://pm2.keymetrics.io/) installed globally.
+
+---
 
 ## 📄 Tool Overview
 
