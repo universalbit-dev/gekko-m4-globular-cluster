@@ -27,10 +27,6 @@ They implement neural network techniques and best practices recommended by leadi
 
 > These tools bridge the gap between theory and practice—making it easier to apply neural network methods to your own data projects.  
 > Start here, experiment, and build smarter models! 🧠🚀
-
----
-Thank you for clarifying! Here’s a revised version of the documentation note, making it clear that some ccxt scripts require context from this plugin’s documentation:
-
 ---
 
 > 📘 **ccxtMarketData:**  
