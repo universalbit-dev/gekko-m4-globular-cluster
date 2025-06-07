@@ -1,7 +1,21 @@
 # CCXT Market Data Plugin Documentation
+
 ## Decentralization Philosophy
 
 > **Note:** This plugin is developed with the goal of decentralizing everything where possible. Our aim is to reduce reliance on centralized data and service providers, and to promote resilience, transparency, and user sovereignty. Future updates may include support for decentralized data feeds and exchanges.
+
+---
+
+> 🚀 **How to Run This Plugin:**  
+> To start this plugin manually, open your terminal and run:  
+>
+> ```
+> node ccxtMarketData.js
+> ```
+>
+> This command will launch the plugin and begin fetching market data using CCXT.
+
+---
 
 ⚙️ **Configuration Quick Start**
 
@@ -15,6 +29,7 @@ config.ccxtMarketData = {
   interval: '1m'
 };
 ```
+
 ---
 
 **ℹ️ Note:**  
@@ -58,3 +73,5 @@ Fetches real-time market data using **public ccxt endpoints**
 
 - Strategy development
 - Market monitoring dashboards
+
+---
