@@ -29,7 +29,13 @@ They implement neural network techniques and best practices recommended by leadi
 > Start here, experiment, and build smarter models! 🧠🚀
 
 ---
+Thank you for clarifying! Here’s a revised version of the documentation note, making it clear that some ccxt scripts require context from this plugin’s documentation:
 
+---
+
+> 📘 **ccxtMarketData:**  
+> This page covers the [`ccxtMarketData` plugin](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/ccxtMarketData/ccxtMarketData.md).  
+> _Please note: Some ccxt scripts need to be understood in the context of this plugin. Learn how to quickly launch the plugin with a simple Node.js command, or follow detailed examples to integrate it into your strategy._
 
 # 🛠️ Gekko M4 Globular Cluster Tools
 
