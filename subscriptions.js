@@ -1,23 +1,29 @@
-/*
-
-
-*/
+/**
+ * Subscriptions Configuration for Gekko M4
+ * -----------------------------------------
+ * Maps emitted events to handler functions. When an event occurs,
+ * Gekko calls the specified handler on any enabled plugin or strategy
+ * that implements it.
+ *
+ * Modify this file to add or remove event-handler mappings as needed
+ * for your custom plugins or strategies.
+ */
 var subscriptions = [
-  // Candle events (calls StopLoss.processCandle if present in plugin)
+  // Candle events
   {
     emitter: 'market',
     event: 'candle',
     handler: 'processCandle'
   },
 
-  // Trade events (calls StopLoss.onTrade if present in plugin)
+  // Trade events
   {
     emitter: ['trader', 'paperTrader'],
     event: 'tradeCompleted',
     handler: 'onTrade'
   },
 
-  // Other standard event handlers (you may adjust/remove as needed for your setup)
+  // Other standard event handlers
   {
     emitter: 'market',
     event: 'marketUpdate',
