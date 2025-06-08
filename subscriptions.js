@@ -3,11 +3,21 @@
 
 */
 var subscriptions = [
+  // Candle events (calls StopLoss.processCandle if present in plugin)
   {
     emitter: 'market',
     event: 'candle',
     handler: 'processCandle'
   },
+
+  // Trade events (calls StopLoss.onTrade if present in plugin)
+  {
+    emitter: ['trader', 'paperTrader'],
+    event: 'tradeCompleted',
+    handler: 'onTrade'
+  },
+
+  // Other standard event handlers (you may adjust/remove as needed for your setup)
   {
     emitter: 'market',
     event: 'marketUpdate',
@@ -52,11 +62,6 @@ var subscriptions = [
     emitter: ['trader', 'paperTrader'],
     event: 'tradeAborted',
     handler: 'processTradeAborted'
-  },
-  {
-    emitter: ['trader', 'paperTrader'],
-    event: 'tradeCompleted',
-    handler: 'processTradeCompleted'
   },
   {
     emitter: 'trader',
