@@ -98,9 +98,10 @@ Trader.prototype.fetchSkySourceData = async function() {
         });
 
     if (response.status === 200 && response.data) {
-    console.log('[INFO] Sky Source Data successfully fetched:');
+    //console.log('[INFO] Sky Source Data successfully fetched:');
     // Update cache
     this.skySourceData = response.data;
+console.log('[DATA]:Astronomical Coordinates RA:', this.skySourceData.model_data.ra, 'DEC:', this.skySourceData.model_data.de);
     this.skySourceExpiresAt = Date.now() + cacheDuration;
     return response.data;
     }
@@ -153,12 +154,15 @@ Trader.prototype.fetchLatestPrice = async function() {
 
         // Adjust price based on Sky Source data
         const skySourceData = await this.fetchSkySourceData();
-        if (skySourceData && skySourceData.coordinates) {
-            const coordinateFactor = (skySourceData.coordinates.ra + skySourceData.coordinates.de) % 5;
+        if (skySourceData && this.skySourceData.model_data) {
+            const coordinateFactor = (this.skySourceData.model_data.ra + this.skySourceData.model_data.de) % 5;
             this.price += coordinateFactor * 0.1; // Add a small factor based on coordinates
+            if (typeof this.price === 'number') {
+            console.log(`Updated price with Sky Source influence: ${this.price} (RA: ${this.skySourceData.model_data.ra}, Dec: ${this.skySourceData.model_data.de})`);
+            } else {
+            console.log(`Price not available yet`);
+            }
             
-            // Log the updated price with Sky Source influence
-            console.log(`Updated price with Sky Source influence: ${this.price} (RA: ${skySourceData.coordinates.ra}, Dec: ${skySourceData.coordinates.de})`);
         }
 
         // Validate price before applying the change
