@@ -160,8 +160,6 @@ var util = {
 program
   .version(util.logVersion())
   .option('-c, --config <file>', 'Config file')
-  .option('-b, --backtest', 'backtesting mode')
-  .option('-i, --import', 'importer mode')
   .parse(process.argv);
 
 // make sure the current node version is recent enough
