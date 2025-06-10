@@ -112,7 +112,7 @@ var util = {
       importers: ROOT + 'importers/exchanges/',
       tools: ROOT + 'core/tools/',
       workers: ROOT + 'core/workers/',
-      config: ROOT + '.env',
+      config: ROOT + 'env/',
       broker: ROOT + 'exchange/'
     }
   },
