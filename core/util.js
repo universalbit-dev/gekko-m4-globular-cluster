@@ -109,7 +109,6 @@ var util = {
       methods: ROOT + 'strategies/',
       indicators: ROOT + 'strategies/indicators/',
       dlna: ROOT + 'core/dlna/',
-      importers: ROOT + 'importers/exchanges/',
       tools: ROOT + 'core/tools/',
       workers: ROOT + 'core/workers/',
       config: ROOT + 'env/',
@@ -132,16 +131,13 @@ var util = {
     if (_gekkoMode)
       return _gekkoMode;
 
-    if (program['import'])
-      return 'importer';
-    else if (program.backtest)
+    if (program.backtest)
       return 'backtest';
     else
       return 'realtime';
   },
   gekkoModes: function() {
     return [
-      'importer',
       'backtest',
       'realtime'
     ]
