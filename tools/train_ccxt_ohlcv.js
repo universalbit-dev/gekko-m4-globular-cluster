@@ -1,8 +1,9 @@
 // train_ccxt_ohlcv.js
 const fs = require('fs');
-const ConvNet = require('../core/convnet.js'); // Adjust path as needed
+const dir = './trained_ccxt_ohlcv';
+const ConvNet = require('../core/convnet.js');
 
-const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes (900,000 ms), adjust as needed
+const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 function trainAndSave() {
   let data;
@@ -37,22 +38,27 @@ function trainAndSave() {
   });
 
   // Training loop (simple)
-  for(let epoch = 0; epoch < 10; epoch++) {
+  for (let epoch = 0; epoch < 10; epoch++) {
     trainingSet.forEach(example => {
       trainer.train(example.input, example.output);
     });
-    console.log(`Epoch ${epoch+1} complete`);
+    console.log(`Epoch ${epoch + 1} complete`);
+  }
+
+  // Ensure the directory exists
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `./trained_ohlcv/trained_ohlcv_ccxt_${timestamp}.json`;
+  const filename = `${dir}/trained_ohlcv_ccxt_${timestamp}.json`;
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
 /*
 example output:
-[2025-06-07T07-27-55-047Z] Model Saved as ./trained_ohlcv/trained_ohlcv_ccxt_2025-06-07T07-27-55-047Z.json
+[2025-06-07T07-27-55-047Z] Model Saved as ./trained_ccxt_ohlcv/trained_ohlcv_ccxt_2025-06-07T07-27-55-047Z.json
 */
 
 // Initial run
