@@ -3,30 +3,38 @@ var config = {};
 
 config.debug =true;
 
-config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
+config.watch = {enabled:true,exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
-config.trader={enabled:false};
+config.trader={enabled:false,
+exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
-config.paperTrader = {enabled: false};
+config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'NEURALNET'};
 
-config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'CSVEXPORT'};
+config.NEURALNET={SMA_long:987,SMA_short:50,threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,
+momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:1597,min_predictions :1597};
 
-config.CSVEXPORT={};
+config.stopLoss = {enabled: true,
+threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
 
 config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'};
-
+  
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
-dependencies:[{module:'sqlite3',version:'5.1.7'}] };
+dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
 
-config.candleWriter={enabled:false,adapter:'sqlite'};
+config.candleWriter={enabled:true,adapter:'sqlite'};
 
-config.adviceLogger={enabled:false};
+config.adviceLogger={enabled:true};
 
 config.backtest = {enabled:false};
 
 config.backtestResultExporter = {enabled: false};
+
+config.ccxtMarketData = {enabled: true,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
+};
+
+config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 100,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
 
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 

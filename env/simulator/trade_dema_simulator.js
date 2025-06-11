@@ -1,31 +1,39 @@
 require('dotenv').config()
 var config = {};
+
 config.debug =true;
+
 config.watch = {exchange: process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset};
 
 config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'DEMA'};
+
 config.DEMA={weight:987,threshold:5,thresholds:[{down:-0.05,up:0.05}]};
 
-config.ccxtMarketData = {
-  enabled: false,
-  exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'
-  };
-  
+config.stopLoss = {enabled: true,
+threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
+
+config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
+
 config.sqlite = {path: 'plugins/sqlite',dataDirectory: 'history',version:'5.1.1',
 dependencies:[{module: 'sqlite3',version:'5.1.7'}] };
+
 config.candleWriter={enabled:true,adapter:'sqlite'};
+
 config.adviceLogger={enabled:true};
+
 config.backtest = {enabled:false};
+
 config.backtestResultExporter = {enabled: false};
+
 config.paperTrader = {enabled: true,reportInCurrency: true,simulationBalance: {asset: 100,currency: 1},feeMaker: 0.1,feeTaker: 0.1,feeUsing: 'maker',slippage: 0.05};
 
 config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
-config.importer = {enabled:false};
+
 config['I understand that Gekko only automates MY OWN trading strategies']=true;
 module.exports = config;
 
