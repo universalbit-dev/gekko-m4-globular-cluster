@@ -1,5 +1,5 @@
 
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
+const _ = require("underscore");
 const {EventEmitter} = require("events");
 var log = require('../core/log');
 const util = require('../core/util');const config = util.getConfig();
