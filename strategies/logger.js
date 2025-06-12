@@ -56,7 +56,7 @@ module.exports = function(strategyName) {
     transports: [
       new DailyRotateFile({
         filename: logFile,           // No date pattern: always `${strategyName}.log`
-        maxSize: '10m',              // Rotate at 10MB
+        maxSize: '1m',              // Rotate at 1MB
         maxFiles: '5',               // Keep last 5 rotated files (or adjust as needed)
         zippedArchive: false         // Set true if you want old logs zipped
       })
