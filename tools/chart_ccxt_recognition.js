@@ -1,15 +1,7 @@
 /**
  * chart_ccxt_recognition.js
- *
- * Description: Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data (fetched via CCXT) using trained ConvNet models.
- * - Loads OHLCV data from CSV (CCXT source)
- * - Converts to JSON and saves
- * - Loads models from MODEL_DIR
- * - Makes predictions and writes enhanced CSV with predictions
- * - Runs every 15 minutes by default
- *
- * Note: This script overwrites the output CSV file on each run to avoid file size growth.
- * It also appends only signal transitions (state changes) to ccxt_signal.log.
+ * Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data using trained ConvNet models.
+ * Ensures chronological order and deduplication of signals and prediction logs.
  */
 
 const fs = require('fs');
@@ -18,7 +10,7 @@ const ConvNet = require('../core/convnet.js'); // adjust path if needed
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv'); // Directory
+const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
@@ -76,26 +68,24 @@ function predictAll(candles, model) {
   });
 }
 
-// Overwrite output file each time to prevent file growth
-function writeEnhancedCsv(rows, predictions, modelName) {
+function writeEnhancedCsv(candles, predictions, modelName) {
   const header = 'timestamp,open,high,low,close,volume,prediction,model\n';
-  const out = rows.map((row, i) => `${row},${predictions[i]},${modelName}`).join('\n');
+  const out = candles.map((candle, i) =>
+    `${candle.timestamp},${candle.open},${candle.high},${candle.low},${candle.close},${candle.volume},${predictions[i]},${modelName}`
+  ).join('\n');
   fs.writeFileSync(OUT_CSV_PATH, header + out + '\n');
   console.log('Wrote predicted CSV:', OUT_CSV_PATH);
 }
 
-// Append signal changes only (timestamp\tprediction) to log file
-function appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH) {
+// Append only signal transitions, in order
+function appendSignalTransitions(candles, predictions, SIGNAL_LOG_PATH) {
   let lastPrediction = null;
   let lines = [];
   for (let i = 0; i < predictions.length; i++) {
     if (predictions[i] !== lastPrediction && predictions[i] !== undefined) {
-      // Convert epoch millis to ISO string if not already
-      let isoTime = timestamps[i];
-      // If the timestamp is a number or a string of digits, convert:
-      if (/^\d+$/.test(isoTime)) {
-        isoTime = new Date(Number(isoTime)).toISOString();
-      }
+      // Convert epoch millis to ISO string if needed
+      let isoTime = candles[i].timestamp;
+      if (/^\d+$/.test(isoTime)) isoTime = new Date(Number(isoTime)).toISOString();
       lines.push(`${isoTime}\t${predictions[i]}`);
       lastPrediction = predictions[i];
     }
@@ -106,42 +96,53 @@ function appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH) {
   }
 }
 
+// Deduplicate and sort the log file
+function deduplicateAndSortLogFile(SIGNAL_LOG_PATH) {
+  if (!fs.existsSync(SIGNAL_LOG_PATH)) return;
+  const lines = fs.readFileSync(SIGNAL_LOG_PATH, 'utf8').trim().split('\n');
+  const seen = new Set();
+  const deduped = [];
+
+  // Parse, sort by ISO timestamp
+  const parsed = lines
+    .map(line => {
+      const [ts, signal] = line.split('\t');
+      return { ts, signal, orig: line };
+    })
+    .filter(obj => obj.ts && obj.signal)
+    .sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+  for (const obj of parsed) {
+    if (!seen.has(obj.ts)) {
+      deduped.push(obj.orig);
+      seen.add(obj.ts);
+    }
+  }
+  fs.writeFileSync(SIGNAL_LOG_PATH, deduped.join('\n') + '\n');
+}
+
 function runRecognition() {
   try {
     const rows = loadCsvRows(CSV_PATH);
-    const candles = csvToJson(rows, JSON_PATH);
+    let candles = csvToJson(rows, JSON_PATH);
 
-    // Deduplicate candles by timestamp
-    const uniqueCandles = [];
-    const seenTimestamps = new Set();
+    // Deduplicate by timestamp
+    const uniqueCandlesMap = new Map();
     for (const candle of candles) {
-      if (!seenTimestamps.has(candle.timestamp)) {
-        uniqueCandles.push(candle);
-        seenTimestamps.add(candle.timestamp);
-      }
+      uniqueCandlesMap.set(candle.timestamp, candle);
     }
+    let uniqueCandles = Array.from(uniqueCandlesMap.values());
 
-    const timestamps = uniqueCandles.map(c => c.timestamp);
+    // Sort candles by timestamp ascending
+    uniqueCandles.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     const models = loadAllModels(MODEL_DIR);
-
     if (models.length) {
       for (const { net, filename } of models) {
         const predictions = predictAll(uniqueCandles, net);
-        // Write CSV: only use the original row for each unique candle
-        // (if you want the CSV to also be deduped, you could do)
-        const uniqueRows = [];
-        const seen = new Set();
-        for (let i = 0; i < rows.length; i++) {
-          const ts = rows[i].split(',')[0];
-          if (!seen.has(ts)) {
-            uniqueRows.push(rows[i]);
-            seen.add(ts);
-          }
-        }
-        writeEnhancedCsv(uniqueRows, predictions, filename);
-        appendSignalTransitions(timestamps, predictions, SIGNAL_LOG_PATH);
-        deduplicateLogFile(SIGNAL_LOG_PATH);
+        writeEnhancedCsv(uniqueCandles, predictions, filename);
+        appendSignalTransitions(uniqueCandles, predictions, SIGNAL_LOG_PATH);
+        deduplicateAndSortLogFile(SIGNAL_LOG_PATH);
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
@@ -150,21 +151,6 @@ function runRecognition() {
   } catch (err) {
     console.error('Error:', err.message);
   }
-}
-
-function deduplicateLogFile(SIGNAL_LOG_PATH) {
-  if (!fs.existsSync(SIGNAL_LOG_PATH)) return;
-  const lines = fs.readFileSync(SIGNAL_LOG_PATH, 'utf8').trim().split('\n');
-  const seen = new Set();
-  const deduped = [];
-  for (const line of lines) {
-    const ts = line.split('\t')[0];
-    if (!seen.has(ts)) {
-      deduped.push(line);
-      seen.add(ts);
-    }
-  }
-  fs.writeFileSync(SIGNAL_LOG_PATH, deduped.join('\n') + '\n');
 }
 
 // Initial run
