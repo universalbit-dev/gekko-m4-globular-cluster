@@ -11,7 +11,8 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'INVERTER'};
 
-config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'};
+config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,
+symbol: process.env.SYMBOL,interval: process.env.INTERVAL};
 
 config.INVERTER = {DI:13,DX:3};
 

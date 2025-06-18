@@ -16,7 +16,8 @@ momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:1597,min_predictions :
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
 
-config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'};
+config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,
+symbol: process.env.SYMBOL,interval: process.env.INTERVAL};
   
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 

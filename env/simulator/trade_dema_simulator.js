@@ -15,7 +15,8 @@ config.DEMA={weight:987,threshold:5,thresholds:[{down:-0.05,up:0.05}]};
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
 
-config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: `BTC/USDT`,interval: '1m'};
+config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,
+symbol: process.env.SYMBOL,interval: process.env.INTERVAL};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 
