@@ -5,13 +5,14 @@ const rfs = require('rotating-file-stream');
 const path = require('path');
 
 class CCXTMarketData {
-  constructor({symbol, interval}) {
+  constructor({ symbol, interval }) {
     this.exchangeId = process.env.EXCHANGE_MARKET_DATA_ID || 'kraken';
     if (!this.exchangeId) throw new Error('Missing EXCHANGE_MARKET_DATA_ID env variable');
     this.exchange = new ccxt[this.exchangeId]();
     this.symbol = symbol;
     this.interval = interval;
 
+    // CSV log directory
     this.logDir = path.join(__dirname, '../../logs/csv');
     fs.ensureDirSync(this.logDir);
 
@@ -24,6 +25,16 @@ class CCXTMarketData {
     this.headerWritten = false;
 
     this.latestTimestamp = 0; // To avoid duplicates
+
+    // JSON file in CSV log dir
+    this.jsonFilePath = path.join(this.logDir, 'ohlcv_ccxt_data.json');
+    if (!fs.existsSync(this.jsonFilePath)) {
+      fs.writeJsonSync(this.jsonFilePath, []);
+    }
+
+    this.destDir = path.join(__dirname, '../../logs/json/ohlcv');
+    fs.ensureDirSync(this.destDir);
+    this.destPath = path.join(this.destDir, 'ohlcv_ccxt_data.json');
   }
 
   async fetchAndAppendOHLCV() {
@@ -40,17 +51,64 @@ class CCXTMarketData {
       const newRows = ohlcv.filter(([timestamp]) => timestamp > this.latestTimestamp);
 
       if (newRows.length > 0) {
+        // Prepare new entries for JSON
+        const jsonEntries = [];
+
         newRows.forEach(([timestamp, open, high, low, close, volume]) => {
           const line = `${timestamp},${open},${high},${low},${close},${volume}\n`;
           this.csvStream.write(line);
+
+          jsonEntries.push({
+            timestamp, open, high, low, close, volume
+          });
         });
+
+        // Append new rows to JSON file (in /logs/csv/)
+        let existingData = [];
+        try {
+          existingData = fs.readJsonSync(this.jsonFilePath);
+        } catch (err) {
+          existingData = [];
+        }
+        const updatedData = existingData.concat(jsonEntries);
+        fs.writeJsonSync(this.jsonFilePath, updatedData, { spaces: 2 });
+
         this.latestTimestamp = newRows[newRows.length - 1][0];
         console.log(`Appended ${newRows.length} new rows at ${new Date().toISOString()}`);
+
+        // ---- APPEND TO DESTINATION JSON FILE ----
+        this.appendJsonToDest(jsonEntries);
+        // -----------------------------------------
+        
       } else {
         console.log(`No new data at ${new Date().toISOString()}`);
       }
     } catch (err) {
       console.error('Error fetching/appending OHLCV:', err);
+    }
+  }
+
+  appendJsonToDest(newEntries) {
+    // Appends only new entries
+    let destData = [];
+    try {
+      if (fs.existsSync(this.destPath)) {
+        destData = fs.readJsonSync(this.destPath);
+      }
+    } catch (e) {
+      destData = [];
+    }
+
+    // Filter to ensure only new data is appended
+    const lastTimestamp = destData.length ? destData[destData.length - 1].timestamp : 0;
+    const filteredEntries = newEntries.filter(entry => entry.timestamp > lastTimestamp);
+
+    if (filteredEntries.length) {
+      const updatedDestData = destData.concat(filteredEntries);
+      fs.writeJsonSync(this.destPath, updatedDestData, { spaces: 2 });
+      console.log(`Appended ${filteredEntries.length} new entries to ${this.destPath}`);
+    } else {
+      console.log('No new entries to append to destination JSON.');
     }
   }
 
@@ -61,9 +119,9 @@ class CCXTMarketData {
 
 // ---- MAIN LOOP ----
 
-const INTERVAL_MS = 60 * 1000; // 1 minute in ms (adjust for 5m if needed)
-const SYMBOL = 'BTC/USDT';    // or your chosen symbol
-const OHLCV_INTERVAL = '1m';  // or '5m', '15m', etc.
+const INTERVAL_MS = 300 * 1000; // 5 minutes
+const SYMBOL = 'BTC/EUR'; // or your chosen symbol
+const OHLCV_INTERVAL = '5m'; // or '1m', '15m', etc.
 
 const marketData = new CCXTMarketData({
   symbol: SYMBOL,
@@ -80,7 +138,7 @@ const timer = setInterval(loop, INTERVAL_MS);
 process.on('SIGINT', () => {
   clearInterval(timer);
   marketData.close();
-  console.log('\nCSV stream closed. Exiting.');
+  console.log('\nCSV and JSON streams closed. Exiting.');
   process.exit(0);
 });
 
