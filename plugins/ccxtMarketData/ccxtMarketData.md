@@ -25,8 +25,8 @@ Add to your strategy config:
 config.ccxtMarketData = {
   enabled: true,
   exchange: 'kraken',
-  symbol: 'BTC/USDT',
-  interval: '1m'
+  symbol: 'BTC/EUR',
+  interval: '5m'
 };
 ```
 
@@ -40,8 +40,8 @@ You can see example of this integration in the project at
 config.ccxtMarketData = {
   enabled: true,
   exchange: process.env.EXCHANGE_MARKET_DATA_ID,
-  symbol: `BTC/USDT`,
-  interval: '1m'
+  symbol: `BTC/EUR`,
+  interval: '5m'
 };
 ```
 This allows dynamic assignment of the exchange via environment variables, making your setup more flexible.
