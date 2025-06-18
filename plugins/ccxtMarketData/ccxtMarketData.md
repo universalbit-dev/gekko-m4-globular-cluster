@@ -38,10 +38,10 @@ You can see example of this integration in the project at
 
 ```js
 config.ccxtMarketData = {
-  enabled: true,
-  exchange: process.env.EXCHANGE_MARKET_DATA_ID,
-  symbol: `BTC/EUR`,
-  interval: '5m'
+enabled: true,
+exchange: process.env.EXCHANGE_MARKET_DATA_ID,
+symbol: process.env.SYMBOL,
+interval: process.env.INTERVAL
 };
 ```
 This allows dynamic assignment of the exchange via environment variables, making your setup more flexible.
