@@ -120,8 +120,8 @@ class CCXTMarketData {
 // ---- MAIN LOOP ----
 
 const INTERVAL_MS = 300 * 1000; // 5 minutes
-const SYMBOL = 'BTC/EUR'; // or your chosen symbol
-const OHLCV_INTERVAL = '5m'; // or '1m', '15m', etc.
+const SYMBOL = process.env.SYMBOL || 'BTC/EUR'; // or your chosen symbol
+const OHLCV_INTERVAL = process.env.INTERVAL || '5m'; // or '1m', '15m', etc.
 
 const marketData = new CCXTMarketData({
   symbol: SYMBOL,
