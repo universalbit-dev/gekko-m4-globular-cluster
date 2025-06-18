@@ -3,7 +3,11 @@ const fs = require('fs');
 const ConvNet = require('../core/convnet.js'); // Adjust path as needed
 
 const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes (900,000 ms), adjust as needed
-
+const filePath='../logs/json/ohlcv/ohlcv_data.json';
+// Check once at the top level of your script
+if (!fs.existsSync(filePath)) {
+  fs.writeFileSync(filePath, '[]', 'utf8');
+}
 function trainAndSave() {
   let data;
   try {

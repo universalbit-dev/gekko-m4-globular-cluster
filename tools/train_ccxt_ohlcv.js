@@ -4,7 +4,11 @@ const dir = './trained_ccxt_ohlcv';
 const ConvNet = require('../core/convnet.js');
 
 const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
-
+const filePath='../logs/json/ohlcv/ohlcv_ccxt_data.json';
+// Check once at the top level of your script
+if (!fs.existsSync(filePath)) {
+  fs.writeFileSync(filePath, '[]', 'utf8');
+}
 function trainAndSave() {
   let data;
   try {
