@@ -126,3 +126,25 @@ For details on implementing advanced charting for this project, refer to the ded
 * ##### **[NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)** - Explore Bitcoin-specific blockchain nodes.
 * #### **[TulipIndicators](https://tulipindicators.org/)** - Technical analysis indicators for financial data.
 * #### **[Blockchain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)** - Resources on blockchain and mining.
+
+* Certainly! Here’s a user-friendly, alternative version of your note with icons, ready to add at the bottom of your readme.md:
+
+---
+
+> ### 📌 **Note on Calculations**
+>
+> When working with this project, you may encounter both:
+>
+> - 📊 **Deterministic Calculations:**  
+>   Always give the same result when using the same input—precise and predictable.
+>
+> - 🎲 **Random (Unpredictable) Calculations:**  
+>   Add an element of chance, so results may change even with the same input.
+>
+> **Why this matters:**  
+> 📊 Deterministic processes are best when you need repeatable and reliable results.  
+> 🎲 Random processes are great for modeling uncertainty or real-world situations where outcomes aren’t always predictable.
+>
+> Understanding which type is used in different parts of this project will help you interpret the results correctly and decide how to use or adjust the code for your needs.
+
+---
