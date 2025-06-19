@@ -141,6 +141,7 @@ pm2 logs --json | node realTimeProcessor.js
 PM2 can serve static files using its `pm2 serve` feature. To expose `simulator.json` over HTTP, use the following command:
 
 ```bash
+cd logs/json
 pm2 serve . 9559 simulator.json
 ```
 
