@@ -1,7 +1,7 @@
 # 🚀 Gekko Broker
 
 - 📚 [Documentation](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/)
-- 🌐 [Exchange Structure (ccxt)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/gekko-broker/wrapper_api.md)
+- 🌐 [Exchange Data Architecture](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/gekko-broker/wrapper_api.md)
 
 ---
 
@@ -37,7 +37,5 @@ The `gekkoBroker.js` file is the core component for communication with crypto ex
    - Built-in checks and logs help prevent mistakes and make troubleshooting easy.
 
 ---
-
-> 💡 **Tip:** For more details, see the [official docs](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/gekko-broker) or the [ccxt Exchange Structure Guide](https://docs.ccxt.com/#/?id=exchange-structure).
 
 ---
