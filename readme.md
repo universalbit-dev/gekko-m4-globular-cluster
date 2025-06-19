@@ -127,8 +127,6 @@ For details on implementing advanced charting for this project, refer to the ded
 * #### **[TulipIndicators](https://tulipindicators.org/)** - Technical analysis indicators for financial data.
 * #### **[Blockchain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)** - Resources on blockchain and mining.
 
-* Certainly! Here’s a user-friendly, alternative version of your note with icons, ready to add at the bottom of your readme.md:
-
 ---
 
 > ### 📌 **Note on Calculations**
