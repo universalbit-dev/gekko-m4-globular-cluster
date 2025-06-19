@@ -1,7 +1,7 @@
 # 🚀 Gekko Broker
 
-- 📚 [Documentation](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/gekko-broker)
-- 🌐 [Exchange Structure (ccxt)](https://docs.ccxt.com/#/?id=exchange-structure)
+- 📚 [Documentation](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/)
+- 🌐 [Exchange Structure (ccxt)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/gekko-broker/wrapper_api.md)
 
 ---
 
