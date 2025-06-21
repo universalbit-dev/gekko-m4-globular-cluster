@@ -28,5 +28,12 @@ module.exports = {
   instances : "1",
   exec_mode : "cluster"
   },
+  {
+  name: 'pm2-tools-watchdog',
+  script    : 'pm2-tools-watchdog.js',
+  args      : '',
+  instances : "1",
+  exec_mode : "cluster"
+  },
 ]
 }
