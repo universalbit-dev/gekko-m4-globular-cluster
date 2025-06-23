@@ -1,12 +1,12 @@
 /**
- * pm2-cpu-watchdog.js (memory optimized)
+ * pm2-cpu-watchdog.js (CPU & MEMORY optimized) summer version
  *
- * Monitors specified PM2 processes for sustained high CPU usage, and restarts them if CPU usage
- * exceeds a configurable threshold for a configurable duration.
+ * Monitors specified PM2 processes for sustained high CPU or MEMORY usage,
+ * and restarts them if usage exceeds configurable thresholds for a configurable duration.
  *
  * Usage:
  *   1. Set the process names you wish to monitor in the `monitoredNames` array below.
- *   2. Adjust the CPU threshold (%), monitoring interval (seconds), and duration threshold (seconds) as needed.
+ *   2. Adjust the CPU & MEMORY thresholds (%/MB), monitoring interval (seconds), and duration thresholds (seconds) as needed.
  *   3. Start this script with PM2 to ensure the watchdog itself stays running:
  *        pm2 start pm2-cpu-watchdog.js --name pm2-cpu-watchdog
  *
@@ -15,15 +15,22 @@
  *   - This script should run on the same server as your PM2 processes.
  *
  * Example:
- *   If a process named 'neuralnet_simulator' uses more than 100% CPU for over 2 minutes,
- *   it will be automatically restarted.
+ *   If a process uses more than 100% CPU for over 2 minutes,
+ *   or more than 400MB RAM for over 2 minutes, it will be automatically restarted.
  *
  * Author: universalbit-dev
  */
 
 const pm2 = require('pm2');
+
+// CPU config
 const CPU_THRESHOLD = 100; // percent CPU usage to trigger restart
-const DURATION_THRESHOLD = 120; // seconds CPU usage must remain above threshold before restart
+const CPU_DURATION_THRESHOLD = 120; // seconds CPU usage must remain above threshold before restart
+
+// MEMORY config
+const MEMORY_THRESHOLD_MB = 400; // MB RAM to trigger restart
+const MEMORY_DURATION_THRESHOLD = 120; // seconds memory must remain above threshold before restart
+
 const CHECK_INTERVAL = 10; // seconds between checks
 
 const monitoredNames = [
@@ -45,8 +52,9 @@ const monitoredNames = [
   'ohlcv_data'
 ];
 
-// Use Map instead of object for better memory handling
+// Use Maps for tracking threshold breaches
 const highCpuSince = new Map();
+const highMemSince = new Map();
 
 function check() {
   pm2.connect(err => {
@@ -59,24 +67,50 @@ function check() {
       const now = Date.now();
       list.forEach(proc => {
         if (!monitoredNames.includes(proc.name)) return;
+
+        // CPU monitoring
         if (proc.monit.cpu > CPU_THRESHOLD) {
           if (!highCpuSince.has(proc.name)) highCpuSince.set(proc.name, now);
-          const duration = (now - highCpuSince.get(proc.name)) / 1000;
-          if (duration > DURATION_THRESHOLD) {
+          const cpuDuration = (now - highCpuSince.get(proc.name)) / 1000;
+          if (cpuDuration > CPU_DURATION_THRESHOLD) {
             pm2.restart(proc.pm_id, err => {
               if (err) console.error('Restart failed:', err);
               else console.log(`Restarted ${proc.name} due to sustained high CPU usage.`);
               highCpuSince.delete(proc.name);
+              highMemSince.delete(proc.name); // Reset mem tracking too
             });
           }
         } else {
           highCpuSince.delete(proc.name);
         }
+
+        // MEMORY monitoring
+        const memMB = proc.monit.memory / (1024 * 1024);
+        if (memMB > MEMORY_THRESHOLD_MB) {
+          if (!highMemSince.has(proc.name)) highMemSince.set(proc.name, now);
+          const memDuration = (now - highMemSince.get(proc.name)) / 1000;
+          if (memDuration > MEMORY_DURATION_THRESHOLD) {
+            pm2.restart(proc.pm_id, err => {
+              if (err) console.error('Restart failed:', err);
+              else console.log(`Restarted ${proc.name} due to sustained high MEMORY usage (${memMB.toFixed(1)} MB).`);
+              highMemSince.delete(proc.name);
+              highCpuSince.delete(proc.name); // Reset cpu tracking too
+            });
+          }
+        } else {
+          highMemSince.delete(proc.name);
+        }
       });
+
       // Clean up process names that no longer exist
       for (const name of Array.from(highCpuSince.keys())) {
         if (!list.some(proc => proc.name === name)) {
           highCpuSince.delete(name);
+        }
+      }
+      for (const name of Array.from(highMemSince.keys())) {
+        if (!list.some(proc => proc.name === name)) {
+          highMemSince.delete(name);
         }
       }
       pm2.disconnect();
