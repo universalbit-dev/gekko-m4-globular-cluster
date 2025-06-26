@@ -1,10 +1,10 @@
 /**
- * ccxt_chart_recognition.js
+ * ccxt_chart_recognition_fine_grained.js
  * 
- * For long period (e.g., 1-hour, 4-hour, daily) OHLCV data.
+ * For short period (e.g., 1-min, 5-min) OHLCV data for fine-grained, high-frequency trading analysis.
  * - Processes CCXT OHLCV data
  * - Runs trained ConvNet models
- * - Logs only state transitions (bull, bear, idle) at long intervals
+ * - Logs all state transitions (bull, bear, idle) at high frequency
  * - Overwrites the output CSV each run
  */
 
@@ -13,12 +13,12 @@ const path = require('path');
 const ConvNet = require('../core/convnet.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
-const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data_long.json');
+const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data_short.json');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
-const INTERVAL_MS = 60 * 60 * 1000; // 1 hour (adjust as needed)
+const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes (adjust as needed)
 
 function ensureDir(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -88,7 +88,7 @@ function writeEnhancedCsv(candles, predictions, modelName) {
   console.log('Wrote predicted CSV:', OUT_CSV_PATH);
 }
 
-// Logs only state transitions for long period data
+// Logs all state transitions in fine granularity
 function appendSignalTransitions(candles, predictions, logPath) {
   ensureDir(logPath);
   let lastPrediction = null;
