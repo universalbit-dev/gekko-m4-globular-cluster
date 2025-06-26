@@ -129,6 +129,45 @@ pm2 start tools.config.js --cron-restart="0 * * * *"
 
 ---
 
+### 4. 💰 Order Simulation Scripts
+
+#### `ccxt_order_simulator.js`
+- **Purpose:** Backtests trading signals from `ccxt_signal.log` to evaluate strategy performance.
+- **Input:** `ccxt_signal.log` containing lines with format: `timestamp<tab>prediction<tab>price`
+- **Output:** 
+  - Results written to `order.log` in CSV format: `timestamp,order,price,balance,pnl,success`
+  - Console summary with performance metrics and statistics
+- **Features:**
+  - Simulates buy/sell/idle actions based on predictions ('bull'=buy, 'bear'=sell, 'idle'=no action)
+  - Tracks base and quote asset balances (default: 1.0 base, 10000.0 quote)
+  - Fixed order amount per trade (default: 0.1 base asset)
+  - Calculates realized PnL for sell orders based on last buy price
+  - Annotates prediction success (buy success if next price higher, sell success if next price lower)
+  - Robust error handling for malformed log lines
+  - Clears order.log on each run
+
+**Usage:**
+```bash
+node ccxt_order_simulator.js
+```
+
+**Sample ccxt_signal.log format:**
+```
+2025-06-26T14:00:00Z	bull	64000
+2025-06-26T14:05:00Z	idle	64100
+2025-06-26T14:10:00Z	bear	64050
+```
+
+**Sample order.log output:**
+```csv
+timestamp,order,price,balance,pnl,success
+2025-06-26T14:00:00Z,buy,64000,74000,0,fail
+2025-06-26T14:05:00Z,idle,64100,74110,0,
+2025-06-26T14:10:00Z,sell,64050,74055,-5,success
+```
+
+---
+
 ## 📝 Usage Notes & Recommendations
 
 - Input files must be regularly updated with fresh OHLCV data and correct labeling (for training).
