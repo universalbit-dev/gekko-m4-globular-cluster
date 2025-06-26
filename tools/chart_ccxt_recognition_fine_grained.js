@@ -31,7 +31,7 @@ const path = require('path');
 const ConvNet = require('../core/convnet.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
-const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data_short.json');
+const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_fine.log');
