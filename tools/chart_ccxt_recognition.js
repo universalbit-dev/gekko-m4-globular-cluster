@@ -1,12 +1,31 @@
 /**
- * ccxt_chart_recognition.js
+ * chart_ccxt_recognition.js
  * 
- * For long period (e.g., 1-hour, 4-hour, daily) OHLCV data.
- * - Processes CCXT OHLCV data
- * - Runs trained ConvNet models
- * - Logs only state transitions (bull, bear, idle) at long intervals
- * - Overwrites the output CSV each run
+ * Purpose:
+ *   Processes OHLCV data (typically 1-hour intervals) using a trained CCXT model to recognize and classify 
+ *   market states as 'bull', 'bear', or 'idle'. Logs only state transitions (not every prediction) to provide 
+ *   concise signal data for downstream trading simulation or analysis.
+ * 
+ * Key Features:
+ *   - Loads recent OHLCV data and uses a trained model for predictions.
+ *   - Logs state transitions with accurate timestamps to a dedicated signal log file.
+ *   - Designed for lower-frequency (hourly) recognition and logging.
+ *   - Supports periodic execution for continuous signal generation.
+ * 
+ * Typical Usage:
+ *   - As a scheduled process in trading automation pipelines.
+ *   - For backtesting and live signal generation at 1-hour intervals.
+ * 
+ * Dependencies:
+ *   - Trained CCXT model files (.json)
+ *   - Recent OHLCV CSV/JSON data
+ *   - Node.js filesystem and path modules
+ * 
+ * Output:
+ *   - signal log: ccxt_signal_hourly.log
+ *   - prediction CSV: ohlcv_ccxt_data_prediction.csv
  */
+
 
 const fs = require('fs');
 const path = require('path');
@@ -16,11 +35,11 @@ const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data_long.json');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
 const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
-const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
+const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_hourly.log');
 const LABELS = ['bull', 'bear', 'idle'];
-const INTERVAL_MS = 60 * 60 * 1000; // 1 hour (adjust as needed)
+const INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
-function ensureDir(filePath) {
+function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
 
@@ -32,7 +51,7 @@ function loadCsvRows(csvPath) {
 }
 
 function csvToJson(rows, jsonPath) {
-  ensureDir(jsonPath);
+  ensureDirExists(jsonPath);
   const candles = rows.map(line => {
     const [timestamp, open, high, low, close, volume] = line.split(',');
     return {
@@ -48,7 +67,7 @@ function csvToJson(rows, jsonPath) {
   return candles;
 }
 
-function loadAllModels(modelDir) {
+function loadModels(modelDir) {
   if (!fs.existsSync(modelDir)) {
     console.warn('No trained model directory found. Skipping prediction step.');
     return [];
@@ -78,8 +97,8 @@ function predictAll(candles, net) {
   });
 }
 
-function writeEnhancedCsv(candles, predictions, modelName) {
-  ensureDir(OUT_CSV_PATH);
+function writePredictedCsv(candles, predictions, modelName) {
+  ensureDirExists(OUT_CSV_PATH);
   const header = 'timestamp,open,high,low,close,volume,prediction,model\n';
   const out = candles.map((c, i) =>
     `${c.timestamp},${c.open},${c.high},${c.low},${c.close},${c.volume},${predictions[i]},${modelName}`
@@ -88,9 +107,9 @@ function writeEnhancedCsv(candles, predictions, modelName) {
   console.log('Wrote predicted CSV:', OUT_CSV_PATH);
 }
 
-// Logs only state transitions for long period data
-function appendSignalTransitions(candles, predictions, logPath) {
-  ensureDir(logPath);
+// Log only state transitions
+function logStateTransitions(candles, predictions, logPath) {
+  ensureDirExists(logPath);
   let lastPrediction = null;
   let lines = [];
   for (let i = 0; i < predictions.length; i++) {
@@ -101,51 +120,30 @@ function appendSignalTransitions(candles, predictions, logPath) {
       lastPrediction = predictions[i];
     }
   }
-  if (lines.length > 0) {
-    fs.appendFileSync(logPath, lines.join('\n') + '\n');
-    console.log('Appended signal transitions to', logPath);
-  }
-}
-
-function deduplicateAndSortLogFile(logPath) {
-  if (!fs.existsSync(logPath)) return;
-  const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n');
-  const seen = new Set();
-  const parsed = lines
-    .map(line => {
-      const [ts, signal] = line.split('\t');
-      return { ts, signal, orig: line };
-    })
-    .filter(obj => obj.ts && obj.signal)
-    .sort((a, b) => new Date(a.ts) - new Date(b.ts));
-  const deduped = [];
-  for (const obj of parsed) {
-    if (!seen.has(obj.ts)) {
-      deduped.push(obj.orig);
-      seen.add(obj.ts);
-    }
-  }
-  fs.writeFileSync(logPath, deduped.join('\n') + '\n');
+  // Overwrite log to avoid repeats
+  fs.writeFileSync(logPath, lines.join('\n') + '\n');
+  console.log('Wrote state transitions to', logPath);
 }
 
 function runRecognition() {
   try {
     const rows = loadCsvRows(CSV_PATH);
-    let candles = csvToJson(rows, JSON_PATH);
+    const candles = csvToJson(rows, JSON_PATH);
 
+    // Remove duplicate candles by timestamp
     const uniqueCandlesMap = new Map();
     for (const candle of candles) uniqueCandlesMap.set(candle.timestamp, candle);
-    let uniqueCandles = Array.from(uniqueCandlesMap.values());
-    uniqueCandles.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    const uniqueCandles = Array.from(uniqueCandlesMap.values()).sort((a, b) =>
+      new Date(a.timestamp) - new Date(b.timestamp)
+    );
 
-    const models = loadAllModels(MODEL_DIR);
+    const models = loadModels(MODEL_DIR);
 
     if (models.length) {
       for (const { net, filename } of models) {
         const predictions = predictAll(uniqueCandles, net);
-        writeEnhancedCsv(uniqueCandles, predictions, filename);
-        appendSignalTransitions(uniqueCandles, predictions, SIGNAL_LOG_PATH);
-        deduplicateAndSortLogFile(SIGNAL_LOG_PATH);
+        writePredictedCsv(uniqueCandles, predictions, filename);
+        logStateTransitions(uniqueCandles, predictions, SIGNAL_LOG_PATH);
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
