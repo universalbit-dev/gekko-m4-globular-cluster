@@ -19,6 +19,7 @@ const monitoredNames = [
   'train ccxt ohlcv',
   'train ohlcv',
   'chart ccxt recognition',
+  'chart ccxt recognition fine grained',
   'chart recognition'
 ];
 
