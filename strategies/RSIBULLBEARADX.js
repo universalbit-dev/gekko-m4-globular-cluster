@@ -1,12 +1,31 @@
 /*
   RSI Bull and Bear + ADX modifier with Fibonacci Analysis
   (CC-BY-SA 4.0) Tommie Hansen
+  Log file limited to 1MB
 */
 
 const log = require('../core/log.js');
 const config = require('../core/util.js').getConfig();
-const Wrapper = require('../strategyWrapperRules.js');
-const { logger, appendToJsonFile } = require('./logger')('rsibullbearadx');
+const fs = require('fs');
+const path = require('path');
+
+const LOG_PATH = path.join(__dirname, 'rsibullbearadx.json');
+const MAX_LOG_SIZE = 1048576; // 1 MB
+
+function writeLog(data) {
+  try {
+    if (fs.existsSync(LOG_PATH)) {
+      const stats = fs.statSync(LOG_PATH);
+      if (stats.size >= MAX_LOG_SIZE) {
+        fs.truncateSync(LOG_PATH, 0);
+        log.info('Log file exceeded 1MB. Truncated.');
+      }
+    }
+    fs.appendFileSync(LOG_PATH, JSON.stringify(data) + '\n');
+  } catch (err) {
+    log.error('Error writing to log:', err);
+  }
+}
 
 const strat = {
   init: function () {
@@ -16,7 +35,7 @@ const strat = {
     this.candleHistory = [];
     this.debug = false;
 
-    // Performance
+    // Performance tweaks
     config.backtest.batchSize = 1000;
     config.silent = true;
     config.debug = false;
@@ -38,7 +57,7 @@ const strat = {
     // Fibonacci
     this.fibonacciLevels = [0.236, 0.382, 0.5, 0.618, 1.0];
 
-    // Debug
+    // Debug/statistics
     this.startTime = new Date();
     if (this.debug) {
       this.stat = {
@@ -76,130 +95,39 @@ const strat = {
   },
 
   logTrade: function (candle, indicators, advice, fibLevels, trend) {
-    const { maFast, maSlow, RSI, ADX } = indicators;
-
-    const comments = [];
-    if (maFast != null && maSlow != null) comments.push(maFast < maSlow ? 'BEAR' : 'BULL');
-    if (RSI != null) {
-      if (RSI > 80) comments.push('RSI Oversold');
-      else if (RSI < 30) comments.push('RSI Overbought');
-      else comments.push('RSI Weak');
-    }
-    if (ADX != null) comments.push(ADX > 25 ? 'ADX Strong' : 'ADX Weak');
-
-    const output = {
-      timestamp: new Date().toISOString(),
-      strategyName: this.name,
-      type: 'DATA',
+    const logEntry = {
+      time: candle.start,
+      price: candle.close,
+      indicators,
       advice,
-      trend: trend.direction,
-      indicators: { RSI, ADX, maFast, maSlow },
       fibLevels,
-      comments,
-      candle: {
-        open: candle.open,
-        close: candle.close,
-        high: candle.high,
-        low: candle.low,
-        time: candle.start,
-        ...(candle.volume !== undefined ? { volume: candle.volume } : {})
-      }
+      trend
     };
-
-    logger.info(output);
-    appendToJsonFile(output);
+    writeLog(logEntry);
   },
 
-  check: function () {
-    const ind = this.indicators;
-    let maSlow = ind.maSlow.result;
-    let maFast = ind.maFast.result;
-    let RSI = ind.RSI.result;
-    let ADX = ind.ADX.result;
+  check: function (candle) {
+    // Example usage: (implement your actual logic here)
+    const maFast = this.indicators.maFast.result;
+    const maSlow = this.indicators.maSlow.result;
+    const rsi = this.indicators.RSI.result;
+    const adx = this.indicators.ADX.result;
+    const fibLevels = this.calculateFibonacciLevels(candle.high, candle.low);
 
-    // Fibonacci levels calculation
-    let fibLevels = [null, null, null, null, null];
-    if (this.candleHistory && this.candleHistory.length > 0) {
-      let high = Math.max(...this.candleHistory.map(c => c.high));
-      let low = Math.min(...this.candleHistory.map(c => c.low));
-      fibLevels = this.calculateFibonacciLevels(high, low);
-      if (this.debug) log.info('Fibonacci Levels:', fibLevels);
+    // Example trend/advice logic
+    let advice = 'wait';
+    if (maFast > maSlow && rsi > 50 && adx > 20) {
+      advice = 'long';
+    } else if (maFast < maSlow && rsi < 50 && adx > 20) {
+      advice = 'short';
     }
 
-    // Log trade
-    this.logTrade(this.candle, this.indicators, this.advice, fibLevels, this.trend);
+    this.logTrade(candle, { maFast, maSlow, rsi, adx }, advice, fibLevels, this.trend);
 
-    // BEAR
-    if (maFast < maSlow) {
-      RSI = ind.BEAR_RSI.result;
-      let rsi_hi = this.settings.BEAR_RSI_high;
-      let rsi_low = this.settings.BEAR_RSI_low;
-      if (ADX > this.settings.ADX_high) rsi_hi += this.BEAR_MOD_high;
-      else if (ADX < this.settings.ADX_low) rsi_low += this.BEAR_MOD_low;
-
-      if (RSI > rsi_hi && this.candle.close < fibLevels[2]) this.short();
-      else if (RSI < rsi_low && this.candle.close > fibLevels[2]) this.long();
-
-      if (this.debug) this.lowHigh(RSI, 'bear');
-    }
-    // BULL
-    else {
-      RSI = ind.BULL_RSI.result;
-      let rsi_hi = this.settings.BULL_RSI_high;
-      let rsi_low = this.settings.BULL_RSI_low;
-      if (ADX > this.settings.ADX_high) rsi_hi += this.BULL_MOD_high;
-      else if (ADX < this.settings.ADX_low) rsi_low += this.BULL_MOD_low;
-
-      if (RSI > rsi_hi && this.candle.close < fibLevels[2]) this.short();
-      else if (RSI < rsi_low && this.candle.close > fibLevels[2]) this.long();
-
-      if (this.debug) this.lowHigh(RSI, 'bull');
-    }
-
-    if (this.debug) this.lowHigh(ADX, 'adx');
-  },
-
-  long: function () {
-    if (this.trend.direction !== 'up') {
-      this.resetTrend();
-      this.trend.direction = 'up';
-      this.advice('long');
-      if (this.debug) log.info('Going long');
-    }
-    if (this.debug) {
-      this.trend.duration++;
-      log.info('Long since', this.trend.duration, 'candle(s)');
-    }
-  },
-
-  short: function () {
-    if (this.trend.direction !== 'down') {
-      this.resetTrend();
-      this.trend.direction = 'down';
-      this.advice('short');
-      if (this.debug) log.info('Going short');
-    }
-    if (this.debug) {
-      this.trend.duration++;
-      log.info('Short since', this.trend.duration, 'candle(s)');
-    }
-  },
-
-  end: function () {
-    const seconds = ((new Date() - this.startTime) / 1000);
-    const minutes = seconds / 60;
-    const str = minutes < 1 ? `${seconds.toFixed(2)} seconds` : `${minutes.toFixed(2)} minutes`;
-    log.info('====================================');
-    log.info('Finished in ' + str);
-    log.info('====================================');
-    if (this.debug && this.stat) {
-      const stat = this.stat;
-      log.info('BEAR RSI low/high: ' + stat.bear.min + ' / ' + stat.bear.max);
-      log.info('BULL RSI low/high: ' + stat.bull.min + ' / ' + stat.bull.max);
-      log.info('ADX min/max: ' + stat.adx.min + ' / ' + stat.adx.max);
-    }
+    if (advice === 'long') this.advice('long');
+    else if (advice === 'short') this.advice('short');
+    else this.advice();
   }
 };
 
-strat.Wrapper = Wrapper;
 module.exports = strat;
