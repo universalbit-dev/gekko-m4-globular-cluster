@@ -111,18 +111,34 @@ function writePredictedCsv(candles, predictions, modelName) {
 function logStateTransitions(candles, predictions, logPath) {
   ensureDirExists(logPath);
   let lastPrediction = null;
-  let lines = [];
+  let lines = ['timestamp\tprediction\tprice']; // Header line
+  
   for (let i = 0; i < predictions.length; i++) {
-    if (predictions[i] !== lastPrediction && predictions[i] !== undefined) {
+    // Validate inputs for robustness
+    if (predictions[i] !== lastPrediction && 
+        predictions[i] !== undefined && 
+        candles[i] && 
+        typeof candles[i].close === 'number' && 
+        !isNaN(candles[i].close)) {
+      
       let isoTime = candles[i].timestamp;
       if (/^\d+$/.test(isoTime)) isoTime = new Date(Number(isoTime)).toISOString();
-      lines.push(`${isoTime}\t${predictions[i]}`);
+      
+      // Ensure price is formatted as float
+      const price = parseFloat(candles[i].close).toString();
+      
+      lines.push(`${isoTime}\t${predictions[i]}\t${price}`);
       lastPrediction = predictions[i];
     }
   }
-  // Overwrite log to avoid repeats
-  fs.writeFileSync(logPath, lines.join('\n') + '\n');
-  console.log('Wrote state transitions to', logPath);
+  
+  // Only write if we have actual signal data (more than just header)
+  if (lines.length > 1) {
+    fs.writeFileSync(logPath, lines.join('\n') + '\n');
+    console.log('Wrote state transitions to', logPath);
+  } else {
+    console.log('No valid state transitions to log');
+  }
 }
 
 function runRecognition() {
