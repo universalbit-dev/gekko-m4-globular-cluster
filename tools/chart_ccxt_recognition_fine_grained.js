@@ -111,14 +111,33 @@ function logStateTransitions(candles, predictions, logPath) {
   ensureDirExists(logPath);
   let lastPrediction = null;
   let lines = [];
+  
+  // Add header line
+  lines.push('timestamp\tprediction\tprice');
+  
   for (let i = 0; i < predictions.length; i++) {
     if (predictions[i] !== lastPrediction && predictions[i] !== undefined) {
-      let isoTime = candles[i].timestamp;
+      // Robust validation against malformed data
+      const candle = candles[i];
+      if (!candle || typeof candle.close !== 'number' || isNaN(candle.close)) {
+        console.warn(`Skipping malformed candle data at index ${i}`);
+        continue;
+      }
+      
+      let isoTime = candle.timestamp;
       if (/^\d+$/.test(isoTime)) isoTime = new Date(Number(isoTime)).toISOString();
-      lines.push(`${isoTime}\t${predictions[i]}`);
-      lastPrediction = predictions[i];
+      
+      // Ensure all three fields are present and valid before logging
+      if (isoTime && predictions[i] && typeof candle.close === 'number') {
+        const price = parseFloat(candle.close.toFixed(8)); // Ensure float precision
+        lines.push(`${isoTime}\t${predictions[i]}\t${price}`);
+        lastPrediction = predictions[i];
+      } else {
+        console.warn(`Skipping incomplete data at index ${i}: timestamp=${isoTime}, prediction=${predictions[i]}, price=${candle.close}`);
+      }
     }
   }
+  
   // Overwrite log to avoid repeats
   fs.writeFileSync(logPath, lines.join('\n') + '\n');
   console.log('Wrote state transitions to', logPath);
