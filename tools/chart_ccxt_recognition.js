@@ -1,40 +1,15 @@
 /**
  * chart_ccxt_recognition.js
- * 
- * Purpose:
- *   Processes OHLCV data (typically 1-hour intervals) using a trained CCXT model to recognize and classify 
- *   market states as 'bull', 'bear', or 'idle'. Logs only state transitions (not every prediction) to provide 
- *   concise signal data for downstream trading simulation or analysis.
- * 
- * Key Features:
- *   - Loads recent OHLCV data and uses a trained model for predictions.
- *   - Logs state transitions with accurate timestamps to a dedicated signal log file.
- *   - Designed for lower-frequency (hourly) recognition and logging.
- *   - Supports periodic execution for continuous signal generation.
- * 
- * Typical Usage:
- *   - As a scheduled process in trading automation pipelines.
- *   - For backtesting and live signal generation at 1-hour intervals.
- * 
- * Dependencies:
- *   - Trained CCXT model files (.json)
- *   - Recent OHLCV CSV/JSON data
- *   - Node.js filesystem and path modules
- * 
- * Output:
- *   - signal log: ccxt_signal_hourly.log
- *   - prediction CSV: ohlcv_ccxt_data_prediction.csv
+ *
+ * Processes 1-hour OHLCV data, applies a trained CCXT model,
  */
-
 
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
-const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
-const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_hourly.log');
 const LABELS = ['bull', 'bear', 'idle'];
 const INTERVAL_MS = 60 * 60 * 1000; // 1 hour
@@ -43,16 +18,11 @@ function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
 
-function loadCsvRows(csvPath) {
+function loadCsvCandles(csvPath) {
   if (!fs.existsSync(csvPath)) throw new Error(`CSV not found at: ${csvPath}`);
-  const rows = fs.readFileSync(csvPath, 'utf8').trim().split('\n');
-  if (rows.length && isNaN(Number(rows[0].split(',')[1]))) rows.shift();
-  return rows;
-}
-
-function csvToJson(rows, jsonPath) {
-  ensureDirExists(jsonPath);
-  const candles = rows.map(line => {
+  let rows = fs.readFileSync(csvPath, 'utf8').trim().split('\n');
+  if (rows.length && isNaN(Number(rows[0].split(',')[1]))) rows.shift(); // skip header
+  return rows.map(line => {
     const [timestamp, open, high, low, close, volume] = line.split(',');
     return {
       timestamp,
@@ -62,26 +32,25 @@ function csvToJson(rows, jsonPath) {
       close: Number(close),
       volume: Number(volume),
     };
-  });
-  fs.writeFileSync(jsonPath, JSON.stringify(candles, null, 2));
-  return candles;
+  }).filter(c =>
+    c.timestamp &&
+    !isNaN(c.open) && !isNaN(c.high) && !isNaN(c.low) &&
+    !isNaN(c.close) && !isNaN(c.volume)
+  );
 }
 
-function loadModels(modelDir) {
-  if (!fs.existsSync(modelDir)) {
-    console.warn('No trained model directory found. Skipping prediction step.');
-    return [];
-  }
-  const modelFiles = fs.readdirSync(modelDir).filter(file => file.endsWith('.json'));
-  return modelFiles.map(file => {
-    const modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, file), 'utf8'));
-    const net = new ConvNet.Net();
-    net.fromJSON(modelJson);
-    return { net, filename: file };
-  });
+function loadModel(modelDir) {
+  if (!fs.existsSync(modelDir)) throw new Error('No trained model directory found.');
+  const modelFiles = fs.readdirSync(modelDir).filter(f => f.endsWith('.json'));
+  if (!modelFiles.length) throw new Error('No trained model files found.');
+  // Use the first model for prediction
+  const modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, modelFiles[0]), 'utf8'));
+  const net = new ConvNet.Net();
+  net.fromJSON(modelJson);
+  return net;
 }
 
-function predictAll(candles, net) {
+function predictCandles(candles, net) {
   return candles.map(candle => {
     try {
       const input = [candle.open, candle.high, candle.low, candle.close, candle.volume];
@@ -91,69 +60,63 @@ function predictAll(candles, net) {
       const idx = probs.indexOf(Math.max(...probs));
       return LABELS[idx] !== undefined ? LABELS[idx] : 'idle';
     } catch (err) {
-      console.error('Prediction error:', err);
       return 'idle';
     }
   });
 }
 
-function writePredictedCsv(candles, predictions, modelName) {
-  ensureDirExists(OUT_CSV_PATH);
-  const header = 'timestamp,open,high,low,close,volume,prediction,model\n';
-  const out = candles.map((c, i) =>
-    `${c.timestamp},${c.open},${c.high},${c.low},${c.close},${c.volume},${predictions[i]},${modelName}`
-  ).join('\n');
-  fs.writeFileSync(OUT_CSV_PATH, header + out + '\n');
-  console.log('Wrote predicted CSV:', OUT_CSV_PATH);
+// Write header if missing
+function ensureSignalLogHeader(logPath) {
+  if (!fs.existsSync(logPath) || fs.statSync(logPath).size === 0) {
+    fs.writeFileSync(logPath, 'timestamp\tprediction\tprice\n');
+  }
 }
 
-// Log only state transitions
+// Log only state transitions, with valid tab-separated (timestamp, prediction, price)
 function logStateTransitions(candles, predictions, logPath) {
   ensureDirExists(logPath);
+  ensureSignalLogHeader(logPath);
+
   let lastPrediction = null;
   let lines = [];
+
   for (let i = 0; i < predictions.length; i++) {
-    if (predictions[i] !== lastPrediction && predictions[i] !== undefined) {
-      let isoTime = candles[i].timestamp;
-      if (/^\d+$/.test(isoTime)) isoTime = new Date(Number(isoTime)).toISOString();
-      lines.push(`${isoTime}\t${predictions[i]}`);
-      lastPrediction = predictions[i];
+    const pred = predictions[i];
+    const price = candles[i].close;
+    const timestamp = /^\d+$/.test(candles[i].timestamp)
+      ? new Date(Number(candles[i].timestamp)).toISOString()
+      : candles[i].timestamp;
+
+    if (
+      pred !== lastPrediction &&
+      pred &&
+      ['bull', 'bear', 'idle'].includes(pred) &&
+      timestamp &&
+      !isNaN(price)
+    ) {
+      lines.push(`${timestamp}\t${pred}\t${price}`);
+      lastPrediction = pred;
     }
   }
-  // Overwrite log to avoid repeats
-  fs.writeFileSync(logPath, lines.join('\n') + '\n');
-  console.log('Wrote state transitions to', logPath);
+  if (lines.length) {
+    fs.appendFileSync(logPath, lines.join('\n') + '\n');
+    console.log('Wrote state transitions to', logPath);
+  } else {
+    console.log('No new transitions to log.');
+  }
 }
 
 function runRecognition() {
   try {
-    const rows = loadCsvRows(CSV_PATH);
-    const candles = csvToJson(rows, JSON_PATH);
-
-    // Remove duplicate candles by timestamp
-    const uniqueCandlesMap = new Map();
-    for (const candle of candles) uniqueCandlesMap.set(candle.timestamp, candle);
-    const uniqueCandles = Array.from(uniqueCandlesMap.values()).sort((a, b) =>
-      new Date(a.timestamp) - new Date(b.timestamp)
-    );
-
-    const models = loadModels(MODEL_DIR);
-
-    if (models.length) {
-      for (const { net, filename } of models) {
-        const predictions = predictAll(uniqueCandles, net);
-        writePredictedCsv(uniqueCandles, predictions, filename);
-        logStateTransitions(uniqueCandles, predictions, SIGNAL_LOG_PATH);
-        console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
-      }
-    } else {
-      console.log('Prediction CSV not generated because no trained models were found.');
-    }
+    const candles = loadCsvCandles(CSV_PATH);
+    if (!candles.length) throw new Error('No valid candles found in CSV.');
+    const model = loadModel(MODEL_DIR);
+    const predictions = predictCandles(candles, model);
+    logStateTransitions(candles, predictions, SIGNAL_LOG_PATH);
   } catch (err) {
     console.error('Recognition error:', err.stack || err.message);
   }
 }
 
-// Initial run
 runRecognition();
 setInterval(runRecognition, INTERVAL_MS);
