@@ -15,8 +15,34 @@ All scripts and data live in: [`logs/json`](https://github.com/universalbit-dev/
 | `randomchess.json`          | 📄 Rolling JSON log of filtered chess games ("Random Game Of Chess"), capped at 1MB.                   |
 | `realTimeChessProcessor.js` | ⚡ Node.js script that filters logs, updates `randomchess.json` live.                                   |
 | `jsonbin_randomchess.js`    | ☁️ Node.js uploader: pushes `randomchess.json` to [jsonbin.io](https://jsonbin.io/) every hour.        |
+| `jsonbin_chess_uploader.sh`    | |
+--- 
+>  **Make the script executable (only needed once):**
+>    ```bash
+>    chmod +x jsonbin_chess_uploader.sh
+>    ```
+>
+>  **Start the uploader and log processor:**
+>    ```bash
+>    ./jsonbin_chess_uploader.sh
+>    ```
+>
+> ---
+>
+> 🚦 **What Happens When You Run the Script?**
+>
+> - **Uploads Chess Data:**  
+>   🚀 Starts `jsonbin_randomchess.js` using PM2, so your chess data is sent to [jsonbin.io](https://jsonbin.io).
+> - **Processes Logs in Real Time:**  
+>   📡 Launches `realTimeChessProcessor.js`, which listens for and processes live PM2 logs.
+>
+> ---
+>
+> 📢 **Tip:**  
+> Make sure you have set your `X-Access-Key` for jsonbin.io in the uploader script, or it won’t work!
+>
+> ---
 
----
 
 ## 🧠 Log Origins
 
