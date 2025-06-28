@@ -49,7 +49,9 @@ const monitoredNames = [
   'neuralnet_refinements_simulator',
   'grafana_neuralnet_refinements',
   'csvexport',
-  'ohlcv_data'
+  'ohlcv_data',
+  'realTimeChess',
+  'randomchess'
 ];
 
 // Use Maps for tracking threshold breaches
