@@ -34,6 +34,10 @@ const fs = require('fs-extra');
 const cron = require('node-cron');
 
 const accessKey = ''; //<== Your jsonbin.io X-Access-Key
+if (!accessKey || accessKey.trim() === '') {
+  console.error('Error: X-Access-Key is not set. Please provide your jsonbin.io X-Access-Key in the accessKey variable.');
+  process.exit(1);
+}
 
 // Schedule the task to run at the start of every hour
 cron.schedule('0 * * * *', () => {
