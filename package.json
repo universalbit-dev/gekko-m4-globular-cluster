@@ -22,7 +22,7 @@
   "events": "^3.3.0",
   "fs-extra": "^11.2.0",
   "gekko-broker": "file:exchange",
-  "humanize-duration": "^3.31.0",
+  "humanize-duration": "^3.33.0",
   "lodash": "^4.17.21",
   "mathjs": "^12.4.0",
   "moment": "^2.29.4",
