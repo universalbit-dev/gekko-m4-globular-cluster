@@ -7,7 +7,7 @@
  * - Loads a trained model from ./trained_ccxt_ohlcv
  * - Predicts a label ('bull', 'bear', 'idle') for each candle
  * - Writes per-candle predictions to ohlcv_ccxt_data_prediction.csv (with header)
- * - Logs state transitions to ccxt_signal_hourly.log (with header)
+ * - Logs state transitions to ccxt_signal.log (with header)
  * - Handles duplicate/malformed CSV headers gracefully
  * - Runs every INTERVAL_MS (default: 1 hour)
  *
