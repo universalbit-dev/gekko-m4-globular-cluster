@@ -52,20 +52,6 @@ pm2 start tools.config.js
 ```
 
 ---
-## ⏰ Automatic Hourly Restart with PM2
-
-To keep your jobs running smoothly, you can schedule an automatic restart every hour using PM2. This helps free up resources and ensures consistent performance.
-
-### 🚀 How To Set Up Hourly Restart
-
-```bash
-pm2 start tools.config.js --cron-restart="0 * * * *"
-```
-
-- This command tells PM2 to **restart all jobs every hour** (at minute 0).
-- 📌 Make sure you have [PM2](https://pm2.keymetrics.io/) installed globally.
-
----
 
 ## 📄 Tool Overview
 
@@ -100,16 +86,12 @@ pm2 start tools.config.js --cron-restart="0 * * * *"
 - **Models:** Uses all models from `./trained_ohlcv/`
 
 #### `chart_ccxt_recognition.js`
-- **Purpose:** Same as above, but for CCXT OHLCV data.  
+- **Purpose:** Applies all trained models to predict market behavior, but for CCXT OHLCV data.  
 - **Input:** `../logs/csv/ohlcv_ccxt_data.csv`  
-- **Output:**  
-  - JSON at `../logs/json/ohlcv/ohlcv_ccxt_data.json`
-  - Predictions CSV: `./ohlcv_ccxt_data_prediction.csv`  
+- **Output:**
+  - Creates predictions CSV: `./ohlcv_ccxt_data_prediction.csv`
+  - Creates predictions Log  'ccxt_signal.log'
 - **Models:** Uses all models from `./trained_ccxt_ohlcv/`
-
-**Prediction Output Example:**  
-`ohlcv_data_prediction.csv`  
-`ohlcv_ccxt_data_prediction.csv`
 
 ---
 
@@ -145,7 +127,7 @@ pm2 start tools.config.js --cron-restart="0 * * * *"
 ## 🧩 Example Workflow
 
 1. Place your OHLCV CSV data in `../logs/csv/`.
-2. Make sure your JSON data (for training) includes the required fields and labels.
+2. Make sure your JSON/CSV data (for training) includes the required fields and labels.
 3. Start all tools with PM2.
 4. Monitor and collect models and predictions from the `trained_ohlcv/`, `trained_ccxt_ohlcv/`, and prediction CSV files.
 
