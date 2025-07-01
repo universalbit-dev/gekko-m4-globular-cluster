@@ -25,14 +25,6 @@ module.exports = {
   autorestart: false        
   },
   {
-  name: 'chart ccxt recognition fine grained',
-  script: 'chart_ccxt_recognition_fine_grained.js',
-  instances: "max",
-  exec_mode: 'cluster',
-  cron_restart: '*/15 * * * *',//15min
-  autorestart: false
-  },
-  {
   name: 'chart recognition',
   script    : 'chart_recognition.js',
   instances : "max",
