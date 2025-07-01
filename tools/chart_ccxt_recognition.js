@@ -1,7 +1,16 @@
 /**
  * chart_ccxt_recognition.js
  *
- * Processes 1-hour OHLCV data, applies a trained CCXT model,
+ * Processes 1-hour OHLCV data, applies a trained CCXT model, and generates predictions.
+ * - Loads OHLCV data from CSV
+ * - Applies trained CCXT model for market predictions ('bull', 'bear', 'idle')
+ * - Writes enhanced CSV with predictions for every candle to ohlcv_ccxt_data_prediction.csv
+ * - Logs state transitions to signal log file
+ * - Runs every 1 hour by default
+ *
+ * Notes:
+ * - Overwrites output prediction CSV on each run to avoid file size growth.
+ * - Appends only signal transitions (state changes) to ccxt_signal_hourly.log.
  */
 
 const fs = require('fs');
@@ -10,6 +19,7 @@ const ConvNet = require('../core/convnet.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
+const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_hourly.log');
 const LABELS = ['bull', 'bear', 'idle'];
 const INTERVAL_MS = 60 * 60 * 1000; // 1 hour
@@ -72,6 +82,17 @@ function ensureSignalLogHeader(logPath) {
   }
 }
 
+// Overwrite output file each time to prevent file growth
+function writeEnhancedCsv(candles, predictions) {
+  ensureDirExists(OUT_CSV_PATH);
+  const header = 'timestamp,open,high,low,close,volume,prediction\n';
+  const out = candles.map((c, i) =>
+    `${c.timestamp},${c.open},${c.high},${c.low},${c.close},${c.volume},${predictions[i]}`
+  ).join('\n');
+  fs.writeFileSync(OUT_CSV_PATH, header + out + '\n');
+  console.log('Wrote predicted CSV:', OUT_CSV_PATH);
+}
+
 // Log only state transitions, with valid tab-separated (timestamp, prediction, price)
 function logStateTransitions(candles, predictions, logPath) {
   ensureDirExists(logPath);
@@ -112,7 +133,14 @@ function runRecognition() {
     if (!candles.length) throw new Error('No valid candles found in CSV.');
     const model = loadModel(MODEL_DIR);
     const predictions = predictCandles(candles, model);
+    
+    // Write enhanced CSV with predictions for every candle
+    writeEnhancedCsv(candles, predictions);
+    
+    // Log only state transitions to signal log (existing functionality)
     logStateTransitions(candles, predictions, SIGNAL_LOG_PATH);
+    
+    console.log(`[${new Date().toISOString()}] CCXT recognition completed successfully`);
   } catch (err) {
     console.error('Recognition error:', err.stack || err.message);
   }
