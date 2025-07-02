@@ -7,15 +7,17 @@
  * - Normalizes new candle data using saved min/max
  * - Predicts class ('bull', 'bear', 'idle') for each candle
  * - Writes per-candle predictions to ohlcv_ccxt_data_prediction.csv (with header)
- * - Logs state transitions to ccxt_signal.log (with header)
+ * - Logs deduplicated state transitions to ccxt_signal.log (with header)
  * - Handles duplicate/malformed CSV headers gracefully
- * - Runs every INTERVAL_MS (default: 1 hour)
+ * - Efficiently processes large files
+ * - Runs every INTERVAL_MS (default: 1 Hour)
  *
  * Usage: node chart_ccxt_recognition.js
  */
 
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 const ConvNet = require('../core/convnet.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
@@ -31,7 +33,7 @@ const LABELS = ['bull', 'bear', 'idle'];
 //   1 hour     (medium term):      const INTERVAL_MS = 60 * 60 * 1000;
 //  24 hours    (long term):        const INTERVAL_MS = 24 * 60 * 60 * 1000;
 // Adjust this value based on your analysis timeframe needs.
-const INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+const INTERVAL_MS = 60 * 60 * 1000;
 
 function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -42,7 +44,7 @@ function loadCsvCandles(csvPath) {
   let rows = fs.readFileSync(csvPath, 'utf8').trim().split('\n');
   // Remove all header rows (first or repeated header lines)
   rows = rows.filter(row => !/^timestamp,open,high,low,close,volume/i.test(row));
-  return rows.map(line => {
+  const candles = rows.map(line => {
     const [timestamp, open, high, low, close, volume] = line.split(',');
     return {
       timestamp,
@@ -57,6 +59,9 @@ function loadCsvCandles(csvPath) {
     !isNaN(c.open) && !isNaN(c.high) && !isNaN(c.low) &&
     !isNaN(c.close) && !isNaN(c.volume)
   );
+  // Ensure chronological order (oldest first)
+  candles.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  return candles;
 }
 
 function loadNormStats() {
@@ -113,25 +118,47 @@ function ensureSignalLogHeader(logPath) {
   }
 }
 
-function logStateTransitions(candles, predictions, logPath) {
+// Efficiently get last prediction from a huge log file using streams
+async function getLastPredictionFromLog(logPath) {
+  if (!fs.existsSync(logPath)) return null;
+  const rl = readline.createInterface({
+    input: fs.createReadStream(logPath),
+    crlfDelay: Infinity
+  });
+  let lastPrediction = null;
+  for await (const line of rl) {
+    if (!line.trim() || line.startsWith('timestamp')) continue;
+    const parts = line.split('\t');
+    if (parts.length >= 2) lastPrediction = parts[1];
+  }
+  return lastPrediction;
+}
+
+// Only log when prediction changes (state transition)
+async function logStateTransitions(candles, predictions, logPath) {
   ensureDirExists(logPath);
   ensureSignalLogHeader(logPath);
-  let lastPrediction = null;
-  let lines = [];
+
+  const lastPrediction = await getLastPredictionFromLog(logPath);
+  let prevPrediction = lastPrediction;
+  const lines = [];
+
   for (let i = 0; i < predictions.length; i++) {
     const pred = predictions[i];
     const price = candles[i].close;
     let timestamp = candles[i].timestamp;
     if (/^\d+$/.test(timestamp)) timestamp = new Date(Number(timestamp)).toISOString();
+
+    // Only log if prediction changes from previous
     if (
-      pred !== lastPrediction &&
       pred &&
       LABELS.includes(pred) &&
       timestamp &&
-      !isNaN(price)
+      !isNaN(price) &&
+      pred !== prevPrediction
     ) {
       lines.push(`${timestamp}\t${pred}\t${price}`);
-      lastPrediction = pred;
+      prevPrediction = pred;
     }
   }
   if (lines.length) {
@@ -142,19 +169,21 @@ function logStateTransitions(candles, predictions, logPath) {
   }
 }
 
-function runRecognition() {
+async function runRecognition() {
   try {
     const candles = loadCsvCandles(CSV_PATH);
     if (!candles.length) throw new Error('No valid candles found in CSV.');
-    const {min, max} = loadNormStats();
+    const { min, max } = loadNormStats();
     const model = loadModel(MODEL_DIR);
     const predictions = predictCandles(candles, model, min, max);
     writeEnhancedCsv(candles, predictions, PRED_CSV_PATH);
-    logStateTransitions(candles, predictions, SIGNAL_LOG_PATH);
+    await logStateTransitions(candles, predictions, SIGNAL_LOG_PATH);
   } catch (err) {
     console.error('Recognition error:', err.stack || err.message);
   }
 }
 
-runRecognition();
-setInterval(runRecognition, INTERVAL_MS);
+(async () => {
+  await runRecognition();
+  setInterval(runRecognition, INTERVAL_MS);
+})();
