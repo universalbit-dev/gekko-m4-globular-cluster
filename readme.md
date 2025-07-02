@@ -63,14 +63,20 @@ Download the project by cloning the repository:
 git clone https://github.com/universalbit-dev/gekko-m4-globular-cluster.git
 cd gekko-m4-globular-cluster
 ```
+---
 
-##### Install Dependencies
+##### Quickly install all dependencies and start the node ecosystem using PM2!
+**Give Permission to Execute the Script**  
+   Open your terminal in the project root and run:  
+   ```bash
+   chmod +x ngc6121.sh
+   ```
 
-Install all required Node.js packages and dependencies:
-
-```bash
-npm i && npm audit fix && npm i pm2 -g 
-``` 
+**Run the Script**  
+   Start the setup and all processes with:  
+   ```bash
+   ./ngc6121.sh
+   ```
 
 This will ensure that all necessary modules are installed and the application is ready to run.
 
@@ -86,15 +92,6 @@ This will ensure that all necessary modules are installed and the application is
 - **[Indicators](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/strategies/indicators)**
 - **[Indicators -- short description --](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/indicators.md)**
 
-#### **Start PM2 Ecosystem**
-
-To run the PM2 process manager with the specified configuration file:
-
-```bash
-pm2 start simulator.config.js --merge-logs --log-date-format "YYYY-MM-DD HH:mm:ss"
-```
-
-This command will start the PM2 ecosystem using the `simulator.config.js` file, which defines the processes and settings required for your application.
 
 #### **Monitor your application and display real-time logs**:
 ```bash
