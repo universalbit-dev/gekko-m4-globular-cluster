@@ -1,6 +1,12 @@
 module.exports = {
   apps : [
   {
+  name: 'label ccxt data',
+  script    : 'label_ccxt_data.js',
+  instances : "max",
+  exec_mode : "cluster",
+  },
+  {
   name: 'train ccxt ohlcv',
   script    : 'train_ccxt_ohlcv.js',
   instances : "max",
@@ -22,7 +28,7 @@ module.exports = {
   instances: "max",
   exec_mode: 'cluster',
   cron_restart: '*/15 * * * *',//15min
-  autorestart: false        
+  autorestart: false
   },
   {
   name: 'chart recognition',
