@@ -39,3 +39,19 @@ echo "============================================"
 echo "        All processes started with PM2      "
 echo "============================================"
 pm2 list
+
+# Wait for 15 minutes before restarting all PM2 processes.
+echo ""
+echo ">> Waiting for 15 minutes (900 seconds) before restarting all PM2 processes..."
+sleep 900
+
+# Restart all pm2 processes
+echo ">> Restarting all PM2 processes now."
+pm2 restart all
+
+echo "============================================"
+echo " Files are kept in sync across the cluster. "
+echo "============================================"
+# Exit the script
+echo ">> Script completed. Exiting."
+exit
