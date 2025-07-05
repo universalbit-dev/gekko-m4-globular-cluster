@@ -20,6 +20,7 @@ const monitoredNames = [
   'train ccxt ohlcv',
   'train ohlcv',
   'chart ccxt recognition',
+  'chart ccxt recognition magnitude',
   'chart recognition'
 ];
 
