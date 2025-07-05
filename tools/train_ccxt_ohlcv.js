@@ -1,5 +1,5 @@
 /**
- * train_ccxt_ohlcv.js
+ * train_ccxt_ohlcv.js 
  *
  * Reads OHLCV data from CSV or JSON, auto-labels (bull=0, bear=1, idle=2),
  * normalizes features, strictly validates, and trains a ConvNetJS model.
@@ -18,6 +18,7 @@ const EPOCHS = Number(process.env.EPOCHS) || 10;
 const BATCH_SIZE = Number(process.env.BATCH_SIZE) || 10;
 const L2_DECAY = Number(process.env.L2_DECAY) || 0.001;
 const NUM_CLASSES = 3; // bull, bear, idle
+const EPSILON = 1e-8; // for floating-point equality
 
 function validateCandleRow(obj) {
   let timestamp, open, high, low, close, volume;
@@ -82,11 +83,11 @@ function parseAndLabelData(dataPath) {
       invalidRows++;
       return;
     }
-    const { open, close } = result.data;
-    let label = 2;
-    if (close > open) label = 0;
-    else if (close < open) label = 1;
-    out.push({ ...result.data, label });
+    const candle = result.data;
+    let label = 2; // idle
+    if (candle.close - candle.open > EPSILON) label = 0; // bull
+    else if (candle.open - candle.close > EPSILON) label = 1; // bear
+    out.push({ ...candle, label });
     validRows++;
   });
   console.log(`[INFO] Valid rows: ${validRows}, Skipped rows: ${invalidRows}`);
@@ -120,11 +121,17 @@ function trainAndSave() {
     return;
   }
 
+  if (!Array.isArray(data) || !data.length) {
+    console.error(`[${new Date().toISOString()}] No valid training samples found.`);
+    return;
+  }
+
   const [min, max] = computeMinMax(data);
-  // Save min/max used for normalization for recognition script
+  // Save min/max for normalization in recognition script
   const NORM_PATH = path.join(MODEL_DIR, 'norm_stats.json');
-  fs.writeFileSync(NORM_PATH, JSON.stringify({min, max}));
-  
+  fs.mkdirSync(MODEL_DIR, { recursive: true });
+  fs.writeFileSync(NORM_PATH, JSON.stringify({ min, max }));
+
   const trainingSet = data.map(candle => ({
     input: norm([candle.open, candle.high, candle.low, candle.close, candle.volume], min, max),
     output: candle.label
@@ -148,10 +155,6 @@ function trainAndSave() {
     process.exit(1);
   }
 
-  if (!trainingSet.length) {
-    console.error(`[${new Date().toISOString()}] No valid training samples found.`);
-    return;
-  }
   console.log(`[${new Date().toISOString()}] Training on ${trainingSet.length} samples.`);
   console.log('First 3 normalized training samples:', trainingSet.slice(0, 3));
 
@@ -175,10 +178,9 @@ function trainAndSave() {
       const x = new ConvNet.Vol(1, 1, 5, example.input);
       trainer.train(x, example.output);
     });
-    // Accuracy output intentionally skipped as requested
+    // Optionally: add logging for progress
   }
 
-  fs.mkdirSync(MODEL_DIR, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = path.join(MODEL_DIR, `trained_ohlcv_ccxt_${timestamp}.json`);
   const tmpFilename = filename + '.tmp';
@@ -199,5 +201,4 @@ setInterval(trainAndSave, INTERVAL_MS);
  * - The script validates every row and shows stats on how many were skipped/used.
  * - Features are normalized to [0,1].
  * - ConvNet.Vol is constructed as new ConvNet.Vol(1, 1, 5, inputArray).
- * - No per-epoch accuracy is shown; ideal for training-only role.
  */
