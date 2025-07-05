@@ -13,6 +13,13 @@ const ConvNet = require('../core/convnet.js');
 const DATA_PATH = process.env.DATA_PATH
   || path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json'); // or .csv
 const MODEL_DIR = process.env.MODEL_DIR || './trained_ccxt_ohlcv';
+// INTERVAL_MS determines how often the script runs (in milliseconds).
+// Common intervals:
+//   5 minutes  (high frequency):   const INTERVAL_MS = 5 * 60 * 1000;
+//  15 minutes  (high frequency):   const INTERVAL_MS = 15 * 60 * 1000;
+//   1 hour     (medium term):      const INTERVAL_MS = 60 * 60 * 1000;
+//  24 hours    (long term):        const INTERVAL_MS = 24 * 60 * 60 * 1000;
+// Adjust this value based on your analysis timeframe needs.
 const INTERVAL_MS = Number(process.env.INTERVAL_MS) || 15 * 60 * 1000;
 const EPOCHS = Number(process.env.EPOCHS) || 10;
 const BATCH_SIZE = Number(process.env.BATCH_SIZE) || 10;
