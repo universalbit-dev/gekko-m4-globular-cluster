@@ -118,8 +118,17 @@ class CCXTMarketData {
 }
 
 // ---- MAIN LOOP ----
+// INTERVALS: Define commonly used intervals in milliseconds for easy reference.
+const INTERVALS = {
+  '5m': 5 * 60 * 1000,        // 5 minutes  (high frequency)
+  '15m': 15 * 60 * 1000,      // 15 minutes (high frequency)
+  '1h': 60 * 60 * 1000,       // 1 hour     (medium term)
+  '24h': 24 * 60 * 60 * 1000  // 24 hours   (long term)
+};
 
-const INTERVAL_MS = 300 * 1000; // 5 minutes
+// Select the interval you want to use here:
+const INTERVAL_MS = INTERVALS['5m']; // Change to '15m', '1h', or '24h' as needed
+
 const SYMBOL = process.env.SYMBOL || 'BTC/EUR'; // or your chosen symbol
 const OHLCV_INTERVAL = process.env.INTERVAL || '5m'; // or '1m', '15m', etc.
 
