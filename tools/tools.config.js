@@ -1,8 +1,8 @@
 module.exports = {
   apps : [
   {
-  name: 'label ccxt data',
-  script    : 'label_ccxt_data.js',
+  name: 'label ohlcv data',
+  script    : 'label_ohlcv.js',
   instances : "max",
   exec_mode : "cluster",
   },
