@@ -1,27 +1,24 @@
 /**
- * chart_ccxt_recognition_magnitude.js
- *
- * Processes 15m OHLCV data, applies a trained CCXT model,
- * computes PVVM and PVD, and labels each log row based on thresholds.
- * Keeps log file under 1MB by truncating header + last 0.5MB if needed.
+ * chart_ccxt_recognition_magnitude.js (modular, uses label_ohlcv.js)
+ * Processes OHLCV CSV, loads trained model, computes PVVM/PVD, labels and logs predictions.
  */
-
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js');
+const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
 const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_magnitude.log');
 const LABELS = ['bull', 'bear', 'idle'];
 const INTERVAL_MS = 15 * 60 * 1000;
-const LOG_MAX_BYTES = 1024 * 1024; // 1MB
-const LOG_KEEP_BYTES = 512 * 1024; // 0.5MB
+const LOG_MAX_BYTES = 1024 * 1024;
+const LOG_KEEP_BYTES = 512 * 1024;
 
-// Thresholds for labeling
 const PVVM_THRESHOLD = 10;
 const PVD_THRESHOLD = 10;
 
+// Utility functions
 function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
@@ -54,7 +51,6 @@ function ensureSignalLogHeader(logPath) {
   if (!fs.existsSync(logPath) || fs.statSync(logPath).size === 0) {
     fs.writeFileSync(logPath, header);
   } else {
-    // Optionally update header if missing label column
     const firstLine = fs.readFileSync(logPath, {encoding:'utf8', flag:'r'}).split('\n')[0];
     if (!firstLine.includes('\tlabel')) {
       const data = fs.readFileSync(logPath);
@@ -68,7 +64,6 @@ function ensureSignalLogHeader(logPath) {
 function loadCsvCandles(csvPath) {
   if (!fs.existsSync(csvPath)) throw new Error(`CSV not found at: ${csvPath}`);
   let rows = fs.readFileSync(csvPath, 'utf8').trim().split('\n');
-  // Remove duplicate headers that might appear mid-file
   rows = rows.filter(row => !/^timestamp,open,high,low,close,volume/i.test(row));
   return rows.map(line => {
     const [timestamp, open, high, low, close, volume] = line.split(',');
@@ -87,7 +82,6 @@ function loadCsvCandles(csvPath) {
   );
 }
 
-// Robust model loader: only pick valid .json files and handle errors
 function loadModel(modelDir) {
   if (!fs.existsSync(modelDir)) throw new Error('No trained model directory found.');
   const modelFiles = fs.readdirSync(modelDir)
@@ -102,9 +96,8 @@ function loadModel(modelDir) {
       modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, modelFile), 'utf8'));
       net = new ConvNet.Net();
       net.fromJSON(modelJson);
-      return net; // Return the first valid model
+      return net;
     } catch (err) {
-      // Log and try next file
       console.error(`Skipping invalid model file: ${modelFile} (${err.message || err})`);
     }
   }
@@ -207,8 +200,12 @@ function logStateTransitions(candles, predictions, indicators, logPath) {
 
 function runRecognition() {
   try {
-    const candles = loadCsvCandles(CSV_PATH);
+    let candles = loadCsvCandles(CSV_PATH);
     if (!candles.length) throw new Error('No valid candles found in CSV.');
+
+    // Consistent modular labeling
+    candles = labelCandles(candles, EPSILON);
+
     const indicators = computeMagnitudeIndicators(candles);
     const model = loadModel(MODEL_DIR);
     const predictions = predictCandles(candles, indicators, model);

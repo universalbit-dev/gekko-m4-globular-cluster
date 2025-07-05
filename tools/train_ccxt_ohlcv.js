@@ -1,31 +1,24 @@
 /**
- * train_ccxt_ohlcv.js 
+ * train_ccxt_ohlcv.js (modular, uses label_ohlcv.js)
  *
- * Reads OHLCV data from CSV or JSON, auto-labels (bull=0, bear=1, idle=2),
+ * Reads OHLCV data from CSV or JSON, labels using the shared label_ohlcv.js module,
  * normalizes features, strictly validates, and trains a ConvNetJS model.
  */
 
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js');
+const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
 // Configurable parameters
 const DATA_PATH = process.env.DATA_PATH
   || path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json'); // or .csv
 const MODEL_DIR = process.env.MODEL_DIR || './trained_ccxt_ohlcv';
-// INTERVAL_MS determines how often the script runs (in milliseconds).
-// Common intervals:
-//   5 minutes  (high frequency):   const INTERVAL_MS = 5 * 60 * 1000;
-//  15 minutes  (high frequency):   const INTERVAL_MS = 15 * 60 * 1000;
-//   1 hour     (medium term):      const INTERVAL_MS = 60 * 60 * 1000;
-//  24 hours    (long term):        const INTERVAL_MS = 24 * 60 * 60 * 1000;
-// Adjust this value based on your analysis timeframe needs.
 const INTERVAL_MS = Number(process.env.INTERVAL_MS) || 15 * 60 * 1000;
 const EPOCHS = Number(process.env.EPOCHS) || 10;
 const BATCH_SIZE = Number(process.env.BATCH_SIZE) || 10;
 const L2_DECAY = Number(process.env.L2_DECAY) || 0.001;
 const NUM_CLASSES = 3; // bull, bear, idle
-const EPSILON = 1e-8; // for floating-point equality
 
 function validateCandleRow(obj) {
   let timestamp, open, high, low, close, volume;
@@ -59,7 +52,7 @@ function validateCandleRow(obj) {
   };
 }
 
-function parseAndLabelData(dataPath) {
+function parseAndLabelData(dataPath, epsilon = EPSILON) {
   const ext = path.extname(dataPath).toLowerCase();
   let arr;
   if (ext === '.json') {
@@ -91,14 +84,23 @@ function parseAndLabelData(dataPath) {
       return;
     }
     const candle = result.data;
-    let label = 2; // idle
-    if (candle.close - candle.open > EPSILON) label = 0; // bull
-    else if (candle.open - candle.close > EPSILON) label = 1; // bear
-    out.push({ ...candle, label });
+    out.push(candle);
     validRows++;
   });
+  // Modular, consistent labeling
+  const labeled = labelCandles(out, epsilon);
+
+  // Print label distribution for debug
+  const stats = { bull: 0, bear: 0, idle: 0 };
+  labeled.forEach(c => {
+    if (c.label === 0) stats.bull++;
+    else if (c.label === 1) stats.bear++;
+    else if (c.label === 2) stats.idle++;
+  });
   console.log(`[INFO] Valid rows: ${validRows}, Skipped rows: ${invalidRows}`);
-  return out;
+  console.log('[INFO] Label distribution:', stats);
+
+  return labeled;
 }
 
 function computeMinMax(data) {
@@ -119,10 +121,21 @@ function norm(vals, min, max) {
   );
 }
 
+// Optional: Balance dataset so all classes are equally represented
+function balanceData(candles) {
+  const byClass = [[], [], []];
+  candles.forEach(c => byClass[c.label].push(c));
+  const minLen = Math.min(...byClass.map(arr => arr.length));
+  if (minLen === 0) return candles; // Don't balance if any class absent
+  // Shuffle and cut each class to minLen
+  byClass.forEach(arr => arr.sort(() => Math.random() - 0.5));
+  return byClass.flatMap(arr => arr.slice(0, minLen));
+}
+
 function trainAndSave() {
   let data;
   try {
-    data = parseAndLabelData(DATA_PATH);
+    data = parseAndLabelData(DATA_PATH, EPSILON);
   } catch (e) {
     console.error(`[${new Date().toISOString()}] Failed to read or parse ${DATA_PATH}:`, e.message);
     return;
@@ -132,6 +145,9 @@ function trainAndSave() {
     console.error(`[${new Date().toISOString()}] No valid training samples found.`);
     return;
   }
+
+  // Optional: balance classes
+  data = balanceData(data);
 
   const [min, max] = computeMinMax(data);
   // Save min/max for normalization in recognition script
@@ -181,7 +197,7 @@ function trainAndSave() {
   });
 
   for (let epoch = 0; epoch < EPOCHS; epoch++) {
-    trainingSet.forEach((example, idx) => {
+    trainingSet.forEach((example) => {
       const x = new ConvNet.Vol(1, 1, 5, example.input);
       trainer.train(x, example.output);
     });
@@ -208,4 +224,5 @@ setInterval(trainAndSave, INTERVAL_MS);
  * - The script validates every row and shows stats on how many were skipped/used.
  * - Features are normalized to [0,1].
  * - ConvNet.Vol is constructed as new ConvNet.Vol(1, 1, 5, inputArray).
+ * - Labeling is consistent and modular via label_ohlcv.js.
  */
