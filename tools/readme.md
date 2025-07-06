@@ -107,8 +107,8 @@ pm2 start tools.config.js
   - `train_ccxt_ohlcv.js`
   - `train_ohlcv.js`
   - `chart_ccxt_recognition.js`
+  - `chart_ccxt_recognition_magnitude.js`
   - `chart_recognition.js`
-
 ---
 
 ## 📝 Usage Notes & Recommendations
@@ -148,7 +148,6 @@ pm2 start tools.config.js
 > node chart_recognition.js
 > # ... etc.
 > ```
-
 ---
 
 ### 🔗 Further Reading
