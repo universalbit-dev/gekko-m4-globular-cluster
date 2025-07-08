@@ -214,3 +214,4 @@ setInterval(trainAndSave, INTERVAL_MS);
  * - ConvNet.Vol is constructed as new ConvNet.Vol(1, 1, 5, inputArray).
  * - No per-epoch accuracy is shown; ideal for training-only role.
  */
+
