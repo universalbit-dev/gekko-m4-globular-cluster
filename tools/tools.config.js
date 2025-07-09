@@ -3,7 +3,7 @@ module.exports = {
   {
   name: 'train ccxt ohlcv',
   script    : 'train_ccxt_ohlcv.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/15 * * * *',//15min
   autorestart: false
@@ -11,7 +11,7 @@ module.exports = {
   {
   name: 'train ohlcv',
   script    : 'train_ohlcv.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/15 * * * *',//15min
   autorestart: false
@@ -19,7 +19,7 @@ module.exports = {
   {
   name: 'chart ccxt recognition',
   script: 'chart_ccxt_recognition.js',
-  instances: "max",
+  instances: "1",
   exec_mode: 'cluster',
   cron_restart: '*/15 * * * *',//15min
   autorestart: false        
@@ -27,7 +27,7 @@ module.exports = {
   {
   name: 'chart ccxt recognition magnitude',
   script: 'chart_ccxt_recognition_magnitude.js',
-  instances: "max",
+  instances: "1",
   exec_mode: 'cluster',
   cron_restart: '*/15 * * * *',//15min
   autorestart: false        
@@ -35,7 +35,7 @@ module.exports = {
   {
   name: 'chart recognition',
   script    : 'chart_recognition.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/15 * * * *',//15min
   autorestart: false
