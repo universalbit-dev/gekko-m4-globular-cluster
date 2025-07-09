@@ -48,6 +48,7 @@ const ORDER_LOG_PATH = path.join(__dirname, './ccxt_order.log');
 const INTERVALS = {
   '5m': 5 * 60 * 1000,
   '15m': 15 * 60 * 1000,
+  '30m': 30 * 60 * 1000,
   '1h': 60 * 60 * 1000,
   '24h': 24 * 60 * 60 * 1000
 };
