@@ -51,8 +51,8 @@ const INTERVALS = {
   '1h': 60 * 60 * 1000,
   '24h': 24 * 60 * 60 * 1000
 };
-const INTERVAL_KEY = process.env.INTERVAL_KEY || '5m';
-const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['5m'];
+const INTERVAL_KEY = process.env.INTERVAL_KEY || '30m';
+const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['30m'];
 
 //Exchange Setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
