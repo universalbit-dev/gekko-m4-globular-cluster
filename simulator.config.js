@@ -4,7 +4,7 @@ module.exports = {
   name: 'neuralnet_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_neuralnet_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -13,7 +13,7 @@ module.exports = {
   name: 'cci_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_cci_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -22,7 +22,7 @@ module.exports = {
   name: 'dema_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_dema_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -31,7 +31,7 @@ module.exports = {
   name : 'rsibullbearadx_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_rsibullbearadx_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -40,7 +40,7 @@ module.exports = {
   name: 'bollingerband_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_bollingerband_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -49,7 +49,7 @@ module.exports = {
   name: 'noop_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_noop_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -58,7 +58,7 @@ module.exports = {
   name: 'neuralnet_refinements_simulator',
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_neuralnet_simulator.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
@@ -67,15 +67,17 @@ module.exports = {
   name: "csvexport",
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_csvexport.js',
-  instances : "max",
+  instances : "1",
   exec_mode : "cluster",
   cron_restart: '*/45 * * * *',//45min
   autorestart: false
   },
   {
   name: "pm2-cpu-watchdog",
-  script: "./pm2-cpu-watchdog.js",
-  watch: false
+  script    : "./pm2-cpu-watchdog.js",
+  instances : "max",
+  exec_mode : "cluster",
+  autorestart: false
   },
 ]
 }
