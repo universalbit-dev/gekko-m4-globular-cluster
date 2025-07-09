@@ -2,20 +2,24 @@
  * ccxt_orders.js
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
+ * Stop Loss and Take Profit support.
  * 
  * - Loads buy/sell signals from log files (basic and magnitude versions supported).
  * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
  * - Places market BUY orders on 'bull' or 'strong_bull' signals when not already in a position.
  * - Places market SELL orders on 'weak_bull' signals with PVVM and PVD near zero when in a position.
+ * - Sells automatically on Stop Loss or Take Profit triggers.
  * - Deduplicates processed signals to avoid double trading.
  * - Logs all trade actions and outcomes to a log file.
  * - Configurable via environment variables:
  *      INTERVAL_KEY: trade interval ('5m', '15m', '1h', '24h')
  *      EXCHANGE: exchange id (e.g., 'kraken')
  *      KEY: API key
- *      API_SECRET: API secret
+ *      SECRET: API secret
  *      PAIR: trading pair (default 'BTC/EUR')
  *      ORDER_AMOUNT: order size in base currency
+ *      STOP_LOSS_PCT: percent below entry to trigger stop loss (default 2)
+ *      TAKE_PROFIT_PCT: percent above entry to trigger take profit (default 4)
  * 
  * Dependencies:
  *   - ccxt
@@ -50,12 +54,17 @@ const INTERVALS = {
 const INTERVAL_KEY = process.env.INTERVAL_KEY || '5m';
 const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['5m'];
 
-// Exchange Setup
+//Exchange Setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
+//API_KEY
 const API_KEY = process.env.KEY || '';
-const API_SECRET = process.env.API_SECRET || '';
+//API_SECRET
+const API_SECRET = process.env.SECRET || '';
 const PAIR = process.env.PAIR || 'BTC/EUR';
 const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
+
+const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;    
+const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4; 
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
@@ -132,6 +141,7 @@ function loadUnifiedSignals() {
 
 let isRunning = false;
 let positionOpen = false; // Only one position at a time
+let entryPrice = null;    // Track entry price for SL/TP
 
 async function main() {
   if (isRunning) {
@@ -155,11 +165,47 @@ async function main() {
       return;
     }
 
+    // --- STOP LOSS / TAKE PROFIT LOGIC ---
+    if (positionOpen && entryPrice) {
+      try {
+        // Fetch latest ticker price
+        const ticker = await exchange.fetchTicker(PAIR);
+        const currentPrice = ticker.last;
+        const stopLossPrice = entryPrice * (1 - STOP_LOSS_PCT / 100);
+        const takeProfitPrice = entryPrice * (1 + TAKE_PROFIT_PCT / 100);
+
+        if (currentPrice <= stopLossPrice) {
+          // Trigger Stop Loss
+          const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
+          positionOpen = false;
+          entryPrice = null;
+          logOrder(timestamp, prediction, label, 'STOP_LOSS', result);
+          console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
+          return; // Don’t process any other signals this cycle
+        }
+        if (currentPrice >= takeProfitPrice) {
+          // Trigger Take Profit
+          const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
+          positionOpen = false;
+          entryPrice = null;
+          logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result);
+          console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
+          return;
+        }
+      } catch (err) {
+        console.error('SL/TP check error:', err.message || err);
+      }
+    }
+
     // Core logic: specialized bullish
     if (!positionOpen && (prediction === 'bull' || label === 'strong_bull')) {
       try {
         const result = await exchange.createMarketBuyOrder(PAIR, ORDER_AMOUNT);
         positionOpen = true;
+
+        // Set entry price from order result
+        entryPrice = result.price || result.average || null;
+
         logOrder(timestamp, prediction, label, 'BUY', result);
         console.log(`[${timestamp}] BUY order submitted (bull/strong_bull)`);
       } catch (err) {
@@ -175,6 +221,7 @@ async function main() {
       try {
         const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
         positionOpen = false;
+        entryPrice = null;
         logOrder(timestamp, prediction, label, 'SELL', result);
         console.log(`[${timestamp}] SELL order submitted (weak_bull, PVVM/PVD near zero)`);
       } catch (err) {
@@ -192,7 +239,6 @@ async function main() {
 }
 
 console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_KEY} (${INTERVAL_MS / 1000}s)`);
-
 
 main();
 setInterval(main, INTERVAL_MS);
