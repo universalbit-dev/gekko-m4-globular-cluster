@@ -57,8 +57,8 @@ const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['30m'];
 
 // Exchange setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
-const API_KEY = process.env.KEY || 'P3nRHjVMqaIfgqqnnnay4e/L3FVDRVQdO4N63UR5by1Wu/ar3Pn89izJ';
-const API_SECRET = process.env.SECRET || 'jLnXApENbiwh6dugyJs/TlXCsJl1iR6wa67/QKoE96S0vqOyv4PBxfRC7P6MSqw2hb22GSWqPXODyN3qkH7h6g==';
+const API_KEY = process.env.KEY || '';
+const API_SECRET = process.env.SECRET || '';
 const PAIR = process.env.PAIR || 'BTC/EUR';
 const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
 
