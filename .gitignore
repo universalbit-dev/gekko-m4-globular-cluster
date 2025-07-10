@@ -13,7 +13,8 @@
 *.sass-cache
 
 # Folders to ignore
-node_modules
-strategies
-exchange
-env
+node_modules/
+strategies/
+exchange/
+env/
+tools/
