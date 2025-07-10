@@ -2,20 +2,20 @@
  * ccxt_orders.js
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
- * Stop Loss and Take Profit support.
+ * Now with Stop Loss and Take Profit support.
  * 
  * - Loads buy/sell signals from log files (basic and magnitude versions supported).
  * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
  * - Places market BUY orders on 'bull' or 'strong_bull' signals when not already in a position.
  * - Places market SELL orders on 'weak_bull' signals with PVVM and PVD near zero when in a position.
- * - Sells automatically on Stop Loss or Take Profit triggers.
+ * - Stop Loss or Take Profit triggers.
  * - Deduplicates processed signals to avoid double trading.
  * - Logs all trade actions and outcomes to a log file.
  * - Configurable via environment variables:
- *      INTERVAL_KEY: trade interval ('5m', '15m', '1h', '24h')
+ *      INTERVAL_KEY: trade interval ('5m', '15m', '30m', '1h', '24h')
  *      EXCHANGE: exchange id (e.g., 'kraken')
  *      KEY: API key
- *      SECRET: API secret
+ *      API_SECRET: API secret
  *      PAIR: trading pair (default 'BTC/EUR')
  *      ORDER_AMOUNT: order size in base currency
  *      STOP_LOSS_PCT: percent below entry to trigger stop loss (default 2)
@@ -55,17 +55,37 @@ const INTERVALS = {
 const INTERVAL_KEY = process.env.INTERVAL_KEY || '30m';
 const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['30m'];
 
-//Exchange Setup
+// Exchange setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
-//API_KEY
-const API_KEY = process.env.KEY || '';
-//API_SECRET
-const API_SECRET = process.env.SECRET || '';
+const API_KEY = process.env.KEY || 'P3nRHjVMqaIfgqqnnnay4e/L3FVDRVQdO4N63UR5by1Wu/ar3Pn89izJ';
+const API_SECRET = process.env.SECRET || 'jLnXApENbiwh6dugyJs/TlXCsJl1iR6wa67/QKoE96S0vqOyv4PBxfRC7P6MSqw2hb22GSWqPXODyN3qkH7h6g==';
 const PAIR = process.env.PAIR || 'BTC/EUR';
 const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
 
-const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;    
-const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4; 
+const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
+const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
+// Core logic: specialized bullish
+/**
+ * PVD/PVVM Move Strength Interpretation Table
+ *
+ * This table provides guidance for interpreting PVD (Price-Volume Delta)
+ * and PVVM (Price-Volume Volatility Metric) values in trading strategies.
+ *
+ * | PVD/PVVM Value | Move Strength  | Indicative/Significative Meaning             |
+ * |----------------|---------------|----------------------------------------------|
+ * | 0 to 3         | Very Weak     | Noise, likely insignificant                  |
+ * | 3 to 7         | Weak          | Minor move, low conviction                   |
+ * | 7 to 10        | Moderate      | Becoming meaningful, but not strong          |
+ * | 10 to 20       | Significant   | Strong move, worth considering for trades    |
+ * | > 20           | Very Strong   | High conviction, strong trend/move           |
+ *
+ * Use these thresholds to filter market noise and identify meaningful moves.
+ * Adjust values as needed based on market conditions.
+ */
+ 
+// PVVM/PVD thresholds (as per user)
+const PVVM_THRESHOLD = 10.0;
+const PVD_THRESHOLD = 10.0;
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
@@ -86,7 +106,6 @@ function loadProcessedSignals() {
   for (const line of lines) {
     const parts = line.split('\t');
     if (parts.length >= 4) {
-      // Unique key: timestamp|prediction|label
       set.add(parts[1] + '|' + parts[2] + '|' + (parts[3] || ''));
     }
   }
@@ -109,7 +128,6 @@ function logOrder(timestamp, prediction, label, action, result, error = null) {
 
 // Helper: Load and unify signals
 function loadUnifiedSignals() {
-  // Load all lines from both logs
   const basicLines = fs.existsSync(SIGNAL_LOG_PATH)
     ? fs.readFileSync(SIGNAL_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean)
     : [];
@@ -131,12 +149,10 @@ function loadUnifiedSignals() {
     if (!timestamp) continue;
     unifiedMap[timestamp] = magMap[timestamp] || { timestamp, prediction };
   }
-  // Add any mag signals missing from basic log
   for (const timestamp in magMap) {
     unifiedMap[timestamp] = magMap[timestamp];
   }
 
-  // Return as sorted array
   return Object.values(unifiedMap).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 }
 
@@ -169,23 +185,20 @@ async function main() {
     // --- STOP LOSS / TAKE PROFIT LOGIC ---
     if (positionOpen && entryPrice) {
       try {
-        // Fetch latest ticker price
         const ticker = await exchange.fetchTicker(PAIR);
         const currentPrice = ticker.last;
         const stopLossPrice = entryPrice * (1 - STOP_LOSS_PCT / 100);
         const takeProfitPrice = entryPrice * (1 + TAKE_PROFIT_PCT / 100);
 
         if (currentPrice <= stopLossPrice) {
-          // Trigger Stop Loss
           const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
           positionOpen = false;
           entryPrice = null;
           logOrder(timestamp, prediction, label, 'STOP_LOSS', result);
           console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
-          return; // Don’t process any other signals this cycle
+          return;
         }
         if (currentPrice >= takeProfitPrice) {
-          // Trigger Take Profit
           const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
           positionOpen = false;
           entryPrice = null;
@@ -198,17 +211,19 @@ async function main() {
       }
     }
 
-    // Core logic: specialized bullish
-    if (!positionOpen && (prediction === 'bull' || label === 'strong_bull')) {
+    // --- PVVM/PVD-based entries and exits (your custom logic) ---
+    if (
+      !positionOpen &&
+      (prediction === 'bull' || label === 'strong_bull') &&
+      !isNaN(PVVM) && !isNaN(PVD) &&
+      Math.abs(PVVM) > PVVM_THRESHOLD && Math.abs(PVD) > PVD_THRESHOLD
+    ) {
       try {
         const result = await exchange.createMarketBuyOrder(PAIR, ORDER_AMOUNT);
         positionOpen = true;
-
-        // Set entry price from order result
         entryPrice = result.price || result.average || null;
-
         logOrder(timestamp, prediction, label, 'BUY', result);
-        console.log(`[${timestamp}] BUY order submitted (bull/strong_bull)`);
+        console.log(`[${timestamp}] BUY order submitted (bull/strong_bull & PVVM/PVD strong)`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'BUY', null, err.message || err);
         console.error('Order error:', err.message || err);
@@ -217,20 +232,19 @@ async function main() {
       positionOpen &&
       label === 'weak_bull' &&
       !isNaN(PVVM) && !isNaN(PVD) &&
-      Math.abs(PVVM) < 10.0 && Math.abs(PVD) < 10.0
+      Math.abs(PVVM) < PVVM_THRESHOLD && Math.abs(PVD) < PVD_THRESHOLD
     ) {
       try {
         const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
         positionOpen = false;
         entryPrice = null;
         logOrder(timestamp, prediction, label, 'SELL', result);
-        console.log(`[${timestamp}] SELL order submitted (weak_bull, PVVM/PVD near zero)`);
+        console.log(`[${timestamp}] SELL order submitted (weak_bull & PVVM/PVD near zero)`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SELL', null, err.message || err);
         console.error('Order error:', err.message || err);
       }
     } else {
-      // Idle/no action
       logOrder(timestamp, prediction, label, 'IDLE', {});
       console.log(`[${timestamp}] No order submitted (IDLE)`);
     }
