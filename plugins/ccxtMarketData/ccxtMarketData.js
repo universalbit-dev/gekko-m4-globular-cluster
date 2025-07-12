@@ -127,10 +127,10 @@ const INTERVALS = {
 };
 
 // Select the interval you want to use here:
-const INTERVAL_MS = INTERVALS['5m']; // Change to '15m', '1h', or '24h' as needed
+const INTERVAL_MS = INTERVALS['15m']; // Change to '15m', '1h', or '24h' as needed
 
 const SYMBOL = process.env.SYMBOL || 'BTC/EUR'; // or your chosen symbol
-const OHLCV_INTERVAL = process.env.INTERVAL || '5m'; // or '1m', '15m', etc.
+const OHLCV_INTERVAL = process.env.INTERVAL || '15m'; // or '1m', '15m', etc.
 
 const marketData = new CCXTMarketData({
   symbol: SYMBOL,
