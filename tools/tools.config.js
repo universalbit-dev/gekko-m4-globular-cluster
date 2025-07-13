@@ -21,7 +21,7 @@ module.exports = {
   script: 'chart_ccxt_recognition.js',
   instances: "1",
   exec_mode: 'cluster',
-  cron_restart: '*/15 * * * *',//15min
+  cron_restart: '*/60 * * * *',//1h
   autorestart: false        
   },
   {
