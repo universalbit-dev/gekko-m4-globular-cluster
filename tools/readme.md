@@ -52,7 +52,17 @@ pm2 start tools.config.js
 ```
 
 ---
+Here’s a user-friendly note (with icon) describing the `docs/` directory for documentation files, ready to insert before the **Tool Overview** section in your README:
 
+---
+
+> 📚 **Documentation Directory (`docs/`)**
+>
+> All user guides and detailed explanations for project tools are organized in the `docs/` directory.  
+> Each file provides easy-to-read documentation for a specific tool or feature, ensuring you have clear instructions and helpful tips.  
+> Browse the `docs/` folder to quickly find information about setup, usage, and best practices for every part of the system!
+
+---
 ## 📄 Tool Overview
 
 ### 1. 🧠 Model Training Scripts
