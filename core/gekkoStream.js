@@ -1,28 +1,24 @@
-/* CODEPILOT EXPLAIN
-This JavaScript file defines a class Gekko that extends the Writable stream class to process and handle financial data in the form of "candles". Here's a detailed explanation:
+/*
+  gekkoStream.js - Gekko Streaming Pipeline Implementation
 
-    Dependencies: The script imports several libraries like Promise, underscore, stream, async, moment, and events. It also imports some utility functions from a local util module.
+  This module implements the Gekko core as a Writable stream and event emitter,
+  orchestrating the flow of trading candle data through configured plugins.
 
-    Gekko Class:
-        The Gekko class extends EventEmitter and Writable. It initializes with an array of plugins and determines which plugins process candles and which emit events.
-        The constructor binds the finalize method and all other methods to the instance using underscore.
+  Main Responsibilities:
+    - Loads and manages plugins for trading, analysis, and event logging.
+    - Processes candle data in a streaming, asynchronous fashion.
+    - Handles plugin event broadcasting and deferred event flushing.
+    - Implements robust shutdown and finalization logic for plugins.
+    - Provides debugging and error logging for plugin execution delays.
 
-    _write Method:
-        This method is overridden to handle incoming data chunks (candles).
-        Depending on the configuration (config.debug and mode), it either logs if a candle is not processed within 0.987 seconds or just processes the candle.
-        It uses underscore's after function to ensure all candle consumers process the candle before calling _done.
+  Usage:
+    - Instantiate GekkoStream with an array of plugin objects.
+    - Pipe candle/trading data into the instance for automated processing.
+    - Plugins are initialized and managed automatically.
 
-    flushDefferedEvents Method: This method ensures all deferred events from producers are broadcasted.
-
-    finalize Method: This method finalizes the processing by finding the 'Trading Advisor' plugin and calling its finish method, which in turn calls shutdown.
-
-    shutdown Method: This method ends the stream, iterates over all plugins to call their finalize method (if they have one), and then exits the process.
-
-    Module Exports: The Gekko class is exported as a module.
-
-    License: The file includes an MIT License disclaimer.
-
-In summary, this script sets up a stream-based processing system for financial candles, using plugins to handle the actual data processing and event handling.
+  Customization:
+    - Extend plugins by adding 'processCandle', 'meta', or 'broadcastDeferredEmit' methods.
+    - Update plugin definitions to support new trading strategies or data sources.
 */
 const _ = require("underscore");
 var Writable = require('stream').Writable;
@@ -131,11 +127,9 @@ Gekko.prototype.shutdown = function() {
 
 module.exports = Gekko;
 /*
+MIT License
 
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Permission is hereby granted, free of charge, to use, copy, modify, and distribute this software, subject to the inclusion of this notice.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 */
