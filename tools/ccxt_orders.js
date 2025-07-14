@@ -2,33 +2,19 @@
  * ccxt_orders.js
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
- * Now with Stop Loss and Take Profit support.
+ * Now with dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, and reason logging.
  * 
  * - Loads buy/sell signals from log files (basic and magnitude versions supported).
  * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
  * - Places market BUY orders on 'bull' or 'strong_bull' signals when not already in a position.
- * - Places market SELL orders on 'weak_bull' signals with PVVM and PVD near zero when in a position.
+ * - Places market SELL/SHORT orders on 'bear' or 'strong_bear' signals when not already in a position (if supported).
+ * - Places market SELL/Cover orders on 'weak_bull' or 'weak_bear' signals with PVVM/PVD near zero when in a position.
+ * - Dynamic thresholding based on recent PVVM/PVD values.
+ * - Adjustable trade size based on PVVM/PVD magnitude.
  * - Stop Loss or Take Profit triggers.
  * - Deduplicates processed signals to avoid double trading.
- * - Logs all trade actions and outcomes to a log file.
- * - Configurable via environment variables:
- *      INTERVAL_KEY: trade interval ('5m', '15m', '30m', '1h', '24h')
- *      EXCHANGE: exchange id (e.g., 'kraken')
- *      KEY: API key
- *      API_SECRET: API secret
- *      PAIR: trading pair (default 'BTC/EUR')
- *      ORDER_AMOUNT: order size in base currency
- *      STOP_LOSS_PCT: percent below entry to trigger stop loss (default 2)
- *      TAKE_PROFIT_PCT: percent above entry to trigger take profit (default 4)
- * 
- * Dependencies:
- *   - ccxt
- *   - dotenv
- *   - Node.js fs and path modules
- * 
- * Usage:
- *   1. Set up .env with your exchange credentials and desired parameters.
- *   2. Run: node ccxt_orders.js
+ * - Logs all trade actions and outcomes to a log file, including trade reason.
+ * - Configurable via environment variables.
  * 
  * Author: universalbit-dev
  * Repo: https://github.com/universalbit-dev/gekko-m4-globular-cluster
@@ -50,7 +36,7 @@ const INTERVALS = {
   '15m': 15 * 60 * 1000,
   '30m': 30 * 60 * 1000,
   '1h': 60 * 60 * 1000,
-  '24h': 24 * 60 * 60 * 1000
+  '24h': 24 * 60 * 60 * 1000,
 };
 const INTERVAL_KEY = process.env.INTERVAL_KEY || '30m';
 const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['30m'];
@@ -64,28 +50,12 @@ const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
 
 const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
 const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
-// Core logic: specialized bullish
-/**
- * PVD/PVVM Move Strength Interpretation Table
- *
- * This table provides guidance for interpreting PVD (Price-Volume Delta)
- * and PVVM (Price-Volume Volatility Metric) values in trading strategies.
- *
- * | PVD/PVVM Value | Move Strength  | Indicative/Significative Meaning             |
- * |----------------|---------------|----------------------------------------------|
- * | 0 to 3         | Very Weak     | Noise, likely insignificant                  |
- * | 3 to 7         | Weak          | Minor move, low conviction                   |
- * | 7 to 10        | Moderate      | Becoming meaningful, but not strong          |
- * | 10 to 20       | Significant   | Strong move, worth considering for trades    |
- * | > 20           | Very Strong   | High conviction, strong trend/move           |
- *
- * Use these thresholds to filter market noise and identify meaningful moves.
- * Adjust values as needed based on market conditions.
- */
- 
-// PVVM/PVD thresholds (as per user)
-const PVVM_THRESHOLD = 10.0;
-const PVD_THRESHOLD = 10.0;
+
+// Dynamic PVVM/PVD thresholds
+const PVVM_BASE_THRESHOLD = 10.0;
+const PVD_BASE_THRESHOLD = 10.0;
+const DYNAMIC_WINDOW = 10; // Number of recent signals to use for dynamic threshold
+const DYNAMIC_FACTOR = 1.2; // Multiplier for dynamic threshold
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
@@ -95,7 +65,7 @@ if (!exchangeClass) {
 const exchange = new exchangeClass({
   apiKey: API_KEY,
   secret: API_SECRET,
-  enableRateLimit: true
+  enableRateLimit: true,
 });
 
 // Helper: Load processed signals (dedup by timestamp|prediction|label)
@@ -113,7 +83,7 @@ function loadProcessedSignals() {
 }
 
 // Helper: Log order
-function logOrder(timestamp, prediction, label, action, result, error = null) {
+function logOrder(timestamp, prediction, label, action, result, reason, error = null) {
   const logLine = [
     new Date().toISOString(),
     timestamp,
@@ -121,7 +91,8 @@ function logOrder(timestamp, prediction, label, action, result, error = null) {
     label || '',
     action,
     error ? `ERROR: ${error}` : 'SUCCESS',
-    error ? '' : JSON.stringify(result)
+    error ? '' : JSON.stringify(result),
+    reason || ''
   ].join('\t') + '\n';
   fs.appendFileSync(ORDER_LOG_PATH, logLine);
 }
@@ -156,9 +127,23 @@ function loadUnifiedSignals() {
   return Object.values(unifiedMap).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 }
 
+// Dynamic threshold calculation
+function getDynamicThresholds(signals) {
+  const recent = signals.slice(-DYNAMIC_WINDOW);
+  const pvvmList = recent.map(s => s.PVVM).filter(x => typeof x === 'number' && !isNaN(x));
+  const pvdList = recent.map(s => s.PVD).filter(x => typeof x === 'number' && !isNaN(x));
+  const avgPVVM = pvvmList.length ? pvvmList.reduce((a,b) => a+b, 0) / pvvmList.length : PVVM_BASE_THRESHOLD;
+  const avgPVD  = pvdList.length  ? pvdList.reduce((a,b) => a+b, 0) / pvdList.length : PVD_BASE_THRESHOLD;
+  return {
+    PVVM: avgPVVM * DYNAMIC_FACTOR,
+    PVD: avgPVD * DYNAMIC_FACTOR,
+  };
+}
+
 let isRunning = false;
-let positionOpen = false; // Only one position at a time
-let entryPrice = null;    // Track entry price for SL/TP
+let positionOpen = false;
+let entryPrice = null;
+let lastAction = null;
 
 async function main() {
   if (isRunning) {
@@ -172,7 +157,6 @@ async function main() {
       console.log('No signals found.');
       return;
     }
-    // Only process latest signal (strategy is interval-based)
     const lastSignal = signals[signals.length - 1];
     const { timestamp, prediction, label, PVVM = NaN, PVD = NaN } = lastSignal;
     const processedSignals = loadProcessedSignals();
@@ -181,6 +165,9 @@ async function main() {
       console.log('Signal already processed. Skipping.');
       return;
     }
+
+    // Dynamic thresholds
+    const { PVVM: pvvmThreshold, PVD: pvdThreshold } = getDynamicThresholds(signals);
 
     // --- STOP LOSS / TAKE PROFIT LOGIC ---
     if (positionOpen && entryPrice) {
@@ -194,7 +181,8 @@ async function main() {
           const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
           positionOpen = false;
           entryPrice = null;
-          logOrder(timestamp, prediction, label, 'STOP_LOSS', result);
+          lastAction = 'STOP_LOSS';
+          logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice})`);
           console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
           return;
         }
@@ -202,7 +190,8 @@ async function main() {
           const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
           positionOpen = false;
           entryPrice = null;
-          logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result);
+          lastAction = 'TAKE_PROFIT';
+          logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice})`);
           console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
           return;
         }
@@ -211,43 +200,92 @@ async function main() {
       }
     }
 
-    // --- PVVM/PVD-based entries and exits (your custom logic) ---
+    // --- Trade Size Adjustment ---
+    let orderSize = ORDER_AMOUNT;
+    if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) orderSize *= 2;
+    if (PVVM < pvvmThreshold && PVD < pvdThreshold) orderSize *= 0.5;
+
+    // --- Entry Logic ---
+    // Bull/Strong Bull Entry
     if (
       !positionOpen &&
       (prediction === 'bull' || label === 'strong_bull') &&
-      !isNaN(PVVM) && !isNaN(PVD) &&
-      Math.abs(PVVM) > PVVM_THRESHOLD && Math.abs(PVD) > PVD_THRESHOLD
+      PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
       try {
-        const result = await exchange.createMarketBuyOrder(PAIR, ORDER_AMOUNT);
+        const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
         positionOpen = true;
         entryPrice = result.price || result.average || null;
-        logOrder(timestamp, prediction, label, 'BUY', result);
+        lastAction = 'BUY';
+        logOrder(timestamp, prediction, label, 'BUY', result, `Bull/Strong Bull & PVVM/PVD above dynamic threshold (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
         console.log(`[${timestamp}] BUY order submitted (bull/strong_bull & PVVM/PVD strong)`);
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'BUY', null, err.message || err);
+        logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
         console.error('Order error:', err.message || err);
       }
-    } else if (
-      positionOpen &&
-      label === 'weak_bull' &&
-      !isNaN(PVVM) && !isNaN(PVD) &&
-      Math.abs(PVVM) < PVVM_THRESHOLD && Math.abs(PVD) < PVD_THRESHOLD
+      return;
+    }
+    // Bear/Strong Bear Entry (if shorting supported)
+    if (
+      !positionOpen &&
+      (prediction === 'bear' || label === 'strong_bear') &&
+      PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
       try {
-        const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
-        positionOpen = false;
-        entryPrice = null;
-        logOrder(timestamp, prediction, label, 'SELL', result);
-        console.log(`[${timestamp}] SELL order submitted (weak_bull & PVVM/PVD near zero)`);
+        const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+        positionOpen = true;
+        entryPrice = result.price || result.average || null;
+        lastAction = 'SHORT';
+        logOrder(timestamp, prediction, label, 'SHORT', result, `Bear/Strong Bear & PVVM/PVD above dynamic threshold (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        console.log(`[${timestamp}] SHORT order submitted (bear/strong_bear & PVVM/PVD strong)`);
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'SELL', null, err.message || err);
+        logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
         console.error('Order error:', err.message || err);
       }
-    } else {
-      logOrder(timestamp, prediction, label, 'IDLE', {});
-      console.log(`[${timestamp}] No order submitted (IDLE)`);
+      return;
     }
+    // --- Exit Logic ---
+    // Weak Bull Exit
+    if (
+      positionOpen &&
+      label === 'weak_bull' &&
+      PVVM < pvvmThreshold && PVD < pvdThreshold
+    ) {
+      try {
+        const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+        positionOpen = false;
+        entryPrice = null;
+        lastAction = 'SELL';
+        logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        console.log(`[${timestamp}] SELL order submitted (weak_bull & PVVM/PVD near zero)`);
+      } catch (err) {
+        logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
+        console.error('Order error:', err.message || err);
+      }
+      return;
+    }
+    // Weak Bear Exit (cover, if shorting)
+    if (
+      positionOpen &&
+      label === 'weak_bear' &&
+      PVVM < pvvmThreshold && PVD < pvdThreshold
+    ) {
+      try {
+        const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
+        positionOpen = false;
+        entryPrice = null;
+        lastAction = 'COVER';
+        logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        console.log(`[${timestamp}] COVER order submitted (weak_bear & PVVM/PVD near zero)`);
+      } catch (err) {
+        logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
+        console.error('Order error:', err.message || err);
+      }
+      return;
+    }
+    // No Trade (idle, neutral, etc)
+    logOrder(timestamp, prediction, label, 'IDLE', {}, 'No action taken');
+    console.log(`[${timestamp}] No order submitted (IDLE)`);
   } finally {
     isRunning = false;
   }
@@ -257,3 +295,17 @@ console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_KEY} (${INTERVAL_
 
 main();
 setInterval(main, INTERVAL_MS);
+
+/*
+ * PVD/PVVM Move Strength Table
+ * | Value     | Strength     | Meaning                       |
+ * |-----------|--------------|-------------------------------|
+ * | 0 to 3    | Very Weak    | Noise, likely insignificant   |
+ * | 3 to 7    | Weak         | Minor move, low conviction    |
+ * | 7 to 10   | Moderate     | Becoming meaningful           |
+ * | 10 to 20  | Significant  | Strong move, worth trading    |
+ * | > 20      | Very Strong  | High conviction, strong trend |
+ *
+ * This script uses dynamic PVVM/PVD thresholds, trade size adjustment, and logs reason for every action.
+ * Shorting logic assumes exchange/pair supports it. If not, disable bear/short logic.
+ */
