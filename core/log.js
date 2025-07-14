@@ -1,87 +1,144 @@
-/*
+const _ = require('underscore');
+const moment = require('moment');
+const fmt = require('util').format;
+const { EventEmitter } = require('events');
+const util = require('./util');
+const config = util.getConfig();
 
+const debug = process.env.DEBUG !== undefined ? process.env.DEBUG === 'true' : config.debug;
+const silent = process.env.SILENT !== undefined ? process.env.SILENT === 'true' : config.silent;
+const env = process.env.GEKKO_ENV || util.gekkoEnv();
 
-*/
-var Promise = require("bluebird");const _ = Promise.promisifyAll(require("underscore"));
-var moment = require("moment");
-var fmt = require('util').format;
+let output;
+if (env === 'standalone') {
+  output = console;
+} else if (env === 'child-process') {
+  output = {
+    error: (...args) => {
+      try {
+        process.send({ log: 'error', message: args.join(' ') });
+      } catch (e) {
+        console.error('[Logging IPC failed, fallback to console]', ...args);
+      }
+    },
+    warn: (...args) => {
+      try {
+        process.send({ log: 'warn', message: args.join(' ') });
+      } catch (e) {
+        console.warn('[Logging IPC failed, fallback to console]', ...args);
+      }
+    },
+    info: (...args) => {
+      try {
+        process.send({ log: 'info', message: args.join(' ') });
+      } catch (e) {
+        console.info('[Logging IPC failed, fallback to console]', ...args);
+      }
+    },
+    write: (...args) => {
+      try {
+        process.send({ log: 'write', message: args.join(' ') });
+      } catch (e) {
+        console.log('[Logging IPC failed, fallback to console]', ...args);
+      }
+    }
+  };
+} else {
+  output = console;
+}
 
-const {EventEmitter}=require('events');
-var util = require('./util');
-var config = util.getConfig();
-var debug = config.debug;
-var silent = config.silent;
-
-var sendToParent = function() {
-  var send = method => (...args) => {
-    process.send({log: method, message: args.join(' ')});
+// Batching implementation
+class LogBatcher {
+  constructor() {
+    this.queue = [];
+    this.processing = false;
   }
 
-  return {
-    error: send('error'),
-    warn: send('warn'),
-    info: send('info'),
-    write: send('write')
+  enqueue(fn, args) {
+    this.queue.push({ fn, args });
+    if (!this.processing) {
+      this.processing = true;
+      setImmediate(() => this.process());
+    }
+  }
+
+  process() {
+    while (this.queue.length) {
+      const { fn, args } = this.queue.shift();
+      try {
+        fn(...args);
+      } catch (e) {
+        // Fallback to console if error occurs
+        console.error('[Batch Logging Error]', e, args);
+      }
+    }
+    this.processing = false;
   }
 }
 
-var Log = function() {
-  _.bindAll(this,_.functions(this));
-  this.env = util.gekkoEnv();
+const batcher = new LogBatcher();
 
-  if(this.env === 'standalone')
-    this.output = console;
-  else if(this.env === 'child-process')
-    this.output = sendToParent();
-};
-util.makeEventEmitter(Log);
+class Log extends EventEmitter {
+  _write(method, args, name) {
+    if (silent) return;
 
-Log.prototype = {
-  _write: function(method, args, name) {
-    if(!name)
-      name = method.toUpperCase();
+    const label = name || method.toUpperCase();
+    const message = `${moment().format('YYYY-MM-DD HH:mm:ss')} (${label}):\t${fmt.apply(null, args)}`;
 
-    var message = moment().format('YYYY-MM-DD HH:mm:ss');
-    message += ' (' + name + '):\t';
-    message += fmt.apply(null, args);
+    if (output && output[method]) {
+      batcher.enqueue(output[method], [message]);
+    } else {
+      // Fallback to console if unknown method
+      batcher.enqueue(console.log, [`[Unknown log method: ${method}]`, message]);
+    }
+  }
 
-    this.output[method](message);
-  },
-  error: function() {
-    this._write('error', arguments);
-  },
-  warn: function() {
-    this._write('warn', arguments);
-  },
-  info: function() {
-    this._write('info', arguments);
-  },
-  write: function() {
-    var args = _.toArray(arguments);
-    var message = fmt.apply(null, args);
-    this.output.info(message);
+  error(...args) {
+    this._write('error', args);
+  }
+
+  warn(...args) {
+    this._write('warn', args);
+  }
+
+  info(...args) {
+    this._write('info', args);
+  }
+
+  write(...args) {
+    const message = fmt.apply(null, args);
+    if (output && output.info) {
+      batcher.enqueue(output.info, [message]);
+    } else {
+      batcher.enqueue(console.log, [message]);
+    }
+  }
+
+  debug(...args) {
+    if (debug && !silent) {
+      this._write('info', args, 'DEBUG');
+    }
   }
 }
 
-if(debug)
-  Log.prototype.debug = function() {
-    this._write('info', arguments, 'DEBUG');
-  }
-else
-  Log.prototype.debug = _.noop;
-
-if(silent) {
+// Silent disables all logging
+if (silent) {
   Log.prototype.debug = _.noop;
   Log.prototype.info = _.noop;
   Log.prototype.warn = _.noop;
   Log.prototype.write = _.noop;
 }
-module.exports = new Log;
+
+// Make Log an EventEmitter for future extensibility
+util.makeEventEmitter(Log);
+
+module.exports = new Log();
 
 /*
-The MIT License (MIT)
-Copyright (c) 2014-2017 Mike van Rossum mike@mvr.me
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT License
+
+Permission is hereby granted, free of charge, to use, copy, modify, and distribute this software, subject to the inclusion of this notice.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 */
+
