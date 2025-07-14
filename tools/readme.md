@@ -50,10 +50,6 @@ Start all tools as background processes with:
 ```bash
 pm2 start tools.config.js
 ```
-
----
-Here’s a user-friendly note (with icon) describing the `docs/` directory for documentation files, ready to insert before the **Tool Overview** section in your README:
-
 ---
 
 > 📚 **Documentation Directory (`docs/`)**
