@@ -5,16 +5,12 @@ module.exports = {
   script    : 'train_ccxt_ohlcv.js',
   instances : "1",
   exec_mode : "cluster",
-  cron_restart: '*/15 * * * *',//15min
-  autorestart: false
   },
   {
   name: 'train ohlcv',
   script    : 'train_ohlcv.js',
   instances : "1",
   exec_mode : "cluster",
-  cron_restart: '*/15 * * * *',//15min
-  autorestart: false
   },
   {
   name: 'chart ccxt recognition',
