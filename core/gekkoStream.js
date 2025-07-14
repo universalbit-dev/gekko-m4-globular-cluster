@@ -20,6 +20,7 @@
     - Extend plugins by adding 'processCandle', 'meta', or 'broadcastDeferredEmit' methods.
     - Update plugin definitions to support new trading strategies or data sources.
 */
+require('dotenv').config();
 const _ = require("underscore");
 var Writable = require('stream').Writable;
 
@@ -28,7 +29,7 @@ var moment = require('moment');
 const {EventEmitter}=require("events");
 
 var util = require('./util');
-var env = util.gekkoEnv();
+var env = process.env.GEKKO_ENV || 'standalone';
 var mode = util.gekkoMode();
 var config = util.getConfig();
 var log = require(util.dirs().core + 'log');
