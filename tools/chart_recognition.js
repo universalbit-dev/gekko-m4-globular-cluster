@@ -10,25 +10,53 @@
  * - Makes predictions for each candle and writes an enhanced CSV with predictions and model name.
  * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
  * - Deduplicates signal log by timestamp, sorts chronologically.
- * - Runs every 15 minutes by default.
+ * - Runs at interval defined by PREDICTION_INTERVAL in .env (default 15m).
  *
  * Notes:
  * - Overwrites output prediction CSV each run to avoid file size growth.
  * - Signal log records only transitions, not every prediction.
  * - Non-blocking: malformed model files are logged and skipped.
+ *
+ * Configuration:
+ * - Uses .env file for settings.
+ * - PREDICTION_INTERVAL controls run frequency (e.g., 15m, 30m, 900000).
+ * - MODEL_DIR, OUT_CSV_PATH, SIGNAL_LOG_PATH are configurable.
+ * - Does NOT use INTERVAL_KEY (trading candle interval) from .env.
  */
 
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js'); // Adjust path if needed
 
+// Preset interval table for parsing PREDICTION_INTERVAL (do not confuse with INTERVAL_KEY)
+const intervalTable = {
+  '1m': 1 * 60 * 1000,
+  '5m': 5 * 60 * 1000,
+  '15m': 15 * 60 * 1000,
+  '30m': 30 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '4h': 4 * 60 * 60 * 1000,
+  '1d': 24 * 60 * 60 * 1000
+};
+
+function parseInterval(str) {
+  if (typeof str === 'number') return str;
+  if (intervalTable[str]) return intervalTable[str];
+  // fallback: try to parse as milliseconds
+  const msValue = Number(str);
+  if (!isNaN(msValue) && msValue > 0) return msValue;
+  return intervalTable['15m']; // Default to 15min if invalid
+}
+
+// .env-configured paths and interval
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ohlcv');
-const OUT_CSV_PATH = path.join(__dirname, './ohlcv_data_prediction.csv');
-const SIGNAL_LOG_PATH = path.join(__dirname, './exchangesimulator_signal.log');
+const MODEL_DIR = process.env.MODEL_DIR || path.join(__dirname, './trained_ohlcv');
+const OUT_CSV_PATH = process.env.OUT_CSV_PATH || path.join(__dirname, './ohlcv_data_prediction.csv');
+const SIGNAL_LOG_PATH = process.env.SIGNAL_LOG_PATH || path.join(__dirname, './exchangesimulator_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
-const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+const INTERVAL_MS = parseInterval(process.env.PREDICTION_INTERVAL || '15m');
 
 function ensureDir(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -183,5 +211,5 @@ function runRecognition() {
 
 // Initial run
 runRecognition();
-// Repeat every INTERVAL_MS (15 minutes by default)
+// Repeat every INTERVAL_MS (from .env, default 15 minutes)
 setInterval(runRecognition, INTERVAL_MS);
