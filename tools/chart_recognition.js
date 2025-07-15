@@ -17,11 +17,6 @@
  * - Signal log records only transitions, not every prediction.
  * - Non-blocking: malformed model files are logged and skipped.
  *
- * Configuration:
- * - Uses .env file for settings.
- * - PREDICTION_INTERVAL controls run frequency (e.g., 15m, 30m, 900000).
- * - MODEL_DIR, OUT_CSV_PATH, SIGNAL_LOG_PATH are configurable.
- * - Does NOT use INTERVAL_KEY (trading candle interval) from .env.
  */
 
 require('dotenv').config();
@@ -29,7 +24,7 @@ const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js'); // Adjust path if needed
 
-// Preset interval table for parsing PREDICTION_INTERVAL (do not confuse with INTERVAL_KEY)
+// Preset interval table for parsing PREDICTION_INTERVAL
 const intervalTable = {
   '1m': 1 * 60 * 1000,
   '5m': 5 * 60 * 1000,
@@ -46,7 +41,7 @@ function parseInterval(str) {
   // fallback: try to parse as milliseconds
   const msValue = Number(str);
   if (!isNaN(msValue) && msValue > 0) return msValue;
-  return intervalTable['15m']; // Default to 15min if invalid
+  return intervalTable['15m']; // Default to 15min
 }
 
 // .env-configured paths and interval
@@ -211,5 +206,5 @@ function runRecognition() {
 
 // Initial run
 runRecognition();
-// Repeat every INTERVAL_MS (from .env, default 15 minutes)
+// Repeat every INTERVAL_MS (default 15 minutes)
 setInterval(runRecognition, INTERVAL_MS);
