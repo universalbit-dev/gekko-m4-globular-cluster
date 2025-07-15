@@ -2,16 +2,20 @@
  * chart_recognition.js
  *
  * Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data (ExchangeSimulator) using trained ConvNet models.
- * - Loads OHLCV data from CSV (ExchangeSimulator)
- * - Converts to JSON and saves
- * - Loads models from MODEL_DIR
- * - Makes predictions and writes enhanced CSV with predictions
- * - Runs every 15 minutes by default
+ *
+ * Workflow:
+ * - Loads OHLCV data from CSV produced by ExchangeSimulator.
+ * - Converts CSV to JSON and saves to disk.
+ * - Loads all ConvNet models from MODEL_DIR (skips malformed models).
+ * - Makes predictions for each candle and writes an enhanced CSV with predictions and model name.
+ * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
+ * - Deduplicates signal log by timestamp, sorts chronologically.
+ * - Runs every 15 minutes by default.
  *
  * Notes:
- * - Overwrites output prediction CSV on each run to avoid file size growth.
- * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
- * - Deduplicates signal log by timestamp.
+ * - Overwrites output prediction CSV each run to avoid file size growth.
+ * - Signal log records only transitions, not every prediction.
+ * - Non-blocking: malformed model files are logged and skipped.
  */
 
 const fs = require('fs');
@@ -61,12 +65,21 @@ function loadAllModels(modelDir) {
     return [];
   }
   const modelFiles = fs.readdirSync(modelDir).filter(file => file.endsWith('.json'));
-  return modelFiles.map(file => {
-    const modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, file), 'utf8'));
-    const net = new ConvNet.Net();
-    net.fromJSON(modelJson);
-    return { net, filename: file };
-  });
+  return modelFiles
+    .map(file => {
+      let modelJson;
+      try {
+        modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, file), 'utf8'));
+      } catch (err) {
+        console.error(`Error parsing JSON in file ${file}: ${err.message}`);
+        return null; // Skip malformed models
+      }
+      if (!modelJson) return null;
+      const net = new ConvNet.Net();
+      net.fromJSON(modelJson);
+      return { net, filename: file };
+    })
+    .filter(model => model !== null);
 }
 
 function predictAll(candles, net) {
