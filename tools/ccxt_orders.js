@@ -51,11 +51,23 @@ const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
 const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
 const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
 
-// Dynamic PVVM/PVD thresholds
+/*
+ * threshold parameters
+ * |               | PVVM | PVD | Window | Factor | Sensitivity/Notes            |
+ * |---------------|------|-----|--------|--------|------------------------------|
+ * | HighFreq      | 5.0  | 5.0 |   5    | 1.0    | Highly sensitive, fast reacts|
+ * | Default       |10.0  |10.0 |  10    | 1.2    | Balanced, moderate           |
+ * | Daily         |15.0  |15.0 |  20    | 1.5    | Less sensitive, filters noise|
+ * | LongTerm      |20.0  |20.0 |  30    | 2.0    | Very selective, strong moves |
+ *
+ * PVVM/PVD: Base move strength threshold.
+ * Window: Number of recent signals for dynamic calculation.
+ * Factor: Multiplier for threshold (lower = more sensitive).
+ */
 const PVVM_BASE_THRESHOLD = 10.0;
 const PVD_BASE_THRESHOLD = 10.0;
-const DYNAMIC_WINDOW = 10; // Number of recent signals to use for dynamic threshold
-const DYNAMIC_FACTOR = 1.2; // Multiplier for dynamic threshold
+const DYNAMIC_WINDOW = 10; 
+const DYNAMIC_FACTOR = 1.2;
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
