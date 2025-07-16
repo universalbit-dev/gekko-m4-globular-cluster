@@ -25,11 +25,21 @@ const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
 // INTERVAL_MS determines how often the script runs (in milliseconds).
-// Common intervals (uncomment to change):
-// const INTERVAL_MS = 5 * 60 * 1000;   // 5 minutes
-// const INTERVAL_MS = 15 * 60 * 1000;  // 15 minutes
-const INTERVAL_MS = 60 * 60 * 1000;     // 1 hour
-// const INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+/** It is crucial to run ccxt_recognition.js and ccxt_recognition_magnitude.js with the SAME interval. (default: 1 hour)
+** This ensures their logs have aligned timestamps, allowing reliable signal matching, deduplication, and accurate dynamic threshold calculations.
+** Mismatched intervals can cause missing or mismatched data, leading to unreliable trading decisions.
+**/
+
+// Interval definitions in milliseconds
+const INTERVALS = {
+  '5m': 5 * 60 * 1000,
+  '15m': 15 * 60 * 1000,
+  '30m': 30 * 60 * 1000,
+  '1h': 60 * 60 * 1000,
+  '24h': 24 * 60 * 60 * 1000,
+};
+const INTERVAL_MS = 60 * 60 * 1000; // 1h
+
 
 function loadCsvRows(csvPath) {
   if (!fs.existsSync(csvPath)) throw new Error(`CSV not found at: ${csvPath}`);
