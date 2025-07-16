@@ -30,7 +30,7 @@ const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
 const MAG_SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_magnitude.log');
 const ORDER_LOG_PATH = path.join(__dirname, './ccxt_order.log');
 
-// Intervals
+// Interval definitions in milliseconds
 const INTERVALS = {
   '5m': 5 * 60 * 1000,
   '15m': 15 * 60 * 1000,
@@ -38,8 +38,12 @@ const INTERVALS = {
   '1h': 60 * 60 * 1000,
   '24h': 24 * 60 * 60 * 1000,
 };
-const INTERVAL_KEY = process.env.INTERVAL_KEY || '30m';
-const INTERVAL_MS = INTERVALS[INTERVAL_KEY] || INTERVALS['30m'];
+
+// DATA analysis interval (1 Hour)
+const INTERVAL_KEY = 60 * 60 * 1000;
+
+// Order submission frequency (30 minutes)
+const INTERVAL_MS = 30 * 60 * 1000;
 
 // Exchange setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
