@@ -307,7 +307,7 @@ async function main() {
   }
 }
 
-console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_KEY} (${INTERVAL_MS / 1000}s)`);
+console.log(`Starting ccxt_orders`);
 
 main();
 setInterval(main, INTERVAL_MS);
