@@ -12,21 +12,9 @@ const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
 const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_magnitude.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
-// INTERVAL_MS determines how often the script runs (in milliseconds).
-/** It is crucial to run ccxt_recognition.js and ccxt_recognition_magnitude.js with the SAME interval. (default: 1 hour)
-** This ensures their logs have aligned timestamps, allowing reliable signal matching, deduplication, and accurate dynamic threshold calculations.
-** Mismatched intervals can cause missing or mismatched data, leading to unreliable trading decisions.
-**/
-
-// Interval definitions in milliseconds
-const INTERVALS = {
-  '5m': 5 * 60 * 1000,
-  '15m': 15 * 60 * 1000,
-  '30m': 30 * 60 * 1000,
-  '1h': 60 * 60 * 1000,
-  '24h': 24 * 60 * 60 * 1000,
-};
-const INTERVAL_MS = 60 * 60 * 1000;
+// IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
+// Set INTERVAL_MS in .env to synchronize intervals.
+const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
 
 
 const LOG_MAX_BYTES = 1024 * 1024;

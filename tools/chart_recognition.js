@@ -10,39 +10,20 @@
  * - Makes predictions for each candle and writes an enhanced CSV with predictions and model name.
  * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
  * - Deduplicates signal log by timestamp, sorts chronologically.
- * - Runs at interval defined by PREDICTION_INTERVAL in .env (default 15m).
  *
  * Notes:
  * - Overwrites output prediction CSV each run to avoid file size growth.
  * - Signal log records only transitions, not every prediction.
  * - Non-blocking: malformed model files are logged and skipped.
  *
+ * Configuration:
+ * - Uses .env file for settings.
  */
 
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js'); // Adjust path if needed
-
-// Preset interval table for parsing PREDICTION_INTERVAL
-const intervalTable = {
-  '1m': 1 * 60 * 1000,
-  '5m': 5 * 60 * 1000,
-  '15m': 15 * 60 * 1000,
-  '30m': 30 * 60 * 1000,
-  '1h': 60 * 60 * 1000,
-  '4h': 4 * 60 * 60 * 1000,
-  '1d': 24 * 60 * 60 * 1000
-};
-
-function parseInterval(str) {
-  if (typeof str === 'number') return str;
-  if (intervalTable[str]) return intervalTable[str];
-  // fallback: try to parse as milliseconds
-  const msValue = Number(str);
-  if (!isNaN(msValue) && msValue > 0) return msValue;
-  return intervalTable['15m']; // Default to 15min
-}
 
 // .env-configured paths and interval
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
@@ -51,7 +32,10 @@ const MODEL_DIR = process.env.MODEL_DIR || path.join(__dirname, './trained_ohlcv
 const OUT_CSV_PATH = process.env.OUT_CSV_PATH || path.join(__dirname, './ohlcv_data_prediction.csv');
 const SIGNAL_LOG_PATH = process.env.SIGNAL_LOG_PATH || path.join(__dirname, './exchangesimulator_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
-const INTERVAL_MS = parseInterval(process.env.PREDICTION_INTERVAL || '15m');
+
+// IMPORTANT: INTERVAL_SIMULATOR must be the same in all related scripts for consistent signal processing and order logic.
+const INTERVAL_SIMULATOR = parseInt(process.env.SIMULATOR_INTERVAL, 10) || 3600000; 
+// default 1h
 
 function ensureDir(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -206,5 +190,4 @@ function runRecognition() {
 
 // Initial run
 runRecognition();
-// Repeat every INTERVAL_MS (default 15 minutes)
-setInterval(runRecognition, INTERVAL_MS);
+setInterval(runRecognition, INTERVAL_SIMULATOR);
