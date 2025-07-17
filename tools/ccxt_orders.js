@@ -58,10 +58,10 @@ const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
  * Window: Number of recent signals for dynamic calculation.
  * Factor: Multiplier for threshold (lower = more sensitive).
  */
-const PVVM_BASE_THRESHOLD = 10.0;
-const PVD_BASE_THRESHOLD = 10.0;
-const DYNAMIC_WINDOW = 10;  
-const DYNAMIC_FACTOR = 1.2;  
+const PVVM_BASE_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10.0;
+const PVD_BASE_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10.0;
+const DYNAMIC_WINDOW = parseInt(process.env.DYNAMIC_WINDOW, 10) || 10;
+const DYNAMIC_FACTOR = parseFloat(process.env.DYNAMIC_FACTOR) || 1.2;
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
