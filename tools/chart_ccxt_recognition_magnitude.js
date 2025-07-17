@@ -20,8 +20,8 @@ const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default
 const LOG_MAX_BYTES = 1024 * 1024;
 const LOG_KEEP_BYTES = 512 * 1024;
 
-const PVVM_THRESHOLD = 10;
-const PVD_THRESHOLD = 10;
+const PVVM_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10;
+const PVD_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10;
 
 // Utility functions
 function ensureDirExists(filePath) {
