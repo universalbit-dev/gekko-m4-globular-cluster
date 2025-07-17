@@ -30,20 +30,9 @@ const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
 const MAG_SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_magnitude.log');
 const ORDER_LOG_PATH = path.join(__dirname, './ccxt_order.log');
 
-// Interval definitions in milliseconds
-const INTERVALS = {
-  '5m': 5 * 60 * 1000,
-  '15m': 15 * 60 * 1000,
-  '30m': 30 * 60 * 1000,
-  '1h': 60 * 60 * 1000,
-  '24h': 24 * 60 * 60 * 1000,
-};
-
-// DATA analysis interval (1 Hour)
-const INTERVAL_KEY = 60 * 60 * 1000;
-
-// Order submission frequency (30 minutes)
-const INTERVAL_MS = 30 * 60 * 1000;
+// IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
+// Set INTERVAL_MS in .env to synchronize intervals.
+const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
 
 // Exchange setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
@@ -55,6 +44,7 @@ const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
 const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
 const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
 
+// Dynamic PVVM/PVD thresholds
 /*
  * threshold parameters
  * |               | PVVM | PVD | Window | Factor | Sensitivity/Notes            |
@@ -70,8 +60,8 @@ const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
  */
 const PVVM_BASE_THRESHOLD = 10.0;
 const PVD_BASE_THRESHOLD = 10.0;
-const DYNAMIC_WINDOW = 10; 
-const DYNAMIC_FACTOR = 1.2;
+const DYNAMIC_WINDOW = 10;  
+const DYNAMIC_FACTOR = 1.2;  
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
@@ -307,10 +297,11 @@ async function main() {
   }
 }
 
-console.log(`Starting ccxt_orders`);
+console.log(`Starting CCXT Orders`);
 
 main();
 setInterval(main, INTERVAL_MS);
+
 
 /*
  * PVD/PVVM Move Strength Table
