@@ -31,24 +31,31 @@ Automated crypto trading bot using [CCXT](https://github.com/ccxt/ccxt), Node.js
 ```bash
 npm install ccxt dotenv
 ```
-
 ---
 
 ## ⚙️ Configuration
 
 Set environment variables in a `.env` file:
-
 ```env
-EXCHANGE=kraken         # Exchange name
-KEY=your_api_key        # API key
-SECRET=your_api_secret  # API secret
-PAIR=BTC/EUR            # Trading pair
-ORDER_AMOUNT=0.00005    # Default trade size
-INTERVAL_KEY=30m        # Signal check interval (5m, 15m, 30m, 1h, 24h)
-STOP_LOSS_PCT=2         # Stop loss percentage
-TAKE_PROFIT_PCT=4       # Take profit percentage
+EXCHANGE=kraken            # Exchange name (e.g., kraken, binance)
+KEY=your_api_key           # Your exchange API key
+SECRET=your_api_secret     # Your exchange API secret
+PAIR=BTC/EUR               # Trading pair
+ORDER_AMOUNT=0.00005       # Default trade size in base currency
+INTERVAL_MS=3600000        # Signal check interval in milliseconds (e.g., 3600000=1h, 900000=15m)
+STOP_LOSS_PCT=2            # Stop loss percentage (e.g., 2 for 2%)
+TAKE_PROFIT_PCT=4          # Take profit percentage (e.g., 4 for 4%)
+
+PVVM_BASE_THRESHOLD=8.5    # Default PVVM move strength threshold
+PVD_BASE_THRESHOLD=7.5     # Default PVD move strength threshold
+DYNAMIC_WINDOW=12          # Number of signals used for dynamic threshold calculation
+DYNAMIC_FACTOR=1.1         # Multiplier for threshold sensitivity (lower = more sensitive)
 ```
 
+**Notes:**
+- `INTERVAL_MS` must be consistent across related scripts for synchronized signal checks.
+- PVVM/PVD parameters control dynamic signal sensitivity.  
+- Keep your API keys private.
 ---
 
 ## 🏁 How It Works
