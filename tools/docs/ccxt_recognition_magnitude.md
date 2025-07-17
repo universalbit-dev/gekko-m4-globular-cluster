@@ -17,7 +17,7 @@ Automated market signal recognition with magnitude analysis for crypto trading.
 - 📏 **Magnitude Analysis:** Calculates PVVM (Price-Volume Vector Magnitude) and PVD (Price-Volume Distance).
 - 🏷️ **Signal Labeling:** Distinguishes between `strong_bull`, `weak_bull`, `strong_bear`, `weak_bear`, and `neutral`.
 - 📝 **Logs State Transitions:** Writes only significant prediction changes to `ccxt_signal_magnitude.log`.
-- 🔄 **Automatic Execution:** Runs every 15 minutes by default.
+- 🔄 **Automatic Execution:** Runs every 1 hour by default.
 - 🧹 **Log Management:** Keeps logs compact by trimming older entries.
 
 ---
@@ -78,8 +78,8 @@ Automated market signal recognition with magnitude analysis for crypto trading.
 
 ## ⏰ Interval
 
-Runs every **15 minutes** by default.  
-To change, adjust `INTERVAL_MS` in the script.
+Runs every **1 hour** by default.  
+To change, adjust `INTERVAL_MS` in the '.env' configuration file.
 
 ---
 
