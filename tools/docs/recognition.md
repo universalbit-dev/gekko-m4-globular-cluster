@@ -15,7 +15,7 @@ Automated Market Signal Recognition for ExchangeSimulator
 - 📈 **Loads OHLCV Data:** Reads historical price/volume data from CSV.
 - 🧠 **Neural Network Predictions:** Uses trained ConvNetJS models for market signal classification.
 - ✨ **Enhanced Output:** Writes an enriched CSV with predictions and model info.
-- ⏱️ **Scheduled Execution:** Runs automatically every 15 minutes.
+- ⏱️ **Scheduled Execution:** Runs automatically every 1 hour.
 - 📝 **Signal Logging:** Appends only signal transitions (state changes) to `exchangesimulator_signal.log`.
 - 🧹 **Deduplication:** Keeps logs clean by removing duplicate timestamps and sorting.
 
@@ -57,7 +57,7 @@ Automated Market Signal Recognition for ExchangeSimulator
    Appends only signal changes to the log and deduplicates by timestamp.
 
 7. **Scheduled Execution:**  
-   Runs every 15 minutes by default.
+   Runs every 1 hour by default.
 
 ---
 
