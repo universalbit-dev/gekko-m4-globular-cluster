@@ -5,12 +5,12 @@ const rfs = require('rotating-file-stream');
 const path = require('path');
 
 class CCXTMarketData {
-  constructor({ symbol, interval }) {
+  constructor({ symbol, ohlcvCandleSize }) {
     this.exchangeId = process.env.EXCHANGE_MARKET_DATA_ID || 'kraken';
     if (!this.exchangeId) throw new Error('Missing EXCHANGE_MARKET_DATA_ID env variable');
     this.exchange = new ccxt[this.exchangeId]();
     this.symbol = symbol;
-    this.interval = interval;
+    this.ohlcvCandleSize = ohlcvCandleSize;
 
     this.logDir = path.join(__dirname, '../../logs/csv');
     fs.ensureDirSync(this.logDir);
@@ -19,7 +19,7 @@ class CCXTMarketData {
     this.csvFileName = 'ohlcv_ccxt_data.csv';
     this.csvFilePath = path.join(this.logDir, this.csvFileName);
 
-    // Use a safe stream that checks file existence and does not overwrite
+    // Create CSV file with header if it doesn't exist
     if (!fs.existsSync(this.csvFilePath)) {
       fs.writeFileSync(this.csvFilePath, this.HEADER);
     }
@@ -45,7 +45,7 @@ class CCXTMarketData {
   async fetchAndAppendOHLCV() {
     try {
       await this.exchange.loadMarkets();
-      const ohlcv = await this.exchange.fetchOHLCV(this.symbol, this.interval);
+      const ohlcv = await this.exchange.fetchOHLCV(this.symbol, this.ohlcvCandleSize);
 
       // Only new, non-duplicate rows
       const newRows = ohlcv.filter(([timestamp]) => timestamp > this.latestTimestamp);
@@ -116,29 +116,24 @@ class CCXTMarketData {
   }
 }
 
-// Main loop and signal handling remain unchanged:
-const INTERVALS = {
-  '5m': 5 * 60 * 1000,
-  '15m': 15 * 60 * 1000,
-  '1h': 60 * 60 * 1000,
-  '24h': 24 * 60 * 60 * 1000
-};
+// ----------------- Main Loop -----------------
 
-const INTERVAL_MS = INTERVALS['15m'];
 const SYMBOL = process.env.SYMBOL || 'BTC/EUR';
-const OHLCV_INTERVAL = process.env.INTERVAL || '15m';
+const OHLCV_CANDLE_SIZE = process.env.OHLCV_CANDLE_SIZE || '1h';
+// INTERVAL_FETCH_DATA should be set in .env (e.g., INTERVAL_FETCH_DATA=3600000 for 1 hour)
+const INTERVAL_FETCH_DATA = Number(process.env.INTERVAL_FETCH_DATA) || 3600000;
 
 const marketData = new CCXTMarketData({
   symbol: SYMBOL,
-  interval: OHLCV_INTERVAL
+  ohlcvCandleSize: OHLCV_CANDLE_SIZE
 });
 
 const loop = async () => {
   await marketData.fetchAndAppendOHLCV();
 };
 
-loop();
-const timer = setInterval(loop, INTERVAL_MS);
+loop(); // Run initially at startup
+const timer = setInterval(loop, INTERVAL_FETCH_DATA);
 
 process.on('SIGINT', () => {
   clearInterval(timer);
