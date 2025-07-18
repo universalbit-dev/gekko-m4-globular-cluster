@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'ccxtmarket',
       script: 'ccxtMarketData.js',
-      instances: 'max',
+      instances: '1',
       exec_mode: 'cluster',
     }
   ]
