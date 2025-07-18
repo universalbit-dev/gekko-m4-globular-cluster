@@ -52,56 +52,16 @@ pm2 start tools.config.js
 ```
 ---
 
-> 📚 **Documentation Directory (`docs/`)**
+> 📚 **Documentation Directory ([`docs/`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs)**
 >
 > All user guides and detailed explanations for project tools are organized in the `docs/` directory.  
 > Each file provides easy-to-read documentation for a specific tool or feature, ensuring you have clear instructions and helpful tips.  
-> Browse the `docs/` folder to quickly find information about setup, usage, and best practices for every part of the system!
-
----
-## 📄 Tool Overview
-
-### 1. 🧠 Model Training Scripts
-
-#### `train_ohlcv.js`
-- **Purpose:** Trains a neural network on standard OHLCV data (Open, High, Low, Close, Volume).  
-- **Input:** `../logs/json/ohlcv/ohlcv_data.json` (must include `label` per candle).  
-- **Output:** Saves models to `./trained_ohlcv/` as timestamped `.json` files.  
-- **Interval:** Retrains every 15 minutes (default).
-
-#### `train_ccxt_ohlcv.js`
-- **Purpose:** Same as above, but for OHLCV data sourced via CCXT.  
-- **Input:** `../logs/json/ohlcv/ohlcv_ccxt_data.json`  
-- **Output:** `./trained_ccxt_ohlcv/` (timestamped).  
-- **Interval:** Every 15 minutes.
-
-**Model Output Example:**  
-`trained_ohlcv/trained_ohlcv_2025-06-05T07-00-00-000Z.json`  
-`trained_ccxt_ohlcv/trained_ccxt_ohlcv_2025-06-05T07-00-00-000Z.json`
+> Browse the [`docs/`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs) folder to quickly find information about setup, usage, and best practices for every part of the system!
 
 ---
 
-### 2. 📊 Chart Recognition Scripts
 
-#### `chart_recognition.js`
-- **Purpose:** Applies all trained models to predict market behavior on new OHLCV data.  
-- **Input:** `../logs/csv/ohlcv_data.csv`  
-- **Output:**  
-  - Converts CSV to JSON at `../logs/json/ohlcv/ohlcv_data.json`
-  - Creates predictions CSV: `./ohlcv_data_prediction.csv`  
-- **Models:** Uses all models from `./trained_ohlcv/`
-
-#### `chart_ccxt_recognition.js`
-- **Purpose:** Applies all trained models to predict market behavior, but for CCXT OHLCV data.  
-- **Input:** `../logs/csv/ohlcv_ccxt_data.csv`  
-- **Output:**
-  - Creates predictions CSV: `./ohlcv_ccxt_data_prediction.csv`
-  - Creates predictions Log  'ccxt_signal.log'
-- **Models:** Uses all models from `./trained_ccxt_ohlcv/`
-
----
-
-### 3. ⚙️ PM2 Configuration
+### ⚙️ PM2 Configuration
 
 #### `tools.config.js`
 - **Purpose:** PM2 ecosystem configuration for running all scripts.
@@ -109,18 +69,12 @@ pm2 start tools.config.js
   ```bash
   pm2 start tools.config.js
   ```
-- **Manages:**  
-  - `train_ccxt_ohlcv.js`
-  - `train_ohlcv.js`
-  - `chart_ccxt_recognition.js`
-  - `chart_ccxt_recognition_magnitude.js`
-  - `chart_recognition.js`
 ---
 
 ## 📝 Usage Notes & Recommendations
 
 - Input files must be regularly updated with fresh OHLCV data and correct labeling (for training).
-- Each script is set up to re-run automatically every 15 minutes by default.
+- Each script is set up to re-run automatically every 1 hour by default.
 - Output model and prediction files are timestamped for traceability.
 - You can check logs and status of each process with:
   ```bash
@@ -152,6 +106,7 @@ pm2 start tools.config.js
 > ```bash
 > node train_ohlcv.js
 > node chart_recognition.js
+> node ccxt_orders.js
 > # ... etc.
 > ```
 ---
@@ -164,6 +119,6 @@ pm2 start tools.config.js
 
 ---
 
-**Happy Hacking! 🚀**
+**Happy Gekko 🚀**
 
 ---
