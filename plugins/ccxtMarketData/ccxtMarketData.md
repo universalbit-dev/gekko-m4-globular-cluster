@@ -1,75 +1,97 @@
-# CCXT Market Data Plugin
+# ccxtMarketData.js Documentation
 
-## Philosophy of Decentralization
+## Overview
 
-> **Note:**  
-> This plugin is built to reduce reliance on centralized data sources by leveraging decentralized, flexible configuration methods.
-
----
-
-## 🚀 Dynamic Configuration Only
-
-The **CCXT Market Data** plugin is configured entirely through dynamic settings, allowing you to adjust parameters at runtime using environment variables. This approach enhances flexibility, portability, and security for different environments and deployments.
-
-### Example: Dynamic Configuration via Environment Variables
-
-Set up your plugin in your strategy configuration file as follows:
-
-```js
-config.ccxtMarketData = {
-  enabled: true,
-  exchange: process.env.EXCHANGE_MARKET_DATA_ID,
-  symbol: process.env.SYMBOL,
-  interval: process.env.INTERVAL
-};
-```
-
-**Environment variables you need to define:**
-- `EXCHANGE_MARKET_DATA_ID` — The exchange identifier (e.g., `kraken`, `binance`)
-- `SYMBOL` — The trading pair symbol (e.g., `BTC/EUR`)
-- `INTERVAL` — The candle interval (e.g., `5m`, `1h`, etc.)
-
-You can set these variables in your shell before starting the application:
-```sh
-export EXCHANGE_MARKET_DATA_ID=kraken
-export SYMBOL=BTC/EUR
-export INTERVAL=5m
-node ccxtMarketData.js
-```
-
----
-
-## 🧩 Plugin Registration
-
-Register the plugin in `plugins.js` as follows:
-
-```js
-{
-  name: 'CCXT Market Data',
-  description: 'Fetches live market data from a public exchange endpoint',
-  slug: 'ccxtMarketData',
-  modes: ['realtime', 'backtest'],
-  path: config => 'ccxtMarketData/ccxtMarketData.js',
-}
-```
-
----
+The `ccxtMarketData.js` module is a Node.js utility for periodically fetching OHLCV (Open, High, Low, Close, Volume) candlestick market data from a cryptocurrency exchange using the [ccxt](https://github.com/ccxt/ccxt) library. It supports configurable symbols, candle sizes, and fetch intervals, storing data in both CSV and JSON formats with robust file handling and atomic updates.
 
 ## Features
 
-- Fetches market data in real-time via public CCXT endpoints
-- All key settings are controlled via environment variables for maximum flexibility and automation
+- Fetches OHLCV data using `ccxt` from a configurable exchange (default: Kraken).
+- Stores data in rotating CSV files (one file per day, up to 30 files).
+- Stores data in JSON files, with atomic writes and backup creation.
+- Prevents duplicate data entries.
+- Supports environment-based configuration.
+- Graceful shutdown handling.
+
+## Environment Variables
+
+- `EXCHANGE_MARKET_DATA_ID`: Exchange ID for ccxt (e.g., `kraken`, `binance`). Default: `kraken`.
+- `SYMBOL`: Trading pair symbol to fetch (e.g., `BTC/EUR`). Default: `BTC/EUR`.
+- `OHLCV_CANDLE_SIZE`: Candle time frame (e.g., `1h`, `5m`). Default: `1h`.
+- `INTERVAL_FETCH_DATA`: Fetch interval in milliseconds. Default: `3600000` (1 hour).
+
+## File Structure
+
+- **CSV Output:** `logs/csv/ohlcv_ccxt_data.csv` (rotated daily, up to 30 files)
+- **JSON Output:** `logs/csv/ohlcv_ccxt_data.json` (main JSON file)
+- **Destination JSON:** `logs/json/ohlcv/ohlcv_ccxt_data.json` (aggregated, atomic writes)
+
+## Main Class: `CCXTMarketData`
+
+### Constructor
+
+```js
+new CCXTMarketData({ symbol, ohlcvCandleSize })
+```
+
+- `symbol`: Trading pair string (e.g., 'BTC/EUR')
+- `ohlcvCandleSize`: Candle interval (e.g., '1h')
+
+**Initializes:**
+- Exchange connection (via ccxt)
+- Output directories and files (CSV and JSON)
+- File streams for logging
+
+### Methods
+
+- **`async fetchAndAppendOHLCV()`**
+  - Loads market data from the configured exchange and symbol.
+  - Filters new (non-duplicate) OHLCV rows.
+  - Appends new data to the CSV and JSON files.
+  - Backs up existing JSON files before overwriting.
+  - Updates destination JSON file for aggregated data.
+  - Logs activity and errors to the console.
+
+- **`appendJsonToDest(newEntries)`**
+  - Appends new JSON entries to the destination JSON file, ensuring no duplicates and atomic file writing.
+
+- **`close()`**
+  - Closes the CSV file stream (called on graceful shutdown).
+
+## Main Script
+
+- Instantiates `CCXTMarketData` with environment or default parameters.
+- Runs an initial fetch at startup.
+- Sets an interval to fetch and append OHLCV data as per `INTERVAL_FETCH_DATA`.
+- Handles `SIGINT` (Ctrl+C) for graceful shutdown and file closure.
+
+## Usage
+
+1. Install dependencies:
+   ```bash
+   npm install ccxt fs-extra rotating-file-stream dotenv
+   ```
+2. Configure your `.env` file with desired parameters (see above).
+3. Run the script:
+   ```bash
+   node plugins/ccxtMarketData/ccxtMarketData.js
+   ```
+
+## Example .env
+
+```
+EXCHANGE_MARKET_DATA_ID=kraken
+SYMBOL=BTC/EUR
+OHLCV_CANDLE_SIZE=1h
+INTERVAL_FETCH_DATA=3600000
+```
+
+## Exports
+
+- The `CCXTMarketData` class is exported for use in other modules.
 
 ---
 
-## Use Cases
-
-- Automatically adapt your trading strategies to different exchanges, symbols, and intervals without modifying code
-- Seamless integration across development, testing, and production environments
-
----
-
-**Tip:**  
-Always use environment variables to manage sensitive or frequently changed configuration options for best security practices and maximum portability.
+**Note:** All output files are created and managed automatically. Ensure the process has permission to write to the `logs/` directories.
 
 ---
