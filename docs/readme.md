@@ -11,6 +11,8 @@
 - [**mode/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/mode): Documentation on different operational modes.
 - [**nodenv/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/nodenv): Information on managing Node.js environments with `nodenv`.
 - [**resources/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/resources): Useful tools, scripts, and references for developers.
+- [**tools**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs)
+trainers for simulator and live data.
 - [**strategies/**](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/docs/strategies): Guides for implementing and optimizing trading strategies.
 
 ### **Important Note**
