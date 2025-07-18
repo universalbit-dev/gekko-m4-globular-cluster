@@ -297,7 +297,7 @@ async function main() {
   }
 }
 
-console.log(`Starting CCXT Orders`);
+console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_MS}`);
 
 main();
 setInterval(main, INTERVAL_MS);
