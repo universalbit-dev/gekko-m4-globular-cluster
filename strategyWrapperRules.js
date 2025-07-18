@@ -1,38 +1,31 @@
-/*copilot explain
-This JavaScript file defines a Wrapper object that manages multiple trading strategies for the Gekko trading bot. Here is a breakdown of its main components:
+/*
+  This file defines a Wrapper object for managing multiple trading strategies in the Gekko trading bot.
 
-    Dependencies:
-        lodash is imported for utility functions.
-        Wrapper is initialized as an empty object.
+  Overview:
+  - Uses lodash for utility functions.
+  - Exports a Wrapper object to coordinate strategy instances.
+
+  Main Components:
 
     Attributes:
-        Wrapper.children: An array to hold instances of child strategies.
-        Wrapper.requiredHistory: Set to -1, meaning no historical data is required.
-        Wrapper.age: Initialized to 0.
+    - Wrapper.children: Array holding child strategy instances.
+    - Wrapper.requiredHistory: Set to -1 (no historical data required).
+    - Wrapper.age: Tracks the age of the Wrapper (starts at 0).
 
-    Method: createChild
-        Takes a strategy name (stratname) and settings.
-        Requires the baseTradingMethod from tradingAdvisor.
-        Imports the strategy file using the provided strategy name.
-        Copies all functions from the strategy file to the Consultant prototype.
-        Adds a custom collectAdvice method to handle advice.
-        Creates a new Consultant (strategy instance) with the provided settings.
-        Sets an event listener for 'advice' to call collectAdvice.
-        Adds the new strategy instance to children and returns it.
+    Methods:
+    - createChild(stratname, settings):
+        • Loads the specified strategy and its settings.
+        • Copies all functions from the strategy into the Consultant prototype.
+        • Adds a custom collectAdvice handler for strategy advice.
+        • Instantiates a Consultant, sets up advice event listening, stores it in children, and returns the instance.
+    - checkChildren(candle):
+        • For each child strategy, resets its last advice and triggers the tick method with the provided market data.
+    - listenAdvice(child):
+        • If the child has advice, calls the advice handler with the recommendation; otherwise, calls it with no arguments.
 
-    Method: checkChildren
-        Takes a candle (market data) as input.
-        Iterates over each child strategy, resets its lastAdvice, and calls the tick method with the candle data.
-
-    Method: listenAdvice
-        Takes a child strategy as input.
-        If the child has a lastAdvice, it calls advice with the recommendation.
-        Otherwise, it calls advice without arguments.
-
-    Exports:
-        The Wrapper object is exported for use in other modules.
-
-This setup allows for the dynamic creation and management of multiple trading strategies within the Gekko trading bot framework.
+  Purpose:
+  - Enables dynamic creation, event handling, and management of multiple trading strategies within the Gekko framework.
+  - Exports the Wrapper for use in other modules.
 */
 
 var _ = require('lodash');
