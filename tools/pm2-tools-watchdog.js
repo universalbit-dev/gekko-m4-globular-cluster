@@ -20,7 +20,8 @@ const monitoredNames = [
   'train ohlcv',
   'chart ccxt recognition',
   'chart ccxt recognition magnitude',
-  'chart recognition'
+  'chart recognition',
+  'ccxt market data'
 ];
 
 const highCpuSince = new Map();
