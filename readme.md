@@ -31,6 +31,16 @@ The **Gekko M4 Globular Cluster** repository is a feature-rich implementation de
 
 ---
 
+## 📚 Project Documentation Overview
+
+- 🗂️ **Main documentation is available in:**
+  - [`docs/`](./docs/) – Core guides and references
+  - [`tools/docs/`](./tools/docs/) – Tool-specific documentation
+
+- 📄 **Important:**  
+  For configuring dynamic exchange simulators and using live public data, **please read [`docs/env_file.md`](./docs/env_file.md)** carefully.
+
+---
 ## Requirements
 
 Before setting up the project, make sure your environment meets the following requirements:
