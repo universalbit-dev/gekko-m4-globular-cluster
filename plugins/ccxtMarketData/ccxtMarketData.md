@@ -1,77 +1,75 @@
-# CCXT Market Data Plugin Documentation
+# CCXT Market Data Plugin
 
-## Decentralization Philosophy
+## Philosophy of Decentralization
 
-> **Note:** This plugin is developed with the goal of decentralizing everything where possible. Our aim is to reduce reliance on centralized data and service providers, and to promote resilience, transparency, and user sovereignty. Future updates may include support for decentralized data feeds and exchanges.
-
----
-
-> 🚀 **How to Run This Plugin:**  
-> To start this plugin manually, open your terminal and run:  
->
-> ```
-> node ccxtMarketData.js
-> ```
->
-> This command will launch the plugin and begin fetching market data using CCXT.
+> **Note:**  
+> This plugin is built to reduce reliance on centralized data sources by leveraging decentralized, flexible configuration methods.
 
 ---
 
-⚙️ **Configuration Quick Start**
+## 🚀 Dynamic Configuration Only
 
-Add to your strategy config:
+The **CCXT Market Data** plugin is configured entirely through dynamic settings, allowing you to adjust parameters at runtime using environment variables. This approach enhances flexibility, portability, and security for different environments and deployments.
+
+### Example: Dynamic Configuration via Environment Variables
+
+Set up your plugin in your strategy configuration file as follows:
 
 ```js
 config.ccxtMarketData = {
   enabled: true,
-  exchange: 'kraken',
-  symbol: 'BTC/EUR',
-  interval: '5m'
+  exchange: process.env.EXCHANGE_MARKET_DATA_ID,
+  symbol: process.env.SYMBOL,
+  interval: process.env.INTERVAL
 };
+```
+
+**Environment variables you need to define:**
+- `EXCHANGE_MARKET_DATA_ID` — The exchange identifier (e.g., `kraken`, `binance`)
+- `SYMBOL` — The trading pair symbol (e.g., `BTC/EUR`)
+- `INTERVAL` — The candle interval (e.g., `5m`, `1h`, etc.)
+
+You can set these variables in your shell before starting the application:
+```sh
+export EXCHANGE_MARKET_DATA_ID=kraken
+export SYMBOL=BTC/EUR
+export INTERVAL=5m
+node ccxtMarketData.js
 ```
 
 ---
 
-**ℹ️ Note:**  
-You can see example of this integration in the project at  
-`env/simulator/trade_rsibullbearadx_simulator.js`, where the plugin is enabled and configured for use with **environment variables**:
+## 🧩 Plugin Registration
+
+Register the plugin in `plugins.js` as follows:
 
 ```js
-config.ccxtMarketData = {
-enabled: true,
-exchange: process.env.EXCHANGE_MARKET_DATA_ID,
-symbol: process.env.SYMBOL,
-interval: process.env.INTERVAL
-};
+{
+  name: 'CCXT Market Data',
+  description: 'Fetches live market data from a public exchange endpoint',
+  slug: 'ccxtMarketData',
+  modes: ['realtime', 'backtest'],
+  path: config => 'ccxtMarketData/ccxtMarketData.js',
+}
 ```
-This allows dynamic assignment of the exchange via environment variables, making your setup more flexible.
 
->
-> 🧩 **Plugin Integration:**  
-> Register the plugin in `plugins.js`:
->
-> ```js
-> {
->   name: 'CCXT Market Data',
->   description: 'Fetches live market data from a public exchange endpoint',
->   slug: 'ccxtMarketData',
->   modes: ['realtime', 'backtest'],
->   path: config => 'ccxtMarketData/ccxtMarketData.js',
-> }
-> ```
+---
 
-## Overview
+## Features
 
-Fetches real-time market data using **public ccxt endpoints**
+- Fetches market data in real-time via public CCXT endpoints
+- All key settings are controlled via environment variables for maximum flexibility and automation
 
-## Key Features
+---
 
-- OHLCV data
-- Configurable exchange and pair
+## Use Cases
 
-## Example Use Cases
+- Automatically adapt your trading strategies to different exchanges, symbols, and intervals without modifying code
+- Seamless integration across development, testing, and production environments
 
-- Strategy development
-- Market monitoring dashboards
+---
+
+**Tip:**  
+Always use environment variables to manage sensitive or frequently changed configuration options for best security practices and maximum portability.
 
 ---
