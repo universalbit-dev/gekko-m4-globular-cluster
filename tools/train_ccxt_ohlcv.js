@@ -1,9 +1,10 @@
 // train_ccxt_ohlcv.js
+require('dotenv').config();
 const fs = require('fs');
 const dir = './trained_ccxt_ohlcv';
 const ConvNet = require('../core/convnet.js');
 
-const INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
 const filePath='../logs/json/ohlcv/ohlcv_ccxt_data.json';
 // Check once at the top level of your script
 if (!fs.existsSync(filePath)) {
@@ -62,6 +63,11 @@ function trainAndSave() {
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
+
+/*
+example output:
+[2025-06-07T07-27-55-047Z] Model Saved as ./trained_ccxt_ohlcv/trained_ohlcv_ccxt_2025-06-07T07-27-55-047Z.json
+*/
 
 // Initial run
 trainAndSave();
