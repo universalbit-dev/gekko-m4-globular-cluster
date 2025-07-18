@@ -1,30 +1,68 @@
-# ccxtMarketData.js Documentation
+# `ccxtMarketData.js` Documentation
 
 ## Overview
 
-The `ccxtMarketData.js` module is a Node.js utility for periodically fetching OHLCV (Open, High, Low, Close, Volume) candlestick market data from a cryptocurrency exchange using the [ccxt](https://github.com/ccxt/ccxt) library. It supports configurable symbols, candle sizes, and fetch intervals, storing data in both CSV and JSON formats with robust file handling and atomic updates.
+The `ccxtMarketData.js` module is a Node.js utility designed to periodically fetch OHLCV (Open, High, Low, Close, Volume) candlestick market data from a cryptocurrency exchange using the [ccxt](https://github.com/ccxt/ccxt) library. It offers flexible configuration for trading pairs, candle intervals, and fetch frequency. Data is stored in both CSV and JSON formats with robust file handling, atomic updates, and rotation.
+
+---
 
 ## Features
 
-- Fetches OHLCV data using `ccxt` from a configurable exchange (default: Kraken).
-- Stores data in rotating CSV files (one file per day, up to 30 files).
-- Stores data in JSON files, with atomic writes and backup creation.
-- Prevents duplicate data entries.
-- Supports environment-based configuration.
-- Graceful shutdown handling.
+- Fetches OHLCV data from a configurable exchange (default: Kraken) via `ccxt`
+- Supports custom trading pairs and candle intervals
+- Stores data in daily-rotated CSV files (up to 30 days)
+- Stores data in JSON files with atomic writes and backup creation
+- Prevents duplicate entries
+- Environment-based configuration
+- Graceful shutdown with proper file closure
 
-## Environment Variables
+---
 
-- `EXCHANGE_MARKET_DATA_ID`: Exchange ID for ccxt (e.g., `kraken`, `binance`). Default: `kraken`.
-- `SYMBOL`: Trading pair symbol to fetch (e.g., `BTC/EUR`). Default: `BTC/EUR`.
-- `OHLCV_CANDLE_SIZE`: Candle time frame (e.g., `1h`, `5m`). Default: `1h`.
-- `INTERVAL_FETCH_DATA`: Fetch interval in milliseconds. Default: `3600000` (1 hour).
+## Environment Configuration
+
+This module uses environment variables to control its behavior.  
+**No sensitive credentials are stored—only public/default settings.**
+
+| Variable                  | Description                                  | Example Value         |
+|---------------------------|----------------------------------------------|-----------------------|
+| `EXCHANGE_MARKET_DATA_ID` | Exchange name for CCXT                       | `kraken`              |
+| `SYMBOL`                  | Trading pair                                 | `BTC/EUR`             |
+| `OHLCV_CANDLE_SIZE`       | Candle interval (`1m`, `1h`, `1d`, etc.)     | `1h`                  |
+| `INTERVAL_FETCH_DATA`     | Fetch interval (milliseconds)                | `3600000`             |
+
+**Suggested Settings:**
+
+| Use Case         | Candle Size   | Fetch Interval (ms) |
+|------------------|--------------|---------------------|
+| High Frequency   | 1m / 5m      | 60000               |
+| Moderate         | 15m / 30m    | 900000 / 1800000    |
+| Long Term        | 1h / 1d      | 3600000 / 86400000  |
+
+**Sample .env:**
+```
+EXCHANGE_MARKET_DATA_ID=kraken
+SYMBOL=BTC/EUR
+OHLCV_CANDLE_SIZE=1h
+INTERVAL_FETCH_DATA=3600000
+```
+
+---
 
 ## File Structure
 
-- **CSV Output:** `logs/csv/ohlcv_ccxt_data.csv` (rotated daily, up to 30 files)
-- **JSON Output:** `logs/csv/ohlcv_ccxt_data.json` (main JSON file)
-- **Destination JSON:** `logs/json/ohlcv/ohlcv_ccxt_data.json` (aggregated, atomic writes)
+- **CSV Output:**  
+  `logs/csv/ohlcv_ccxt_data.csv`  
+  (rotated daily, retains up to 30 files)
+
+- **JSON Output:**  
+  `logs/csv/ohlcv_ccxt_data.json`  
+  (main JSON log file)
+
+- **Destination JSON:**  
+  `logs/json/ohlcv/ohlcv_ccxt_data.json`  
+  (aggregated, atomic writes)
+
+---
 
 ## Main Class: `CCXTMarketData`
 
@@ -33,65 +71,68 @@ The `ccxtMarketData.js` module is a Node.js utility for periodically fetching OH
 ```js
 new CCXTMarketData({ symbol, ohlcvCandleSize })
 ```
-
-- `symbol`: Trading pair string (e.g., 'BTC/EUR')
-- `ohlcvCandleSize`: Candle interval (e.g., '1h')
+- `symbol`: Trading pair (string, e.g., `'BTC/EUR'`)
+- `ohlcvCandleSize`: Candle interval (string, e.g., `'1h'`)
 
 **Initializes:**
-- Exchange connection (via ccxt)
-- Output directories and files (CSV and JSON)
-- File streams for logging
+- Exchange connection via `ccxt`
+- Output directories and file streams for CSV and JSON logging
+
+---
 
 ### Methods
 
-- **`async fetchAndAppendOHLCV()`**
-  - Loads market data from the configured exchange and symbol.
-  - Filters new (non-duplicate) OHLCV rows.
-  - Appends new data to the CSV and JSON files.
-  - Backs up existing JSON files before overwriting.
-  - Updates destination JSON file for aggregated data.
-  - Logs activity and errors to the console.
+#### `async fetchAndAppendOHLCV()`
+- Fetches new OHLCV data from the exchange
+- Filters out duplicate records
+- Appends new entries to CSV and JSON files
+- Creates backups before overwriting JSON
+- Updates destination (aggregated) JSON file
+- Logs actions and errors to the console
 
-- **`appendJsonToDest(newEntries)`**
-  - Appends new JSON entries to the destination JSON file, ensuring no duplicates and atomic file writing.
+#### `appendJsonToDest(newEntries)`
+- Appends new JSON entries to the destination file
+- Ensures no duplicates and uses atomic file writing
 
-- **`close()`**
-  - Closes the CSV file stream (called on graceful shutdown).
+#### `close()`
+- Closes the CSV file stream—for use during graceful shutdown
 
-## Main Script
+---
 
-- Instantiates `CCXTMarketData` with environment or default parameters.
-- Runs an initial fetch at startup.
-- Sets an interval to fetch and append OHLCV data as per `INTERVAL_FETCH_DATA`.
-- Handles `SIGINT` (Ctrl+C) for graceful shutdown and file closure.
+## Main Script Workflow
+
+1. Instantiates `CCXTMarketData` with environment or default settings
+2. Performs an initial data fetch on startup
+3. Sets an interval to fetch and append OHLCV data as per `INTERVAL_FETCH_DATA`
+4. Handles `SIGINT` (Ctrl+C) for graceful shutdown and stream closure
+
+---
 
 ## Usage
 
-1. Install dependencies:
+1. **Install dependencies:**
    ```bash
    npm install ccxt fs-extra rotating-file-stream dotenv
    ```
-2. Configure your `.env` file with desired parameters (see above).
-3. Run the script:
+
+2. **Configure your `.env` file:**
+   (Use the sample above or your preferred settings)
+
+3. **Run the script:**
    ```bash
    node plugins/ccxtMarketData/ccxtMarketData.js
    ```
 
-## Example .env
-
-```
-EXCHANGE_MARKET_DATA_ID=kraken
-SYMBOL=BTC/EUR
-OHLCV_CANDLE_SIZE=1h
-INTERVAL_FETCH_DATA=3600000
-```
+---
 
 ## Exports
 
-- The `CCXTMarketData` class is exported for use in other modules.
+- Exports the `CCXTMarketData` class for use in other modules
 
 ---
 
-**Note:** All output files are created and managed automatically. Ensure the process has permission to write to the `logs/` directories.
+> **Note:**  
+> All output files and directories are managed automatically.  
+> Ensure your process has write permissions to the `logs/` directories.
 
 ---
