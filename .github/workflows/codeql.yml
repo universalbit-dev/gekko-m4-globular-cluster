@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'python' ] # Add or remove languages relevant to your repo
+        language: [ 'javascript' ] # Add or remove languages relevant to your repo
 
     steps:
     - name: Checkout repository
