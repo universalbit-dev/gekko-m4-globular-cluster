@@ -31,6 +31,12 @@ module.exports = {
   exec_mode : "cluster"
   },
   {
+  name: 'ccxt market data',
+  script    : '../plugins/ccxtMarketData/ccxtMarketData.js',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+  {
   name: 'pm2-tools-watchdog',
   script    : 'pm2-tools-watchdog.js',
   instances : "max",
