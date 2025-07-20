@@ -59,8 +59,8 @@ module.exports = {
   {
   name: "pm2-cpu-watchdog",
   script    : "./pm2-cpu-watchdog.js",
-  instances : "max",
-  exec_mode : "cluster",
+  instances : "1",
+  exec_mode : "fork",
   },
 ]
 }
