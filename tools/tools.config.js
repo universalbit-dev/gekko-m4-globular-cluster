@@ -13,34 +13,28 @@ module.exports = {
   exec_mode : "cluster"
   },
   {
-  name: 'chart ccxt recognition',
-  script: 'chart_ccxt_recognition.js',
-  instances: "1",
-  exec_mode: 'cluster'     
-  },
-  {
-  name: 'chart ccxt recognition magnitude',
-  script: 'chart_ccxt_recognition_magnitude.js',
-  instances: "1",
-  exec_mode: 'cluster'    
-  },
-  {
   name: 'chart recognition',
   script    : 'chart_recognition.js',
   instances : "1",
   exec_mode : "cluster"
   },
   {
-  name: 'ccxt market data',
-  script    : '../plugins/ccxtMarketData/ccxtMarketData.js',
-  instances : "1",
-  exec_mode : "cluster"
+  name: 'chart ccxt recognition',
+  script: 'chart_ccxt_recognition.js',
+  instances: "1",
+  exec_mode: 'cluster',
+  },
+  {
+  name: 'chart ccxt recognition magnitude',
+  script: 'chart_ccxt_recognition_magnitude.js',
+  instances: "1",
+  exec_mode: 'cluster',
   },
   {
   name: 'pm2-tools-watchdog',
   script    : 'pm2-tools-watchdog.js',
-  instances : "max",
-  exec_mode : "cluster"
+  instances : "1",
+  exec_mode : "fork"
   },
 ]
 }
