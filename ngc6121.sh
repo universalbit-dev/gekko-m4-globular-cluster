@@ -16,21 +16,14 @@ npm install pm2 -g
 
 # Step 3: Start simulator.config.js
 echo ""
-echo ">> Starting simulator with PM2..."
-pm2 start simulator.config.js --name simulator
+echo ">> Starting ecosystem with PM2..."
+pm2 start ngc6121.config.js --name ngc6121
 
-# Step 4: Start tools/tools.config.js
-echo ""
-echo ">> Starting tools with PM2..."
-cd tools
-pm2 start tools.config.js --name tools
-cd ..
-
-# Step 5: Start plugins/ccxtMarketData/ccxtmarket.config.js
+# Step 5: Start plugins/ccxtMarketData/ccxtmarket
 echo ""
 echo ">> Starting ccxtmarket plugin with PM2..."
 cd plugins/ccxtMarketData
-pm2 start ccxtmarket.config.js --name ccxtmarket
+pm2 start ccxtMarketData.js --name ccxtmarket
 cd ~
 
 # Final: Show PM2 process list
