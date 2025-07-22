@@ -151,6 +151,33 @@ let positionOpen = false;
 let entryPrice = null;
 let lastAction = null;
 
+/**
+ * On startup, sync the bot's position state with the exchange.
+ * Prevents repeated BUY errors if already in a spot position.
+ * Checks base asset balance and sets positionOpen accordingly.
+ */
+
+async function syncPosition() {
+  try {
+    const balance = await exchange.fetchBalance();
+    const baseCurrency = PAIR.split('/')[0];
+    // For spot: If you have any of the base asset, assume "in position"
+    if (balance.total[baseCurrency] && balance.total[baseCurrency] > 0) {
+      positionOpen = true;
+      entryPrice = null; // Optionally: fetch last buy price from trade history if needed
+      lastAction = 'BUY';
+      console.log(`[Startup] Detected open position in ${baseCurrency} (amount: ${balance.total[baseCurrency]}). Bot will start IN POSITION.`);
+    } else {
+      positionOpen = false;
+      entryPrice = null;
+      lastAction = null;
+      console.log(`[Startup] No open position detected on exchange. Bot will start FLAT.`);
+    }
+  } catch (err) {
+    console.error('Error syncing position with exchange:', err.message || err);
+  }
+}
+
 async function main() {
   if (isRunning) {
     console.warn(`[${new Date().toISOString()}] Previous cycle still running, skipping this interval.`);
@@ -231,7 +258,10 @@ async function main() {
       }
       return;
     }
-    // Bear/Strong Bear Entry (if shorting supported)
+
+/**
+ * Only open a SHORT position if none is currently open (prevents multiple SHORTs).
+*/
     if (
       !positionOpen &&
       (prediction === 'bear' || label === 'strong_bear') &&
@@ -297,11 +327,13 @@ async function main() {
   }
 }
 
-console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_MS}`);
-
-main();
-setInterval(main, INTERVAL_MS);
-
+// --- Startup: Sync position with exchange, then start main loop ---
+(async () => {
+  await syncPosition();
+  console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_MS}`);
+  main();
+  setInterval(main, INTERVAL_MS);
+})();
 
 /*
  * PVD/PVVM Move Strength Table
