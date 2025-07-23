@@ -259,9 +259,9 @@ async function main() {
       return;
     }
 
-/**
- * Only open a SHORT position if none is currently open (prevents multiple SHORTs).
-*/
+    /**
+     * Only open a SHORT position if none is currently open (prevents multiple SHORTs).
+     */
     if (
       !positionOpen &&
       (prediction === 'bear' || label === 'strong_bear') &&
@@ -294,12 +294,14 @@ async function main() {
         lastAction = 'SELL';
         logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
         console.log(`[${timestamp}] SELL order submitted (weak_bull & PVVM/PVD near zero)`);
+        await syncPosition();
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
         console.error('Order error:', err.message || err);
       }
       return;
     }
+
     // Weak Bear Exit (cover, if shorting)
     if (
       positionOpen &&
@@ -313,19 +315,17 @@ async function main() {
         lastAction = 'COVER';
         logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
         console.log(`[${timestamp}] COVER order submitted (weak_bear & PVVM/PVD near zero)`);
+        await syncPosition();
       } catch (err) {
         logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
         console.error('Order error:', err.message || err);
       }
       return;
     }
-    // No Trade (idle, neutral, etc)
-    logOrder(timestamp, prediction, label, 'IDLE', {}, 'No action taken');
-    console.log(`[${timestamp}] No order submitted (IDLE)`);
   } finally {
     isRunning = false;
   }
-}
+} 
 
 // --- Startup: Sync position with exchange, then start main loop ---
 (async () => {
