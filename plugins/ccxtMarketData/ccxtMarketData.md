@@ -117,8 +117,34 @@ new CCXTMarketData({ symbol, ohlcvCandleSize })
 
 2. **Configure your `.env` file:**
    (Use the sample above or your preferred settings)
+```env
+######################################################################
+#               CCXTMarketData Environment File               	     #
+#                                                                    #
+# This file contains only public/default configuration values. 	     #
+# No sensitive or private credentials are present.             	     #
+#                                                              	     # 
+# - EXCHANGE_MARKET_DATA_ID: Exchange name for CCXT                  #
+# - SYMBOL: Trading pair (e.g., BTC/EUR, ETH/USDT)                   #
+# - OHLCV_CANDLE_SIZE: Candle interval (e.g., 1m,1h, 1d)	     #
+# - INTERVAL_FETCH_DATA: Data fetch interval in milliseconds 	     #
+######################################################################
+#   Suggested settings:
+# High Frequency:  OHLCV_CANDLE_SIZE=1m   INTERVAL_FETCH_DATA=60000
+# High Frequency:  OHLCV_CANDLE_SIZE=5m   INTERVAL_FETCH_DATA=60000
+# Moderate:        OHLCV_CANDLE_SIZE=15m  INTERVAL_FETCH_DATA=900000
+# Moderate:        OHLCV_CANDLE_SIZE=30m  INTERVAL_FETCH_DATA=1800000
+# Long Term:       OHLCV_CANDLE_SIZE=1h   INTERVAL_FETCH_DATA=3600000
+# Long Term:       OHLCV_CANDLE_SIZE=1d   INTERVAL_FETCH_DATA=86400000
+######################################################################
 
-3. **Run the script:**
+EXCHANGE_MARKET_DATA_ID=kraken
+SYMBOL=BTC/EUR
+OHLCV_CANDLE_SIZE=1h
+INTERVAL_FETCH_DATA=3600000
+```
+
+4. **Run the script:**
    ```bash
    node plugins/ccxtMarketData/ccxtMarketData.js
    ```
