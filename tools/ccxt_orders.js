@@ -161,10 +161,9 @@ async function syncPosition() {
   try {
     const balance = await exchange.fetchBalance();
     const baseCurrency = PAIR.split('/')[0];
-    // For spot: If you have any of the base asset, assume "in position"
-    if (balance.total[baseCurrency] && balance.total[baseCurrency] > 0) {
+    if (balance.total[baseCurrency] && balance.total[baseCurrency] >= ORDER_AMOUNT) {
       positionOpen = true;
-      entryPrice = null; // Optionally: fetch last buy price from trade history if needed
+      entryPrice = null;
       lastAction = 'BUY';
       console.log(`[Startup] Detected open position in ${baseCurrency} (amount: ${balance.total[baseCurrency]}). Bot will start IN POSITION.`);
     } else {
