@@ -39,7 +39,8 @@ const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
 const API_SECRET = process.env.SECRET || '';
 const PAIR = process.env.PAIR || 'BTC/EUR';
-const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00005;
+const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00006;
+const MIN_ALLOWED_ORDER_AMOUNT = parseFloat(process.env.MIN_ALLOWED_ORDER_AMOUNT) || 0.00006;
 
 const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
 const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
@@ -157,6 +158,21 @@ let lastAction = null;
  * Checks base asset balance and sets positionOpen accordingly.
  */
 
+/**
+ * Volatility Table
+ * | Volatility (%) | Market State   | Typical Strategy            |
+ * |----------------|---------------|-----------------------------|
+ * | 0 - 1          | Very Low      | Scalping, range-bound trades|
+ * | 1 - 3          | Low           | Conservative entries, small moves |
+ * | 3 - 7          | Moderate      | Swing trades, trend following|
+ * | 7 - 15         | High          | Aggressive trend, momentum  |
+ * | > 15           | Very High     | Tactical, breakout, reduce size |
+ *
+ * - The bot can adjust risk/trade size based on observed volatility.
+ * - Use volatility metrics to filter signals or trigger tactical mode.
+ * - Tactical logic allows dynamic risk management, position sizing, and signal filtering based on real-time market conditions.
+ */
+
 async function syncPosition() {
   try {
     const balance = await exchange.fetchBalance();
@@ -210,7 +226,8 @@ async function main() {
         const takeProfitPrice = entryPrice * (1 + TAKE_PROFIT_PCT / 100);
 
         if (currentPrice <= stopLossPrice) {
-          const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
+          let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
+          const result = await exchange.createMarketSellOrder(PAIR, orderSize);
           positionOpen = false;
           entryPrice = null;
           lastAction = 'STOP_LOSS';
@@ -219,7 +236,8 @@ async function main() {
           return;
         }
         if (currentPrice >= takeProfitPrice) {
-          const result = await exchange.createMarketSellOrder(PAIR, ORDER_AMOUNT);
+          let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
+          const result = await exchange.createMarketSellOrder(PAIR, orderSize);
           positionOpen = false;
           entryPrice = null;
           lastAction = 'TAKE_PROFIT';
@@ -236,6 +254,9 @@ async function main() {
     let orderSize = ORDER_AMOUNT;
     if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) orderSize *= 2;
     if (PVVM < pvvmThreshold && PVD < pvdThreshold) orderSize *= 0.5;
+
+    // Enforce minimum allowed order amount
+    orderSize = Math.max(orderSize, MIN_ALLOWED_ORDER_AMOUNT);
 
     // --- Entry Logic ---
     // Bull/Strong Bull Entry
@@ -346,4 +367,4 @@ async function main() {
  *
  * This script uses dynamic PVVM/PVD thresholds, trade size adjustment, and logs reason for every action.
  * Shorting logic assumes exchange/pair supports it. If not, disable bear/short logic.
- */
+*/
