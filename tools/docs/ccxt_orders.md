@@ -4,7 +4,6 @@ Automated crypto trading system using [CCXT](https://github.com/ccxt/ccxt), Node
 **Supports dynamic position sizing, strict minimum order handling, and real-time risk management.**
 
 <div align="center">
-  <img src="https://img.icons8.com/fluency/48/crypto-coin.png" alt="Crypto" width="48"/>
   <img src="https://img.icons8.com/fluency/48/robot.png" alt="Bot" width="48"/>
   <img src="https://img.icons8.com/fluency/48/settings.png" alt="Settings" width="48"/>
 </div>
