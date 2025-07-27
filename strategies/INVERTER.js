@@ -55,7 +55,7 @@ const { Chess } = require('chess.js');
 // Helper function: Generate a random Fibonacci number (for fun/debugging)
 const sequence = async function() {
     try {
-        const fibonacci_sequence = ['0', '1', '1', '2', '3', '5', '8', '13', ...];
+        const fibonacci_sequence = ['0', '1', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '144'];
         var fibonacci_number = Math.floor(Math.random() * fibonacci_sequence.length);
         fibonacci_number = fibonacci_sequence[fibonacci_number];
         await console.log('Fibonacci Sequence -- Wohoo! -- Number: ', fibonacci_number);
@@ -95,7 +95,7 @@ method = {
         // Add indicators with specific settings
         this.addIndicator('dema', 'DEMA', { optInTimePeriod: 1, optInFastPeriod: 233, optInSlowPeriod: 55 });
         this.addIndicator('maFast', 'SMA', { optInTimePeriod: 987 });
-        this.addIndicator('rsi', 'RSI', { optInTimePeriod: 14 });
+        this.addIndicator('rsi', 'RSI', { interval: 14 });
         this.addIndicator('adx', 'ADX', { optInTimePeriod: 3 });
         
         // Initialize StopLoss with a 5% threshold
