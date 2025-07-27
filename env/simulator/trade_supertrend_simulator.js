@@ -10,7 +10,10 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'SUPERTREND'};
 
-config.SUPERTREND={ATR:7,bandFactor:3};
+config.SUPERTREND = {
+  ATR: Number(process.env.SUPERTREND_ATR) || 7,
+  bandFactor: Number(process.env.SUPERTREND_BAND_FACTOR) || 3
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
