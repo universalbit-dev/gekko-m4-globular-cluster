@@ -6,7 +6,7 @@ const ConvNet = require('../core/convnet.js'); // Adjust path as needed
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
-const filePath='./logs/json/ohlcv/ohlcv_data.json';
+const filePath='../logs/json/ohlcv/ohlcv_data.json';
 // Check once at the top level of your script
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(filePath, '[]', 'utf8');
@@ -14,7 +14,7 @@ if (!fs.existsSync(filePath)) {
 function trainAndSave() {
   let data;
   try {
-    data = JSON.parse(fs.readFileSync('./logs/json/ohlcv/ohlcv_data.json', 'utf8'));
+    data = JSON.parse(fs.readFileSync('../logs/json/ohlcv/ohlcv_data.json', 'utf8'));
   } catch (e) {
     console.error('Failed to read or parse ohlcv_data.json:', e.message);
     return;
@@ -52,7 +52,7 @@ function trainAndSave() {
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `./tools/trained_ohlcv/trained_ohlcv_${timestamp}.json`;
+  const filename = `../tools/trained_ohlcv/trained_ohlcv_${timestamp}.json`;
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
