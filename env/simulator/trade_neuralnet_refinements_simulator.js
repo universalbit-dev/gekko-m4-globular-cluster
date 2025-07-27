@@ -10,8 +10,19 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'NEURALNET'};
 
-config.NEURALNET={SMA_long:987,SMA_short:50,threshold_buy :0.2,threshold_sell :-0.2,learning_rate :0.01,limit_order:0.01,
-momentum:0.1,decay:0.01,hodl_threshold:1,price_buffer_len:1597,min_predictions :1597};
+config.NEURALNET = {
+  SMA_long: Number(process.env.NEURALNET_SMA_LONG) || 987,
+  SMA_short: Number(process.env.NEURALNET_SMA_SHORT) || 50,
+  threshold_buy: Number(process.env.NEURALNET_THRESHOLD_BUY) || 0.2,
+  threshold_sell: Number(process.env.NEURALNET_THRESHOLD_SELL) || -0.2,
+  learning_rate: Number(process.env.NEURALNET_LEARNING_RATE) || 0.01,
+  limit_order: Number(process.env.NEURALNET_LIMIT_ORDER) || 0.01,
+  momentum: Number(process.env.NEURALNET_MOMENTUM) || 0.1,
+  decay: Number(process.env.NEURALNET_DECAY) || 0.01,
+  hodl_threshold: Number(process.env.NEURALNET_HODL_THRESHOLD) || 1,
+  price_buffer_len: Number(process.env.NEURALNET_PRICE_BUFFER_LEN) || 1597,
+  min_predictions: Number(process.env.NEURALNET_MIN_PREDICTIONS) || 1597
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
