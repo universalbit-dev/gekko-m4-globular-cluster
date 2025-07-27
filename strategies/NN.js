@@ -1,5 +1,3 @@
-const { addon: ov } = require('openvino-node');
-
 var log = require('../core/log.js');
 var util= require('../core/util.js')
 var config = require('../core/util.js').getConfig();
@@ -53,7 +51,7 @@ predictionCount:0,priceBuffer:[],stoplossCounter:0,prevPrice:0,prevAction:'wait'
     startTime = new Date();
     this.hodle_threshold = this.settings.hodle_threshold || 1;
     this.addIndicator('dema', 'DEMA', {optInTimePeriod:this.settings.DEMA});
-    this.addIndicator('rsi', 'RSI', {optInTimePeriod:this.settings.RSI});
+    this.addIndicator('rsi', 'RSI', {interval:this.settings.RSI});
     this.stopLoss = new StopLoss(5); // 5% stop loss threshold
 
     this.name = 'NN';
