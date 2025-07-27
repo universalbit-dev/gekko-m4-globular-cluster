@@ -13,7 +13,10 @@ config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'INVERT
 
 config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: process.env.SYMBOL,candleSize:process.env.OHLCV_CANDLE_SIZE,fetchInterval: process.env.INTERVAL_FETCH_DATA};
 
-config.INVERTER = {DI:13,DX:3};
+config.INVERTER = {
+  DI: Number(process.env.INVERTER_DI) || 13,
+  DX: Number(process.env.INVERTER_DX) || 3
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
