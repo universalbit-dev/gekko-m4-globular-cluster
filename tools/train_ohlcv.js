@@ -58,11 +58,6 @@ function trainAndSave() {
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
-/*
-example output:
-[2025-06-07T07-31-03-634Z] Model Saved as ./trained_ohlcv/trained_ohlcv_2025-06-07T07-31-03-634Z.json
-*/
-
 // Initial run
 trainAndSave();
 
