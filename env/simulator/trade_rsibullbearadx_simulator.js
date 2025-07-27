@@ -11,8 +11,24 @@ config.tradingAdvisor = {enabled:true,warmupPeriods:200 ,candleSize:13,historySi
 
 config.ccxtMarketData = {enabled: true,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: process.env.SYMBOL,candleSize:process.env.OHLCV_CANDLE_SIZE,fetchInterval: process.env.INTERVAL_FETCH_DATA};
 
-config.RSIBULLBEARADX={SMA_long:200,SMA_short:50,BULL_RSI:10,BULL_RSI_high:80,BULL_RSI_low:60,BEAR_RSI:15,BEAR_RSI_high:50,BEAR_RSI_low:20,
-BULL_mod_high:5,BULL_mod_low :-5,BEAR_mod_high:15,BEAR_mod_low:-5,RSI:13,ADX:8,ADX_high:70,ADX_low:50};
+config.RSIBULLBEARADX = {
+  SMA_long: Number(process.env.RSIBULLBEARADX_SMA_LONG) || 200,
+  SMA_short: Number(process.env.RSIBULLBEARADX_SMA_SHORT) || 50,
+  BULL_RSI: Number(process.env.RSIBULLBEARADX_BULL_RSI) || 10,
+  BULL_RSI_high: Number(process.env.RSIBULLBEARADX_BULL_RSI_HIGH) || 80,
+  BULL_RSI_low: Number(process.env.RSIBULLBEARADX_BULL_RSI_LOW) || 60,
+  BEAR_RSI: Number(process.env.RSIBULLBEARADX_BEAR_RSI) || 15,
+  BEAR_RSI_high: Number(process.env.RSIBULLBEARADX_BEAR_RSI_HIGH) || 50,
+  BEAR_RSI_low: Number(process.env.RSIBULLBEARADX_BEAR_RSI_LOW) || 20,
+  BULL_mod_high: Number(process.env.RSIBULLBEARADX_BULL_MOD_HIGH) || 5,
+  BULL_mod_low: Number(process.env.RSIBULLBEARADX_BULL_MOD_LOW) || -5,
+  BEAR_mod_high: Number(process.env.RSIBULLBEARADX_BEAR_MOD_HIGH) || 15,
+  BEAR_mod_low: Number(process.env.RSIBULLBEARADX_BEAR_MOD_LOW) || -5,
+  RSI: Number(process.env.RSIBULLBEARADX_RSI) || 13,
+  ADX: Number(process.env.RSIBULLBEARADX_ADX) || 8,
+  ADX_high: Number(process.env.RSIBULLBEARADX_ADX_HIGH) || 70,
+  ADX_low: Number(process.env.RSIBULLBEARADX_ADX_LOW) || 50
+};
 
 config.stopLoss = {enabled: true,threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
 
