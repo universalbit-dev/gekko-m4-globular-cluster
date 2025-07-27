@@ -9,17 +9,22 @@ echo ""
 echo ">> Installing Node.js dependencies..."
 npm install
 
-# Step 2: Install PM2 globally
+# Step 2: Fix vulnerabilities with npm audit fix
+echo ""
+echo ">> Running npm audit fix to address vulnerabilities..."
+npm audit fix
+
+# Step 3: Install PM2 globally
 echo ""
 echo ">> Installing PM2 globally..."
 npm install pm2 -g
 
-# Step 3: Start simulator.config.js
+# Step 4: Start ngc6121.config.js with PM2
 echo ""
 echo ">> Starting ecosystem with PM2..."
 pm2 start ngc6121.config.js --name ngc6121
 
-# Step 5: Start plugins/ccxtMarketData/ccxtmarket
+# Step 5: Start plugins/ccxtMarketData/ccxtmarket with PM2
 echo ""
 echo ">> Starting ccxtmarket plugin with PM2..."
 cd plugins/ccxtMarketData
