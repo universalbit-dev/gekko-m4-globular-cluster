@@ -10,7 +10,18 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'BOLLINGERBAND'};
 
-config.BOLLINGERBAND={bbands:[{TimePeriod: 20,NbDevUp: 2.25,NbDevDn: 2}],SMA: 200,DEMA: 200,gannAngleRatios: [1, 2, 3]};
+config.BOLLINGERBAND = {
+  bbands: [{
+    TimePeriod: Number(process.env.BBANDS_TIMEPERIOD) || 20,
+    NbDevUp: Number(process.env.BBANDS_NBDEVUP) || 2.25,
+    NbDevDn: Number(process.env.BBANDS_NBDEVDN) || 2
+  }],
+  SMA: Number(process.env.BBANDS_SMA) || 200,
+  DEMA: Number(process.env.BBANDS_DEMA) || 200,
+  gannAngleRatios: process.env.BBANDS_GANN_ANGLES
+    ? process.env.BBANDS_GANN_ANGLES.split(',').map(Number)
+    : [1, 2, 3]
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
