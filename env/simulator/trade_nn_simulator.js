@@ -10,8 +10,22 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'NN'};
 
-config.NN={threshold_buy:0.2,threshold_sell:-0.2,method:'adadelta',learning_rate:0.01,momentum:0.0,
-l1_decay:0.001,l2_decay:0.001,price_buffer_len:987,min_predictions:144,hodl_threshold:1,scale:1,batch_size:1,RSI:13,DEMA:1};
+config.NN = {
+  threshold_buy: Number(process.env.NN_THRESHOLD_BUY) || 0.2,
+  threshold_sell: Number(process.env.NN_THRESHOLD_SELL) || -0.2,
+  method: process.env.NN_METHOD || 'adadelta',
+  learning_rate: Number(process.env.NN_LEARNING_RATE) || 0.01,
+  momentum: Number(process.env.NN_MOMENTUM) || 0.0,
+  l1_decay: Number(process.env.NN_L1_DECAY) || 0.001,
+  l2_decay: Number(process.env.NN_L2_DECAY) || 0.001,
+  price_buffer_len: Number(process.env.NN_PRICE_BUFFER_LEN) || 987,
+  min_predictions: Number(process.env.NN_MIN_PREDICTIONS) || 144,
+  hodl_threshold: Number(process.env.NN_HODL_THRESHOLD) || 1,
+  scale: Number(process.env.NN_SCALE) || 1,
+  batch_size: Number(process.env.NN_BATCH_SIZE) || 1,
+  RSI: Number(process.env.NN_RSI) || 13,
+  DEMA: Number(process.env.NN_DEMA) || 1
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
