@@ -3,6 +3,7 @@ require('dotenv').config();
 const fs = require('fs');
 const dir = './trained_ccxt_ohlcv';
 const ConvNet = require('../core/convnet.js');
+const path = require('path');
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
@@ -61,8 +62,7 @@ function trainAndSave() {
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `../tools/trained_ccxt_ohlcv/trained_ccxt_ohlcv_${timestamp}.json`;
-  fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
+  const filename = path.join(__dirname, 'trained_ohlcv', `trained_ohlcv_${timestamp}.json`);
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
