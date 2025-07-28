@@ -16,13 +16,14 @@
 
 const fs = require('fs');
 const path = require('path');
-const ConvNet = require('../core/convnet.js');
+const ConvNet = require('../core/convnet.js'); // Adjust path if needed
 
-const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
-const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ohlcv');
-const OUT_CSV_PATH = path.join(__dirname, './ohlcv_data_prediction.csv');
-const SIGNAL_LOG_PATH = path.join(__dirname, './exchangesimulator_signal.log');
+const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_data.csv');
+const JSON_PATH = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
+const MODEL_DIR = path.resolve(__dirname, './trained_ohlcv');
+const OUT_CSV_PATH = path.resolve(__dirname, './ohlcv_data_prediction.csv');
+const SIGNAL_LOG_PATH = path.resolve(__dirname, './exchangesimulator_signal.log');
+
 const LABELS = ['bull', 'bear', 'idle'];
 const INTERVAL_SIMULATOR = 65 * 60 * 1000; // 65 minutes
 

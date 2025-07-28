@@ -8,15 +8,14 @@ const path = require('path');
 const ConvNet = require('../core/convnet.js');
 const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
-const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
-const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
-const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_magnitude.log');
+const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
+const MODEL_DIR = path.resolve(__dirname, './trained_ccxt_ohlcv');
+const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
-
 
 const LOG_MAX_BYTES = 1024 * 1024;
 const LOG_KEEP_BYTES = 512 * 1024;

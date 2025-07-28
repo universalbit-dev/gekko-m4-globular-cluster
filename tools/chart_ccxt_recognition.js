@@ -16,11 +16,11 @@ const ConvNet = require('../core/convnet.js');
 // --- Import labeling logic ---
 const { labelCandle, labelCandles, EPSILON } = require('./label_ohlcv.js');
 
-const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
-const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
-const MODEL_DIR = path.join(__dirname, './trained_ccxt_ohlcv');
-const OUT_CSV_PATH = path.join(__dirname, './ohlcv_ccxt_data_prediction.csv');
-const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
+const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
+const JSON_PATH = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
+const MODEL_DIR = path.resolve(__dirname, './trained_ccxt_ohlcv');
+const OUT_CSV_PATH = path.resolve(__dirname, './ohlcv_ccxt_data_prediction.csv');
+const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
