@@ -70,7 +70,7 @@ function trainAndSave() {
 }
 
 /*
-[2025-07-28T08-53-03-609Z] Model Saved as /home/unbt/gekko-m4-globular-cluster/tools/trained_ccxt_ohlcv/trained_ccxt_ohlcv_2025-07-28T08-53-03-609Z.json
+[2025-07-28T08-53-03-609Z] Model Saved as trained_ccxt_ohlcv/trained_ccxt_ohlcv_2025-07-28T08-53-03-609Z.json
 */
 
 // Initial run
