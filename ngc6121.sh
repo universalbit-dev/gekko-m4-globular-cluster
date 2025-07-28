@@ -38,10 +38,10 @@ echo "        All processes started with PM2      "
 echo "============================================"
 pm2 list
 
-# Wait for 15 minutes before restarting all PM2 processes.
+# Wait for 5 minutes before restarting all PM2 processes.
 echo ""
-echo ">> Waiting for 15 minutes (900 seconds) before restarting all PM2 processes..."
-sleep 900
+echo ">> Waiting for 5 minutes (300 seconds) before restarting all PM2 processes..."
+sleep 300
 
 # Restart all pm2 processes
 echo ">> Restarting all PM2 processes now."
