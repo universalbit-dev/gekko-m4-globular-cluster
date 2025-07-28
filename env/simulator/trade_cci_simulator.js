@@ -11,7 +11,15 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'CCI'};
 
-config.CCI={thresholds:[{up:100,down:-100,persistence:0}],constant:0.015,history:987};
+config.CCI = {
+  thresholds: [{
+    up: Number(process.env.CCI_THRESHOLDS_UP),
+    down: Number(process.env.CCI_THRESHOLDS_DOWN),
+    persistence: Number(process.env.CCI_THRESHOLDS_PERSISTENCE)
+  }],
+  constant: Number(process.env.CCI_CONSTANT),
+  history: Number(process.env.CCI_HISTORY)
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
