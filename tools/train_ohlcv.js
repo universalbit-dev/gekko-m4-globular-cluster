@@ -1,12 +1,14 @@
 // train_ohlcv.js
+const path = require('path');
 require('dotenv').config();
 const fs = require('fs');
+const dir = path.resolve(__dirname, 'trained_ohlcv'); 
 const ConvNet = require('../core/convnet.js'); // Adjust path as needed
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
-const filePath='./logs/json/ohlcv/ohlcv_data.json';
+const filePath = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
 // Check once at the top level of your script
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(filePath, '[]', 'utf8');
@@ -52,14 +54,13 @@ function trainAndSave() {
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `./tools/trained_ohlcv/trained_ohlcv_${timestamp}.json`;
+  const filename = path.join(dir, `trained_ohlcv_${timestamp}.json`);
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
 /*
-example output:
-[2025-06-07T07-31-03-634Z] Model Saved as ./trained_ohlcv/trained_ohlcv_2025-06-07T07-31-03-634Z.json
+[2025-07-28T08-58-26-522Z] Model Saved as trained_ohlcv/trained_ohlcv_2025-07-28T08-58-26-522Z.json
 */
 
 // Initial run
