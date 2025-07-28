@@ -2,40 +2,29 @@
  * chart_recognition.js
  *
  * Predicts market actions ('bull', 'bear', 'idle') from OHLCV CSV data (ExchangeSimulator) using trained ConvNet models.
- *
- * Workflow:
- * - Loads OHLCV data from CSV produced by ExchangeSimulator.
- * - Converts CSV to JSON and saves to disk.
- * - Loads all ConvNet models from MODEL_DIR (skips malformed models).
- * - Makes predictions for each candle and writes an enhanced CSV with predictions and model name.
- * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
- * - Deduplicates signal log by timestamp, sorts chronologically.
+ * - Loads OHLCV data from CSV (ExchangeSimulator)
+ * - Converts to JSON and saves
+ * - Loads models from MODEL_DIR
+ * - Makes predictions and writes enhanced CSV with predictions
+ * - Runs every 65 minutes by default
  *
  * Notes:
- * - Overwrites output prediction CSV each run to avoid file size growth.
- * - Signal log records only transitions, not every prediction.
- * - Non-blocking: malformed model files are logged and skipped.
- *
- * Configuration:
- * - Uses .env file for settings.
+ * - Overwrites output prediction CSV on each run to avoid file size growth.
+ * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
+ * - Deduplicates signal log by timestamp.
  */
 
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js'); // Adjust path if needed
 
-// .env-configured paths and interval
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
-const MODEL_DIR = process.env.MODEL_DIR || path.join(__dirname, './trained_ohlcv');
-const OUT_CSV_PATH = process.env.OUT_CSV_PATH || path.join(__dirname, './ohlcv_data_prediction.csv');
-const SIGNAL_LOG_PATH = process.env.SIGNAL_LOG_PATH || path.join(__dirname, './exchangesimulator_signal.log');
+const MODEL_DIR = path.join(__dirname, './trained_ohlcv');
+const OUT_CSV_PATH = path.join(__dirname, './ohlcv_data_prediction.csv');
+const SIGNAL_LOG_PATH = path.join(__dirname, './exchangesimulator_signal.log');
 const LABELS = ['bull', 'bear', 'idle'];
-
-// IMPORTANT: INTERVAL_SIMULATOR must be the same in all related scripts for consistent signal processing and order logic.
-const INTERVAL_SIMULATOR = parseInt(process.env.INTERVAL_SIMULATOR, 10) || 3600000; 
-// default 1h
+const INTERVAL_SIMULATOR = 65 * 60 * 1000; // 65 minutes
 
 function ensureDir(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -72,21 +61,12 @@ function loadAllModels(modelDir) {
     return [];
   }
   const modelFiles = fs.readdirSync(modelDir).filter(file => file.endsWith('.json'));
-  return modelFiles
-    .map(file => {
-      let modelJson;
-      try {
-        modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, file), 'utf8'));
-      } catch (err) {
-        console.error(`Error parsing JSON in file ${file}: ${err.message}`);
-        return null; // Skip malformed models
-      }
-      if (!modelJson) return null;
-      const net = new ConvNet.Net();
-      net.fromJSON(modelJson);
-      return { net, filename: file };
-    })
-    .filter(model => model !== null);
+  return modelFiles.map(file => {
+    const modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, file), 'utf8'));
+    const net = new ConvNet.Net();
+    net.fromJSON(modelJson);
+    return { net, filename: file };
+  });
 }
 
 function predictAll(candles, net) {
@@ -190,4 +170,5 @@ function runRecognition() {
 
 // Initial run
 runRecognition();
+// Repeat every INTERVAL_SIMULATOR (65 minutes by default)
 setInterval(runRecognition, INTERVAL_SIMULATOR);
