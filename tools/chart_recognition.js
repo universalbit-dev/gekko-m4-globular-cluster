@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const ConvNet = require('../core/convnet.js'); // Adjust path if needed
+const ConvNet = require('../core/convnet.js');
 
 const CSV_PATH = path.join(__dirname, '../logs/csv/ohlcv_data.csv');
 const JSON_PATH = path.join(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
