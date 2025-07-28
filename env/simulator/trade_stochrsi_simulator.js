@@ -10,7 +10,14 @@ exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'STOCHRSI'};
 
-config.STOCHRSI={interval:10,high:70,low:30,persistence:5,RSI:21,STOCH:21};
+config.STOCHRSI = {
+  interval: Number(process.env.STOCHRSI_INTERVAL),
+  high: Number(process.env.STOCHRSI_HIGH),
+  low: Number(process.env.STOCHRSI_LOW),
+  persistence: Number(process.env.STOCHRSI_PERSISTENCE),
+  RSI: Number(process.env.STOCHRSI_RSI),
+  STOCH: Number(process.env.STOCHRSI_STOCH)
+};
 
 config.stopLoss = {enabled: true,
 threshold: 5,trailing: true,resetAfterTrigger: false,candleSize: 5};
