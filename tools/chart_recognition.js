@@ -34,7 +34,7 @@ const SIGNAL_LOG_PATH = process.env.SIGNAL_LOG_PATH || path.join(__dirname, './e
 const LABELS = ['bull', 'bear', 'idle'];
 
 // IMPORTANT: INTERVAL_SIMULATOR must be the same in all related scripts for consistent signal processing and order logic.
-const INTERVAL_SIMULATOR = parseInt(process.env.SIMULATOR_INTERVAL, 10) || 3600000; 
+const INTERVAL_SIMULATOR = parseInt(process.env.INTERVAL_SIMULATOR, 10) || 3600000; 
 // default 1h
 
 function ensureDir(filePath) {
