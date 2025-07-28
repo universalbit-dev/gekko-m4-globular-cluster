@@ -2,6 +2,7 @@
  * chart_ccxt_recognition_magnitude.js (modular, uses label_ohlcv.js)
  * Processes OHLCV CSV, loads trained model, computes PVVM/PVD, labels and logs predictions.
  */
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const ConvNet = require('../core/convnet.js');
