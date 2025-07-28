@@ -3,11 +3,12 @@ require('dotenv').config();
 const fs = require('fs');
 const dir = './trained_ccxt_ohlcv';
 const ConvNet = require('../core/convnet.js');
+const path = require('path');
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
-const filePath='./logs/json/ohlcv/ohlcv_ccxt_data.json';
+const filePath = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
 // Check once at the top level of your script
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(filePath, '[]', 'utf8');
