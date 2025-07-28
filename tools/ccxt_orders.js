@@ -26,9 +26,9 @@ const fs = require('fs');
 const path = require('path');
 
 // Paths
-const SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal.log');
-const MAG_SIGNAL_LOG_PATH = path.join(__dirname, './ccxt_signal_magnitude.log');
-const ORDER_LOG_PATH = path.join(__dirname, './ccxt_order.log');
+const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
+const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
+const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
