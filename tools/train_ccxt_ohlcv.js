@@ -1,9 +1,10 @@
 // train_ccxt_ohlcv.js
+const path = require('path');
 require('dotenv').config();
 const fs = require('fs');
-const dir = './trained_ccxt_ohlcv';
+const dir = path.resolve(__dirname, 'trained_ccxt_ohlcv'); 
 const ConvNet = require('../core/convnet.js');
-const path = require('path');
+
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
 // Set INTERVAL_MS in .env to synchronize intervals.
@@ -63,14 +64,13 @@ function trainAndSave() {
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   
-  const filename = `./trained_ccxt_ohlcv/trained_ccxt_ohlcv_${timestamp}.json`;
+  const filename = path.join(dir, `trained_ccxt_ohlcv_${timestamp}.json`);
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
 
 /*
-example output:
-[2025-06-07T07-27-55-047Z] Model Saved as ./trained_ccxt_ohlcv/trained_ohlcv_ccxt_2025-06-07T07-27-55-047Z.json
+[2025-07-28T08-53-03-609Z] Model Saved as /home/unbt/gekko-m4-globular-cluster/tools/trained_ccxt_ohlcv/trained_ccxt_ohlcv_2025-07-28T08-53-03-609Z.json
 */
 
 // Initial run
