@@ -12,12 +12,12 @@ class CCXTMarketData {
     this.symbol = symbol;
     this.ohlcvCandleSize = ohlcvCandleSize;
 
-    this.logDir = path.join(__dirname, '../../logs/csv');
+    this.logDir = path.resolve(__dirname, '../../logs/csv');
     fs.ensureDirSync(this.logDir);
 
     this.HEADER = 'timestamp,open,high,low,close,volume\n';
     this.csvFileName = 'ohlcv_ccxt_data.csv';
-    this.csvFilePath = path.join(this.logDir, this.csvFileName);
+    this.csvFilePath = path.resolve(this.logDir, this.csvFileName);
 
     // Create CSV file with header if it doesn't exist
     if (!fs.existsSync(this.csvFilePath)) {
@@ -32,14 +32,14 @@ class CCXTMarketData {
     this.latestTimestamp = 0;
 
     // JSON file
-    this.jsonFilePath = path.join(this.logDir, 'ohlcv_ccxt_data.json');
+    this.jsonFilePath = path.resolve(this.logDir, 'ohlcv_ccxt_data.json');
     if (!fs.existsSync(this.jsonFilePath)) {
       fs.writeJsonSync(this.jsonFilePath, []);
     }
 
-    this.destDir = path.join(__dirname, '../../logs/json/ohlcv');
+    this.destDir = path.resolve(__dirname, '../../logs/json/ohlcv');
     fs.ensureDirSync(this.destDir);
-    this.destPath = path.join(this.destDir, 'ohlcv_ccxt_data.json');
+    this.destPath = path.resolve(this.destDir, 'ohlcv_ccxt_data.json');
   }
 
   async fetchAndAppendOHLCV() {
