@@ -193,6 +193,45 @@ async function syncPosition() {
   }
 }
 
+async function hasEnoughBalanceForOrder(action, orderSize, currentPrice) {
+  try {
+    const balance = await exchange.fetchBalance();
+    const [base, quote] = PAIR.split('/');
+    if (action === 'BUY') {
+      const required = orderSize * currentPrice;
+      if ((balance.free[quote] || 0) < required) {
+        console.log(`Not enough ${quote} for BUY. Needed: ${required}, Available: ${balance.free[quote]}`);
+        return false;
+      }
+    }
+    if (action === 'SELL') {
+      if ((balance.free[base] || 0) < orderSize) {
+        console.log(`Not enough ${base} for SELL. Needed: ${orderSize}, Available: ${balance.free[base]}`);
+        return false;
+      }
+    }
+    if (action === 'SHORT') {
+      if (!exchange.has['margin']) {
+        console.log('Short logic skipped: Margin trading not supported on this exchange.');
+        return false;
+      }
+      // Margin/collateral check can be added here if needed for more safety
+    }
+    if (action === 'COVER') {
+      // COVER = market buy; need enough quote
+      const required = orderSize * currentPrice;
+      if ((balance.free[quote] || 0) < required) {
+        console.log(`Not enough ${quote} for COVER. Needed: ${required}, Available: ${balance.free[quote]}`);
+        return false;
+      }
+    }
+    return true;
+  } catch (err) {
+    console.error('Balance check error:', err.message || err);
+    return false;
+  }
+}
+
 async function main() {
   if (isRunning) {
     console.warn(`[${new Date().toISOString()}] Previous cycle still running, skipping this interval.`);
@@ -227,22 +266,42 @@ async function main() {
 
         if (currentPrice <= stopLossPrice) {
           let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
-          const result = await exchange.createMarketSellOrder(PAIR, orderSize);
-          positionOpen = false;
-          entryPrice = null;
-          lastAction = 'STOP_LOSS';
-          logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice})`);
-          console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
+          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+            await syncPosition();
+            return;
+          }
+          try {
+            const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+            positionOpen = false;
+            entryPrice = null;
+            lastAction = 'STOP_LOSS';
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice})`);
+            console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
+          } catch (err) {
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
+            console.error('Order error:', err.message || err);
+            if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+          }
           return;
         }
         if (currentPrice >= takeProfitPrice) {
           let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
-          const result = await exchange.createMarketSellOrder(PAIR, orderSize);
-          positionOpen = false;
-          entryPrice = null;
-          lastAction = 'TAKE_PROFIT';
-          logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice})`);
-          console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
+          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+            await syncPosition();
+            return;
+          }
+          try {
+            const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+            positionOpen = false;
+            entryPrice = null;
+            lastAction = 'TAKE_PROFIT';
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice})`);
+            console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
+          } catch (err) {
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
+            console.error('Order error:', err.message || err);
+            if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+          }
           return;
         }
       } catch (err) {
@@ -258,6 +317,17 @@ async function main() {
     // Enforce minimum allowed order amount
     orderSize = Math.max(orderSize, MIN_ALLOWED_ORDER_AMOUNT);
 
+    // Fetch ticker price for balance check
+    let ticker = null;
+    try {
+      ticker = await exchange.fetchTicker(PAIR);
+    } catch (err) {
+      console.error('Ticker fetch error:', err.message || err);
+      isRunning = false;
+      return;
+    }
+    const currentPrice = ticker.last;
+
     // --- Entry Logic ---
     // Bull/Strong Bull Entry
     if (
@@ -265,6 +335,11 @@ async function main() {
       (prediction === 'bull' || label === 'strong_bull') &&
       PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
+      if (!(await hasEnoughBalanceForOrder('BUY', orderSize, currentPrice))) {
+        await syncPosition();
+        isRunning = false;
+        return;
+      }
       try {
         const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
         positionOpen = true;
@@ -275,7 +350,9 @@ async function main() {
       } catch (err) {
         logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
         console.error('Order error:', err.message || err);
+        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      isRunning = false;
       return;
     }
 
@@ -287,6 +364,16 @@ async function main() {
       (prediction === 'bear' || label === 'strong_bear') &&
       PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
+      if (!exchange.has['margin']) {
+        console.log('Short/SELL signals ignored: Spot trading only (no margin enabled).');
+        isRunning = false;
+        return;
+      }
+      if (!(await hasEnoughBalanceForOrder('SHORT', orderSize, currentPrice))) {
+        await syncPosition();
+        isRunning = false;
+        return;
+      }
       try {
         const result = await exchange.createMarketSellOrder(PAIR, orderSize);
         positionOpen = true;
@@ -297,7 +384,9 @@ async function main() {
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
         console.error('Order error:', err.message || err);
+        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      isRunning = false;
       return;
     }
     // --- Exit Logic ---
@@ -307,6 +396,11 @@ async function main() {
       label === 'weak_bull' &&
       PVVM < pvvmThreshold && PVD < pvdThreshold
     ) {
+      if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+        await syncPosition();
+        isRunning = false;
+        return;
+      }
       try {
         const result = await exchange.createMarketSellOrder(PAIR, orderSize);
         positionOpen = false;
@@ -318,7 +412,9 @@ async function main() {
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
         console.error('Order error:', err.message || err);
+        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      isRunning = false;
       return;
     }
 
@@ -328,6 +424,16 @@ async function main() {
       label === 'weak_bear' &&
       PVVM < pvvmThreshold && PVD < pvdThreshold
     ) {
+      if (!exchange.has['margin']) {
+        console.log('Cover signals ignored: Spot trading only (no margin enabled).');
+        isRunning = false;
+        return;
+      }
+      if (!(await hasEnoughBalanceForOrder('COVER', orderSize, currentPrice))) {
+        await syncPosition();
+        isRunning = false;
+        return;
+      }
       try {
         const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
         positionOpen = false;
@@ -339,7 +445,9 @@ async function main() {
       } catch (err) {
         logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
         console.error('Order error:', err.message || err);
+        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      isRunning = false;
       return;
     }
   } finally {
