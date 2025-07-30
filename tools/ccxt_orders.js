@@ -429,13 +429,23 @@ async function main() {
         isRunning = false;
         return;
       }
-      if (!(await hasEnoughBalanceForOrder('COVER', orderSize, currentPrice))) {
-        await syncPosition();
-        isRunning = false;
-        return;
-      }
       try {
-        const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
+        const balance = await exchange.fetchBalance();
+        const [base, quote] = PAIR.split('/');
+        // Add a small buffer for fees/slippage
+        const feeBuffer = 1.005; // 0.5% buffer
+        const availableEUR = balance.free[quote] || 0;
+        const maxBuyable = availableEUR / (currentPrice * feeBuffer);
+        const coverOrderSize = Math.min(orderSize, maxBuyable);
+
+        if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
+          console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableEUR}. COVER order skipped.`);
+          logOrder(timestamp, prediction, label, 'COVER', null, `COVER skipped: not enough ${quote} for minimum order size`, null);
+          isRunning = false;
+          return;
+        }
+
+        const result = await exchange.createMarketBuyOrder(PAIR, coverOrderSize);
         positionOpen = false;
         entryPrice = null;
         lastAction = 'COVER';
