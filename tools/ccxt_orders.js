@@ -2,7 +2,7 @@
  * ccxt_orders.js
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
- * Now with dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, and reason logging.
+ * Now with dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, reason logging, and dynamic trade frequency.
  * 
  * - Loads buy/sell signals from log files (basic and magnitude versions supported).
  * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
@@ -15,6 +15,7 @@
  * - Deduplicates processed signals to avoid double trading.
  * - Logs all trade actions and outcomes to a log file, including trade reason.
  * - Configurable via environment variables.
+ * - Dynamically adapts order submission frequency to market volatility (PVVM/PVD).
  * 
  * Author: universalbit-dev
  * Repo: https://github.com/universalbit-dev/gekko-m4-globular-cluster
@@ -30,10 +31,6 @@ const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
 const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
 const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
 
-// IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
-// Set INTERVAL_MS in .env to synchronize intervals.
-const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
-
 // Exchange setup
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
@@ -46,23 +43,18 @@ const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
 const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
 
 // Dynamic PVVM/PVD thresholds
-/*
- * threshold parameters
- * |               | PVVM | PVD | Window | Factor | Sensitivity/Notes            |
- * |---------------|------|-----|--------|--------|------------------------------|
- * | HighFreq      | 5.0  | 5.0 |   5    | 1.0    | Highly sensitive, fast reacts|
- * | Default       |10.0  |10.0 |  10    | 1.2    | Balanced, moderate           |
- * | Daily         |15.0  |15.0 |  20    | 1.5    | Less sensitive, filters noise|
- * | LongTerm      |20.0  |20.0 |  30    | 2.0    | Very selective, strong moves |
- *
- * PVVM/PVD: Base move strength threshold.
- * Window: Number of recent signals for dynamic calculation.
- * Factor: Multiplier for threshold (lower = more sensitive).
- */
 const PVVM_BASE_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10.0;
 const PVD_BASE_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10.0;
 const DYNAMIC_WINDOW = parseInt(process.env.DYNAMIC_WINDOW, 10) || 10;
 const DYNAMIC_FACTOR = parseFloat(process.env.DYNAMIC_FACTOR) || 1.2;
+
+// Dynamic frequency configs (ms)
+const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;    // 1 min
+const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000; // 5 min
+const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000; // 30 min
+
+// Default interval (used on first run, will be overwritten dynamically)
+let INTERVAL_MS = INTERVAL_DEFAULT;
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
@@ -147,31 +139,21 @@ function getDynamicThresholds(signals) {
   };
 }
 
+// Dynamic frequency logic: choose INTERVAL_MS based on most recent PVVM/PVD
+function getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold) {
+  if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) {
+    return INTERVAL_HIGH;    // High freq (market is moving!)
+  }
+  if (PVVM < pvvmThreshold * 0.7 && PVD < pvdThreshold * 0.7) {
+    return INTERVAL_LOW;     // Long-term (market is quiet)
+  }
+  return INTERVAL_DEFAULT;   // Moderate freq (normal regime)
+}
+
 let isRunning = false;
 let positionOpen = false;
 let entryPrice = null;
 let lastAction = null;
-
-/**
- * On startup, sync the bot's position state with the exchange.
- * Prevents repeated BUY errors if already in a spot position.
- * Checks base asset balance and sets positionOpen accordingly.
- */
-
-/**
- * Volatility Table
- * | Volatility (%) | Market State   | Typical Strategy            |
- * |----------------|---------------|-----------------------------|
- * | 0 - 1          | Very Low      | Scalping, range-bound trades|
- * | 1 - 3          | Low           | Conservative entries, small moves |
- * | 3 - 7          | Moderate      | Swing trades, trend following|
- * | 7 - 15         | High          | Aggressive trend, momentum  |
- * | > 15           | Very High     | Tactical, breakout, reduce size |
- *
- * - The bot can adjust risk/trade size based on observed volatility.
- * - Use volatility metrics to filter signals or trigger tactical mode.
- * - Tactical logic allows dynamic risk management, position sizing, and signal filtering based on real-time market conditions.
- */
 
 async function syncPosition() {
   try {
@@ -215,10 +197,8 @@ async function hasEnoughBalanceForOrder(action, orderSize, currentPrice) {
         console.log('Short logic skipped: Margin trading not supported on this exchange.');
         return false;
       }
-      // Margin/collateral check can be added here if needed for more safety
     }
     if (action === 'COVER') {
-      // COVER = market buy; need enough quote
       const required = orderSize * currentPrice;
       if ((balance.free[quote] || 0) < required) {
         console.log(`Not enough ${quote} for COVER. Needed: ${required}, Available: ${balance.free[quote]}`);
@@ -238,10 +218,12 @@ async function main() {
     return;
   }
   isRunning = true;
+
   try {
     const signals = loadUnifiedSignals();
     if (signals.length === 0) {
       console.log('No signals found.');
+      scheduleNext(INTERVAL_DEFAULT); // fallback frequency
       return;
     }
     const lastSignal = signals[signals.length - 1];
@@ -250,11 +232,16 @@ async function main() {
     const signalKey = `${timestamp}|${prediction}|${label || ''}`;
     if (processedSignals.has(signalKey)) {
       console.log('Signal already processed. Skipping.');
+      scheduleNext(INTERVAL_DEFAULT); // fallback frequency
       return;
     }
 
     // Dynamic thresholds
     const { PVVM: pvvmThreshold, PVD: pvdThreshold } = getDynamicThresholds(signals);
+
+    // --- Dynamic Frequency: set interval for next cycle
+    INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
+    console.log(`[${timestamp}] Chosen INTERVAL_MS: ${INTERVAL_MS / 1000}s (PVVM=${PVVM}, PVD=${PVD}, thresholds: ${pvvmThreshold}, ${pvdThreshold})`);
 
     // --- STOP LOSS / TAKE PROFIT LOGIC ---
     if (positionOpen && entryPrice) {
@@ -268,6 +255,7 @@ async function main() {
           let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
           if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
             await syncPosition();
+            scheduleNext(INTERVAL_MS);
             return;
           }
           try {
@@ -282,12 +270,14 @@ async function main() {
             console.error('Order error:', err.message || err);
             if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
           }
+          scheduleNext(INTERVAL_MS);
           return;
         }
         if (currentPrice >= takeProfitPrice) {
           let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
           if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
             await syncPosition();
+            scheduleNext(INTERVAL_MS);
             return;
           }
           try {
@@ -302,6 +292,7 @@ async function main() {
             console.error('Order error:', err.message || err);
             if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
           }
+          scheduleNext(INTERVAL_MS);
           return;
         }
       } catch (err) {
@@ -313,8 +304,6 @@ async function main() {
     let orderSize = ORDER_AMOUNT;
     if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) orderSize *= 2;
     if (PVVM < pvvmThreshold && PVD < pvdThreshold) orderSize *= 0.5;
-
-    // Enforce minimum allowed order amount
     orderSize = Math.max(orderSize, MIN_ALLOWED_ORDER_AMOUNT);
 
     // Fetch ticker price for balance check
@@ -323,13 +312,13 @@ async function main() {
       ticker = await exchange.fetchTicker(PAIR);
     } catch (err) {
       console.error('Ticker fetch error:', err.message || err);
+      scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
     const currentPrice = ticker.last;
 
     // --- Entry Logic ---
-    // Bull/Strong Bull Entry
     if (
       !positionOpen &&
       (prediction === 'bull' || label === 'strong_bull') &&
@@ -337,6 +326,7 @@ async function main() {
     ) {
       if (!(await hasEnoughBalanceForOrder('BUY', orderSize, currentPrice))) {
         await syncPosition();
+        scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
       }
@@ -352,13 +342,12 @@ async function main() {
         console.error('Order error:', err.message || err);
         if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
 
-    /**
-     * Only open a SHORT position if none is currently open (prevents multiple SHORTs).
-     */
+    // SHORT Entry
     if (
       !positionOpen &&
       (prediction === 'bear' || label === 'strong_bear') &&
@@ -366,11 +355,13 @@ async function main() {
     ) {
       if (!exchange.has['margin']) {
         console.log('Short/SELL signals ignored: Spot trading only (no margin enabled).');
+        scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
       }
       if (!(await hasEnoughBalanceForOrder('SHORT', orderSize, currentPrice))) {
         await syncPosition();
+        scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
       }
@@ -386,11 +377,11 @@ async function main() {
         console.error('Order error:', err.message || err);
         if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
     // --- Exit Logic ---
-    // Weak Bull Exit
     if (
       positionOpen &&
       label === 'weak_bull' &&
@@ -398,6 +389,7 @@ async function main() {
     ) {
       if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
         await syncPosition();
+        scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
       }
@@ -414,6 +406,7 @@ async function main() {
         console.error('Order error:', err.message || err);
         if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
@@ -426,14 +419,14 @@ async function main() {
     ) {
       if (!exchange.has['margin']) {
         console.log('Cover signals ignored: Spot trading only (no margin enabled).');
+        scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
       }
       try {
         const balance = await exchange.fetchBalance();
         const [base, quote] = PAIR.split('/');
-        // Add a small buffer for fees/slippage
-        const feeBuffer = 1.005; // 0.5% buffer
+        const feeBuffer = 1.005;
         const availableEUR = balance.free[quote] || 0;
         const maxBuyable = availableEUR / (currentPrice * feeBuffer);
         const coverOrderSize = Math.min(orderSize, maxBuyable);
@@ -441,6 +434,7 @@ async function main() {
         if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
           console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableEUR}. COVER order skipped.`);
           logOrder(timestamp, prediction, label, 'COVER', null, `COVER skipped: not enough ${quote} for minimum order size`, null);
+          scheduleNext(INTERVAL_MS);
           isRunning = false;
           return;
         }
@@ -457,32 +451,29 @@ async function main() {
         console.error('Order error:', err.message || err);
         if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
       }
+      scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
+
+    // If nothing triggered, just reschedule
+    scheduleNext(INTERVAL_MS);
+
   } finally {
     isRunning = false;
   }
-} 
+}
+
+// --- Dynamic interval scheduling ---
+let intervalHandle = null;
+function scheduleNext(ms) {
+  if (intervalHandle) clearTimeout(intervalHandle);
+  intervalHandle = setTimeout(main, ms);
+}
 
 // --- Startup: Sync position with exchange, then start main loop ---
 (async () => {
   await syncPosition();
-  console.log(`Starting ccxt_orders.js with interval: ${INTERVAL_MS}`);
+  console.log(`Starting ccxt_orders.js with initial interval: ${INTERVAL_MS / 1000}s`);
   main();
-  setInterval(main, INTERVAL_MS);
 })();
-
-/*
- * PVD/PVVM Move Strength Table
- * | Value     | Strength     | Meaning                       |
- * |-----------|--------------|-------------------------------|
- * | 0 to 3    | Very Weak    | Noise, likely insignificant   |
- * | 3 to 7    | Weak         | Minor move, low conviction    |
- * | 7 to 10   | Moderate     | Becoming meaningful           |
- * | 10 to 20  | Significant  | Strong move, worth trading    |
- * | > 20      | Very Strong  | High conviction, strong trend |
- *
- * This script uses dynamic PVVM/PVD thresholds, trade size adjustment, and logs reason for every action.
- * Shorting logic assumes exchange/pair supports it. If not, disable bear/short logic.
-*/
