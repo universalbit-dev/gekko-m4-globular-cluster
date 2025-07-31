@@ -1,5 +1,5 @@
 /**
- * ccxt_orders.js
+ * ccxt_orders.js (Zenith Version)
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
  * Now with dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, reason logging, and dynamic trade frequency.
@@ -243,62 +243,117 @@ async function main() {
     INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
     console.log(`[${timestamp}] Chosen INTERVAL_MS: ${INTERVAL_MS / 1000}s (PVVM=${PVVM}, PVD=${PVD}, thresholds: ${pvvmThreshold}, ${pvdThreshold})`);
 
-    // --- STOP LOSS / TAKE PROFIT LOGIC ---
-    if (positionOpen && entryPrice) {
-      try {
-        const ticker = await exchange.fetchTicker(PAIR);
-        const currentPrice = ticker.last;
-        const stopLossPrice = entryPrice * (1 - STOP_LOSS_PCT / 100);
-        const takeProfitPrice = entryPrice * (1 + TAKE_PROFIT_PCT / 100);
+    // --- DYNAMIC STOP LOSS / TAKE PROFIT LOGIC ---
+    
+/**
+ * Enhanced Stop Loss / Take Profit Block
+ * --------------------------------------
+ * - Calculates stop loss and take profit percentages dynamically based on PVVM/PVD volatility.
+ * - On trigger, sells your entire BTC position (avoids partial sells).
+ * - Handles dust and minimum order size requirements for the exchange.
+ * - Maintains logging and console output as before for transparency and debugging.
+ */
+ 
+if (positionOpen && entryPrice) {
+  try {
+    const ticker = await exchange.fetchTicker(PAIR);
+    const currentPrice = ticker.last;
 
-        if (currentPrice <= stopLossPrice) {
-          let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
-          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
-            await syncPosition();
-            scheduleNext(INTERVAL_MS);
-            return;
-          }
-          try {
-            const result = await exchange.createMarketSellOrder(PAIR, orderSize);
-            positionOpen = false;
-            entryPrice = null;
-            lastAction = 'STOP_LOSS';
-            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice})`);
-            console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
-          } catch (err) {
-            logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
-            console.error('Order error:', err.message || err);
-            if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
-          }
-          scheduleNext(INTERVAL_MS);
-          return;
-        }
-        if (currentPrice >= takeProfitPrice) {
-          let orderSize = Math.max(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT);
-          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
-            await syncPosition();
-            scheduleNext(INTERVAL_MS);
-            return;
-          }
-          try {
-            const result = await exchange.createMarketSellOrder(PAIR, orderSize);
-            positionOpen = false;
-            entryPrice = null;
-            lastAction = 'TAKE_PROFIT';
-            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice})`);
-            console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
-          } catch (err) {
-            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
-            console.error('Order error:', err.message || err);
-            if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
-          }
-          scheduleNext(INTERVAL_MS);
-          return;
-        }
-      } catch (err) {
-        console.error('SL/TP check error:', err.message || err);
+ /**
+ * Dynamic SL/TP Parameter Table
+ * ----------------------------------------------------------
+ * | Setting      | BASE_SL | BASE_TP | VOL_SCALING | Use Case           |
+ * |--------------|---------|---------|-------------|--------------------|
+ * | Ultra-HF     | 0.15%   | 0.25%   | 0.03        | Ultra High-freq    |
+ * | HF           | 0.3%    | 0.5%    | 0.05        | High-frequency     |
+ * | Moderate     | 1%      | 2%      | 0.10        | Moderate           |
+ * | LongTerm     | 2%      | 4%      | 0.10        | Long-term/swing    |
+ * ----------------------------------------------------------
+ * - VOL_SCALING: Each 1 unit PVVM/PVD adds that % to SL/TP (adapts to volatility).
+ * - Always tune for your pair, volatility, and backtest results.
+ */
+ 
+    //Custom Configuration 
+    const BASE_SL = 1; // 1% base Stop Loss
+    const BASE_TP = 2; // 2% base Take Profit 
+    const VOL_SCALING = 0.10; // Each 1 PVVM/PVD adds 0.10% to SL/TP
+
+    // If PVVM/PVD are undefined, fall back to base only
+    const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
+      ? (PVVM + PVD) / 2
+      : 0;
+
+    const dynamicSL = BASE_SL + (VOL_SCALING * avgVol);
+    const dynamicTP = BASE_TP + (VOL_SCALING * avgVol);
+
+    const stopLossPrice = entryPrice * (1 - dynamicSL / 100);
+    const takeProfitPrice = entryPrice * (1 + dynamicTP / 100);
+
+    // --- SELL ALL POSITION ON TRIGGER ---
+    const balance = await exchange.fetchBalance();
+    const baseCurrency = PAIR.split('/')[0];
+    let orderSize = balance.free[baseCurrency] || 0;
+    // Optionally avoid dust:
+    if (orderSize > 0.00001) orderSize -= 0.00000001;
+
+    if (currentPrice <= stopLossPrice) {
+      if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
+        console.log(`Not enough ${baseCurrency} for STOP LOSS sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
+        await syncPosition();
+        scheduleNext(INTERVAL_MS);
+        return;
       }
+      if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+        await syncPosition();
+        scheduleNext(INTERVAL_MS);
+        return;
+      }
+      try {
+        const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+        positionOpen = false;
+        entryPrice = null;
+        lastAction = 'STOP_LOSS';
+        logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%)`);
+        console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
+      } catch (err) {
+        logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
+        console.error('Order error:', err.message || err);
+        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+      }
+      scheduleNext(INTERVAL_MS);
+      return;
     }
+    if (currentPrice >= takeProfitPrice) {
+      if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
+        console.log(`Not enough ${baseCurrency} for TAKE PROFIT sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
+        await syncPosition();
+        scheduleNext(INTERVAL_MS);
+        return;
+      }
+      if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+        await syncPosition();
+        scheduleNext(INTERVAL_MS);
+        return;
+      }
+      try {
+        const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+        positionOpen = false;
+        entryPrice = null;
+        lastAction = 'TAKE_PROFIT';
+        logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%)`);
+        console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
+      } catch (err) {
+        logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
+        console.error('Order error:', err.message || err);
+        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+      }
+      scheduleNext(INTERVAL_MS);
+      return;
+    }
+  } catch (err) {
+    console.error('SL/TP check error:', err.message || err);
+  }
+}
 
     // --- Trade Size Adjustment ---
     let orderSize = ORDER_AMOUNT;
