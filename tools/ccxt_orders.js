@@ -261,14 +261,14 @@ if (positionOpen && entryPrice) {
 
  /**
  * Dynamic SL/TP Parameter Table
- * ----------------------------------------------------------
- * | Setting      | BASE_SL | BASE_TP | VOL_SCALING | Use Case           |
- * |--------------|---------|---------|-------------|--------------------|
- * | Ultra-HF     | 0.15%   | 0.25%   | 0.03        | Ultra High-freq    |
- * | HF           | 0.3%    | 0.5%    | 0.05        | High-frequency     |
- * | Moderate     | 1%      | 2%      | 0.10        | Moderate           |
- * | LongTerm     | 2%      | 4%      | 0.10        | Long-term/swing    |
- * ----------------------------------------------------------
+ * ------------------------------------------------------------------------
+ * | Setting      | BASE_SL | BASE_TP | VOL_SCALING | Use Case            |
+ * |--------------|---------|---------|-------------|---------------------|
+ * | Ultra-HF     | 0.15%   | 0.25%   | 0.003        | Ultra High-freq    |
+ * | HF           | 0.3%    | 0.5%    | 0.005        | High-frequency     |
+ * | Moderate     | 1%      | 2%      | 0.010        | Moderate           |
+ * | LongTerm     | 2%      | 4%      | 0.010        | Long-term/swing    |
+ * ------------------------------------------------------------------------
  * - VOL_SCALING: Each 1 unit PVVM/PVD adds that % to SL/TP (adapts to volatility).
  * - Always tune for your pair, volatility, and backtest results.
  */
@@ -276,7 +276,8 @@ if (positionOpen && entryPrice) {
     //Custom Configuration 
     const BASE_SL = 1; // 1% base Stop Loss
     const BASE_TP = 2; // 2% base Take Profit 
-    const VOL_SCALING = 0.10; // Each 1 PVVM/PVD adds 0.10% to SL/TP
+    const VOL_SCALING = 0.010; // Each 1 PVVM/PVD adds 0.010% to SL/TP
+
 
     // If PVVM/PVD are undefined, fall back to base only
     const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
