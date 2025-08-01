@@ -195,7 +195,7 @@ node tools/ccxt_orders.js
 
 ---
 
-**For advanced tweaks, see [`tools/ccxt_orders.js`](../tools/ccxt_orders.js) or open an Issue.**
+**For advanced tweaks, see [`tools/ccxt_orders.js`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/tools/ccxt_orders.js) or open an Issue.**
 
 ---
 
