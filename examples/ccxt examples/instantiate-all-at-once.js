@@ -23,7 +23,7 @@ async function test () {
 
         // instantiate the exchange
         let exchange = new ccxt[id] (exchanges[id])
-        console.log (exchange.id, exchange.apiKey)
+        console.log (exchange.id, 'exchange instantiated')
         exchanges[id] = exchange
 
         // load markets
