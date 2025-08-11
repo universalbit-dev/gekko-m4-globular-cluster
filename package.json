@@ -11,7 +11,7 @@
     "async": "^3.2.5",
     "axios": "^1.7.9",
     "bluebird": "^3.7.2",
-    "ccxt": "^4.3.88",
+    "ccxt": "^4.4.95",
     "chess.js": "^1.0.0-beta.6",
     "child_process": "^1.0.2",
     "commander": "^6.2.0",
