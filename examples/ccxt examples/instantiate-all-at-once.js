@@ -1,46 +1,44 @@
-
-
 import ccxt from '../../js/ccxt.js';
 
-async function test () {
+async function test() {
+    // Define exchange credentials
+    const exchangeConfigs = {
+        bittrex: { apiKey: 'YOUR_API_KEY', secret: 'YOUR_SECRET' },
+        bitfinex: { apiKey: 'YOUR_API_KEY', secret: 'YOUR_SECRET' },
+    };
 
-    let exchanges = { 
-        "bittrex": {
-            "apiKey": "YOUR_API_KEY", 
-            "secret": "YOUR_SECRET",
-        },
-        "bitfinex": { 
-            "apiKey": "YOUR_API_KEY", 
-            "secret": "YOUR_SECRET"
-        },
-    }
+    // Filter only supported exchanges present in ccxt
+    const ids = ccxt.exchanges.filter(id => id in exchangeConfigs);
 
-    let ids = ccxt.exchanges.filter (id => id in exchanges)
+    const exchanges = {};
 
-    await Promise.all (ids.map (async id => {
+    await Promise.all(ids.map(async id => {
+        try {
+            const config = exchangeConfigs[id];
+            console.log(`Config for ${id}:`, config);
 
-        console.log (exchanges[id])
+            // Instantiate exchange
+            const exchange = new ccxt[id](config);
+            console.log(`${exchange.id} exchange instantiated`);
 
-        // instantiate the exchange
-        let exchange = new ccxt[id] (exchanges[id])
-        console.log (exchange.id, 'exchange instantiated')
-        exchanges[id] = exchange
+            // Load markets
+            await exchange.loadMarkets();
+            console.log(`${exchange.id} markets loaded`);
 
-        // load markets
-        await exchange.loadMarkets ()
-        console.log (exchange.id, 'loaded')
+            // Check balance if API key is set
+            if (exchange.apiKey) {
+                const balance = await exchange.fetchBalance();
+                console.log(`${exchange.id} balance:`, balance);
+            }
 
-        // check the balance
-        if (exchange.apiKey) {
-            let balance = await exchange.fetchBalance ()
-            console.log (exchange.id, balance)
+            exchanges[id] = exchange;
+        } catch (err) {
+            console.error(`Error initializing ${id}:`, err);
         }
+    }));
 
-        return exchange
-    }))
-
-    // when all of them are ready, do your other things
-    console.log ('Loaded exchanges:', ids.join (', '))
+    // When all exchanges are ready
+    console.log('Loaded exchanges:', Object.keys(exchanges).join(', '));
 }
 
-test ()
+test();
