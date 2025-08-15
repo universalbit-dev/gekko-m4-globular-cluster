@@ -23,3 +23,8 @@ jobs:
 
       - name: Fix Vulnerabilities in root
         run: npm audit fix
+
+      - name: Run ngc6121.sh Simulator Script
+        run: |
+          chmod +x ./ngc6121.sh
+          ./ngc6121.sh
