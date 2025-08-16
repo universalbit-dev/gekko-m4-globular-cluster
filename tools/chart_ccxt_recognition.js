@@ -11,7 +11,6 @@
 const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const fs = require('fs');
-const path = require('path');
 const ConvNet = require('../core/convnet.js');
 
 // --- Import labeling logic ---
