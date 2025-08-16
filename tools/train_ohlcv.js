@@ -1,4 +1,5 @@
 // train_ohlcv.js
+const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const fs = require('fs');
 const dir = path.resolve(__dirname, 'trained_ohlcv'); 
