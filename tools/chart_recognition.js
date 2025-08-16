@@ -13,9 +13,8 @@
  * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
  * - Deduplicates signal log by timestamp.
  */
-
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const fs = require('fs');
-const path = require('path');
 const ConvNet = require('../core/convnet.js'); // Adjust path if needed
 
 const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_data.csv');
