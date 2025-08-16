@@ -1,6 +1,5 @@
 // train_ccxt_ohlcv.js
-const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const fs = require('fs');
 const dir = path.resolve(__dirname, 'trained_ccxt_ohlcv'); 
 const ConvNet = require('../core/convnet.js');
