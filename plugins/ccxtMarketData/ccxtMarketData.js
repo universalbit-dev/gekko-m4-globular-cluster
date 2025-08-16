@@ -1,8 +1,8 @@
+const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const ccxt = require('ccxt');
 const fs = require('fs-extra');
 const rfs = require('rotating-file-stream');
-const path = require('path');
 
 class CCXTMarketData {
   constructor({ symbol, ohlcvCandleSize }) {
