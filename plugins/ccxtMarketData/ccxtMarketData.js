@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../../.env' });
 const ccxt = require('ccxt');
 const fs = require('fs-extra');
 const rfs = require('rotating-file-stream');
