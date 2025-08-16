@@ -2,7 +2,7 @@
  * ccxt_orders.js (Zenith Version)
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
- * Now with dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, reason logging, and dynamic trade frequency.
+ * - Dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, reason logging, and dynamic trade frequency.
  * 
  * - Loads buy/sell signals from log files (basic and magnitude versions supported).
  * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
@@ -16,6 +16,7 @@
  * - Logs all trade actions and outcomes to a log file, including trade reason.
  * - Configurable via environment variables.
  * - Dynamically adapts order submission frequency to market volatility (PVVM/PVD).
+ * - Active portfolio rebalancing.
  * 
  * Author: universalbit-dev
  * Repo: https://github.com/universalbit-dev/gekko-m4-globular-cluster
@@ -25,6 +26,35 @@ require('dotenv').config();
 const ccxt = require('ccxt');
 const fs = require('fs');
 const path = require('path');
+
+// ML-based adaptation: Track trade outcomes (add to your logOrder or trading loop)
+let stopLossHits = 0, takeProfitHits = 0, totalTrades = 0;
+
+function recordTradeOutcome(outcome) {
+  totalTrades++;
+  if (outcome === 'STOP_LOSS') stopLossHits++;
+  if (outcome === 'TAKE_PROFIT') takeProfitHits++;
+}
+
+// Adaptive SL/TP logic (runtime, every N trades)
+function adaptParameters() {
+  let BASE_SL = 1, BASE_TP = 2; // defaults
+  if (totalTrades >= 10) { // Only adapt after enough trades
+    if (stopLossHits / totalTrades > 0.5) {
+      BASE_SL += 0.5; // Widen stop loss
+      console.log('Widening SL due to frequent stop-outs');
+    }
+    if (takeProfitHits / totalTrades < 0.2) {
+      BASE_TP -= 0.5; // Lower TP to make it easier to hit
+      console.log('Lowering TP due to few take profits');
+    }
+    // Reset counters every N trades, or use rolling window
+    stopLossHits = 0;
+    takeProfitHits = 0;
+    totalTrades = 0;
+  }
+  return { BASE_SL, BASE_TP };
+}
 
 // Paths
 const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
@@ -36,25 +66,14 @@ const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
 const API_SECRET = process.env.SECRET || '';
 const PAIR = process.env.PAIR || 'BTC/EUR';
-const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.00006;
-const MIN_ALLOWED_ORDER_AMOUNT = parseFloat(process.env.MIN_ALLOWED_ORDER_AMOUNT) || 0.00006;
-
-const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 2;
-const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 4;
-
-// Dynamic PVVM/PVD thresholds
-const PVVM_BASE_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10.0;
-const PVD_BASE_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10.0;
-const DYNAMIC_WINDOW = parseInt(process.env.DYNAMIC_WINDOW, 10) || 10;
-const DYNAMIC_FACTOR = parseFloat(process.env.DYNAMIC_FACTOR) || 1.2;
+const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.0001;
+const MIN_ALLOWED_ORDER_AMOUNT = parseFloat(process.env.MIN_ALLOWED_ORDER_AMOUNT) || 0.0001;
 
 // Dynamic frequency configs (ms)
-const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;    // 1 min
-const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000; // 5 min
-const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000; // 30 min
-
-// Default interval (used on first run, will be overwritten dynamically)
-let INTERVAL_MS = INTERVAL_DEFAULT;
+const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;
+const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000;
+const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000;
+let INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000;
 
 const exchangeClass = ccxt[EXCHANGE];
 if (!exchangeClass) {
@@ -127,7 +146,7 @@ function loadUnifiedSignals() {
 }
 
 // Dynamic threshold calculation
-function getDynamicThresholds(signals) {
+function getDynamicThresholds(signals, PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, DYNAMIC_WINDOW, DYNAMIC_FACTOR) {
   const recent = signals.slice(-DYNAMIC_WINDOW);
   const pvvmList = recent.map(s => s.PVVM).filter(x => typeof x === 'number' && !isNaN(x));
   const pvdList = recent.map(s => s.PVD).filter(x => typeof x === 'number' && !isNaN(x));
@@ -141,13 +160,9 @@ function getDynamicThresholds(signals) {
 
 // Dynamic frequency logic: choose INTERVAL_MS based on most recent PVVM/PVD
 function getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold) {
-  if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) {
-    return INTERVAL_HIGH;    // High freq (market is moving!)
-  }
-  if (PVVM < pvvmThreshold * 0.7 && PVD < pvdThreshold * 0.7) {
-    return INTERVAL_LOW;     // Long-term (market is quiet)
-  }
-  return INTERVAL_DEFAULT;   // Moderate freq (normal regime)
+  if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) return INTERVAL_HIGH;
+  if (PVVM < pvvmThreshold * 0.7 && PVD < pvdThreshold * 0.7) return INTERVAL_LOW;
+  return INTERVAL_DEFAULT;
 }
 
 let isRunning = false;
@@ -212,6 +227,15 @@ async function hasEnoughBalanceForOrder(action, orderSize, currentPrice) {
   }
 }
 
+// Active rebalance: don't mark the current signal processed if insufficient balance/margin
+async function handleInsufficientFunds(signalKey, rescheduleMs) {
+  console.error('Insufficient funds/margin detected; will resync and retry this signal on next interval.');
+  await syncPosition();
+  scheduleNext(rescheduleMs || INTERVAL_DEFAULT);
+  isRunning = false;
+}
+
+// --- Main trading loop ---
 async function main() {
   if (isRunning) {
     console.warn(`[${new Date().toISOString()}] Previous cycle still running, skipping this interval.`);
@@ -223,138 +247,153 @@ async function main() {
     const signals = loadUnifiedSignals();
     if (signals.length === 0) {
       console.log('No signals found.');
-      scheduleNext(INTERVAL_DEFAULT); // fallback frequency
+      scheduleNext(INTERVAL_DEFAULT);
       return;
     }
     const lastSignal = signals[signals.length - 1];
     const { timestamp, prediction, label, PVVM = NaN, PVD = NaN } = lastSignal;
     const processedSignals = loadProcessedSignals();
     const signalKey = `${timestamp}|${prediction}|${label || ''}`;
-    if (processedSignals.has(signalKey)) {
-      console.log('Signal already processed. Skipping.');
-      scheduleNext(INTERVAL_DEFAULT); // fallback frequency
-      return;
-    }
 
-    // Dynamic thresholds
-    const { PVVM: pvvmThreshold, PVD: pvdThreshold } = getDynamicThresholds(signals);
-
-    // --- Dynamic Frequency: set interval for next cycle
-    INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
-    console.log(`[${timestamp}] Chosen INTERVAL_MS: ${INTERVAL_MS / 1000}s (PVVM=${PVVM}, PVD=${PVD}, thresholds: ${pvvmThreshold}, ${pvdThreshold})`);
-
-    // --- DYNAMIC STOP LOSS / TAKE PROFIT LOGIC ---
-    
-/**
- * Enhanced Stop Loss / Take Profit Block
- * --------------------------------------
- * - Calculates stop loss and take profit percentages dynamically based on PVVM/PVD volatility.
- * - On trigger, sells your entire BTC position (avoids partial sells).
- * - Handles dust and minimum order size requirements for the exchange.
- * - Maintains logging and console output as before for transparency and debugging.
- */
- 
-if (positionOpen && entryPrice) {
-  try {
-    const ticker = await exchange.fetchTicker(PAIR);
-    const currentPrice = ticker.last;
-
- /**
- * Dynamic SL/TP Parameter Table
- * ------------------------------------------------------------------------
- * | Setting      | BASE_SL | BASE_TP | VOL_SCALING | Use Case            |
- * |--------------|---------|---------|-------------|---------------------|
- * | Ultra-HF     | 0.15%   | 0.25%   | 0.003        | Ultra High-freq    |
- * | HF           | 0.3%    | 0.5%    | 0.005        | High-frequency     |
- * | Moderate     | 1%      | 2%      | 0.010        | Moderate           |
- * | LongTerm     | 2%      | 4%      | 0.010        | Long-term/swing    |
- * ------------------------------------------------------------------------
- * - VOL_SCALING: Each 1 unit PVVM/PVD adds that % to SL/TP (adapts to volatility).
- * - Always tune for your pair, volatility, and backtest results.
- */
- 
-    //Custom Configuration 
-    const BASE_SL = 1; // 1% base Stop Loss
-    const BASE_TP = 2; // 2% base Take Profit 
-    const VOL_SCALING = 0.010; // Each 1 PVVM/PVD adds 0.010% to SL/TP
-
-
-    // If PVVM/PVD are undefined, fall back to base only
+    // --- Dynamic PVVM/PVD thresholds (volatility/volume signals) ---
+    // Calculate average volatility from PVVM and PVD
     const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
       ? (PVVM + PVD) / 2
       : 0;
 
-    const dynamicSL = BASE_SL + (VOL_SCALING * avgVol);
-    const dynamicTP = BASE_TP + (VOL_SCALING * avgVol);
+    // Dynamically set threshold parameters based on avgVol
+    // Low volatility: High Frequency (HF)
+    // Moderate: Default
+    // High volatility: Long-term
+    let PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, DYNAMIC_WINDOW, DYNAMIC_FACTOR;
+    if (avgVol < 50) {
+      PVVM_BASE_THRESHOLD = 5.0;
+      PVD_BASE_THRESHOLD  = 5.0;
+      DYNAMIC_WINDOW      = 5;
+      DYNAMIC_FACTOR      = 1.05;
+    } else if (avgVol < 150) {
+      PVVM_BASE_THRESHOLD = 10.0;
+      PVD_BASE_THRESHOLD  = 10.0;
+      DYNAMIC_WINDOW      = 10;
+      DYNAMIC_FACTOR      = 1.2;
+    } else {
+      PVVM_BASE_THRESHOLD = 20.0;
+      PVD_BASE_THRESHOLD  = 20.0;
+      DYNAMIC_WINDOW      = 30;
+      DYNAMIC_FACTOR      = 1.5;
+    }
 
-    const stopLossPrice = entryPrice * (1 - dynamicSL / 100);
-    const takeProfitPrice = entryPrice * (1 + dynamicTP / 100);
+    // Dynamic thresholds
+    const { PVVM: pvvmThreshold, PVD: pvdThreshold } = getDynamicThresholds(
+      signals,
+      PVVM_BASE_THRESHOLD,
+      PVD_BASE_THRESHOLD,
+      DYNAMIC_WINDOW,
+      DYNAMIC_FACTOR
+    );
+    INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
+    console.log(`[${timestamp}] Dynamic Thresholds: ${INTERVAL_MS / 1000}s (PVVM=${PVVM}, PVD=${PVD}, thresholds: ${pvvmThreshold}, ${pvdThreshold})`);
 
-    // --- SELL ALL POSITION ON TRIGGER ---
-    const balance = await exchange.fetchBalance();
-    const baseCurrency = PAIR.split('/')[0];
-    let orderSize = balance.free[baseCurrency] || 0;
-    // Optionally avoid dust:
-    if (orderSize > 0.00001) orderSize -= 0.00000001;
-
-    if (currentPrice <= stopLossPrice) {
-      if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-        console.log(`Not enough ${baseCurrency} for STOP LOSS sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        return;
-      }
-      if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        return;
-      }
-      try {
-        const result = await exchange.createMarketSellOrder(PAIR, orderSize);
-        positionOpen = false;
-        entryPrice = null;
-        lastAction = 'STOP_LOSS';
-        logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%)`);
-        console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
-      } catch (err) {
-        logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
-        console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
-      }
-      scheduleNext(INTERVAL_MS);
+    // Only skip processed signals if the order was successful in the past
+    if (processedSignals.has(signalKey)) {
+      console.log('Signal already processed. Skipping.');
+      scheduleNext(INTERVAL_DEFAULT);
       return;
     }
-    if (currentPrice >= takeProfitPrice) {
-      if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-        console.log(`Not enough ${baseCurrency} for TAKE PROFIT sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        return;
-      }
-      if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        return;
-      }
+
+    // --- DYNAMIC STOP LOSS / TAKE PROFIT LOGIC ---
+    // Use ML-adaptive SL/TP based on recent outcomes
+    const { BASE_SL: adaptiveBASE_SL, BASE_TP: adaptiveBASE_TP } = adaptParameters();
+
+    if (positionOpen && entryPrice) {
       try {
-        const result = await exchange.createMarketSellOrder(PAIR, orderSize);
-        positionOpen = false;
-        entryPrice = null;
-        lastAction = 'TAKE_PROFIT';
-        logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%)`);
-        console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
+        const ticker = await exchange.fetchTicker(PAIR);
+        const currentPrice = ticker.last;
+
+        // --- Dynamic SL/TP/Scaling based on volatility ---
+        let BASE_SL = adaptiveBASE_SL, BASE_TP = adaptiveBASE_TP, VOL_SCALING;
+        if (avgVol < 50) {
+          VOL_SCALING = 0.002; // minimal scaling
+        } else if (avgVol < 150) {
+          VOL_SCALING = 0.005; // moderate scaling
+        } else {
+          VOL_SCALING = 0.02;  // strong scaling
+        }
+
+        // Calculate dynamic stop loss and take profit
+        const dynamicSL = BASE_SL + (VOL_SCALING * avgVol);
+        const dynamicTP = BASE_TP + (VOL_SCALING * avgVol);
+
+        const stopLossPrice = entryPrice * (1 - dynamicSL / 100);
+        const takeProfitPrice = entryPrice * (1 + dynamicTP / 100);
+
+        const balance = await exchange.fetchBalance();
+        const baseCurrency = PAIR.split('/')[0];
+        let orderSize = balance.free[baseCurrency] || 0;
+        if (orderSize > 0.00001) orderSize -= 0.00000001;
+
+        if (currentPrice <= stopLossPrice) {
+          if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
+            console.log(`Not enough ${baseCurrency} for STOP LOSS sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+            return;
+          }
+          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+            return;
+          }
+          try {
+            const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+            positionOpen = false;
+            entryPrice = null;
+            lastAction = 'STOP_LOSS';
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%)`);
+            recordTradeOutcome(lastAction); // ML adaptation: record outcome
+            console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
+          } catch (err) {
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
+            console.error('Order error:', err.message || err);
+            if (err.message && err.message.includes('Insufficient funds')) {
+              await handleInsufficientFunds(signalKey, INTERVAL_MS);
+              return;
+            }
+          }
+          scheduleNext(INTERVAL_MS);
+          return;
+        }
+        if (currentPrice >= takeProfitPrice) {
+          if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
+            console.log(`Not enough ${baseCurrency} for TAKE PROFIT sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+            return;
+          }
+          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+            return;
+          }
+          try {
+            const result = await exchange.createMarketSellOrder(PAIR, orderSize);
+            positionOpen = false;
+            entryPrice = null;
+            lastAction = 'TAKE_PROFIT';
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%)`);
+            recordTradeOutcome(lastAction); // ML adaptation: record outcome
+            console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
+          } catch (err) {
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
+            console.error('Order error:', err.message || err);
+            if (err.message && err.message.includes('Insufficient funds')) {
+              await handleInsufficientFunds(signalKey, INTERVAL_MS);
+              return;
+            }
+          }
+          scheduleNext(INTERVAL_MS);
+          return;
+        }
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
-        console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+        console.error('SL/TP check error:', err.message || err);
       }
-      scheduleNext(INTERVAL_MS);
-      return;
     }
-  } catch (err) {
-    console.error('SL/TP check error:', err.message || err);
-  }
-}
 
     // --- Trade Size Adjustment ---
     let orderSize = ORDER_AMOUNT;
@@ -374,16 +413,14 @@ if (positionOpen && entryPrice) {
     }
     const currentPrice = ticker.last;
 
-    // --- Entry Logic ---
+    // --- Entry Logic: BUY ---
     if (
       !positionOpen &&
       (prediction === 'bull' || label === 'strong_bull') &&
       PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
       if (!(await hasEnoughBalanceForOrder('BUY', orderSize, currentPrice))) {
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        isRunning = false;
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
       try {
@@ -392,18 +429,22 @@ if (positionOpen && entryPrice) {
         entryPrice = result.price || result.average || null;
         lastAction = 'BUY';
         logOrder(timestamp, prediction, label, 'BUY', result, `Bull/Strong Bull & PVVM/PVD above dynamic threshold (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        recordTradeOutcome(lastAction); // ML adaptation: record outcome
         console.log(`[${timestamp}] BUY order submitted (bull/strong_bull & PVVM/PVD strong)`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
         console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+        if (err.message && err.message.includes('Insufficient funds')) {
+          await handleInsufficientFunds(signalKey, INTERVAL_MS);
+          return;
+        }
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
 
-    // SHORT Entry
+    // --- Entry Logic: SHORT ---
     if (
       !positionOpen &&
       (prediction === 'bear' || label === 'strong_bear') &&
@@ -416,9 +457,7 @@ if (positionOpen && entryPrice) {
         return;
       }
       if (!(await hasEnoughBalanceForOrder('SHORT', orderSize, currentPrice))) {
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        isRunning = false;
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
       try {
@@ -427,26 +466,29 @@ if (positionOpen && entryPrice) {
         entryPrice = result.price || result.average || null;
         lastAction = 'SHORT';
         logOrder(timestamp, prediction, label, 'SHORT', result, `Bear/Strong Bear & PVVM/PVD above dynamic threshold (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        recordTradeOutcome(lastAction); // ML adaptation: record outcome
         console.log(`[${timestamp}] SHORT order submitted (bear/strong_bear & PVVM/PVD strong)`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
         console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+        if (err.message && err.message.includes('Insufficient funds')) {
+          await handleInsufficientFunds(signalKey, INTERVAL_MS);
+          return;
+        }
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
-    // --- Exit Logic ---
+
+    // --- Exit Logic: SELL (weak_bull) ---
     if (
       positionOpen &&
       label === 'weak_bull' &&
       PVVM < pvvmThreshold && PVD < pvdThreshold
     ) {
       if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
-        await syncPosition();
-        scheduleNext(INTERVAL_MS);
-        isRunning = false;
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
       try {
@@ -455,19 +497,23 @@ if (positionOpen && entryPrice) {
         entryPrice = null;
         lastAction = 'SELL';
         logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        recordTradeOutcome(lastAction); // ML adaptation: record outcome
         console.log(`[${timestamp}] SELL order submitted (weak_bull & PVVM/PVD near zero)`);
         await syncPosition();
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
         console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+        if (err.message && err.message.includes('Insufficient funds')) {
+          await handleInsufficientFunds(signalKey, INTERVAL_MS);
+          return;
+        }
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
 
-    // Weak Bear Exit (cover, if shorting)
+    // --- Exit Logic: COVER (weak_bear) ---
     if (
       positionOpen &&
       label === 'weak_bear' &&
@@ -483,15 +529,15 @@ if (positionOpen && entryPrice) {
         const balance = await exchange.fetchBalance();
         const [base, quote] = PAIR.split('/');
         const feeBuffer = 1.005;
-        const availableEUR = balance.free[quote] || 0;
-        const maxBuyable = availableEUR / (currentPrice * feeBuffer);
+        const availableQuote = balance.free[quote] || 0;
+        const maxBuyable = availableQuote / (currentPrice * feeBuffer);
         const coverOrderSize = Math.min(orderSize, maxBuyable);
 
         if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-          console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableEUR}. COVER order skipped.`);
+          console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableQuote}. COVER order skipped.`);
           logOrder(timestamp, prediction, label, 'COVER', null, `COVER skipped: not enough ${quote} for minimum order size`, null);
-          scheduleNext(INTERVAL_MS);
-          isRunning = false;
+          recordTradeOutcome('COVER'); // ML adaptation: record outcome
+          await handleInsufficientFunds(signalKey, INTERVAL_MS);
           return;
         }
 
@@ -500,12 +546,16 @@ if (positionOpen && entryPrice) {
         entryPrice = null;
         lastAction = 'COVER';
         logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
+        recordTradeOutcome(lastAction); // ML adaptation: record outcome
         console.log(`[${timestamp}] COVER order submitted (weak_bear & PVVM/PVD near zero)`);
         await syncPosition();
       } catch (err) {
         logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
         console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) await syncPosition();
+        if (err.message && err.message.includes('Insufficient funds')) {
+          await handleInsufficientFunds(signalKey, INTERVAL_MS);
+          return;
+        }
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
@@ -530,6 +580,6 @@ function scheduleNext(ms) {
 // --- Startup: Sync position with exchange, then start main loop ---
 (async () => {
   await syncPosition();
-  console.log(`Starting ccxt_orders.js with initial interval: ${INTERVAL_MS / 1000}s`);
+  console.log(`Starting ccxt_orders.js with INTERVAL_MS: ${INTERVAL_MS / 1000}s`);
   main();
 })();
