@@ -25,7 +25,6 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const ccxt = require('ccxt');
 const fs = require('fs');
-const path = require('path');
 
 // ML-based adaptation: Track trade outcomes (add to your logOrder or trading loop)
 let stopLossHits = 0, takeProfitHits = 0, totalTrades = 0;
