@@ -21,7 +21,7 @@
  * Author: universalbit-dev
  * Repo: https://github.com/universalbit-dev/gekko-m4-globular-cluster
  */
-
+const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const ccxt = require('ccxt');
 const fs = require('fs');
