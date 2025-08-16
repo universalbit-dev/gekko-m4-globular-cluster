@@ -1,6 +1,6 @@
 // train_ohlcv.js
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const path = require('path');
-require('dotenv').config();
 const fs = require('fs');
 const dir = path.resolve(__dirname, 'trained_ohlcv'); 
 const ConvNet = require('../core/convnet.js'); // Adjust path as needed
