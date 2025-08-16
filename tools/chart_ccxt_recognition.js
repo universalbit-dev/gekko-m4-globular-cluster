@@ -8,6 +8,7 @@
  * - Makes predictions; writes an enhanced CSV with predictions and true labels (overwrites each run)
  * - Appends only state transitions to ccxt_signal.log (deduplicated)
  */
+const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const fs = require('fs');
 const path = require('path');
