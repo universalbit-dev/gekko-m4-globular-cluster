@@ -2,52 +2,57 @@
  * ccxt_orders.js (Zenith Version)
  * 
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
+ * Features:
  * - Dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, reason logging, and dynamic trade frequency.
- * 
  * - Loads buy/sell signals from log files (basic and magnitude versions supported).
  * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
- * - Places market BUY orders on 'bull' or 'strong_bull' signals when not already in a position.
- * - Places market SELL/SHORT orders on 'bear' or 'strong_bear' signals when not already in a position (if supported).
- * - Places market SELL/Cover orders on 'weak_bull' or 'weak_bear' signals with PVVM/PVD near zero when in a position.
- * - Dynamic thresholding based on recent PVVM/PVD values.
- * - Adjustable trade size based on PVVM/PVD magnitude.
- * - Stop Loss or Take Profit triggers.
- * - Deduplicates processed signals to avoid double trading.
- * - Logs all trade actions and outcomes to a log file, including trade reason.
+ * - Places market BUY/SELL/SHORT/COVER orders based on consensus signals and PVVM/PVD thresholds.
+ * - Dynamic stop loss/take profit logic.
+ * - Logs all trade actions and outcomes.
  * - Configurable via environment variables.
- * - Dynamically adapts order submission frequency to market volatility (PVVM/PVD).
  * - Active portfolio rebalancing.
  * 
  * Author: universalbit-dev
- * Repo: https://github.com/universalbit-dev/gekko-m4-globular-cluster
  */
+
 const path = require('path');
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
-const ccxt = require('ccxt');
 const fs = require('fs');
+const ccxt = require('ccxt');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// ML-based adaptation: Track trade outcomes (add to your logOrder or trading loop)
+// --- Config ---
+const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
+const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
+const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
+const EXCHANGE = process.env.EXCHANGE || 'kraken';
+const API_KEY = process.env.KEY || '';
+const API_SECRET = process.env.SECRET || '';
+const PAIR = process.env.PAIR || 'BTC/EUR';
+const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.0001;
+const MIN_ALLOWED_ORDER_AMOUNT = parseFloat(process.env.MIN_ALLOWED_ORDER_AMOUNT) || 0.0001;
+const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;
+const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000;
+const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000;
+let INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000;
+
+// --- ML-based adaptation: Track trade outcomes
 let stopLossHits = 0, takeProfitHits = 0, totalTrades = 0;
-
 function recordTradeOutcome(outcome) {
   totalTrades++;
   if (outcome === 'STOP_LOSS') stopLossHits++;
   if (outcome === 'TAKE_PROFIT') takeProfitHits++;
 }
-
-// Adaptive SL/TP logic (runtime, every N trades)
 function adaptParameters() {
-  let BASE_SL = 1, BASE_TP = 2; // defaults
-  if (totalTrades >= 10) { // Only adapt after enough trades
+  let BASE_SL = 1, BASE_TP = 2;
+  if (totalTrades >= 10) {
     if (stopLossHits / totalTrades > 0.5) {
-      BASE_SL += 0.5; // Widen stop loss
-      console.log('Widening SL due to frequent stop-outs');
+      BASE_SL += 0.5;
+      console.log('[ML] Widening SL due to frequent stop-outs');
     }
     if (takeProfitHits / totalTrades < 0.2) {
-      BASE_TP -= 0.5; // Lower TP to make it easier to hit
-      console.log('Lowering TP due to few take profits');
+      BASE_TP -= 0.5;
+      console.log('[ML] Lowering TP due to few take profits');
     }
-    // Reset counters every N trades, or use rolling window
     stopLossHits = 0;
     takeProfitHits = 0;
     totalTrades = 0;
@@ -55,51 +60,19 @@ function adaptParameters() {
   return { BASE_SL, BASE_TP };
 }
 
-// Paths
-const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
-const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
-const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
-
-// Exchange setup
-const EXCHANGE = process.env.EXCHANGE || 'kraken';
-const API_KEY = process.env.KEY || '';
-const API_SECRET = process.env.SECRET || '';
-const PAIR = process.env.PAIR || 'BTC/EUR';
-const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.0001;
-const MIN_ALLOWED_ORDER_AMOUNT = parseFloat(process.env.MIN_ALLOWED_ORDER_AMOUNT) || 0.0001;
-
-// Dynamic frequency configs (ms)
-const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;
-const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000;
-const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000;
-let INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000;
-
-const exchangeClass = ccxt[EXCHANGE];
-if (!exchangeClass) {
-  console.error(`Exchange '${EXCHANGE}' not supported by ccxt.`);
-  process.exit(1);
-}
-const exchange = new exchangeClass({
-  apiKey: API_KEY,
-  secret: API_SECRET,
-  enableRateLimit: true,
-});
-
-// Helper: Load processed signals (dedup by timestamp|prediction|label)
+// --- Helper: Load processed signals (dedup by timestamp|prediction|label)
 function loadProcessedSignals() {
   if (!fs.existsSync(ORDER_LOG_PATH)) return new Set();
   const set = new Set();
   const lines = fs.readFileSync(ORDER_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean);
   for (const line of lines) {
     const parts = line.split('\t');
-    if (parts.length >= 4) {
-      set.add(parts[1] + '|' + parts[2] + '|' + (parts[3] || ''));
-    }
+    if (parts.length >= 4) set.add(parts[1] + '|' + parts[2] + '|' + (parts[3] || ''));
   }
   return set;
 }
 
-// Helper: Log order
+// --- Helper: Log order
 function logOrder(timestamp, prediction, label, action, result, reason, error = null) {
   const logLine = [
     new Date().toISOString(),
@@ -114,7 +87,7 @@ function logOrder(timestamp, prediction, label, action, result, reason, error = 
   fs.appendFileSync(ORDER_LOG_PATH, logLine);
 }
 
-// Helper: Load and unify signals
+// --- Helper: Load and unify signals
 function loadUnifiedSignals() {
   const basicLines = fs.existsSync(SIGNAL_LOG_PATH)
     ? fs.readFileSync(SIGNAL_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean)
@@ -123,14 +96,12 @@ function loadUnifiedSignals() {
     ? fs.readFileSync(MAG_SIGNAL_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean)
     : [];
 
-  // Parse mag signals: timestamp -> obj
   const magMap = {};
   for (const line of magLines) {
     const [timestamp, prediction, price, PVVM, PVD, label] = line.split('\t');
     if (timestamp) magMap[timestamp] = { timestamp, prediction, price, PVVM: parseFloat(PVVM), PVD: parseFloat(PVD), label };
   }
 
-  // Merge: prefer magnitude version if exists
   const unifiedMap = {};
   for (const line of basicLines) {
     const [timestamp, prediction] = line.split('\t');
@@ -144,7 +115,7 @@ function loadUnifiedSignals() {
   return Object.values(unifiedMap).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 }
 
-// Dynamic threshold calculation
+// --- Dynamic threshold calculation
 function getDynamicThresholds(signals, PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, DYNAMIC_WINDOW, DYNAMIC_FACTOR) {
   const recent = signals.slice(-DYNAMIC_WINDOW);
   const pvvmList = recent.map(s => s.PVVM).filter(x => typeof x === 'number' && !isNaN(x));
@@ -157,18 +128,32 @@ function getDynamicThresholds(signals, PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, 
   };
 }
 
-// Dynamic frequency logic: choose INTERVAL_MS based on most recent PVVM/PVD
+// --- Dynamic frequency logic
 function getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold) {
   if (PVVM > pvvmThreshold * 2 && PVD > pvdThreshold * 2) return INTERVAL_HIGH;
   if (PVVM < pvvmThreshold * 0.7 && PVD < pvdThreshold * 0.7) return INTERVAL_LOW;
   return INTERVAL_DEFAULT;
 }
 
+// --- Exchange setup
+const exchangeClass = ccxt[EXCHANGE];
+if (!exchangeClass) {
+  console.error(`Exchange '${EXCHANGE}' not supported by ccxt.`);
+  process.exit(1);
+}
+const exchange = new exchangeClass({
+  apiKey: API_KEY,
+  secret: API_SECRET,
+  enableRateLimit: true,
+});
+
+// --- Bot state
 let isRunning = false;
 let positionOpen = false;
 let entryPrice = null;
 let lastAction = null;
 
+// --- Sync position from exchange
 async function syncPosition() {
   try {
     const balance = await exchange.fetchBalance();
@@ -177,18 +162,19 @@ async function syncPosition() {
       positionOpen = true;
       entryPrice = null;
       lastAction = 'BUY';
-      console.log(`[Startup] Detected open position in ${baseCurrency} (amount: ${balance.total[baseCurrency]}). Bot will start IN POSITION.`);
+      console.log(`[Startup] Detected open position in ${baseCurrency} (${balance.total[baseCurrency]}).`);
     } else {
       positionOpen = false;
       entryPrice = null;
       lastAction = null;
-      console.log(`[Startup] No open position detected on exchange. Bot will start FLAT.`);
+      console.log(`[Startup] No open position detected. Starting flat.`);
     }
   } catch (err) {
-    console.error('Error syncing position with exchange:', err.message || err);
+    console.error('Error syncing position:', err.message || err);
   }
 }
 
+// --- Balance check for orders
 async function hasEnoughBalanceForOrder(action, orderSize, currentPrice) {
   try {
     const balance = await exchange.fetchBalance();
@@ -208,7 +194,7 @@ async function hasEnoughBalanceForOrder(action, orderSize, currentPrice) {
     }
     if (action === 'SHORT') {
       if (!exchange.has['margin']) {
-        console.log('Short logic skipped: Margin trading not supported on this exchange.');
+        console.log('Short logic skipped: Margin trading not supported.');
         return false;
       }
     }
@@ -226,9 +212,9 @@ async function hasEnoughBalanceForOrder(action, orderSize, currentPrice) {
   }
 }
 
-// Active rebalance: don't mark the current signal processed if insufficient balance/margin
+// --- Insufficient funds handler
 async function handleInsufficientFunds(signalKey, rescheduleMs) {
-  console.error('Insufficient funds/margin detected; will resync and retry this signal on next interval.');
+  console.error('[Funds] Insufficient funds/margin; will resync and retry.');
   await syncPosition();
   scheduleNext(rescheduleMs || INTERVAL_DEFAULT);
   isRunning = false;
@@ -237,52 +223,48 @@ async function handleInsufficientFunds(signalKey, rescheduleMs) {
 // --- Main trading loop ---
 async function main() {
   if (isRunning) {
-    console.warn(`[${new Date().toISOString()}] Previous cycle still running, skipping this interval.`);
+    console.warn(`[${new Date().toISOString()}] Previous cycle still running, skipping.`);
     return;
   }
   isRunning = true;
+  console.log(`[DEBUG] Entering main loop at ${new Date().toISOString()}`);
 
   try {
     const signals = loadUnifiedSignals();
+    console.log(`[DEBUG] Loaded ${signals.length} signals`);
     if (signals.length === 0) {
       console.log('No signals found.');
       scheduleNext(INTERVAL_DEFAULT);
       return;
     }
+
     const lastSignal = signals[signals.length - 1];
     const { timestamp, prediction, label, PVVM = NaN, PVD = NaN } = lastSignal;
     const processedSignals = loadProcessedSignals();
     const signalKey = `${timestamp}|${prediction}|${label || ''}`;
+    console.log(`[DEBUG] Last signal: ${JSON.stringify(lastSignal)}`);
 
-    // --- Dynamic PVVM/PVD thresholds (volatility/volume signals) ---
-    // Calculate average volatility from PVVM and PVD
+    // --- Dynamic PVVM/PVD thresholds ---
     const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
       ? (PVVM + PVD) / 2
       : 0;
-
-    // Dynamically set threshold parameters based on avgVol
-    // Low volatility: High Frequency (HF)
-    // Moderate: Default
-    // High volatility: Long-term
     let PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, DYNAMIC_WINDOW, DYNAMIC_FACTOR;
     if (avgVol < 50) {
       PVVM_BASE_THRESHOLD = 5.0;
-      PVD_BASE_THRESHOLD  = 5.0;
-      DYNAMIC_WINDOW      = 5;
-      DYNAMIC_FACTOR      = 1.05;
+      PVD_BASE_THRESHOLD = 5.0;
+      DYNAMIC_WINDOW = 5;
+      DYNAMIC_FACTOR = 1.05;
     } else if (avgVol < 150) {
       PVVM_BASE_THRESHOLD = 10.0;
-      PVD_BASE_THRESHOLD  = 10.0;
-      DYNAMIC_WINDOW      = 10;
-      DYNAMIC_FACTOR      = 1.2;
+      PVD_BASE_THRESHOLD = 10.0;
+      DYNAMIC_WINDOW = 10;
+      DYNAMIC_FACTOR = 1.2;
     } else {
       PVVM_BASE_THRESHOLD = 20.0;
-      PVD_BASE_THRESHOLD  = 20.0;
-      DYNAMIC_WINDOW      = 30;
-      DYNAMIC_FACTOR      = 1.5;
+      PVD_BASE_THRESHOLD = 20.0;
+      DYNAMIC_WINDOW = 30;
+      DYNAMIC_FACTOR = 1.5;
     }
-
-    // Dynamic thresholds
     const { PVVM: pvvmThreshold, PVD: pvdThreshold } = getDynamicThresholds(
       signals,
       PVVM_BASE_THRESHOLD,
@@ -290,37 +272,29 @@ async function main() {
       DYNAMIC_WINDOW,
       DYNAMIC_FACTOR
     );
-    
-    // Only skip processed signals if the order was successful in the past
+    INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
+
     if (processedSignals.has(signalKey)) {
       console.log('Signal already processed. Skipping.');
       scheduleNext(INTERVAL_DEFAULT);
       return;
     }
 
-    // --- DYNAMIC STOP LOSS / TAKE PROFIT LOGIC ---
-    // Use ML-adaptive SL/TP based on recent outcomes
+    // --- ML-adaptive SL/TP ---
     const { BASE_SL: adaptiveBASE_SL, BASE_TP: adaptiveBASE_TP } = adaptParameters();
 
+    // --- SL/TP logic ---
     if (positionOpen && entryPrice) {
       try {
         const ticker = await exchange.fetchTicker(PAIR);
         const currentPrice = ticker.last;
-
-        // --- Dynamic SL/TP/Scaling based on volatility ---
         let BASE_SL = adaptiveBASE_SL, BASE_TP = adaptiveBASE_TP, VOL_SCALING;
-        if (avgVol < 50) {
-          VOL_SCALING = 0.002; // minimal scaling
-        } else if (avgVol < 150) {
-          VOL_SCALING = 0.005; // moderate scaling
-        } else {
-          VOL_SCALING = 0.02;  // strong scaling
-        }
+        if (avgVol < 50) VOL_SCALING = 0.002;
+        else if (avgVol < 150) VOL_SCALING = 0.005;
+        else VOL_SCALING = 0.02;
 
-        // Calculate dynamic stop loss and take profit
         const dynamicSL = BASE_SL + (VOL_SCALING * avgVol);
         const dynamicTP = BASE_TP + (VOL_SCALING * avgVol);
-
         const stopLossPrice = entryPrice * (1 - dynamicSL / 100);
         const takeProfitPrice = entryPrice * (1 + dynamicTP / 100);
 
@@ -329,13 +303,10 @@ async function main() {
         let orderSize = balance.free[baseCurrency] || 0;
         if (orderSize > 0.00001) orderSize -= 0.00000001;
 
+        // STOP LOSS
         if (currentPrice <= stopLossPrice) {
-          if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-            console.log(`Not enough ${baseCurrency} for STOP LOSS sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
-            await handleInsufficientFunds(signalKey, INTERVAL_MS);
-            return;
-          }
-          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+          if (orderSize < MIN_ALLOWED_ORDER_AMOUNT ||
+              !(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
             await handleInsufficientFunds(signalKey, INTERVAL_MS);
             return;
           }
@@ -344,27 +315,21 @@ async function main() {
             positionOpen = false;
             entryPrice = null;
             lastAction = 'STOP_LOSS';
-            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `Price dropped to ${currentPrice} (SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%)`);
-            recordTradeOutcome(lastAction); // ML adaptation: record outcome
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%`);
+            recordTradeOutcome(lastAction);
             console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
           } catch (err) {
             logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
-            console.error('Order error:', err.message || err);
-            if (err.message && err.message.includes('Insufficient funds')) {
-              await handleInsufficientFunds(signalKey, INTERVAL_MS);
-              return;
-            }
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+            return;
           }
           scheduleNext(INTERVAL_MS);
           return;
         }
+        // TAKE PROFIT
         if (currentPrice >= takeProfitPrice) {
-          if (orderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-            console.log(`Not enough ${baseCurrency} for TAKE PROFIT sell. Needed: ${MIN_ALLOWED_ORDER_AMOUNT}, Available: ${orderSize}`);
-            await handleInsufficientFunds(signalKey, INTERVAL_MS);
-            return;
-          }
-          if (!(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
+          if (orderSize < MIN_ALLOWED_ORDER_AMOUNT ||
+              !(await hasEnoughBalanceForOrder('SELL', orderSize, currentPrice))) {
             await handleInsufficientFunds(signalKey, INTERVAL_MS);
             return;
           }
@@ -373,16 +338,13 @@ async function main() {
             positionOpen = false;
             entryPrice = null;
             lastAction = 'TAKE_PROFIT';
-            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `Price rose to ${currentPrice} (TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%)`);
-            recordTradeOutcome(lastAction); // ML adaptation: record outcome
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%`);
+            recordTradeOutcome(lastAction);
             console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
           } catch (err) {
             logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
-            console.error('Order error:', err.message || err);
-            if (err.message && err.message.includes('Insufficient funds')) {
-              await handleInsufficientFunds(signalKey, INTERVAL_MS);
-              return;
-            }
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+            return;
           }
           scheduleNext(INTERVAL_MS);
           return;
@@ -398,7 +360,7 @@ async function main() {
     if (PVVM < pvvmThreshold && PVD < pvdThreshold) orderSize *= 0.5;
     orderSize = Math.max(orderSize, MIN_ALLOWED_ORDER_AMOUNT);
 
-    // Fetch ticker price for balance check
+    // --- Fetch ticker price
     let ticker = null;
     try {
       ticker = await exchange.fetchTicker(PAIR);
@@ -425,16 +387,13 @@ async function main() {
         positionOpen = true;
         entryPrice = result.price || result.average || null;
         lastAction = 'BUY';
-        logOrder(timestamp, prediction, label, 'BUY', result, `Bull/Strong Bull & PVVM/PVD above dynamic threshold (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
-        recordTradeOutcome(lastAction); // ML adaptation: record outcome
-        console.log(`[${timestamp}] BUY order submitted (bull/strong_bull & PVVM/PVD strong)`);
+        logOrder(timestamp, prediction, label, 'BUY', result, `Bull/Strong Bull & PVVM/PVD above dynamic threshold`);
+        recordTradeOutcome(lastAction);
+        console.log(`[${timestamp}] BUY order submitted`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
-        console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) {
-          await handleInsufficientFunds(signalKey, INTERVAL_MS);
-          return;
-        }
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
+        return;
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
@@ -448,7 +407,7 @@ async function main() {
       PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
       if (!exchange.has['margin']) {
-        console.log('Short/SELL signals ignored: Spot trading only (no margin enabled).');
+        console.log('Short/SELL signals ignored: Spot trading only.');
         scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
@@ -462,16 +421,13 @@ async function main() {
         positionOpen = true;
         entryPrice = result.price || result.average || null;
         lastAction = 'SHORT';
-        logOrder(timestamp, prediction, label, 'SHORT', result, `Bear/Strong Bear & PVVM/PVD above dynamic threshold (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
-        recordTradeOutcome(lastAction); // ML adaptation: record outcome
-        console.log(`[${timestamp}] SHORT order submitted (bear/strong_bear & PVVM/PVD strong)`);
+        logOrder(timestamp, prediction, label, 'SHORT', result, `Bear/Strong Bear & PVVM/PVD above dynamic threshold`);
+        recordTradeOutcome(lastAction);
+        console.log(`[${timestamp}] SHORT order submitted`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
-        console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) {
-          await handleInsufficientFunds(signalKey, INTERVAL_MS);
-          return;
-        }
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
+        return;
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
@@ -493,17 +449,14 @@ async function main() {
         positionOpen = false;
         entryPrice = null;
         lastAction = 'SELL';
-        logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
-        recordTradeOutcome(lastAction); // ML adaptation: record outcome
-        console.log(`[${timestamp}] SELL order submitted (weak_bull & PVVM/PVD near zero)`);
+        logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero`);
+        recordTradeOutcome(lastAction);
+        console.log(`[${timestamp}] SELL order submitted`);
         await syncPosition();
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
-        console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) {
-          await handleInsufficientFunds(signalKey, INTERVAL_MS);
-          return;
-        }
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
+        return;
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
@@ -517,7 +470,7 @@ async function main() {
       PVVM < pvvmThreshold && PVD < pvdThreshold
     ) {
       if (!exchange.has['margin']) {
-        console.log('Cover signals ignored: Spot trading only (no margin enabled).');
+        console.log('Cover signals ignored: Spot trading only.');
         scheduleNext(INTERVAL_MS);
         isRunning = false;
         return;
@@ -531,9 +484,9 @@ async function main() {
         const coverOrderSize = Math.min(orderSize, maxBuyable);
 
         if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-          console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableQuote}. COVER order skipped.`);
-          logOrder(timestamp, prediction, label, 'COVER', null, `COVER skipped: not enough ${quote} for minimum order size`, null);
-          recordTradeOutcome('COVER'); // ML adaptation: record outcome
+          console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableQuote}.`);
+          logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+          recordTradeOutcome('COVER');
           await handleInsufficientFunds(signalKey, INTERVAL_MS);
           return;
         }
@@ -542,41 +495,50 @@ async function main() {
         positionOpen = false;
         entryPrice = null;
         lastAction = 'COVER';
-        logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero (${PVVM.toFixed(2)}, ${PVD.toFixed(2)})`);
-        recordTradeOutcome(lastAction); // ML adaptation: record outcome
-        console.log(`[${timestamp}] COVER order submitted (weak_bear & PVVM/PVD near zero)`);
+        logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
+        recordTradeOutcome(lastAction);
+        console.log(`[${timestamp}] COVER order submitted`);
         await syncPosition();
       } catch (err) {
         logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
-        console.error('Order error:', err.message || err);
-        if (err.message && err.message.includes('Insufficient funds')) {
-          await handleInsufficientFunds(signalKey, INTERVAL_MS);
-          return;
-        }
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
+        return;
       }
       scheduleNext(INTERVAL_MS);
       isRunning = false;
       return;
     }
 
-    // If nothing triggered, just reschedule
+    // --- Default: Reschedule if no trade triggered ---
     scheduleNext(INTERVAL_MS);
 
+  } catch (e) {
+    console.error('[UNCAUGHT EXCEPTION]', e);
+    scheduleNext(INTERVAL_DEFAULT);
   } finally {
     isRunning = false;
+    console.log(`[DEBUG] Exiting main loop at ${new Date().toISOString()}`);
   }
 }
 
-// --- Dynamic interval scheduling ---
+// --- Interval scheduling ---
 let intervalHandle = null;
 function scheduleNext(ms) {
   if (intervalHandle) clearTimeout(intervalHandle);
+  console.log(`[DEBUG] Scheduling next run in ${ms / 1000}s`);
   intervalHandle = setTimeout(main, ms);
 }
 
-// --- Startup: Sync position with exchange, then start main loop ---
+// --- Startup ---
 (async () => {
   await syncPosition();
   console.log(`Starting ccxt_orders.js with INTERVAL_MS: ${INTERVAL_MS / 1000}s`);
   main();
 })();
+
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT EXCEPTION]', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[UNHANDLED REJECTION]', reason);
+});
