@@ -290,8 +290,7 @@ async function main() {
       DYNAMIC_WINDOW,
       DYNAMIC_FACTOR
     );
-    INTERVAL_MS = process.env.INTERVAL_MS ? parseInt(process.env.INTERVAL_MS, 10) : 60 * 60 * 1000;
-
+    
     // Only skip processed signals if the order was successful in the past
     if (processedSignals.has(signalKey)) {
       console.log('Signal already processed. Skipping.');
