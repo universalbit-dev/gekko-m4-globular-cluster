@@ -8,6 +8,7 @@
   "author": "Mike van Rossum <mike@mvr.me>",
   "license": "MIT",
   "dependencies": {
+    "@tensorflow/tfjs-node": "^4.22.0",
     "async": "^3.2.5",
     "axios": "^1.7.9",
     "bluebird": "^3.7.2",
@@ -49,7 +50,7 @@
     "ws": "^8.18.0"
   },
   "engines": {
-  "node": ">=18 <=24"
+    "node": ">=18 <=24"
   },
   "keywords": [
     "gekko-m4",
