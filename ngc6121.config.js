@@ -69,6 +69,12 @@ module.exports = {
   exec_mode : "cluster"
   },
   {
+  name: 'train ccxt ohlcv tf',
+  script    : 'tools/train_ccxt_ohlcv_tf.js',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+  {
   name: 'train ohlcv',
   script    : 'tools/train_ohlcv.js',
   instances : "1",
