@@ -1,17 +1,6 @@
 /**
- * ccxt_orders.js (Zenith Version)
- * 
- * Automated trading bot for cryptocurrency using ccxt, Node.js, and custom signal logs.
- * Features:
- * - Dynamic PVVM/PVD thresholds, bull/bear support, adjustable trade size, reason logging, and dynamic trade frequency.
- * - Loads buy/sell signals from log files (basic and magnitude versions supported).
- * - Trades on the specified exchange (default Kraken) and trading pair (default BTC/EUR).
- * - Places market BUY/SELL/SHORT/COVER orders based on consensus signals and PVVM/PVD thresholds.
- * - Dynamic stop loss/take profit logic.
- * - Logs all trade actions and outcomes.
- * - Configurable via environment variables.
- * - Active portfolio rebalancing.
- * 
+ * ccxt_orders.js (Zenith Version, robust comparative log parsing, model winner adaptive)
+ * Automated trading bot for cryptocurrency using ccxt, Node.js, and comparative signal logs.
  * Author: universalbit-dev
  */
 
@@ -23,6 +12,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 // --- Config ---
 const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
+const MODEL_WINNER_PATH = path.resolve(__dirname, './model_winner.json');
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
 const API_SECRET = process.env.SECRET || '';
@@ -33,6 +23,19 @@ const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;
 const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000;
 const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000;
 let INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000;
+
+// --- Model Winner Loader ---
+function getActiveModel() {
+  try {
+    if (fs.existsSync(MODEL_WINNER_PATH)) {
+      const data = JSON.parse(fs.readFileSync(MODEL_WINNER_PATH, 'utf8'));
+      return data.active_model || 'ensemble';
+    }
+  } catch (err) {
+    console.error('Error reading model_winner.json:', err);
+  }
+  return 'ensemble'; // fallback
+}
 
 // --- ML-based adaptation ---
 let stopLossHits = 0, takeProfitHits = 0, totalTrades = 0;
@@ -53,8 +56,6 @@ function adaptParameters() {
 
 // --- Comparative Signal Log Parser ---
 function parseComparativeSignalLine(line) {
-  // Expected columns:
-  // timestamp, prediction_convnet, prediction_tf, price, PVVM, PVD, label_convnet, label_tf, ensemble_label
   const parts = line.split('\t');
   if (parts.length < 9) return null;
   const [
@@ -94,7 +95,7 @@ function parseComparativeSignalLine(line) {
     PVD: parsedPVD,
     label_convnet: label_convnet ? label_convnet.trim() : null,
     label_tf: label_tf ? label_tf.trim() : null,
-    label: ensemble_label.trim() // Use this for your trading logic!
+    ensemble_label: ensemble_label.trim()
   };
 }
 
@@ -104,14 +105,13 @@ function loadComparativeSignals(logPath) {
   return lines.slice(1).map(parseComparativeSignalLine).filter(Boolean);
 }
 
-// --- Helper: Load processed signals (dedup by timestamp|ensemble_label)
+// --- Helper: Load processed signals (dedup by timestamp|prediction|label)
 function loadProcessedSignals() {
   if (!fs.existsSync(ORDER_LOG_PATH)) return new Set();
   const set = new Set();
   const lines = fs.readFileSync(ORDER_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean);
   for (const line of lines) {
     const parts = line.split('\t');
-    // Use timestamp, prediction, label for deduplication key
     if (parts.length >= 4) {
       set.add(parts[1] + '|' + parts[2] + '|' + (parts[3] || ''));
     }
@@ -258,7 +258,21 @@ async function main() {
     }
 
     const lastSignal = signals[signals.length - 1];
-    const { timestamp, prediction_convnet, prediction_tf, label, PVVM = NaN, PVD = NaN, price } = lastSignal;
+    const { timestamp, prediction_convnet, prediction_tf, PVVM = NaN, PVD = NaN, price } = lastSignal;
+
+    // --- MODEL WINNER ADAPTATION ---
+    const activeModel = getActiveModel();
+    let prediction, label;
+    if (activeModel === 'tf') {
+      prediction = lastSignal.prediction_tf;
+      label = lastSignal.label_tf;
+    } else if (activeModel === 'convnet') {
+      prediction = lastSignal.prediction_convnet;
+      label = lastSignal.label_convnet;
+    } else {
+      prediction = lastSignal.ensemble_label;
+      label = lastSignal.ensemble_label;
+    }
 
     // Validate signal
     if (typeof price !== 'number' || isNaN(price)) {
@@ -272,15 +286,15 @@ async function main() {
       return;
     }
     const processedSignals = loadProcessedSignals();
-    const signalKey = `${timestamp}|${prediction_convnet}|${label || ''}`;
+    const signalKey = `${timestamp}|${prediction}|${label || ''}`;
     console.log(`[DEBUG] Last signal: ${JSON.stringify(lastSignal)}`);
+    console.log(`[DEBUG] Using active model: ${activeModel}, label: ${label}, prediction: ${prediction}`);
 
     // --- Dynamic PVVM/PVD thresholds ---
     const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
       ? (PVVM + PVD) / 2
       : 0;
 
-    // Set moderate-high trade frequency parameters
     const PVVM_THRESHOLDS = [1.0, 2.5, 5.0];
     const PVD_THRESHOLDS = [1.0, 2.5, 5.0];
     const DYNAMIC_WINDOWS = [4, 7, 12];
@@ -359,11 +373,11 @@ async function main() {
             positionOpen = false;
             entryPrice = null;
             lastAction = 'STOP_LOSS';
-            logOrder(timestamp, prediction_convnet, label, 'STOP_LOSS', result, `SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%`);
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%`);
             recordTradeOutcome(lastAction);
             console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
           } catch (err) {
-            logOrder(timestamp, prediction_convnet, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
+            logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
             await handleInsufficientFunds(signalKey, INTERVAL_MS);
             return;
           }
@@ -382,11 +396,11 @@ async function main() {
             positionOpen = false;
             entryPrice = null;
             lastAction = 'TAKE_PROFIT';
-            logOrder(timestamp, prediction_convnet, label, 'TAKE_PROFIT', result, `TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%`);
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%`);
             recordTradeOutcome(lastAction);
             console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
           } catch (err) {
-            logOrder(timestamp, prediction_convnet, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
+            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
             await handleInsufficientFunds(signalKey, INTERVAL_MS);
             return;
           }
@@ -431,11 +445,11 @@ async function main() {
         positionOpen = true;
         entryPrice = result.price || result.average || null;
         lastAction = 'BUY';
-        logOrder(timestamp, prediction_convnet, label, 'BUY', result, `Strong Bull & PVVM/PVD above dynamic threshold`);
+        logOrder(timestamp, prediction, label, 'BUY', result, `Strong Bull & PVVM/PVD above dynamic threshold`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] BUY order submitted`);
       } catch (err) {
-        logOrder(timestamp, prediction_convnet, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
+        logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
@@ -465,11 +479,11 @@ async function main() {
         positionOpen = true;
         entryPrice = result.price || result.average || null;
         lastAction = 'SHORT';
-        logOrder(timestamp, prediction_convnet, label, 'SHORT', result, `Strong Bear & PVVM/PVD above dynamic threshold`);
+        logOrder(timestamp, prediction, label, 'SHORT', result, `Strong Bear & PVVM/PVD above dynamic threshold`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] SHORT order submitted`);
       } catch (err) {
-        logOrder(timestamp, prediction_convnet, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
+        logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
@@ -493,12 +507,12 @@ async function main() {
         positionOpen = false;
         entryPrice = null;
         lastAction = 'SELL';
-        logOrder(timestamp, prediction_convnet, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero`);
+        logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] SELL order submitted`);
         await syncPosition();
       } catch (err) {
-        logOrder(timestamp, prediction_convnet, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
+        logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
@@ -529,7 +543,7 @@ async function main() {
 
         if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
           console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableQuote}.`);
-          logOrder(timestamp, prediction_convnet, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+          logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
           recordTradeOutcome('COVER');
           await handleInsufficientFunds(signalKey, INTERVAL_MS);
           return;
@@ -539,12 +553,12 @@ async function main() {
         positionOpen = false;
         entryPrice = null;
         lastAction = 'COVER';
-        logOrder(timestamp, prediction_convnet, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
+        logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] COVER order submitted`);
         await syncPosition();
       } catch (err) {
-        logOrder(timestamp, prediction_convnet, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
+        logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
