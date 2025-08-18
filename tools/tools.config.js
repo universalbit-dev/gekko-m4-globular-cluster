@@ -7,6 +7,12 @@ module.exports = {
   exec_mode : "fork"
   },
   {
+  name: 'train ccxt ohlcv tf',
+  script    : 'train_ccxt_ohlcv_tf.js',
+  instances : "1",
+  exec_mode : "fork"
+  },
+  {
   name: 'train ohlcv',
   script    : 'train_ohlcv.js',
   instances : "1",
