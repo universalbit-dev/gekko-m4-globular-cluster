@@ -1,32 +1,28 @@
 /**
  * chart_ccxt_recognition_magnitude.js (modular, uses label_ohlcv.js)
- * Processes OHLCV CSV, loads ConvNet and TensorFlow.js models, computes PVVM/PVD, labels and logs predictions for comparative analysis.
+ * Processes OHLCV JSON, loads ConvNet and TensorFlow.js models, computes PVVM/PVD, labels and logs predictions for comparative analysis.
  */
 const path = require('path');
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const fs = require('fs');
 const ConvNet = require('../core/convnet.js');
 const tf = require('@tensorflow/tfjs-node');
 const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
-const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
+const JSON_PATH = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
 const MODEL_DIR_CONVNET = path.resolve(__dirname, './trained_ccxt_ohlcv');
 const MODEL_DIR_TF = path.resolve(__dirname, './trained_ccxt_ohlcv_tf');
 const SIGNAL_LOG_PATH_COMPARISON = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
-// IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
-// Set INTERVAL_MS in .env to synchronize intervals.
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
-
 const LOG_MAX_BYTES = 1024 * 1024;
 const LOG_KEEP_BYTES = 512 * 1024;
 
 const PVVM_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10;
 const PVD_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10;
 
-// Utility functions (unchanged)
 function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
@@ -69,21 +65,17 @@ function ensureSignalLogHeader(logPath) {
   }
 }
 
-function loadCsvCandles(csvPath) {
-  if (!fs.existsSync(csvPath)) throw new Error(`CSV not found at: ${csvPath}`);
-  let rows = fs.readFileSync(csvPath, 'utf8').trim().split('\n');
-  rows = rows.filter(row => !/^timestamp,open,high,low,close,volume/i.test(row));
-  return rows.map(line => {
-    const [timestamp, open, high, low, close, volume] = line.split(',');
-    return {
-      timestamp,
-      open: Number(open),
-      high: Number(high),
-      low: Number(low),
-      close: Number(close),
-      volume: Number(volume),
-    };
-  }).filter(c =>
+// REPLACEMENT: Load candles from JSON array file
+function loadJsonCandles(jsonPath) {
+  if (!fs.existsSync(jsonPath)) throw new Error(`JSON not found at: ${jsonPath}`);
+  let data = fs.readFileSync(jsonPath, 'utf8');
+  let array = [];
+  try {
+    array = JSON.parse(data);
+  } catch (err) {
+    throw new Error(`Failed to parse JSON: ${err.message}`);
+  }
+  return array.filter(c =>
     c.timestamp &&
     !isNaN(c.open) && !isNaN(c.high) && !isNaN(c.low) &&
     !isNaN(c.close) && !isNaN(c.volume)
@@ -93,16 +85,14 @@ function loadCsvCandles(csvPath) {
 function loadModelConvNet(modelDir) {
   if (!fs.existsSync(modelDir)) throw new Error('No trained ConvNet model directory found.');
   const modelFiles = fs.readdirSync(modelDir)
-    .filter(f => f.endsWith('.json') && f !== 'norm_stats.json')
+    .filter(f => f.endsWith('.json'))
     .sort()
     .reverse();
   if (!modelFiles.length) throw new Error('No trained ConvNet model files found.');
-  let modelJson;
-  let net;
   for (const modelFile of modelFiles) {
     try {
-      modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, modelFile), 'utf8'));
-      net = new ConvNet.Net();
+      const modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, modelFile), 'utf8'));
+      const net = new ConvNet.Net();
       net.fromJSON(modelJson);
       return net;
     } catch (err) {
@@ -112,7 +102,6 @@ function loadModelConvNet(modelDir) {
   throw new Error('No valid ConvNetJS model files could be loaded.');
 }
 
-// TensorFlow.js model loader
 async function loadModelTF(modelDir) {
   if (!fs.existsSync(modelDir)) throw new Error('No trained TensorFlow model directory found.');
   const modelFiles = fs.readdirSync(modelDir)
@@ -165,7 +154,6 @@ function labelSignal(pred, PVVM, PVD) {
   return 'neutral';
 }
 
-// ConvNet prediction (unchanged)
 function predictCandlesConvNet(candles, indicators, net) {
   return candles.map((candle, i) => {
     try {
@@ -189,16 +177,14 @@ function predictCandlesConvNet(candles, indicators, net) {
   });
 }
 
-// TensorFlow.js prediction
 function predictCandlesTF(candles, indicators, model) {
-  // Prepare input for TF model: [open, high, low, close, volume]
   const inputs = candles.map(candle => [
     candle.open,
     candle.high,
     candle.low,
     candle.close,
     candle.volume
-    // Note: if your TF model was trained with PVVM/PVD, add indicators[i].PVVM and indicators[i].PVD here
+    // Add indicators[i].PVVM and indicators[i].PVD if required by your model
   ]);
   const xs = tf.tensor2d(inputs, [inputs.length, 5]);
   const preds = model.predict(xs);
@@ -209,15 +195,11 @@ function predictCandlesTF(candles, indicators, model) {
   });
 }
 
-// Ensemble/Comparison function
 function ensembleLabel(labelConvNet, labelTF) {
-  // Simple majority voting or agreement
   if (labelConvNet === labelTF) return labelConvNet;
-  // If different, you may prefer 'idle' or 'neutral' or more advanced logic
   return 'neutral';
 }
 
-// Logging function for comparative analysis
 function logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, logPath) {
   ensureDirExists(logPath);
   enforceLogSizeLimit(logPath, LOG_MAX_BYTES, LOG_KEEP_BYTES);
@@ -262,13 +244,11 @@ function logComparativeStateTransitions(candles, predictionsConvNet, predictions
   }
 }
 
-// Main recognition function (async for TensorFlow model loading)
 async function runRecognition() {
   try {
-    let candles = loadCsvCandles(CSV_PATH);
-    if (!candles.length) throw new Error('No valid candles found in CSV.');
+    let candles = loadJsonCandles(JSON_PATH);
+    if (!candles.length) throw new Error('No valid candles found in JSON.');
 
-    // Consistent modular labeling
     candles = labelCandles(candles, EPSILON);
 
     const indicators = computeMagnitudeIndicators(candles);
@@ -284,7 +264,5 @@ async function runRecognition() {
   }
 }
 
-// Initial run
 runRecognition();
-// Repeat every INTERVAL_MS
 setInterval(runRecognition, INTERVAL_MS);
