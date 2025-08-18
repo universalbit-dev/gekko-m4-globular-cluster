@@ -19,6 +19,7 @@ const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log')
 const LABELS = ['bull', 'bear', 'idle'];
 
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000;
+console.log("INTERVAL_MS:", INTERVAL_MS);
 const LOG_MAX_BYTES = 1024 * 1024;
 const LOG_KEEP_BYTES = 512 * 1024;
 
@@ -189,15 +190,11 @@ function predictCandlesTF(candles, indicators, model) {
   });
 }
 
-// --- Comparative Log Writer ---
 function logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, logPath) {
   ensureDirExists(logPath);
   enforceLogSizeLimit(logPath, LOG_MAX_BYTES, LOG_KEEP_BYTES);
   ensureSignalLogHeader(logPath);
 
-  let lastPredictionConvNet = null;
-  let lastPredictionTF = null;
-  let lastTimestamp = null;
   let lines = [];
 
   for (let i = 0; i < predictionsConvNet.length; i++) {
@@ -212,8 +209,8 @@ function logComparativeStateTransitions(candles, predictionsConvNet, predictions
     const labelTF = labelSignal(predTF, PVVM, PVD);
     const ensemble = ensembleLabel(labelConvNet, labelTF);
 
+    // Log EVERY valid signal
     if (
-      (predConvNet !== lastPredictionConvNet || predTF !== lastPredictionTF || timestamp !== lastTimestamp) &&
       predConvNet && predTF &&
       LABELS.includes(predConvNet) &&
       LABELS.includes(predTF) &&
@@ -221,16 +218,13 @@ function logComparativeStateTransitions(candles, predictionsConvNet, predictions
       !isNaN(price)
     ) {
       lines.push(`${timestamp}\t${predConvNet}\t${predTF}\t${price}\t${PVVM}\t${PVD}\t${labelConvNet}\t${labelTF}\t${ensemble}`);
-      lastPredictionConvNet = predConvNet;
-      lastPredictionTF = predTF;
-      lastTimestamp = timestamp;
     }
   }
   if (lines.length) {
     fs.appendFileSync(logPath, lines.join('\n') + '\n');
-    console.log('Wrote comparative state transitions to', logPath);
+    console.log('Wrote comparative signals to', logPath);
   } else {
-    console.log('No new transitions to log.');
+    console.log('No valid signals to log.');
   }
 }
 
