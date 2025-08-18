@@ -21,7 +21,6 @@ const ccxt = require('ccxt');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // --- Config ---
-const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
 const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
@@ -35,7 +34,7 @@ const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 
 const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000;
 let INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000;
 
-// --- ML-based adaptation: Track trade outcomes
+// --- ML-based adaptation ---
 let stopLossHits = 0, takeProfitHits = 0, totalTrades = 0;
 function recordTradeOutcome(outcome) {
   totalTrades++;
@@ -45,29 +44,77 @@ function recordTradeOutcome(outcome) {
 function adaptParameters() {
   let BASE_SL = 1, BASE_TP = 2;
   if (totalTrades >= 10) {
-    if (stopLossHits / totalTrades > 0.5) {
-      BASE_SL += 0.5;
-      console.log('[ML] Widening SL due to frequent stop-outs');
-    }
-    if (takeProfitHits / totalTrades < 0.2) {
-      BASE_TP -= 0.5;
-      console.log('[ML] Lowering TP due to few take profits');
-    }
-    stopLossHits = 0;
-    takeProfitHits = 0;
-    totalTrades = 0;
+    if (stopLossHits / totalTrades > 0.5) BASE_SL += 0.5;
+    if (takeProfitHits / totalTrades < 0.2) BASE_TP -= 0.5;
+    stopLossHits = 0; takeProfitHits = 0; totalTrades = 0;
   }
   return { BASE_SL, BASE_TP };
 }
 
-// --- Helper: Load processed signals (dedup by timestamp|prediction|label)
+// --- Comparative Signal Log Parser ---
+function parseComparativeSignalLine(line) {
+  // Expected columns:
+  // timestamp, prediction_convnet, prediction_tf, price, PVVM, PVD, label_convnet, label_tf, ensemble_label
+  const parts = line.split('\t');
+  if (parts.length < 9) return null;
+  const [
+    timestamp,
+    prediction_convnet,
+    prediction_tf,
+    price,
+    PVVM,
+    PVD,
+    label_convnet,
+    label_tf,
+    ensemble_label
+  ] = parts;
+
+  const parsedPrice = Number(price);
+  const parsedPVVM = Number(PVVM);
+  const parsedPVD = Number(PVD);
+
+  if (
+    !timestamp ||
+    typeof prediction_convnet !== 'string' ||
+    typeof prediction_tf !== 'string' ||
+    isNaN(parsedPrice) ||
+    isNaN(parsedPVVM) ||
+    isNaN(parsedPVD) ||
+    !ensemble_label
+  ) {
+    return null;
+  }
+
+  return {
+    timestamp: timestamp.trim(),
+    prediction_convnet: prediction_convnet.trim(),
+    prediction_tf: prediction_tf.trim(),
+    price: parsedPrice,
+    PVVM: parsedPVVM,
+    PVD: parsedPVD,
+    label_convnet: label_convnet ? label_convnet.trim() : null,
+    label_tf: label_tf ? label_tf.trim() : null,
+    label: ensemble_label.trim() // Use this for your trading logic!
+  };
+}
+
+function loadComparativeSignals(logPath) {
+  if (!fs.existsSync(logPath)) return [];
+  const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n').filter(Boolean);
+  return lines.slice(1).map(parseComparativeSignalLine).filter(Boolean);
+}
+
+// --- Helper: Load processed signals (dedup by timestamp|ensemble_label)
 function loadProcessedSignals() {
   if (!fs.existsSync(ORDER_LOG_PATH)) return new Set();
   const set = new Set();
   const lines = fs.readFileSync(ORDER_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean);
   for (const line of lines) {
     const parts = line.split('\t');
-    if (parts.length >= 4) set.add(parts[1] + '|' + parts[2] + '|' + (parts[3] || ''));
+    // Use timestamp, prediction, label for deduplication key
+    if (parts.length >= 4) {
+      set.add(parts[1] + '|' + parts[2] + '|' + (parts[3] || ''));
+    }
   }
   return set;
 }
@@ -85,34 +132,6 @@ function logOrder(timestamp, prediction, label, action, result, reason, error = 
     reason || ''
   ].join('\t') + '\n';
   fs.appendFileSync(ORDER_LOG_PATH, logLine);
-}
-
-// --- Helper: Load and unify signals
-function loadUnifiedSignals() {
-  const basicLines = fs.existsSync(SIGNAL_LOG_PATH)
-    ? fs.readFileSync(SIGNAL_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean)
-    : [];
-  const magLines = fs.existsSync(MAG_SIGNAL_LOG_PATH)
-    ? fs.readFileSync(MAG_SIGNAL_LOG_PATH, 'utf8').trim().split('\n').filter(Boolean)
-    : [];
-
-  const magMap = {};
-  for (const line of magLines) {
-    const [timestamp, prediction, price, PVVM, PVD, label] = line.split('\t');
-    if (timestamp) magMap[timestamp] = { timestamp, prediction, price, PVVM: parseFloat(PVVM), PVD: parseFloat(PVD), label };
-  }
-
-  const unifiedMap = {};
-  for (const line of basicLines) {
-    const [timestamp, prediction] = line.split('\t');
-    if (!timestamp) continue;
-    unifiedMap[timestamp] = magMap[timestamp] || { timestamp, prediction };
-  }
-  for (const timestamp in magMap) {
-    unifiedMap[timestamp] = magMap[timestamp];
-  }
-
-  return Object.values(unifiedMap).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 }
 
 // --- Dynamic threshold calculation
@@ -158,7 +177,7 @@ async function syncPosition() {
   try {
     const balance = await exchange.fetchBalance();
     const baseCurrency = PAIR.split('/')[0];
-    if (balance.total[baseCurrency] && balance.total[baseCurrency] >= ORDER_AMOUNT) {
+    if (balance.total[baseCurrency] && balance.total[baseCurrency] > MIN_ALLOWED_ORDER_AMOUNT * 1.2) {
       positionOpen = true;
       entryPrice = null;
       lastAction = 'BUY';
@@ -230,7 +249,7 @@ async function main() {
   console.log(`[DEBUG] Entering main loop at ${new Date().toISOString()}`);
 
   try {
-    const signals = loadUnifiedSignals();
+    const signals = loadComparativeSignals(MAG_SIGNAL_LOG_PATH);
     console.log(`[DEBUG] Loaded ${signals.length} signals`);
     if (signals.length === 0) {
       console.log('No signals found.');
@@ -239,32 +258,54 @@ async function main() {
     }
 
     const lastSignal = signals[signals.length - 1];
-    const { timestamp, prediction, label, PVVM = NaN, PVD = NaN } = lastSignal;
+    const { timestamp, prediction_convnet, prediction_tf, label, PVVM = NaN, PVD = NaN, price } = lastSignal;
+
+    // Validate signal
+    if (typeof price !== 'number' || isNaN(price)) {
+      console.warn('[Signal] Skipping signal with invalid price field:', lastSignal);
+      scheduleNext(INTERVAL_MS);
+      return;
+    }
+    if (!label || typeof label !== 'string') {
+      console.warn('[Signal] Skipping signal with invalid label field:', lastSignal);
+      scheduleNext(INTERVAL_MS);
+      return;
+    }
     const processedSignals = loadProcessedSignals();
-    const signalKey = `${timestamp}|${prediction}|${label || ''}`;
+    const signalKey = `${timestamp}|${prediction_convnet}|${label || ''}`;
     console.log(`[DEBUG] Last signal: ${JSON.stringify(lastSignal)}`);
 
     // --- Dynamic PVVM/PVD thresholds ---
     const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
       ? (PVVM + PVD) / 2
       : 0;
+
+    // Set moderate-high trade frequency parameters
+    const PVVM_THRESHOLDS = [1.0, 2.5, 5.0];
+    const PVD_THRESHOLDS = [1.0, 2.5, 5.0];
+    const DYNAMIC_WINDOWS = [4, 7, 12];
+    const DYNAMIC_FACTORS = [1.03, 1.07, 1.12];
+
     let PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, DYNAMIC_WINDOW, DYNAMIC_FACTOR;
+
     if (avgVol < 50) {
-      PVVM_BASE_THRESHOLD = 5.0;
-      PVD_BASE_THRESHOLD = 5.0;
-      DYNAMIC_WINDOW = 5;
-      DYNAMIC_FACTOR = 1.05;
+      PVVM_BASE_THRESHOLD = PVVM_THRESHOLDS[0];
+      PVD_BASE_THRESHOLD  = PVD_THRESHOLDS[0];
+      DYNAMIC_WINDOW      = DYNAMIC_WINDOWS[0];
+      DYNAMIC_FACTOR      = DYNAMIC_FACTORS[0];
     } else if (avgVol < 150) {
-      PVVM_BASE_THRESHOLD = 10.0;
-      PVD_BASE_THRESHOLD = 10.0;
-      DYNAMIC_WINDOW = 10;
-      DYNAMIC_FACTOR = 1.2;
+      PVVM_BASE_THRESHOLD = PVVM_THRESHOLDS[1];
+      PVD_BASE_THRESHOLD  = PVD_THRESHOLDS[1];
+      DYNAMIC_WINDOW      = DYNAMIC_WINDOWS[1];
+      DYNAMIC_FACTOR      = DYNAMIC_FACTORS[1];
     } else {
-      PVVM_BASE_THRESHOLD = 20.0;
-      PVD_BASE_THRESHOLD = 20.0;
-      DYNAMIC_WINDOW = 30;
-      DYNAMIC_FACTOR = 1.5;
+      PVVM_BASE_THRESHOLD = PVVM_THRESHOLDS[2];
+      PVD_BASE_THRESHOLD  = PVD_THRESHOLDS[2];
+      DYNAMIC_WINDOW      = DYNAMIC_WINDOWS[2];
+      DYNAMIC_FACTOR      = DYNAMIC_FACTORS[2];
     }
+
+    // Calculate dynamic thresholds
     const { PVVM: pvvmThreshold, PVD: pvdThreshold } = getDynamicThresholds(
       signals,
       PVVM_BASE_THRESHOLD,
@@ -272,11 +313,14 @@ async function main() {
       DYNAMIC_WINDOW,
       DYNAMIC_FACTOR
     );
-    INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
 
+    // Calculate dynamic interval for scheduling
+    const INTERVAL_MS = getDynamicInterval(PVVM, PVD, pvvmThreshold, pvdThreshold);
+
+    // Prevent duplicate signal processing
     if (processedSignals.has(signalKey)) {
       console.log('Signal already processed. Skipping.');
-      scheduleNext(INTERVAL_DEFAULT);
+      scheduleNext(INTERVAL_MS);
       return;
     }
 
@@ -315,11 +359,11 @@ async function main() {
             positionOpen = false;
             entryPrice = null;
             lastAction = 'STOP_LOSS';
-            logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%`);
+            logOrder(timestamp, prediction_convnet, label, 'STOP_LOSS', result, `SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%`);
             recordTradeOutcome(lastAction);
             console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
           } catch (err) {
-            logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
+            logOrder(timestamp, prediction_convnet, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
             await handleInsufficientFunds(signalKey, INTERVAL_MS);
             return;
           }
@@ -338,11 +382,11 @@ async function main() {
             positionOpen = false;
             entryPrice = null;
             lastAction = 'TAKE_PROFIT';
-            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%`);
+            logOrder(timestamp, prediction_convnet, label, 'TAKE_PROFIT', result, `TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%`);
             recordTradeOutcome(lastAction);
             console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
           } catch (err) {
-            logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
+            logOrder(timestamp, prediction_convnet, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
             await handleInsufficientFunds(signalKey, INTERVAL_MS);
             return;
           }
@@ -375,7 +419,7 @@ async function main() {
     // --- Entry Logic: BUY ---
     if (
       !positionOpen &&
-      (prediction === 'bull' || label === 'strong_bull') &&
+      (label === 'strong_bull') &&
       PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
       if (!(await hasEnoughBalanceForOrder('BUY', orderSize, currentPrice))) {
@@ -387,11 +431,11 @@ async function main() {
         positionOpen = true;
         entryPrice = result.price || result.average || null;
         lastAction = 'BUY';
-        logOrder(timestamp, prediction, label, 'BUY', result, `Bull/Strong Bull & PVVM/PVD above dynamic threshold`);
+        logOrder(timestamp, prediction_convnet, label, 'BUY', result, `Strong Bull & PVVM/PVD above dynamic threshold`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] BUY order submitted`);
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
+        logOrder(timestamp, prediction_convnet, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
@@ -403,7 +447,7 @@ async function main() {
     // --- Entry Logic: SHORT ---
     if (
       !positionOpen &&
-      (prediction === 'bear' || label === 'strong_bear') &&
+      (label === 'strong_bear') &&
       PVVM > pvvmThreshold && PVD > pvdThreshold
     ) {
       if (!exchange.has['margin']) {
@@ -421,11 +465,11 @@ async function main() {
         positionOpen = true;
         entryPrice = result.price || result.average || null;
         lastAction = 'SHORT';
-        logOrder(timestamp, prediction, label, 'SHORT', result, `Bear/Strong Bear & PVVM/PVD above dynamic threshold`);
+        logOrder(timestamp, prediction_convnet, label, 'SHORT', result, `Strong Bear & PVVM/PVD above dynamic threshold`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] SHORT order submitted`);
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
+        logOrder(timestamp, prediction_convnet, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
@@ -449,12 +493,12 @@ async function main() {
         positionOpen = false;
         entryPrice = null;
         lastAction = 'SELL';
-        logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero`);
+        logOrder(timestamp, prediction_convnet, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] SELL order submitted`);
         await syncPosition();
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
+        logOrder(timestamp, prediction_convnet, label, 'SELL', null, 'Failed to submit SELL', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
@@ -485,7 +529,7 @@ async function main() {
 
         if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
           console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableQuote}.`);
-          logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+          logOrder(timestamp, prediction_convnet, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
           recordTradeOutcome('COVER');
           await handleInsufficientFunds(signalKey, INTERVAL_MS);
           return;
@@ -495,12 +539,12 @@ async function main() {
         positionOpen = false;
         entryPrice = null;
         lastAction = 'COVER';
-        logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
+        logOrder(timestamp, prediction_convnet, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] COVER order submitted`);
         await syncPosition();
       } catch (err) {
-        logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
+        logOrder(timestamp, prediction_convnet, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
         return;
       }
