@@ -22,7 +22,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // --- Config ---
 const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal.log');
-const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
+const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
