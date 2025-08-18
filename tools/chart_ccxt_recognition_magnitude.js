@@ -13,7 +13,6 @@ const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
 const MODEL_DIR_CONVNET = path.resolve(__dirname, './trained_ccxt_ohlcv');
 const MODEL_DIR_TF = path.resolve(__dirname, './trained_ccxt_ohlcv_tf');
-const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
 const SIGNAL_LOG_PATH_COMPARISON = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
