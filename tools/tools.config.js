@@ -13,6 +13,12 @@ module.exports = {
   exec_mode : "fork"
   },
   {
+  name: 'challenge_analysis',
+  script    : 'challenge_analysis.js',
+  instances : "1",
+  exec_mode : "fork"
+  },
+  {
   name: 'train ohlcv',
   script    : 'train_ohlcv.js',
   instances : "1",
