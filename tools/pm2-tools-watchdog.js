@@ -16,8 +16,9 @@ const DURATION_THRESHOLD = 120; // seconds CPU must be above threshold
 const CHECK_INTERVAL = 10;      // seconds between checks
 
 const monitoredNames = [
-  'train ccxt ohlcv',
   'train ohlcv',
+  'train ccxt ohlcv',
+  'train ccxt ohlcv tf',
   'chart ccxt recognition',
   'chart ccxt recognition magnitude',
   'chart recognition',
