@@ -1,28 +1,31 @@
 /**
- * chart_ccxt_recognition_magnitude.js (modular, uses label_ohlcv.js)
- * Processes OHLCV JSON, loads ConvNet and TensorFlow.js models, computes PVVM/PVD, labels and logs predictions for comparative analysis.
+ * chart_ccxt_recognition_magnitude.js
+ * Processes OHLCV JSON, loads ConvNet and TensorFlow.js models, computes PVVM/PVD, labels and logs comparative predictions.
  */
+
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const fs = require('fs');
 const ConvNet = require('../core/convnet.js');
 const tf = require('@tensorflow/tfjs-node');
 const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
+// --- Config ---
 const JSON_PATH = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
 const MODEL_DIR_CONVNET = path.resolve(__dirname, './trained_ccxt_ohlcv');
 const MODEL_DIR_TF = path.resolve(__dirname, './trained_ccxt_ohlcv_tf');
-const SIGNAL_LOG_PATH_COMPARISON = path.resolve(__dirname, './ccxt_signal_comparative.log');
+const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
-const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
+const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000;
 const LOG_MAX_BYTES = 1024 * 1024;
 const LOG_KEEP_BYTES = 512 * 1024;
 
 const PVVM_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10;
 const PVD_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10;
 
+// --- Helpers ---
 function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
@@ -65,7 +68,7 @@ function ensureSignalLogHeader(logPath) {
   }
 }
 
-// REPLACEMENT: Load candles from JSON array file
+// --- Candle Loader ---
 function loadJsonCandles(jsonPath) {
   if (!fs.existsSync(jsonPath)) throw new Error(`JSON not found at: ${jsonPath}`);
   let data = fs.readFileSync(jsonPath, 'utf8');
@@ -75,6 +78,7 @@ function loadJsonCandles(jsonPath) {
   } catch (err) {
     throw new Error(`Failed to parse JSON: ${err.message}`);
   }
+  // Filter for valid candles
   return array.filter(c =>
     c.timestamp &&
     !isNaN(c.open) && !isNaN(c.high) && !isNaN(c.low) &&
@@ -82,12 +86,10 @@ function loadJsonCandles(jsonPath) {
   );
 }
 
+// --- Model Loaders ---
 function loadModelConvNet(modelDir) {
   if (!fs.existsSync(modelDir)) throw new Error('No trained ConvNet model directory found.');
-  const modelFiles = fs.readdirSync(modelDir)
-    .filter(f => f.endsWith('.json'))
-    .sort()
-    .reverse();
+  const modelFiles = fs.readdirSync(modelDir).filter(f => f.endsWith('.json')).sort().reverse();
   if (!modelFiles.length) throw new Error('No trained ConvNet model files found.');
   for (const modelFile of modelFiles) {
     try {
@@ -104,10 +106,7 @@ function loadModelConvNet(modelDir) {
 
 async function loadModelTF(modelDir) {
   if (!fs.existsSync(modelDir)) throw new Error('No trained TensorFlow model directory found.');
-  const modelFiles = fs.readdirSync(modelDir)
-    .filter(f => f.startsWith('trained_ccxt_ohlcv_tf_'))
-    .sort()
-    .reverse();
+  const modelFiles = fs.readdirSync(modelDir).filter(f => f.startsWith('trained_ccxt_ohlcv_tf_')).sort().reverse();
   if (!modelFiles.length) throw new Error('No trained TensorFlow model files found.');
   for (const modelFile of modelFiles) {
     try {
@@ -121,16 +120,15 @@ async function loadModelTF(modelDir) {
   throw new Error('No valid TensorFlow models could be loaded.');
 }
 
+// --- Magnitude Indicators ---
 function priceVolumeVectorMagnitude(a, b) {
   const dx = b.close - a.close;
   const dy = b.volume - a.volume;
   return Math.sqrt(dx * dx + dy * dy);
 }
-
 function priceVolumeDistance(a, b) {
   return Math.abs(b.close - a.close) + Math.abs(b.volume - a.volume);
 }
-
 function computeMagnitudeIndicators(candles) {
   let indicators = [];
   for (let i = 0; i < candles.length; i++) {
@@ -146,6 +144,7 @@ function computeMagnitudeIndicators(candles) {
   return indicators;
 }
 
+// --- Labeling ---
 function labelSignal(pred, PVVM, PVD) {
   if (pred === 'bull' && PVVM > PVVM_THRESHOLD && PVD > PVD_THRESHOLD) return 'strong_bull';
   if (pred === 'bull') return 'weak_bull';
@@ -153,18 +152,18 @@ function labelSignal(pred, PVVM, PVD) {
   if (pred === 'bear') return 'weak_bear';
   return 'neutral';
 }
+function ensembleLabel(labelConvNet, labelTF) {
+  if (labelConvNet === labelTF) return labelConvNet;
+  return 'neutral';
+}
 
+// --- Prediction ---
 function predictCandlesConvNet(candles, indicators, net) {
   return candles.map((candle, i) => {
     try {
       const input = [
-        candle.open,
-        candle.high,
-        candle.low,
-        candle.close,
-        candle.volume,
-        indicators[i].PVVM,
-        indicators[i].PVD
+        candle.open, candle.high, candle.low, candle.close, candle.volume,
+        indicators[i].PVVM, indicators[i].PVD
       ];
       const x = new ConvNet.Vol(input);
       const out = net.forward(x);
@@ -176,15 +175,10 @@ function predictCandlesConvNet(candles, indicators, net) {
     }
   });
 }
-
 function predictCandlesTF(candles, indicators, model) {
   const inputs = candles.map(candle => [
-    candle.open,
-    candle.high,
-    candle.low,
-    candle.close,
-    candle.volume
-    // Add indicators[i].PVVM and indicators[i].PVD if required by your model
+    candle.open, candle.high, candle.low, candle.close, candle.volume
+    // If your TF model expects PVVM/PVD, add indicators[i].PVVM, indicators[i].PVD here
   ]);
   const xs = tf.tensor2d(inputs, [inputs.length, 5]);
   const preds = model.predict(xs);
@@ -195,11 +189,7 @@ function predictCandlesTF(candles, indicators, model) {
   });
 }
 
-function ensembleLabel(labelConvNet, labelTF) {
-  if (labelConvNet === labelTF) return labelConvNet;
-  return 'neutral';
-}
-
+// --- Comparative Log Writer ---
 function logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, logPath) {
   ensureDirExists(logPath);
   enforceLogSizeLimit(logPath, LOG_MAX_BYTES, LOG_KEEP_BYTES);
@@ -225,8 +215,8 @@ function logComparativeStateTransitions(candles, predictionsConvNet, predictions
     if (
       (predConvNet !== lastPredictionConvNet || predTF !== lastPredictionTF || timestamp !== lastTimestamp) &&
       predConvNet && predTF &&
-      ['bull', 'bear', 'idle'].includes(predConvNet) &&
-      ['bull', 'bear', 'idle'].includes(predTF) &&
+      LABELS.includes(predConvNet) &&
+      LABELS.includes(predTF) &&
       timestamp &&
       !isNaN(price)
     ) {
@@ -244,6 +234,7 @@ function logComparativeStateTransitions(candles, predictionsConvNet, predictions
   }
 }
 
+// --- Main ---
 async function runRecognition() {
   try {
     let candles = loadJsonCandles(JSON_PATH);
@@ -258,7 +249,7 @@ async function runRecognition() {
     const predictionsConvNet = predictCandlesConvNet(candles, indicators, modelConvNet);
     const predictionsTF = predictCandlesTF(candles, indicators, modelTF);
 
-    logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, SIGNAL_LOG_PATH_COMPARISON);
+    logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, SIGNAL_LOG_PATH);
   } catch (err) {
     console.error('Recognition error:', err.stack || err.message);
   }
