@@ -1,6 +1,6 @@
-const path = require('path');
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+require('dotenv').config();
 const fs = require('fs');
+const path = require('path');
 const tf = require('@tensorflow/tfjs-node');
 const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
