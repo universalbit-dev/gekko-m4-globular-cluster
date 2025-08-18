@@ -1,16 +1,20 @@
 /**
  * chart_ccxt_recognition_magnitude.js (modular, uses label_ohlcv.js)
- * Processes OHLCV CSV, loads trained model, computes PVVM/PVD, labels and logs predictions.
+ * Processes OHLCV CSV, loads ConvNet and TensorFlow.js models, computes PVVM/PVD, labels and logs predictions for comparative analysis.
  */
 const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
 const fs = require('fs');
 const ConvNet = require('../core/convnet.js');
+const tf = require('@tensorflow/tfjs-node');
 const { labelCandles, EPSILON } = require('./label_ohlcv.js');
 
 const CSV_PATH = path.resolve(__dirname, '../logs/csv/ohlcv_ccxt_data.csv');
-const MODEL_DIR = path.resolve(__dirname, './trained_ccxt_ohlcv');
+const MODEL_DIR_CONVNET = path.resolve(__dirname, './trained_ccxt_ohlcv');
+const MODEL_DIR_TF = path.resolve(__dirname, './trained_ccxt_ohlcv_tf');
 const SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_magnitude.log');
+const SIGNAL_LOG_PATH_COMPARISON = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const LABELS = ['bull', 'bear', 'idle'];
 
 // IMPORTANT: INTERVAL_MS must be the same in all related scripts for consistent signal processing and order logic.
@@ -23,7 +27,7 @@ const LOG_KEEP_BYTES = 512 * 1024;
 const PVVM_THRESHOLD = parseFloat(process.env.PVVM_BASE_THRESHOLD) || 10;
 const PVD_THRESHOLD = parseFloat(process.env.PVD_BASE_THRESHOLD) || 10;
 
-// Utility functions
+// Utility functions (unchanged)
 function ensureDirExists(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
@@ -52,12 +56,12 @@ function enforceLogSizeLimit(logPath, maxBytes = LOG_MAX_BYTES, keepBytes = LOG_
 }
 
 function ensureSignalLogHeader(logPath) {
-  const header = 'timestamp\tprediction\tprice\tPVVM\tPVD\tlabel\n';
+  const header = 'timestamp\tprediction_convnet\tprediction_tf\tprice\tPVVM\tPVD\tlabel_convnet\tlabel_tf\tensemble_label\n';
   if (!fs.existsSync(logPath) || fs.statSync(logPath).size === 0) {
     fs.writeFileSync(logPath, header);
   } else {
     const firstLine = fs.readFileSync(logPath, {encoding:'utf8', flag:'r'}).split('\n')[0];
-    if (!firstLine.includes('\tlabel')) {
+    if (!firstLine.includes('\tensemble_label')) {
       const data = fs.readFileSync(logPath);
       const firstNl = data.indexOf('\n');
       const body = data.slice(firstNl + 1);
@@ -87,13 +91,13 @@ function loadCsvCandles(csvPath) {
   );
 }
 
-function loadModel(modelDir) {
-  if (!fs.existsSync(modelDir)) throw new Error('No trained model directory found.');
+function loadModelConvNet(modelDir) {
+  if (!fs.existsSync(modelDir)) throw new Error('No trained ConvNet model directory found.');
   const modelFiles = fs.readdirSync(modelDir)
     .filter(f => f.endsWith('.json') && f !== 'norm_stats.json')
     .sort()
     .reverse();
-  if (!modelFiles.length) throw new Error('No trained model files found.');
+  if (!modelFiles.length) throw new Error('No trained ConvNet model files found.');
   let modelJson;
   let net;
   for (const modelFile of modelFiles) {
@@ -103,10 +107,30 @@ function loadModel(modelDir) {
       net.fromJSON(modelJson);
       return net;
     } catch (err) {
-      console.error(`Skipping invalid model file: ${modelFile} (${err.message || err})`);
+      console.error(`Skipping invalid ConvNet model file: ${modelFile} (${err.message || err})`);
     }
   }
   throw new Error('No valid ConvNetJS model files could be loaded.');
+}
+
+// TensorFlow.js model loader
+async function loadModelTF(modelDir) {
+  if (!fs.existsSync(modelDir)) throw new Error('No trained TensorFlow model directory found.');
+  const modelFiles = fs.readdirSync(modelDir)
+    .filter(f => f.startsWith('trained_ccxt_ohlcv_tf_'))
+    .sort()
+    .reverse();
+  if (!modelFiles.length) throw new Error('No trained TensorFlow model files found.');
+  for (const modelFile of modelFiles) {
+    try {
+      const modelPath = `file://${path.join(modelDir, modelFile)}`;
+      const model = await tf.loadLayersModel(modelPath + '/model.json');
+      return model;
+    } catch (err) {
+      console.error(`Skipping invalid TensorFlow model: ${modelFile} (${err.message || err})`);
+    }
+  }
+  throw new Error('No valid TensorFlow models could be loaded.');
 }
 
 function priceVolumeVectorMagnitude(a, b) {
@@ -142,7 +166,8 @@ function labelSignal(pred, PVVM, PVD) {
   return 'neutral';
 }
 
-function predictCandles(candles, indicators, net) {
+// ConvNet prediction (unchanged)
+function predictCandlesConvNet(candles, indicators, net) {
   return candles.map((candle, i) => {
     try {
       const input = [
@@ -165,45 +190,81 @@ function predictCandles(candles, indicators, net) {
   });
 }
 
-function logStateTransitions(candles, predictions, indicators, logPath) {
+// TensorFlow.js prediction
+function predictCandlesTF(candles, indicators, model) {
+  // Prepare input for TF model: [open, high, low, close, volume]
+  const inputs = candles.map(candle => [
+    candle.open,
+    candle.high,
+    candle.low,
+    candle.close,
+    candle.volume
+    // Note: if your TF model was trained with PVVM/PVD, add indicators[i].PVVM and indicators[i].PVD here
+  ]);
+  const xs = tf.tensor2d(inputs, [inputs.length, 5]);
+  const preds = model.predict(xs);
+  const probsArr = preds.arraySync();
+  return probsArr.map(row => {
+    const idx = row.indexOf(Math.max(...row));
+    return LABELS[idx] !== undefined ? LABELS[idx] : 'idle';
+  });
+}
+
+// Ensemble/Comparison function
+function ensembleLabel(labelConvNet, labelTF) {
+  // Simple majority voting or agreement
+  if (labelConvNet === labelTF) return labelConvNet;
+  // If different, you may prefer 'idle' or 'neutral' or more advanced logic
+  return 'neutral';
+}
+
+// Logging function for comparative analysis
+function logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, logPath) {
   ensureDirExists(logPath);
   enforceLogSizeLimit(logPath, LOG_MAX_BYTES, LOG_KEEP_BYTES);
   ensureSignalLogHeader(logPath);
 
-  let lastPrediction = null;
+  let lastPredictionConvNet = null;
+  let lastPredictionTF = null;
   let lastTimestamp = null;
   let lines = [];
 
-  for (let i = 0; i < predictions.length; i++) {
-    const pred = predictions[i];
+  for (let i = 0; i < predictionsConvNet.length; i++) {
+    const predConvNet = predictionsConvNet[i];
+    const predTF = predictionsTF[i];
     const price = candles[i].close;
     const timestamp = /^\d+$/.test(candles[i].timestamp)
       ? new Date(Number(candles[i].timestamp)).toISOString()
       : candles[i].timestamp;
     const { PVVM, PVD } = indicators[i];
-    const label = labelSignal(pred, PVVM, PVD);
+    const labelConvNet = labelSignal(predConvNet, PVVM, PVD);
+    const labelTF = labelSignal(predTF, PVVM, PVD);
+    const ensemble = ensembleLabel(labelConvNet, labelTF);
 
     if (
-      (pred !== lastPrediction || timestamp !== lastTimestamp) &&
-      pred &&
-      ['bull', 'bear', 'idle'].includes(pred) &&
+      (predConvNet !== lastPredictionConvNet || predTF !== lastPredictionTF || timestamp !== lastTimestamp) &&
+      predConvNet && predTF &&
+      ['bull', 'bear', 'idle'].includes(predConvNet) &&
+      ['bull', 'bear', 'idle'].includes(predTF) &&
       timestamp &&
       !isNaN(price)
     ) {
-      lines.push(`${timestamp}\t${pred}\t${price}\t${PVVM}\t${PVD}\t${label}`);
-      lastPrediction = pred;
+      lines.push(`${timestamp}\t${predConvNet}\t${predTF}\t${price}\t${PVVM}\t${PVD}\t${labelConvNet}\t${labelTF}\t${ensemble}`);
+      lastPredictionConvNet = predConvNet;
+      lastPredictionTF = predTF;
       lastTimestamp = timestamp;
     }
   }
   if (lines.length) {
     fs.appendFileSync(logPath, lines.join('\n') + '\n');
-    console.log('Wrote state transitions to', logPath);
+    console.log('Wrote comparative state transitions to', logPath);
   } else {
     console.log('No new transitions to log.');
   }
 }
 
-function runRecognition() {
+// Main recognition function (async for TensorFlow model loading)
+async function runRecognition() {
   try {
     let candles = loadCsvCandles(CSV_PATH);
     if (!candles.length) throw new Error('No valid candles found in CSV.');
@@ -212,13 +273,19 @@ function runRecognition() {
     candles = labelCandles(candles, EPSILON);
 
     const indicators = computeMagnitudeIndicators(candles);
-    const model = loadModel(MODEL_DIR);
-    const predictions = predictCandles(candles, indicators, model);
-    logStateTransitions(candles, predictions, indicators, SIGNAL_LOG_PATH);
+    const modelConvNet = loadModelConvNet(MODEL_DIR_CONVNET);
+    const modelTF = await loadModelTF(MODEL_DIR_TF);
+
+    const predictionsConvNet = predictCandlesConvNet(candles, indicators, modelConvNet);
+    const predictionsTF = predictCandlesTF(candles, indicators, modelTF);
+
+    logComparativeStateTransitions(candles, predictionsConvNet, predictionsTF, indicators, SIGNAL_LOG_PATH_COMPARISON);
   } catch (err) {
     console.error('Recognition error:', err.stack || err.message);
   }
 }
 
+// Initial run
 runRecognition();
+// Repeat every INTERVAL_MS
 setInterval(runRecognition, INTERVAL_MS);
