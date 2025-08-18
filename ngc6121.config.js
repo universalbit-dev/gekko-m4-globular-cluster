@@ -81,6 +81,12 @@ module.exports = {
   exec_mode : "cluster"
   },
   {
+  name: 'challenge_analysis',
+  script    : 'tools/challenge_analysis.js',
+  instances : "1",
+  exec_mode : "cluster"
+  },
+  {
   name: 'chart recognition',
   script    : 'tools/chart_recognition.js',
   instances : "1",
