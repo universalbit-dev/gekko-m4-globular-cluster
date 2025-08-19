@@ -520,35 +520,35 @@ async function main() {
       isRunning = false;
       return;
     }
-
+    
     // --- Exit Logic: COVER (weak_bear) ---
-    if (
-      positionOpen &&
-      label === 'weak_bear' &&
-      PVVM < pvvmThreshold && PVD < pvdThreshold
-    ) {
-      if (!exchange.has['margin']) {
-        console.log('Cover signals ignored: Spot trading only.');
-        scheduleNext(INTERVAL_MS);
-        isRunning = false;
-        return;
-      }
-      try {
-        const balance = await exchange.fetchBalance();
-        const [base, quote] = PAIR.split('/');
-        const feeBuffer = 1.005;
-        const availableQuote = balance.free[quote] || 0;
-        const maxBuyable = availableQuote / (currentPrice * feeBuffer);
-        const coverOrderSize = Math.min(orderSize, maxBuyable);
+if (
+  positionOpen &&
+  label === 'weak_bear' &&
+  PVVM < pvvmThreshold && PVD < pvdThreshold
+) {
+  if (!exchange.has['margin']) {
+    console.log('Cover signals ignored: Spot trading only.');
+    scheduleNext(INTERVAL_MS);
+    isRunning = false;
+    return;
+  }
+  try {
+    const balance = await exchange.fetchBalance();
+    const [base, quote] = PAIR.split('/');
+    const feeBuffer = 1.005;
+    const availableQuote = balance.free[quote] || 0;
 
-        if (coverOrderSize < MIN_ALLOWED_ORDER_AMOUNT) {
-          console.log(`Not enough ${quote} for COVER. Needed: ${orderSize * currentPrice}, Available: ${availableQuote}.`);
-          logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
-          recordTradeOutcome('COVER');
-          await handleInsufficientFunds(signalKey, INTERVAL_MS);
-          return;
-        }
+    // The full coverable size based on available quote
+    const maxCoverable = availableQuote / (currentPrice * feeBuffer);
 
+    // Only submit a COVER if you can do at least the minimum allowed
+    if (maxCoverable >= MIN_ALLOWED_ORDER_AMOUNT) {
+      // Don't cover more than your open position
+      const openPositionSize = balance.total[base] || 0;
+      const coverOrderSize = Math.min(openPositionSize, maxCoverable);
+
+      if (coverOrderSize >= MIN_ALLOWED_ORDER_AMOUNT) {
         const result = await exchange.createMarketBuyOrder(PAIR, coverOrderSize);
         positionOpen = false;
         entryPrice = null;
@@ -557,15 +557,31 @@ async function main() {
         recordTradeOutcome(lastAction);
         console.log(`[${timestamp}] COVER order submitted`);
         await syncPosition();
-      } catch (err) {
-        logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
+      } else {
+        // Not enough for even minimum, just wait and retry
+        console.log(`Not enough ${quote} for COVER. Needed: ${MIN_ALLOWED_ORDER_AMOUNT * currentPrice}, Available: ${availableQuote}.`);
+        logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+        recordTradeOutcome('COVER');
         await handleInsufficientFunds(signalKey, INTERVAL_MS);
-        return;
       }
-      scheduleNext(INTERVAL_MS);
-      isRunning = false;
-      return;
+    } else {
+      // Not enough for even minimum, just wait and retry
+      console.log(`Not enough ${quote} for COVER. Needed: ${MIN_ALLOWED_ORDER_AMOUNT * currentPrice}, Available: ${availableQuote}.`);
+      logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+      recordTradeOutcome('COVER');
+      await handleInsufficientFunds(signalKey, INTERVAL_MS);
     }
+  } catch (err) {
+    logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
+    await handleInsufficientFunds(signalKey, INTERVAL_MS);
+    return;
+  }
+  scheduleNext(INTERVAL_MS);
+  isRunning = false;
+  return;
+}
+
+    
 
     // --- Default: Reschedule if no trade triggered ---
     scheduleNext(INTERVAL_MS);
