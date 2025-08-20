@@ -23,7 +23,6 @@ const monitoredNames = [
   'chart_ccxt_recognition_magnitude',
   'chart_recognition',
   'label_ohlcv',
-  'pm2-tools-watchdog',
   'train_ccxt_ohlcv',
   'train_ccxt_ohlcv_tf',
   'train_ohlcv'
