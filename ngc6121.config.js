@@ -111,12 +111,6 @@ module.exports = {
       exec_mode: "cluster"
     },
     {
-      name: 'tools.config',
-      script: 'tools/tools.config.js',
-      instances: "1",
-      exec_mode: "cluster"
-    },
-    {
       name: 'train_ccxt_ohlcv',
       script: 'tools/train_ccxt_ohlcv.js',
       instances: "1",
