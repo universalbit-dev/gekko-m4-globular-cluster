@@ -89,7 +89,7 @@ pm2 start tools.config.js
 1. Place your OHLCV CSV data in `../logs/csv/`.
 2. Make sure your JSON/CSV data (for training) includes the required fields and labels.
 3. Start all tools with PM2.
-4. Monitor and collect models and predictions from the `trained_ohlcv/`, `trained_ccxt_ohlcv/`, and prediction CSV files.
+4. Monitor and collect models and predictions from the `trained_ohlcv/`, `trained_ccxt_ohlcv/`, `trained_ccxt_ohlcv_tf` and prediction CSV files.
 
 ---
 
