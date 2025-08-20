@@ -25,7 +25,8 @@ const monitoredNames = [
   'label_ohlcv',
   'train_ccxt_ohlcv',
   'train_ccxt_ohlcv_tf',
-  'train_ohlcv'
+  'train_ohlcv',
+  'ccxtmarket'
 ];
 
 const highCpuSince = new Map();
