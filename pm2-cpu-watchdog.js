@@ -34,6 +34,18 @@ const MEMORY_DURATION_THRESHOLD = 120; // seconds memory must remain above thres
 const CHECK_INTERVAL = 10; // seconds between checks
 
 const monitoredNames = [
+  'ccxt_orders',
+  'challenge_analysis',
+  'challenge_log_writer',
+  'chart_ccxt_recognition',
+  'chart_ccxt_recognition_magnitude',
+  'chart_recognition',
+  'label_ohlcv',
+  'pm2-tools-watchdog',
+  'tools.config',
+  'train_ccxt_ohlcv',
+  'train_ccxt_ohlcv_tf',
+  'train_ohlcv',
   'neuralnet_simulator',
   'grafana_neuralnet',
   'cci_simulator',
@@ -53,7 +65,6 @@ const monitoredNames = [
   'realTimeChess',
   'randomchess'
 ];
-
 // Use Maps for tracking threshold breaches
 const highCpuSince = new Map();
 const highMemSince = new Map();
