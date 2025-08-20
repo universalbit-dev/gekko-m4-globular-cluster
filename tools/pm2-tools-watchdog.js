@@ -24,7 +24,6 @@ const monitoredNames = [
   'chart_recognition',
   'label_ohlcv',
   'pm2-tools-watchdog',
-  'tools.config',
   'train_ccxt_ohlcv',
   'train_ccxt_ohlcv_tf',
   'train_ohlcv'
