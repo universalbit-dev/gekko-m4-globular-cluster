@@ -61,7 +61,8 @@ const monitoredNames = [
   'csvexport',
   'ohlcv_data',
   'realTimeChess',
-  'randomchess'
+  'randomchess',
+  'ccxtmarket'
 ];
 
 // Use Maps for tracking threshold breaches
