@@ -30,7 +30,6 @@ const CPU_DURATION_THRESHOLD = 120; // seconds CPU usage must remain above thres
 // MEMORY config
 const MEMORY_THRESHOLD_MB = 400; // MB RAM to trigger restart
 const MEMORY_DURATION_THRESHOLD = 120; // seconds memory must remain above threshold before restart
-
 const CHECK_INTERVAL = 10; // seconds between checks
 
 const monitoredNames = [
@@ -42,7 +41,6 @@ const monitoredNames = [
   'chart_recognition',
   'label_ohlcv',
   'pm2-tools-watchdog',
-  'tools.config',
   'train_ccxt_ohlcv',
   'train_ccxt_ohlcv_tf',
   'train_ohlcv',
@@ -65,6 +63,7 @@ const monitoredNames = [
   'realTimeChess',
   'randomchess'
 ];
+
 // Use Maps for tracking threshold breaches
 const highCpuSince = new Map();
 const highMemSince = new Map();
