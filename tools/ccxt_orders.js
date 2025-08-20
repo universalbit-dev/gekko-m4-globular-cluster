@@ -1,5 +1,5 @@
 /**
- * ccxt_orders.js (Zenith Version, robust comparative log parsing, model winner adaptive)
+ * ccxt_orders.js (Zenith Version, robust comparative log parsing, auto-tuning parameters, model winner adaptive with P&L selection)
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and comparative signal logs.
  * Author: universalbit-dev
  */
@@ -13,6 +13,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const MAG_SIGNAL_LOG_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log');
 const ORDER_LOG_PATH = path.resolve(__dirname, './ccxt_order.log');
 const MODEL_WINNER_PATH = path.resolve(__dirname, './model_winner.json');
+const MODEL_PERFORMANCE_PATH = path.resolve(__dirname, './model_performance.json');
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
 const API_SECRET = process.env.SECRET || '';
@@ -23,6 +24,8 @@ const INTERVAL_HIGH = parseInt(process.env.INTERVAL_HIGH, 10) || 60 * 1000;
 const INTERVAL_DEFAULT = parseInt(process.env.INTERVAL_DEFAULT, 10) || 5 * 60 * 1000;
 const INTERVAL_LOW = parseInt(process.env.INTERVAL_LOW, 10) || 30 * 60 * 1000;
 let INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000;
+const MODEL_PNL_UPDATE_FREQ = 4;
+const AUTOTUNE_FREQ = 4;
 
 // --- Model Winner Loader ---
 function getActiveModel() {
@@ -37,6 +40,75 @@ function getActiveModel() {
   return 'ensemble'; // fallback
 }
 
+// --- Model P&L Tracking ---
+function loadModelPerformance() {
+  if (fs.existsSync(MODEL_PERFORMANCE_PATH)) {
+    try {
+      return JSON.parse(fs.readFileSync(MODEL_PERFORMANCE_PATH, 'utf8'));
+    } catch (e) {
+      console.error('Error loading model performance:', e);
+    }
+  }
+  // Initial structure
+  return { tf: { pnl: 0, trades: 0 }, convnet: { pnl: 0, trades: 0 }, ensemble: { pnl: 0, trades: 0 } };
+}
+
+function saveModelPerformance(performance) {
+  fs.writeFileSync(MODEL_PERFORMANCE_PATH, JSON.stringify(performance, null, 2));
+}
+
+function recordModelTrade(model, pnl) {
+  const performance = loadModelPerformance();
+  if (!performance[model]) performance[model] = { pnl: 0, trades: 0 };
+  performance[model].pnl += pnl;
+  performance[model].trades += 1;
+  saveModelPerformance(performance);
+}
+
+function selectWinnerModel() {
+  const performance = loadModelPerformance();
+  let winner = 'ensemble';
+  let maxPnl = performance.ensemble.pnl;
+  for (const m of ['tf', 'convnet']) {
+    if (performance[m].pnl > maxPnl) {
+      winner = m;
+      maxPnl = performance[m].pnl;
+    }
+  }
+  fs.writeFileSync(MODEL_WINNER_PATH, JSON.stringify({ active_model: winner }, null, 2));
+  console.log(`[WINNER SELECTION] Updated active model to: ${winner} (P&L: ${maxPnl})`);
+}
+
+function calculateTradePnL(action, entryPrice, exitPrice, amount) {
+  if (!entryPrice || !exitPrice || !amount) return 0;
+  if (['SELL', 'TAKE_PROFIT', 'STOP_LOSS', 'COVER'].includes(action)) {
+    return (exitPrice - entryPrice) * amount;
+  }
+  if (['SHORT'].includes(action)) {
+    // Opening short: log 0 for now, close on COVER
+    return 0;
+  }
+  return 0;
+}
+
+async function afterTrade(action, model, entryPrice, exitPrice, amount) {
+  const pnl = calculateTradePnL(action, entryPrice, exitPrice, amount);
+  recordModelTrade(model, pnl);
+
+  // Update winner model every N trades
+  const performance = loadModelPerformance();
+  const totalTrades =
+    (performance.tf?.trades || 0) +
+    (performance.convnet?.trades || 0) +
+    (performance.ensemble?.trades || 0);
+  if (totalTrades % MODEL_PNL_UPDATE_FREQ === 0) {
+    selectWinnerModel();
+  }
+  if (totalTrades % AUTOTUNE_FREQ === 0) {
+    autoTuneParameters();
+  }
+}
+
 // --- ML-based adaptation ---
 let stopLossHits = 0, takeProfitHits = 0, totalTrades = 0;
 function recordTradeOutcome(outcome) {
@@ -44,14 +116,118 @@ function recordTradeOutcome(outcome) {
   if (outcome === 'STOP_LOSS') stopLossHits++;
   if (outcome === 'TAKE_PROFIT') takeProfitHits++;
 }
+
+// Dynamic variables for tuning
+let minTrades = 8;
+let SL_STEP = 0.2;
+let TP_STEP = 0.2;
+let SL_MIN = 0.5, SL_MAX = 5;
+let TP_MIN = 1, TP_MAX = 10;
+
+// Optionally, keep a history of recent P&L for further auto-tuning
+let recentPnlHistory = [];
+
+function autoTuneAdaptParams() {
+  // Example logic: tune parameters based on performance, trade volatility, etc.
+  const avgPnl = recentPnlHistory.length ? recentPnlHistory.reduce((a, b) => a + b, 0) / recentPnlHistory.length : 0;
+
+  // If average P&L drops, be more conservative
+  if (avgPnl < 0) {
+    SL_STEP = Math.max(0.1, SL_STEP - 0.05);
+    TP_STEP = Math.max(0.1, TP_STEP - 0.05);
+    minTrades = Math.min(20, minTrades + 2); // wait longer before adapting
+    SL_MIN = Math.min(SL_MIN + 0.1, SL_MAX); // slightly wider stop loss
+    TP_MIN = Math.max(TP_MIN - 0.1, 0.5);    // slightly tighter take profit
+  }
+  // If average P&L is high, be more aggressive
+  if (avgPnl > 0.5) {
+    SL_STEP = Math.min(1.0, SL_STEP + 0.05);
+    TP_STEP = Math.min(1.0, TP_STEP + 0.05);
+    minTrades = Math.max(4, minTrades - 2);  // adapt quicker
+    SL_MIN = Math.max(0.3, SL_MIN - 0.1);    // slightly tighter stop loss
+    TP_MIN = Math.min(TP_MIN + 0.1, TP_MAX); // slightly wider take profit
+  }
+  // Clamp values to safe ranges
+  SL_STEP = Math.max(0.1, Math.min(SL_STEP, 1.0));
+  TP_STEP = Math.max(0.1, Math.min(TP_STEP, 1.0));
+  minTrades = Math.max(4, Math.min(minTrades, 20));
+  SL_MIN = Math.max(0.3, Math.min(SL_MIN, SL_MAX));
+  TP_MIN = Math.max(0.5, Math.min(TP_MIN, TP_MAX));
+}
+
+// Your main adaptParameters function now uses dynamically tuned variables
 function adaptParameters() {
   let BASE_SL = 1, BASE_TP = 2;
-  if (totalTrades >= 10) {
-    if (stopLossHits / totalTrades > 0.5) BASE_SL += 0.5;
-    if (takeProfitHits / totalTrades < 0.2) BASE_TP -= 0.5;
+
+  autoTuneAdaptParams();
+
+  if (totalTrades >= minTrades) {
+    const slRatio = stopLossHits / totalTrades;
+    const tpRatio = takeProfitHits / totalTrades;
+
+    if (slRatio > 0.5) BASE_SL = Math.min(BASE_SL + SL_STEP, SL_MAX);
+    if (tpRatio < 0.2) BASE_TP = Math.max(BASE_TP - TP_STEP, TP_MIN);
+
+    // Reset counters for next window
     stopLossHits = 0; takeProfitHits = 0; totalTrades = 0;
   }
   return { BASE_SL, BASE_TP };
+}
+
+// --- Auto-tuning Sensitive Parameters ---
+let PVVM_THRESHOLDS = [1.0, 2.5, 5.0];
+let PVD_THRESHOLDS = [1.0, 2.5, 5.0];
+let DYNAMIC_WINDOWS = [4, 7, 12];
+let DYNAMIC_FACTORS = [1.03, 1.07, 1.12];
+
+function getPNLStats() {
+  const perf = loadModelPerformance();
+  let tradeCount = 0, winCount = 0, maxDrawdown = 0, cumPnL = 0;
+  for (const m of Object.keys(perf)) {
+    tradeCount += perf[m].trades;
+    cumPnL += perf[m].pnl;
+    if (perf[m].pnl > 0) winCount += perf[m].trades;
+    if (perf[m].pnl < maxDrawdown) maxDrawdown = perf[m].pnl;
+  }
+  return {
+    winRate: tradeCount > 0 ? winCount / tradeCount : 0,
+    maxDrawdown: maxDrawdown,
+    tradeCount: tradeCount,
+    cumPnL: cumPnL,
+  };
+}
+
+function autoTuneParameters() {
+  const pnlStats = getPNLStats();
+  // If win rate < 50%, tighten thresholds and increase factors
+  if (pnlStats.winRate < 0.5) {
+    PVVM_THRESHOLDS = PVVM_THRESHOLDS.map(x => Math.max(0.1, x + 0.5));
+    PVD_THRESHOLDS = PVD_THRESHOLDS.map(x => Math.max(0.1, x + 0.5));
+    DYNAMIC_FACTORS = DYNAMIC_FACTORS.map(x => x + 0.02);
+    console.log(`[AUTOTUNE] Win rate low (${(pnlStats.winRate*100).toFixed(1)}%), making bot more conservative.`);
+  }
+  // If win rate > 70%, loosen thresholds and decrease factors
+  if (pnlStats.winRate > 0.7) {
+    PVVM_THRESHOLDS = PVVM_THRESHOLDS.map(x => Math.max(0.1, x - 0.3));
+    PVD_THRESHOLDS = PVD_THRESHOLDS.map(x => Math.max(0.1, x - 0.3));
+    DYNAMIC_FACTORS = DYNAMIC_FACTORS.map(x => Math.max(1.0, x - 0.01));
+    console.log(`[AUTOTUNE] Win rate high (${(pnlStats.winRate*100).toFixed(1)}%), making bot more aggressive.`);
+  }
+  // If max drawdown is large, use shorter windows (faster adaptation)
+  if (pnlStats.maxDrawdown < -0.10) {
+    DYNAMIC_WINDOWS = DYNAMIC_WINDOWS.map(x => Math.max(2, x - 2));
+    console.log(`[AUTOTUNE] Max drawdown (${pnlStats.maxDrawdown.toFixed(3)}) high, adapting faster.`);
+  }
+  // If trades are too few, decrease all thresholds a little
+  if (pnlStats.tradeCount < 5) {
+    PVVM_THRESHOLDS = PVVM_THRESHOLDS.map(x => Math.max(0.1, x - 0.2));
+    PVD_THRESHOLDS = PVD_THRESHOLDS.map(x => Math.max(0.1, x - 0.2));
+    console.log(`[AUTOTUNE] Trade count low (${pnlStats.tradeCount}), lowering thresholds for more trades.`);
+  }
+  // Optionally: Save to disk for inspection
+  fs.writeFileSync(path.resolve(__dirname, './autotune_params.json'), JSON.stringify({
+    PVVM_THRESHOLDS, PVD_THRESHOLDS, DYNAMIC_WINDOWS, DYNAMIC_FACTORS
+  }, null, 2));
 }
 
 // --- Comparative Signal Log Parser ---
@@ -290,15 +466,10 @@ async function main() {
     console.log(`[DEBUG] Last signal: ${JSON.stringify(lastSignal)}`);
     console.log(`[DEBUG] Using active model: ${activeModel}, label: ${label}, prediction: ${prediction}`);
 
-    // --- Dynamic PVVM/PVD thresholds ---
+    // --- Dynamic PVVM/PVD thresholds (now auto-tuned) ---
     const avgVol = (typeof PVVM === 'number' && typeof PVD === 'number')
       ? (PVVM + PVD) / 2
       : 0;
-
-    const PVVM_THRESHOLDS = [1.0, 2.5, 5.0];
-    const PVD_THRESHOLDS = [1.0, 2.5, 5.0];
-    const DYNAMIC_WINDOWS = [4, 7, 12];
-    const DYNAMIC_FACTORS = [1.03, 1.07, 1.12];
 
     let PVVM_BASE_THRESHOLD, PVD_BASE_THRESHOLD, DYNAMIC_WINDOW, DYNAMIC_FACTOR;
 
@@ -371,10 +542,11 @@ async function main() {
           try {
             const result = await exchange.createMarketSellOrder(PAIR, orderSize);
             positionOpen = false;
-            entryPrice = null;
             lastAction = 'STOP_LOSS';
             logOrder(timestamp, prediction, label, 'STOP_LOSS', result, `SL at ${stopLossPrice}, dynamic SL: ${dynamicSL.toFixed(2)}%`);
             recordTradeOutcome(lastAction);
+            await afterTrade('STOP_LOSS', activeModel, entryPrice, result.price || result.average || currentPrice, orderSize);
+            entryPrice = null;
             console.log(`[${timestamp}] STOP LOSS triggered at ${currentPrice}`);
           } catch (err) {
             logOrder(timestamp, prediction, label, 'STOP_LOSS', null, 'Failed to submit STOP_LOSS', err.message || err);
@@ -394,10 +566,11 @@ async function main() {
           try {
             const result = await exchange.createMarketSellOrder(PAIR, orderSize);
             positionOpen = false;
-            entryPrice = null;
             lastAction = 'TAKE_PROFIT';
             logOrder(timestamp, prediction, label, 'TAKE_PROFIT', result, `TP at ${takeProfitPrice}, dynamic TP: ${dynamicTP.toFixed(2)}%`);
             recordTradeOutcome(lastAction);
+            await afterTrade('TAKE_PROFIT', activeModel, entryPrice, result.price || result.average || currentPrice, orderSize);
+            entryPrice = null;
             console.log(`[${timestamp}] TAKE PROFIT triggered at ${currentPrice}`);
           } catch (err) {
             logOrder(timestamp, prediction, label, 'TAKE_PROFIT', null, 'Failed to submit TAKE_PROFIT', err.message || err);
@@ -443,10 +616,11 @@ async function main() {
       try {
         const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
         positionOpen = true;
-        entryPrice = result.price || result.average || null;
+        entryPrice = result.price || result.average || currentPrice;
         lastAction = 'BUY';
         logOrder(timestamp, prediction, label, 'BUY', result, `Strong Bull & PVVM/PVD above dynamic threshold`);
         recordTradeOutcome(lastAction);
+        await afterTrade('BUY', activeModel, null, entryPrice, orderSize);
         console.log(`[${timestamp}] BUY order submitted`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'BUY', null, 'Failed to submit BUY', err.message || err);
@@ -477,10 +651,11 @@ async function main() {
       try {
         const result = await exchange.createMarketSellOrder(PAIR, orderSize);
         positionOpen = true;
-        entryPrice = result.price || result.average || null;
+        entryPrice = result.price || result.average || currentPrice;
         lastAction = 'SHORT';
         logOrder(timestamp, prediction, label, 'SHORT', result, `Strong Bear & PVVM/PVD above dynamic threshold`);
         recordTradeOutcome(lastAction);
+        await afterTrade('SHORT', activeModel, null, entryPrice, orderSize);
         console.log(`[${timestamp}] SHORT order submitted`);
       } catch (err) {
         logOrder(timestamp, prediction, label, 'SHORT', null, 'Failed to submit SHORT', err.message || err);
@@ -505,10 +680,11 @@ async function main() {
       try {
         const result = await exchange.createMarketSellOrder(PAIR, orderSize);
         positionOpen = false;
-        entryPrice = null;
         lastAction = 'SELL';
         logOrder(timestamp, prediction, label, 'SELL', result, `Weak Bull & PVVM/PVD near zero`);
         recordTradeOutcome(lastAction);
+        await afterTrade('SELL', activeModel, entryPrice, result.price || result.average || currentPrice, orderSize);
+        entryPrice = null;
         console.log(`[${timestamp}] SELL order submitted`);
         await syncPosition();
       } catch (err) {
@@ -522,67 +698,61 @@ async function main() {
     }
     
     // --- Exit Logic: COVER (weak_bear) ---
-if (
-  positionOpen &&
-  label === 'weak_bear' &&
-  PVVM < pvvmThreshold && PVD < pvdThreshold
-) {
-  if (!exchange.has['margin']) {
-    console.log('Cover signals ignored: Spot trading only.');
-    scheduleNext(INTERVAL_MS);
-    isRunning = false;
-    return;
-  }
-  try {
-    const balance = await exchange.fetchBalance();
-    const [base, quote] = PAIR.split('/');
-    const feeBuffer = 1.005;
-    const availableQuote = balance.free[quote] || 0;
-
-    // The full coverable size based on available quote
-    const maxCoverable = availableQuote / (currentPrice * feeBuffer);
-
-    // Only submit a COVER if you can do at least the minimum allowed
-    if (maxCoverable >= MIN_ALLOWED_ORDER_AMOUNT) {
-      // Don't cover more than your open position
-      const openPositionSize = balance.total[base] || 0;
-      const coverOrderSize = Math.min(openPositionSize, maxCoverable);
-
-      if (coverOrderSize >= MIN_ALLOWED_ORDER_AMOUNT) {
-        const result = await exchange.createMarketBuyOrder(PAIR, coverOrderSize);
-        positionOpen = false;
-        entryPrice = null;
-        lastAction = 'COVER';
-        logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
-        recordTradeOutcome(lastAction);
-        console.log(`[${timestamp}] COVER order submitted`);
-        await syncPosition();
-      } else {
-        // Not enough for even minimum, just wait and retry
-        console.log(`Not enough ${quote} for COVER. Needed: ${MIN_ALLOWED_ORDER_AMOUNT * currentPrice}, Available: ${availableQuote}.`);
-        logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
-        recordTradeOutcome('COVER');
-        await handleInsufficientFunds(signalKey, INTERVAL_MS);
+    if (
+      positionOpen &&
+      label === 'weak_bear' &&
+      PVVM < pvvmThreshold && PVD < pvdThreshold
+    ) {
+      if (!exchange.has['margin']) {
+        console.log('Cover signals ignored: Spot trading only.');
+        scheduleNext(INTERVAL_MS);
+        isRunning = false;
+        return;
       }
-    } else {
-      // Not enough for even minimum, just wait and retry
-      console.log(`Not enough ${quote} for COVER. Needed: ${MIN_ALLOWED_ORDER_AMOUNT * currentPrice}, Available: ${availableQuote}.`);
-      logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
-      recordTradeOutcome('COVER');
-      await handleInsufficientFunds(signalKey, INTERVAL_MS);
+      try {
+        const balance = await exchange.fetchBalance();
+        const [base, quote] = PAIR.split('/');
+        const feeBuffer = 1.005;
+        const availableQuote = balance.free[quote] || 0;
+
+        const maxCoverable = availableQuote / (currentPrice * feeBuffer);
+
+        if (maxCoverable >= MIN_ALLOWED_ORDER_AMOUNT) {
+          const openPositionSize = balance.total[base] || 0;
+          const coverOrderSize = Math.min(openPositionSize, maxCoverable);
+
+          if (coverOrderSize >= MIN_ALLOWED_ORDER_AMOUNT) {
+            const result = await exchange.createMarketBuyOrder(PAIR, coverOrderSize);
+            positionOpen = false;
+            lastAction = 'COVER';
+            logOrder(timestamp, prediction, label, 'COVER', result, `Weak Bear & PVVM/PVD near zero`);
+            recordTradeOutcome(lastAction);
+            await afterTrade('COVER', activeModel, entryPrice, result.price || result.average || currentPrice, coverOrderSize);
+            entryPrice = null;
+            console.log(`[${timestamp}] COVER order submitted`);
+            await syncPosition();
+          } else {
+            console.log(`Not enough ${quote} for COVER. Needed: ${MIN_ALLOWED_ORDER_AMOUNT * currentPrice}, Available: ${availableQuote}.`);
+            logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+            recordTradeOutcome('COVER');
+            await handleInsufficientFunds(signalKey, INTERVAL_MS);
+          }
+        } else {
+          console.log(`Not enough ${quote} for COVER. Needed: ${MIN_ALLOWED_ORDER_AMOUNT * currentPrice}, Available: ${availableQuote}.`);
+          logOrder(timestamp, prediction, label, 'COVER', null, 'COVER skipped: not enough quote for minimum size', null);
+          recordTradeOutcome('COVER');
+          await handleInsufficientFunds(signalKey, INTERVAL_MS);
+        }
+      } catch (err) {
+        logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
+        await handleInsufficientFunds(signalKey, INTERVAL_MS);
+        return;
+      }
+      scheduleNext(INTERVAL_MS);
+      isRunning = false;
+      return;
     }
-  } catch (err) {
-    logOrder(timestamp, prediction, label, 'COVER', null, 'Failed to submit COVER', err.message || err);
-    await handleInsufficientFunds(signalKey, INTERVAL_MS);
-    return;
-  }
-  scheduleNext(INTERVAL_MS);
-  isRunning = false;
-  return;
-}
-
     
-
     // --- Default: Reschedule if no trade triggered ---
     scheduleNext(INTERVAL_MS);
 
