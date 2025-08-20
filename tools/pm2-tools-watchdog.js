@@ -16,13 +16,18 @@ const DURATION_THRESHOLD = 120; // seconds CPU must be above threshold
 const CHECK_INTERVAL = 10;      // seconds between checks
 
 const monitoredNames = [
-  'train ohlcv',
-  'train ccxt ohlcv',
-  'train ccxt ohlcv tf',
-  'chart ccxt recognition',
-  'chart ccxt recognition magnitude',
-  'chart recognition',
-  'ccxt market data'
+  'ccxt_orders',
+  'challenge_analysis',
+  'challenge_log_writer',
+  'chart_ccxt_recognition',
+  'chart_ccxt_recognition_magnitude',
+  'chart_recognition',
+  'label_ohlcv',
+  'pm2-tools-watchdog',
+  'tools.config',
+  'train_ccxt_ohlcv',
+  'train_ccxt_ohlcv_tf',
+  'train_ohlcv'
 ];
 
 const highCpuSince = new Map();
