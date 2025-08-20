@@ -11,14 +11,17 @@ const CHALLENGE_LOG_PATH = path.resolve(__dirname, './challenge.log');
 const MODEL_WINNER_PATH = path.resolve(__dirname, './model_winner.json');
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000; // default 15min
 const WINDOW_SIZE = parseInt(process.env.WINDOW_SIZE, 10) || 50;
-const MIN_WIN_RATE = 0.55;
-const DOMINANCE_THRESHOLD = 0.6;
-const DOMINANCE_MIN_LENGTH = 10;
+const MIN_WIN_RATE = parseFloat(process.env.MIN_WIN_RATE) || 0.55;
+const DOMINANCE_THRESHOLD = parseFloat(process.env.DOMINANCE_THRESHOLD) || 0.6;
+const DOMINANCE_MIN_LENGTH = parseInt(process.env.DOMINANCE_MIN_LENGTH, 10) || 10;
 
 function parseChallengeLine(line) {
   if (line.startsWith('#')) return null;
   const parts = line.split('\t');
-  if (parts.length < 8) return null;
+  // Fill missing columns with default values
+  while (parts.length < 8) {
+    parts.push('neutral');
+  }
   return {
     timestamp: parts[0],
     convnet_pred: parts[1],
@@ -32,12 +35,17 @@ function parseChallengeLine(line) {
 }
 
 function loadChallengeLog(logPath) {
-  if (!fs.existsSync(logPath)) return [];
-  return fs.readFileSync(logPath, 'utf8')
-    .trim()
-    .split('\n')
-    .map(parseChallengeLine)
-    .filter(Boolean);
+  try {
+    if (!fs.existsSync(logPath)) return [];
+    return fs.readFileSync(logPath, 'utf8')
+      .trim()
+      .split('\n')
+      .map(parseChallengeLine)
+      .filter(Boolean);
+  } catch (err) {
+    console.error(`[${new Date().toISOString()}] Error reading log file: ${err}`);
+    return [];
+  }
 }
 
 function rollingWinRate(results, model, windowSize) {
@@ -82,12 +90,16 @@ function findDominantPeriods(winRates, results, threshold = DOMINANCE_THRESHOLD,
 
 function printAnalysis(results, convnetWinRate, tfWinRate, active_model, win_rate) {
   const lastIdx = results.length - 1;
-  console.log(`Model winner written to: ${MODEL_WINNER_PATH}`);
+  const nowIso = new Date().toISOString();
+
+  // Print summary with both analysis time and last log timestamp
+  console.log(`[${nowIso}] Model winner written to: ${MODEL_WINNER_PATH}`);
   console.log(
     JSON.stringify({
       active_model,
       win_rate,
-      timestamp: results[lastIdx].timestamp
+      analysis_timestamp: nowIso,
+      log_timestamp: results[lastIdx]?.timestamp || null
     }, null, 2)
   );
   console.log(`--- Rolling Win Rates (Window: ${WINDOW_SIZE}) ---`);
@@ -95,11 +107,11 @@ function printAnalysis(results, convnetWinRate, tfWinRate, active_model, win_rat
   const convnetPeriods = findDominantPeriods(convnetWinRate, results);
   const tfPeriods = findDominantPeriods(tfWinRate, results);
 
-  console.log('ConvNet Dominant Periods (win rate > 60%%):');
+  console.log('ConvNet Dominant Periods (win rate > 60%):');
   convnetPeriods.forEach(p =>
     console.log(`  ${p.start_ts} - ${p.end_ts}, length: ${p.length}`)
   );
-  console.log('TensorFlow Dominant Periods (win rate > 60%%):');
+  console.log('TensorFlow Dominant Periods (win rate > 60%):');
   tfPeriods.forEach(p =>
     console.log(`  ${p.start_ts} - ${p.end_ts}, length: ${p.length}`)
   );
@@ -108,7 +120,7 @@ function printAnalysis(results, convnetWinRate, tfWinRate, active_model, win_rat
 function analyzeAndWrite() {
   const results = loadChallengeLog(CHALLENGE_LOG_PATH);
   if (results.length === 0) {
-    console.log('No challenge data found.');
+    console.log(`[${new Date().toISOString()}] No challenge data found.`);
     return;
   }
 
@@ -138,7 +150,14 @@ function analyzeAndWrite() {
     win_rate,
     timestamp: results[lastIdx].timestamp
   };
-  fs.writeFileSync(MODEL_WINNER_PATH, JSON.stringify(winnerObj, null, 2));
+
+  // Try writing and log any errors
+  try {
+    fs.writeFileSync(MODEL_WINNER_PATH, JSON.stringify(winnerObj, null, 2));
+    console.log(`[${new Date().toISOString()}] model_winner.json updated: ${MODEL_WINNER_PATH}`);
+  } catch (err) {
+    console.error(`[${new Date().toISOString()}] Error writing model_winner.json:`, err);
+  }
 
   printAnalysis(results, convnetWinRate, tfWinRate, active_model, win_rate);
 }
