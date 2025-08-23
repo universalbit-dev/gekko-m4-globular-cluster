@@ -6,7 +6,7 @@
 
 ## 📝 Overview
 
-**ExchangeSimulator.js** is a simulated exchange wrapper designed for the [Gekko M4 Globular Cluster](https://github.com/universalbit-dev/gekko-m4-globular-cluster) project. It enables safe, realistic testing and debugging of trading strategies without relying on live financial markets.
+**ExchangeSimulator.js** is a simulated exchange wrapper designed for the [Gekko M4 Globular Cluster](https://github.com/universalbit-dev/gekko-m4-globular-cluster) project. 
 
 ---
 
@@ -16,6 +16,7 @@
 - 💹 **Generates fake trades & OHLCV data** (Open-High-Low-Close-Volume) for robust testing.
 - 🌌 **Celestial data integration:** Fetches the M4 (NGC 6121) cluster’s coordinates from the Noctua Sky API and factors them into price generation, simulating “astro-influenced” market behavior.
 - 🔄 **Trend switching:** Price trends alternate between “up” and “down” using Fibonacci-based timing.
+- ⚡ **Configurable volatility levels:** Supports low, moderate, and high volatility to match different market conditions.
 
 ---
 
@@ -32,8 +33,8 @@
 ```js
 const Trader = require('./exchange/wrappers/exchangesimulator.js');
 
-// 1. Create a Trader instance
-const trader = new Trader(10, 'up'); // Initial price: 10, trend: 'up'
+// 1. Create a Trader instance (choose volatility: 'low', 'moderate', 'high')
+const trader = new Trader({ initialPrice: 10, initialTrend: 'up', volatility: 'moderate' });
 
 // 2. Fetch and cache M4 Sky Source data
 await trader.fetchSkySourceData();
@@ -51,6 +52,12 @@ trader.generateOHLCV(startTimestamp, endTimestamp, intervalSeconds, (err, ohlcvD
     console.log(ohlcvData); // Array of OHLCV candles
   }
 });
+
+// 5. Simulate M4 cluster stars (optional)
+await trader.simulateStarsInCluster(10000);
+
+// 6. Export stars to JSON (optional)
+trader.exportStarsToJSON("m4_simulated_stars.json");
 ```
 
 ---
@@ -61,9 +68,20 @@ trader.generateOHLCV(startTimestamp, endTimestamp, intervalSeconds, (err, ohlcvD
 |------------------------|--------------------------------------------------------------------------|
 | `Trader`               | Main class to simulate trading, prices, and integrate celestial factors. |
 | `fetchSkySourceData`   | Fetches and caches M4 cluster coordinates from Noctua Sky API.           |
-| `fetchLatestPrice`     | Adjusts price with trend and celestial factor.                           |
+| `fetchLatestPrice`     | Adjusts price with trend, volatility, and celestial factor.              |
 | `getTrades`            | Generates and returns simulated trades.                                  |
 | `generateOHLCV`        | Produces OHLCV candles from simulated trades.                            |
+| `simulateStarsInCluster` | Simulates unique star IDs for M4 cluster.                              |
+| `exportStarsToJSON`    | Exports simulated stars to a JSON file.                                  |
+
+---
+
+## 🔁 Volatility Levels
+
+- **Low:** Small, gentle price movements.
+- **Moderate:** Typical market volatility.
+- **High:** Large, wild swings (useful for stress testing).
+- *Set via the `volatility` parameter when initializing `Trader`.*
 
 ---
 
