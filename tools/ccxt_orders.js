@@ -46,12 +46,12 @@ function getActiveModel() {
   try {
     if (fs.existsSync(MODEL_WINNER_PATH)) {
       const data = JSON.parse(fs.readFileSync(MODEL_WINNER_PATH, 'utf8'));
-      return data.active_model || 'ensemble';
+      return data.active_model || 'tf';
     }
   } catch (err) {
     console.error('Error reading model_winner.json:', err);
   }
-  return 'ensemble'; // fallback
+  return 'tf'; // fallback
 }
 
 // --- Model P&L Tracking ---
