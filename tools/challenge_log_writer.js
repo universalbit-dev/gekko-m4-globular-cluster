@@ -1,8 +1,8 @@
 /**
  * challenge_log_writer.js
  * Reads signal data from ccxt_signal_comparative.log and appends formatted entries to challenge.log.
- * Each entry includes contextualized label and price from the winner model.
- *
+ * Each entry includes contextualized label and price based on the dynamically selected winner model.
+ * The winner_label represents the model currently selected by auto-tuning (see model_winner.json).
  */
 
 const fs = require('fs');
@@ -13,8 +13,11 @@ const CCXT_SIGNAL_PATH = path.resolve(__dirname, './ccxt_signal_comparative.log'
 const CHALLENGE_LOG_PATH = path.resolve(__dirname, './challenge.log');
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 15 * 60 * 1000; // Default 15 min
 
-function getWinnerLabelFromAnalysis() {
-  // Try reading model_winner.json for auto-selection; fallback to ensemble_label
+/**
+ * Gets the label name for the model currently selected as winner by challenge_analysis.js
+ * Returns: 'label_convnet', 'label_tf', or 'ensemble_label'
+ */
+function getWinnerLabelColumn() {
   const MODEL_WINNER_PATH = path.resolve(__dirname, './model_winner.json');
   try {
     const data = fs.readFileSync(MODEL_WINNER_PATH, 'utf8');
@@ -23,32 +26,28 @@ function getWinnerLabelFromAnalysis() {
     if (parsed.active_model === 'tf') return 'label_tf';
     return 'ensemble_label';
   } catch (err) {
-    return 'ensemble_label';
+    // Fallback: use tf if analysis is not available
+    return 'label_tf';
   }
 }
 
-function parseSignalLine(line, header, winnerLabelType) {
-  // Map header columns to their indexes
+/**
+ * Formats a log entry for challenge.log using the winner label logic.
+ * winner_label_value is taken from the currently selected model column.
+ */
+function formatChallengeLogEntry(line, header, winnerLabelCol) {
   const parts = line.trim().split('\t');
   const idx = col => header.indexOf(col);
 
-  // Extract the needed fields
   const timestamp = parts[idx('timestamp')];
   const convnet_pred = parts[idx('prediction_convnet')];
   const tf_pred = parts[idx('prediction_tf')];
   const entry_price = Number(parts[idx('price')]);
-
-  // Winner label selection
-  let winner_label;
-  if (winnerLabelType === 'ensemble_label') winner_label = parts[idx('ensemble_label')];
-  else if (winnerLabelType === 'label_convnet') winner_label = parts[idx('label_convnet')];
-  else if (winnerLabelType === 'label_tf') winner_label = parts[idx('label_tf')];
-  else winner_label = parts[idx('ensemble_label')];
-
-  // Winner price selection (if you have winner price column, use it here)
+  // Winner label value from appropriate column
+  const winner_label_value = parts[idx(winnerLabelCol)];
+  // Winner price: you may update if you ever log a different winner price
   const winner_price = entry_price;
 
-  // Calculate win/loss for convnet and tf predictions using winner price
   function getResult(prediction, entry, winner) {
     if (prediction === 'bull') return winner > entry ? 'win' : 'loss';
     if (prediction === 'bear') return winner < entry ? 'win' : 'loss';
@@ -58,7 +57,7 @@ function parseSignalLine(line, header, winnerLabelType) {
   const convnet_result = getResult(convnet_pred, entry_price, winner_price);
   const tf_result = getResult(tf_pred, entry_price, winner_price);
 
-  // Format: timestamp, convnet_pred, tf_pred, entry_price, winner_price, convnet_result, tf_result, winner_label
+  // The field "winner_label" now represents the label value of the selected winner model (auto-tuned).
   return [
     timestamp,
     convnet_pred,
@@ -67,7 +66,7 @@ function parseSignalLine(line, header, winnerLabelType) {
     winner_price,
     convnet_result,
     tf_result,
-    winner_label
+    winner_label_value 
   ].join('\t') + '\n';
 }
 
@@ -90,8 +89,8 @@ function writeChallengeLogEntry() {
     console.warn(`[WARN] No valid signal line found.`);
     return;
   }
-  const winnerLabelType = getWinnerLabelFromAnalysis();
-  const formattedEntry = parseSignalLine(latest.line, latest.header, winnerLabelType);
+  const winnerLabelCol = getWinnerLabelColumn();
+  const formattedEntry = formatChallengeLogEntry(latest.line, latest.header, winnerLabelCol);
   fs.appendFile(CHALLENGE_LOG_PATH, formattedEntry, err => {
     if (err) {
       console.error(`[ERROR] Writing to challenge.log:`, err);
