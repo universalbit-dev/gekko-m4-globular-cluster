@@ -138,7 +138,7 @@ function analyzeAndWrite() {
   }
 
   if ((win_rate || 0) < MIN_WIN_RATE) {
-    active_model = 'ensemble';
+    active_model = 'tf';
   }
 
   const winnerObj = {
