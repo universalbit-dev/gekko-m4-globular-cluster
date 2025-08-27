@@ -63,12 +63,6 @@ module.exports = {
       exec_mode: "cluster",
     },
     {
-      name: 'ccxt_orders',
-      script: 'tools/ccxt_orders.js',
-      instances: "1",
-      exec_mode: "cluster"
-    },
-    {
       name: 'challenge_analysis',
       script: 'tools/challenge_analysis.js',
       instances: "1",
