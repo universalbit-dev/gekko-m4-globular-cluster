@@ -1,4 +1,18 @@
 /**
+ * WARNING: REAL TRADING & FINANCIAL RISK
+ * 
+ * This script (ccxt_orders.js) will execute real trading orders on your linked exchange account using your API credentials.
+ * 
+ * - All actions taken by this script will result in actual financial transactions on the connected exchange.
+ * - Only run this script if you fully understand the risks involved in cryptocurrency trading.
+ * - You are solely responsible for any losses or liabilities incurred.
+ * - This is NOT a simulation or backtest; all trades are live.
+ * - Use at your own risk. No warranty is provided.
+ * 
+ * EU MiCA Notice: This tool is for registered, authenticated users only and delegates all compliance, security, and asset custody to the exchange.
+ */
+
+/**
  * ccxt_orders.js (Zenith Version, robust comparative log parsing, auto-tuning parameters, model winner adaptive with P&L selection)
  * Automated trading bot for cryptocurrency using ccxt, Node.js, and comparative signal logs.
  * Author: universalbit-dev
