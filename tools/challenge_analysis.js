@@ -1,6 +1,6 @@
 /**
- * challenge_analysis.js (Continuous, interval-based version)
- * Periodically analyzes signal logs and updates model_winner.json.
+ * challenge_analysis.js
+ * Periodically analyzes challenge.log and updates model_winner.json with the best performing model.
  */
 
 const path = require('path');
@@ -16,12 +16,10 @@ const DOMINANCE_THRESHOLD = parseFloat(process.env.DOMINANCE_THRESHOLD) || 0.6;
 const DOMINANCE_MIN_LENGTH = parseInt(process.env.DOMINANCE_MIN_LENGTH, 10) || 10;
 
 function parseChallengeLine(line) {
-  if (line.startsWith('#')) return null;
+  if (!line.trim() || line.startsWith('#')) return null;
   const parts = line.split('\t');
   // Fill missing columns with default values
-  while (parts.length < 8) {
-    parts.push('neutral');
-  }
+  while (parts.length < 8) parts.push('neutral');
   return {
     timestamp: parts[0],
     convnet_pred: parts[1],
@@ -30,7 +28,7 @@ function parseChallengeLine(line) {
     next_price: Number(parts[4]),
     convnet_result: parts[5],
     tf_result: parts[6],
-    ensemble_label: parts[7]
+    winner_label: parts[7]
   };
 }
 
@@ -92,7 +90,6 @@ function printAnalysis(results, convnetWinRate, tfWinRate, active_model, win_rat
   const lastIdx = results.length - 1;
   const nowIso = new Date().toISOString();
 
-  // Print summary with both analysis time and last log timestamp
   console.log(`[${nowIso}] Model winner written to: ${MODEL_WINNER_PATH}`);
   console.log(
     JSON.stringify({
@@ -144,14 +141,12 @@ function analyzeAndWrite() {
     active_model = 'ensemble';
   }
 
-  // Write model_winner.json
   const winnerObj = {
     active_model,
     win_rate,
     timestamp: results[lastIdx].timestamp
   };
 
-  // Try writing and log any errors
   try {
     fs.writeFileSync(MODEL_WINNER_PATH, JSON.stringify(winnerObj, null, 2));
     console.log(`[${new Date().toISOString()}] model_winner.json updated: ${MODEL_WINNER_PATH}`);
