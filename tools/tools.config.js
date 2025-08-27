@@ -1,12 +1,6 @@
 module.exports = {
   apps : [
     {
-      name: 'ccxt_orders',
-      script: 'ccxt_orders.js',
-      instances: "1",
-      exec_mode: "cluster"
-    },
-    {
       name: 'challenge_analysis',
       script: 'challenge_analysis.js',
       instances: "1",
