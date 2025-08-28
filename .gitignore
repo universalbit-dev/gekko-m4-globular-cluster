@@ -18,3 +18,5 @@ strategies/
 exchange/
 env/
 tools/
+# Ignore specific file inside tools directory
+tools/ccxt_orders.js
