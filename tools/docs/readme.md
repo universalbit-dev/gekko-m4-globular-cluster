@@ -19,7 +19,7 @@ tools/
 │   ├── chart_ccxt_recognition_magnitude.js  # Magnitude recognition for ccxt charts
 │   ├── chart_recognition.js              # General chart recognition
 │   └── multi_timeframe_ohlcv.js          # Multi-timeframe OHLCV data handling
-├── docs/                                 # Documentation (empty or not expanded)
+├── docs/                                 # Documentation
 ├── evaluation/                           # Evaluation scripts, results, scoring
 │   ├── autoTune.js                       # JS script for auto-tuning
 │   ├── autoTune.json                     # Auto-tune configuration
