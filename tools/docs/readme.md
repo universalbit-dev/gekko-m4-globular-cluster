@@ -128,7 +128,7 @@ Here’s an **entity-relationship style diagram** showing the logical connection
       |                      |                      |                 |
 [chart/]                 [logs/]                [microstructure/]    |
       |                      |                      |                |
-[macro_ccxt_orders.js]   [logs/json/ohlcv/]   [macro_ccxt_orders.js] |
+[macro_ccxt_orders.js]   [logs/json/ohlcv/]   [micro_ccxt_orders.js] |
       |                      |                      |                |
 [tradeQualityScore.js]   [Trade_Quality_Scoring.md] |                |
       |                      |                      |                |
