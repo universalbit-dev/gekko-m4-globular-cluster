@@ -27,7 +27,6 @@ This JavaScript code defines a trading strategy for the Gekko trading bot using 
                 Issues a "long" advice (buy) if the close price is above the Supertrend and no position is currently held.
                 Issues a "short" advice (sell) if the close price is below the Supertrend and a position is currently held.
 */
-const { addon: ov } = require('openvino-node');
 const _ = require("underscore");
 var log = require('../core/log.js');
 var fs = require("fs-extra");fs.createReadStream('/dev/null');
