@@ -24,8 +24,6 @@
  * 
  * Last Updated: 2025-04-06
  */
-
-const { addon: ov } = require('openvino-node');
 const ccxt = require("ccxt");
 var log = require('../core/log.js');
 var convnetjs = require('../core/convnet.js');
