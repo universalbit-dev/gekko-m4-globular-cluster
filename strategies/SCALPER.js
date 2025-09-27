@@ -32,7 +32,6 @@ This JavaScript code defines a trading strategy for the Gekko trading bot called
 The strategy uses a combination of the PSAR indicator, Darvas Box, and custom logic to determine buy and sell signals. 
 It also includes debugging functionalities and a stop loss mechanism to manage risk.
 */
-const { addon: ov } = require('openvino-node');
 var Promise = require("bluebird");const _ = require("underscore");
 var log = require('../core/log.js');
 const { Chess } = require('chess.js');
