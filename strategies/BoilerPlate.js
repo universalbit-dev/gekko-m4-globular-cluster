@@ -1,4 +1,3 @@
-const { addon: ov } = require('openvino-node');
 // BoilerPlate Strategy
 const tulind=require('../core/tulind');
 var log = require('../core/log.js');
