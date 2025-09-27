@@ -1,0 +1,72 @@
+[
+  {
+    "indicator": "rsi",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "abs",
+    "bestScore": 0,
+    "bestTimestamp": 1758969960000
+  },
+  {
+    "indicator": "rsi",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "profit",
+    "bestScore": 0,
+    "bestTimestamp": 1758969960000
+  },
+  {
+    "indicator": "rsi",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "sharpe",
+    "bestScore": -0.003763839870804671,
+    "bestTimestamp": 1758969960000
+  },
+  {
+    "indicator": "rsi",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "hit-rate",
+    "bestScore": 0,
+    "bestTimestamp": 1758969960000,
+    "totalTrades": 0,
+    "wins": 0,
+    "losses": 0
+  },
+  {
+    "indicator": "atr",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "abs",
+    "bestScore": 0,
+    "bestTimestamp": 1758969960000
+  },
+  {
+    "indicator": "atr",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "profit",
+    "bestScore": 0,
+    "bestTimestamp": 1758969960000
+  },
+  {
+    "indicator": "atr",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "sharpe",
+    "bestScore": -0.003763839870804671,
+    "bestTimestamp": 1758969960000
+  },
+  {
+    "indicator": "atr",
+    "paramName": "interval",
+    "bestParam": 2,
+    "scoring": "hit-rate",
+    "bestScore": 0,
+    "bestTimestamp": 1758969960000,
+    "totalTrades": 0,
+    "wins": 0,
+    "losses": 0
+  }
+]
