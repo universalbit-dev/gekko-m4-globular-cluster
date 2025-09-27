@@ -24,13 +24,6 @@ echo ""
 echo ">> Starting ecosystem with PM2..."
 pm2 start ngc6121.config.js --name ngc6121
 
-# Step 5: Start plugins/ccxtMarketData/ccxtmarket with PM2
-echo ""
-echo ">> Starting ccxtmarket plugin with PM2..."
-cd plugins/ccxtMarketData
-pm2 start ccxtMarketData.js --name ccxtmarket
-cd ~
-
 # Final: Show PM2 process list
 echo ""
 echo "============================================"
