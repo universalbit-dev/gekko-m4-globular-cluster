@@ -9,8 +9,6 @@
  * - Enhanced logging and debugging
  * - Centralized configurations
  */
-
-const { addon: ov } = require('openvino-node');
 const convnetjs = require('../core/convnet.js');
 const deepqlearn = require('../core/deepqlearn.js');
 const log = require('../core/log.js');
