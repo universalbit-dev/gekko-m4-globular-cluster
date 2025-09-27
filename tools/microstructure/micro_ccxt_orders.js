@@ -205,7 +205,7 @@ async function main() {
 
     // --- Entry logic (long/short) ---
     if (!positionOpen && allowReentry && PVVM > 10 && PVD > 10 && (signalLabel === 'strong_bull' || signalLabel === 'strong_bear')) {
-      if (tradeQuality.totalScore < 70) {
+      if (tradeQuality.totalScore < process.env.MICRO_TRADE_QUALITY_THRESHOLD || 70) {
         fs.appendFileSync(ORDER_LOG_PATH, `[${new Date().toISOString()}] SKIP_LOW_QUALITY SCORE=${tradeQuality.totalScore}\n`);
         isRunning = false; setTimeout(main, INTERVAL_MS); return;
       }
