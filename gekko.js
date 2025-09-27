@@ -8,8 +8,6 @@
   backtesting on historical data. Also look at the code to see what how
   it is working.
 */
-
-const { addon: ov } = require('openvino-node');
 const util = require('./core/util');
 const config = util.getConfig();
 const dirs = util.dirs();
