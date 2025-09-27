@@ -22,7 +22,7 @@ npm install pm2 -g
 # Step 4: Start ngc6121.config.js with PM2
 echo ""
 echo ">> Starting ecosystem with PM2..."
-pm2 start ngc6121.config.js --name ngc6121
+pm2 start simulator.config.js --name ngc6121
 
 # Final: Show PM2 process list
 echo ""

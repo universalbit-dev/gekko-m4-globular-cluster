@@ -50,7 +50,7 @@ module.exports = {
   exec_mode : "cluster",
   },
   {
-  name: "csvexport",
+  name: "simulator data",
   script    : 'gekko.js',
   args      : '-c env/simulator/trade_csvexport.js',
   instances : "1",
