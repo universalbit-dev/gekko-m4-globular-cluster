@@ -1,0 +1,370 @@
+{
+  "1m": {
+    "summary": {
+      "active_model": "convnet",
+      "win_rate": 0.3888888888888889,
+      "dominant_periods": [
+        {
+          "start_ts": "1758091740000",
+          "end_ts": "1758093060000",
+          "length": 23
+        },
+        {
+          "start_ts": "1758135660000",
+          "end_ts": "1758137220000",
+          "length": 27
+        },
+        {
+          "start_ts": "1758139380000",
+          "end_ts": "1758140580000",
+          "length": 21
+        },
+        {
+          "start_ts": "1758144060000",
+          "end_ts": "1758144780000",
+          "length": 13
+        },
+        {
+          "start_ts": "1758146040000",
+          "end_ts": "1758146880000",
+          "length": 15
+        },
+        {
+          "start_ts": "1758148560000",
+          "end_ts": "1758150780000",
+          "length": 38
+        },
+        {
+          "start_ts": "1758157800000",
+          "end_ts": "1758158700000",
+          "length": 16
+        },
+        {
+          "start_ts": "1758159780000",
+          "end_ts": "1758160620000",
+          "length": 15
+        },
+        {
+          "start_ts": "1758163440000",
+          "end_ts": "1758164160000",
+          "length": 13
+        },
+        {
+          "start_ts": "1758164460000",
+          "end_ts": "1758165960000",
+          "length": 26
+        },
+        {
+          "start_ts": "1758170520000",
+          "end_ts": "1758171960000",
+          "length": 25
+        },
+        {
+          "start_ts": "1758183360000",
+          "end_ts": "1758184140000",
+          "length": 14
+        },
+        {
+          "start_ts": "1758201180000",
+          "end_ts": "1758202920000",
+          "length": 30
+        },
+        {
+          "start_ts": "1758210060000",
+          "end_ts": "1758211380000",
+          "length": 23
+        },
+        {
+          "start_ts": "1758219000000",
+          "end_ts": "1758220080000",
+          "length": 19
+        },
+        {
+          "start_ts": "1758238440000",
+          "end_ts": "1758239460000",
+          "length": 18
+        },
+        {
+          "start_ts": "1758295500000",
+          "end_ts": "1758296640000",
+          "length": 20
+        },
+        {
+          "start_ts": "1758313200000",
+          "end_ts": "1758314160000",
+          "length": 17
+        },
+        {
+          "start_ts": "1758353640000",
+          "end_ts": "1758355140000",
+          "length": 26
+        },
+        {
+          "start_ts": "1758374280000",
+          "end_ts": "1758375180000",
+          "length": 16
+        },
+        {
+          "start_ts": "1758448260000",
+          "end_ts": "1758448980000",
+          "length": 13
+        },
+        {
+          "start_ts": "1758476940000",
+          "end_ts": "1758478200000",
+          "length": 22
+        },
+        {
+          "start_ts": "1758494760000",
+          "end_ts": "1758495600000",
+          "length": 15
+        },
+        {
+          "start_ts": "1758512940000",
+          "end_ts": "1758514020000",
+          "length": 19
+        },
+        {
+          "start_ts": "1758538140000",
+          "end_ts": "1758540120000",
+          "length": 34
+        },
+        {
+          "start_ts": "1758549420000",
+          "end_ts": "1758550620000",
+          "length": 21
+        },
+        {
+          "start_ts": "1758564660000",
+          "end_ts": "1758565800000",
+          "length": 20
+        },
+        {
+          "start_ts": "1758573120000",
+          "end_ts": "1758574740000",
+          "length": 28
+        },
+        {
+          "start_ts": "1758575940000",
+          "end_ts": "1758577260000",
+          "length": 23
+        },
+        {
+          "start_ts": "1758602940000",
+          "end_ts": "1758603960000",
+          "length": 18
+        },
+        {
+          "start_ts": "1758608940000",
+          "end_ts": "1758609840000",
+          "length": 16
+        },
+        {
+          "start_ts": "1758688140000",
+          "end_ts": "1758689040000",
+          "length": 16
+        },
+        {
+          "start_ts": "1758692220000",
+          "end_ts": "1758694260000",
+          "length": 35
+        },
+        {
+          "start_ts": "1758711660000",
+          "end_ts": "1758712560000",
+          "length": 16
+        },
+        {
+          "start_ts": "1758724620000",
+          "end_ts": "1758725940000",
+          "length": 23
+        },
+        {
+          "start_ts": "1758808920000",
+          "end_ts": "1758810480000",
+          "length": 27
+        },
+        {
+          "start_ts": "1758826320000",
+          "end_ts": "1758827280000",
+          "length": 17
+        },
+        {
+          "start_ts": "1758926220000",
+          "end_ts": "1758927420000",
+          "length": 21
+        }
+      ],
+      "analysis_timestamp": "2025-09-27T10:47:00.869Z",
+      "log_timestamp": "1758969000000"
+    },
+    "recent_win": {
+      "timestamp": "1758968820000",
+      "prediction_convnet": "bull",
+      "prediction_tf": "bull",
+      "entry_price": "93534",
+      "next_price": "93540.6",
+      "convnet_result": "win",
+      "tf_result": "win",
+      "winner_label": "strong_bull",
+      "open": "93534",
+      "high": "93534",
+      "low": "93534",
+      "close": "93534",
+      "volume": "0.00051104",
+      "volatility": 2.7428571428546484
+    }
+  },
+  "5m": {
+    "summary": {
+      "active_model": "convnet",
+      "win_rate": 0.5,
+      "dominant_periods": [
+        {
+          "start_ts": "1758088200000",
+          "end_ts": "1758096000000",
+          "length": 27
+        },
+        {
+          "start_ts": "1758137700000",
+          "end_ts": "1758141300000",
+          "length": 13
+        },
+        {
+          "start_ts": "1758147600000",
+          "end_ts": "1758151200000",
+          "length": 13
+        },
+        {
+          "start_ts": "1758164400000",
+          "end_ts": "1758171000000",
+          "length": 23
+        },
+        {
+          "start_ts": "1758201600000",
+          "end_ts": "1758207000000",
+          "length": 19
+        },
+        {
+          "start_ts": "1758239100000",
+          "end_ts": "1758245700000",
+          "length": 23
+        },
+        {
+          "start_ts": "1758345900000",
+          "end_ts": "1758351000000",
+          "length": 18
+        },
+        {
+          "start_ts": "1758604200000",
+          "end_ts": "1758610500000",
+          "length": 22
+        },
+        {
+          "start_ts": "1758677400000",
+          "end_ts": "1758681300000",
+          "length": 14
+        },
+        {
+          "start_ts": "1758691500000",
+          "end_ts": "1758697800000",
+          "length": 22
+        },
+        {
+          "start_ts": "1758710100000",
+          "end_ts": "1758714300000",
+          "length": 15
+        },
+        {
+          "start_ts": "1758718200000",
+          "end_ts": "1758728700000",
+          "length": 36
+        },
+        {
+          "start_ts": "1758906600000",
+          "end_ts": "1758912300000",
+          "length": 20
+        }
+      ],
+      "analysis_timestamp": "2025-09-27T10:47:00.938Z",
+      "log_timestamp": "1758969000000"
+    },
+    "recent_win": {
+      "timestamp": "1758968400000",
+      "prediction_convnet": "bull",
+      "prediction_tf": "idle",
+      "entry_price": "93540.1",
+      "next_price": "93540.6",
+      "convnet_result": "win",
+      "tf_result": "loss",
+      "winner_label": "strong_bull",
+      "open": "93540.1",
+      "high": "93540.1",
+      "low": "93540.1",
+      "close": "93540.1",
+      "volume": "0.00263654",
+      "volatility": 18.29999999999979
+    }
+  },
+  "15m": {
+    "summary": {
+      "active_model": "convnet",
+      "win_rate": 0.2777777777777778,
+      "dominant_periods": [
+        {
+          "start_ts": "1758198600000",
+          "end_ts": "1758220200000",
+          "length": 25
+        },
+        {
+          "start_ts": "1758701700000",
+          "end_ts": "1758727800000",
+          "length": 30
+        }
+      ],
+      "analysis_timestamp": "2025-09-27T10:47:00.961Z",
+      "log_timestamp": "1758969000000"
+    },
+    "recent_win": {
+      "timestamp": "1758966300000",
+      "prediction_convnet": "bull",
+      "prediction_tf": "bear",
+      "entry_price": "93525.5",
+      "next_price": "93550.3",
+      "convnet_result": "win",
+      "tf_result": "loss",
+      "winner_label": "strong_bull",
+      "open": "93525.6",
+      "high": "93525.6",
+      "low": "93525.5",
+      "close": "93525.5",
+      "volume": "0.02006622",
+      "volatility": 49.48571428571241
+    }
+  },
+  "1h": {
+    "summary": {
+      "active_model": "no_winner",
+      "win_rate": 0,
+      "dominant_periods": [],
+      "analysis_timestamp": "2025-09-27T10:47:00.968Z",
+      "log_timestamp": "1758967200000"
+    },
+    "recent_win": {
+      "timestamp": "1758967200000",
+      "prediction_convnet": "bull",
+      "prediction_tf": "bull",
+      "entry_price": "93548.5",
+      "next_price": "93548.5",
+      "convnet_result": "pending",
+      "tf_result": "pending",
+      "winner_label": "strong_bull",
+      "open": "93548.6",
+      "high": "93548.6",
+      "low": "93548.5",
+      "close": "93548.5",
+      "volume": "0.00600542",
+      "volatility": 94.414285714288
+    }
+  }
+}
