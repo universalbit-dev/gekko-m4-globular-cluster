@@ -15,7 +15,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const scoreRSI = require('./evaluation/score/rsi_score');
 const scoreATR = require('./evaluation/score/atr_score');
 const { getBestParam } = require('./getBestParams');
-const { scoreTrade } = require('./tradeQualityScore'); // <== Trade Quality Integration
+const { scoreTrade } = require('./tradeQualityScore');
 const autoTuneResultsPath = path.resolve(__dirname, './evaluation/autoTune_results.json');
 
 // --- Config from .env ---
@@ -311,7 +311,7 @@ async function main() {
     console.log(`[DEBUG] Trade Quality Score (pre-trade): ${tradeQuality.totalScore}`, tradeQuality.breakdown);
 
     // Optionally skip low-quality trades
-    if (tradeQuality.totalScore < 70) {
+    if (tradeQuality.totalScore < process.env.MACRO_TRADE_QUALITY_THRESHOLD || 70) {
       logOrder({
         timestamp: lastSignal.timestamp, model: winnerModel, prediction, label,
         win_rate, dominant_periods, volatility, active_model, action: 'SKIP',
