@@ -29,7 +29,6 @@
     "moment": "^2.29.4",
     "nanospinner": "^1.1.0",
     "node-noop": "^1.0.0",
-    "openvino-node": "^2024.3.0",
     "path": "^0.12.7",
     "promisify-node": "^0.5.0",
     "prompt-lite": "^0.1.1",
