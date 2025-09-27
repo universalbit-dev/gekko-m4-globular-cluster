@@ -4,22 +4,22 @@ echo "============================================"
 echo "   NGC6121 Setup Script - Gekko M4 Cluster  "
 echo "============================================"
 
-# Step 1: Install npm dependencies
+# Install npm dependencies
 echo ""
 echo ">> Installing Node.js dependencies..."
 npm install
 
-# Step 2: Fix vulnerabilities with npm audit fix
+# Fix vulnerabilities with npm audit fix
 echo ""
 echo ">> Running npm audit fix to address vulnerabilities..."
 npm audit fix
 
-# Step 3: Install PM2 globally
+# Install PM2 globally
 echo ""
 echo ">> Installing PM2 globally..."
 npm install pm2 -g
 
-# Step 4: Start ngc6121.config.js with PM2
+# Start simulator.config.js with PM2
 echo ""
 echo ">> Starting ecosystem with PM2..."
 pm2 start simulator.config.js --name ngc6121
