@@ -29,10 +29,6 @@ They implement neural network techniques and best practices recommended by leadi
 > Start here, experiment, and build smarter models! 🧠🚀
 ---
 
-> 📘 **ccxtMarketData:**  
-> This page covers the [`ccxtMarketData` plugin](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/plugins/ccxtMarketData/ccxtMarketData.md).  
-> _Please note: Some ccxt scripts need to be understood in the context of this plugin. Learn how to quickly launch the plugin with a simple Node.js command, or follow detailed examples to integrate it into your strategy._
-
 # 🛠️ Gekko M4 Globular Cluster Tools
 
 This directory contains core automation scripts for model training and chart recognition, along with their PM2 process management configuration.
@@ -52,13 +48,25 @@ pm2 start tools.config.js
 ```
 ---
 
-> 📚 **Documentation Directory ([`docs/`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs)**
->
-> All user guides and detailed explanations for project tools are organized in the `docs/` directory.  
-> Each file provides easy-to-read documentation for a specific tool or feature, ensuring you have clear instructions and helpful tips.  
-> Browse the [`docs/`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs) folder to quickly find information about setup, usage, and best practices for every part of the system!
+📚 **Documentation Directory ([`docs/`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs))**
+
+All user guides and detailed explanations for project tools are organized in the `docs/` directory.  
+Each file provides easy-to-read documentation for a specific tool or feature, ensuring you have clear instructions and helpful tips.  
+Browse the [`docs/`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/master/tools/docs) folder to quickly find information about setup, usage, and best practices for every part of the system!
+
+### Notable documentation files:
+
+- [`tools/Microstructure.md`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/tools/Microstructure.md):  
+  Advanced microstructure trading bot documentation — dynamic profit/loss management, multi-timeframe logic, trailing stops, and more.
+
+- [`tools/Macrostructure.md`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/tools/Macrostructure.md):  
+  Macrostructure trading bot documentation — robust auto-tuned multi-timeframe system, dynamic parameter selection, signal analysis, and error handling.
+
+- [`tools/Trade_Quality_Scoring.md`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/tools/Trade_Quality_Scoring.md):  
+  Trade quality scoring guide — modular scoring system, noise reduction strategies, minimum hold times, and analytics for both macro and microstructure bots.
 
 ---
+
 
 
 ### ⚙️ PM2 Configuration
