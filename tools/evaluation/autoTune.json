@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-09-07T09:06:48.997Z",
+  "stats": {
+    "total": 2,
+    "win": 0,
+    "loss": 0,
+    "winRate": 0,
+    "totalPnL": 0,
+    "avgPnL": 0
+  },
+  "suggestions": [
+    {
+      "param": "ORDER_AMOUNT",
+      "suggestion": "lower",
+      "reason": "Low win rate"
+    },
+    {
+      "param": "STOP_LOSS_PCT",
+      "suggestion": "tighten",
+      "reason": "Low win rate"
+    }
+  ]
+}

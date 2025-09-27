@@ -1,0 +1,46 @@
+{
+  "dataPath": "../logs/json/ohlcv/ohlcv_ccxt_data.json",
+  "outputPath": "./evaluate_results.json",
+  "tests": [
+    {
+      "indicator": "rsi",
+      "params": { "interval": 5, "buyLevel": 30, "sellLevel": 70 },
+      "scoring": "abs"
+    },
+    {
+      "indicator": "rsi",
+      "params": { "interval": 5, "buyLevel": 30, "sellLevel": 70 },
+      "scoring": "profit"
+    },
+    {
+      "indicator": "rsi",
+      "params": { "interval": 5, "buyLevel": 30, "sellLevel": 70 },
+      "scoring": "sharpe"
+    },
+    {
+      "indicator": "rsi",
+      "params": { "interval": 5, "buyLevel": 30, "sellLevel": 70 },
+      "scoring": "hit-rate"
+    },
+    {
+      "indicator": "atr",
+      "params": { "interval": 14, "buyLevel": 50, "sellLevel": 200 },
+      "scoring": "abs"
+    },
+    {
+      "indicator": "atr",
+      "params": { "interval": 14, "buyLevel": 50, "sellLevel": 200 },
+      "scoring": "profit"
+    },
+    {
+      "indicator": "atr",
+      "params": { "interval": 14, "buyLevel": 50, "sellLevel": 200 },
+      "scoring": "sharpe"
+    },
+    {
+      "indicator": "atr",
+      "params": { "interval": 14, "buyLevel": 50, "sellLevel": 200 },
+      "scoring": "hit-rate"
+    }
+  ]
+}
