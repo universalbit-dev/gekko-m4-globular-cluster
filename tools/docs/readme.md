@@ -284,5 +284,3 @@ flowchart TD
 - **Arrows** indicate typical data flows (e.g., training produces models, scripts write logs).
 - **Key flows**: Training scripts create models, chart/microstructure scripts interact with logs, challenge scripts analyze and record results, indicators feed into scoring logic.
 
-> **Tip:** Copy this diagram into a [Mermaid live editor](https://mermaid.live) or supported Markdown viewer for interactive exploration.
-
