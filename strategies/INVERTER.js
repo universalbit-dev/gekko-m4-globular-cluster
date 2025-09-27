@@ -27,9 +27,6 @@
  * - [Gab0's Gekko Adapted Strategies](https://github.com/Gab0/gekko-adapted-strategies)
  * - [Extra Indicators by Gabriel Araujo](https://github.com/Gab0/gekko-extra-indicators)
  */
-
-// Import necessary libraries and modules
-const { addon: ov } = require('openvino-node'); // OpenVINO library for AI processing
 const _ = require("underscore"); // Utility library for common functions
 var log = require('../core/log.js'); // Logging utility
 var config = require('../core/util.js').getConfig(); // Load configuration file
