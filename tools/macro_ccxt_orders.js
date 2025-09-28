@@ -311,7 +311,8 @@ async function main() {
     console.log(`[DEBUG] Trade Quality Score (pre-trade): ${tradeQuality.totalScore}`, tradeQuality.breakdown);
 
     // Optionally skip low-quality trades
-    if (tradeQuality.totalScore < process.env.MACRO_TRADE_QUALITY_THRESHOLD || 70) {
+    const MIN_QUALITY = parseFloat(process.env.MACRO_TRADE_QUALITY_THRESHOLD) || 70;
+    if (tradeQuality.totalScore < MIN_QUALITY) {
       logOrder({
         timestamp: lastSignal.timestamp, model: winnerModel, prediction, label,
         win_rate, dominant_periods, volatility, active_model, action: 'SKIP',
