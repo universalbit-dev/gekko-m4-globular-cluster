@@ -7,6 +7,103 @@ It automates the scoring of trading indicators (like RSI, ATR) on historical OHL
 Runs once or continuously, configurable via environment variables.
 
 ---
+```mermaid
+flowchart TD
+    subgraph ENV[".env"]
+        ENV_VAR["EVALUATE_INTERVAL_MS / INTERVAL_MS"]
+    end
+
+    subgraph CONFIG["evaluate.json"]
+        DATA_PATH["dataPath (OHLCV JSON)"]
+        OUTPUT_PATH["outputPath (results JSON)"]
+        TESTS["tests[] (indicator configs)"]
+    end
+
+    subgraph INDICATORS["Indicators"]
+        RSI["RSI (RSI.js)"]
+        ATR["ATR (ATR.js)"]
+        EXTEND["...extendable"]
+    end
+
+    subgraph SCORING["Scoring Methods"]
+        ABS["absScore"]
+        PROFIT["profitScore"]
+        SHARPE["sharpeScore"]
+        HITRATE["hitRateScore"]
+        EXTENDSCORE["...extendable"]
+    end
+
+    subgraph EVALUATE["evaluate.js"]
+        LOAD_ENV["Load environment variables"]
+        LOAD_CONFIG["Read evaluate.json"]
+        LOAD_DATA["Load OHLCV data"]
+        TEST_LOOP["For each test"]
+        INSTANTIATE_IND["Instantiate indicator"]
+        APPLY_IND["Apply indicator to candles"]
+        SCORE_METHOD["Score results"]
+        ASSEMBLE["Assemble results"]
+        OUTPUT["Output results"]
+        DAEMON["Daemon mode (interval rerun)"]
+    end
+
+    ENV_VAR --> LOAD_ENV
+    LOAD_ENV --> LOAD_CONFIG
+    LOAD_CONFIG -->|dataPath| LOAD_DATA
+    LOAD_CONFIG -->|tests| TEST_LOOP
+    LOAD_DATA --> TEST_LOOP
+    TEST_LOOP --> INSTANTIATE_IND
+    INSTANTIATE_IND --> INDICATORS
+    TEST_LOOP --> APPLY_IND
+    APPLY_IND --> SCORE_METHOD
+    SCORE_METHOD --> SCORING
+    SCORE_METHOD --> ASSEMBLE
+    ASSEMBLE --> OUTPUT
+    OUTPUT --> OUTPUT_PATH
+    OUTPUT --> EVALUATE
+    LOAD_ENV --> DAEMON
+    DAEMON --> LOAD_CONFIG
+
+    %% Extending
+    EXTEND -.-> INDICATORS
+    EXTENDSCORE -.-> SCORING
+
+    %% Internal Functions
+    subgraph FUNCS["Internal Functions"]
+        ABS_FN["absScore(values)"]
+        PROFIT_FN["profitScore(ohlcv, signals, params)"]
+        SHARPE_FN["sharpeScore(returns)"]
+        HITRATE_FN["hitRateScore(trades)"]
+        SIMULATE_FN["simulateTrades(ohlcv, signals, params)"]
+    end
+    SCORING --> ABS_FN
+    SCORING --> PROFIT_FN
+    SCORING --> SHARPE_FN
+    SCORING --> HITRATE_FN
+    HITRATE --> SIMULATE_FN
+
+    %% Output Example
+    OUTPUT -.->|"JSON"| OutputExample["See documentation for output format"]
+
+    %% File Links
+    subgraph FILES["Related Files"]
+        CONFIG_FILE["evaluate.json"]
+        RSI_FILE["indicator/RSI.js"]
+        ATR_FILE["indicator/ATR.js"]
+    end
+    CONFIG_FILE -.-> CONFIG
+    RSI_FILE -.-> RSI
+    ATR_FILE -.-> ATR
+
+    %% Notes
+    subgraph NOTES["Notes"]
+        NODEJS["Node.js required"]
+        MODULAR["Modular extension"]
+        OHLCV["Various OHLCV datasets"]
+    end
+    ENV_VAR -.-> NODEJS
+    EVALUATE -.-> MODULAR
+    LOAD_DATA -.-> OHLCV
+```
 
 ## 📦 Main Features
 
