@@ -7,6 +7,174 @@
 This script implements a highly adaptive microstructure trading bot for cryptocurrency markets using the [ccxt](https://github.com/ccxt/ccxt) library. It is designed for rapid, small trades with advanced risk management, multi-frame prediction confirmation, dynamic trade sizing, trailing stops, and strict position handling.
 
 ---
+```mermaid
+flowchart TD
+    %% ENVIRONMENT CONFIGURATION
+    subgraph ENV["🛠️ .env Config"]
+        EXCHANGE["EXCHANGE"]
+        API_KEY["KEY"]
+        API_SECRET["SECRET"]
+        PAIR["PAIR"]
+        MICRO_ORDER_AMOUNT["MICRO_ORDER_AMOUNT"]
+        MICRO_INTERVAL_MS["MICRO_INTERVAL_MS"]
+        BASE_PROFIT_PCT["BASE_PROFIT_PCT"]
+        BASE_LOSS_PCT["BASE_LOSS_PCT"]
+        FIB_HOLD_INDEX["FIB_HOLD_INDEX"]
+        MIN_HOLD_MS["MIN_HOLD_MS"]
+        MICRO_TIMEFRAME["MICRO_TIMEFRAME"]
+        MICRO_MAX_TRADES_PER_DAY["MICRO_MAX_TRADES_PER_DAY"]
+    end
+
+    %% DATA FILES
+    subgraph DATA["📂 Data Files"]
+        OHLCV_PRED["logs/json/ohlcv/ohlcv_ccxt_data_*_prediction.json"]
+        MICRO_ORDER_LOG["logs/micro_order.log"]
+    end
+
+    %% CORE MODULES
+    subgraph MODULES["🧩 Core Modules"]
+        BOT["microstructure/micro_ccxt_orders.js"]
+        SCORE_TRADE["tradeQualityScore.js"]
+    end
+
+    %% EXCHANGE LAYER
+    subgraph CCXT["🌐 Exchange Layer"]
+        CCXT_API["ccxt (Kraken, etc.)"]
+    end
+
+    %% MAIN LOGIC
+    subgraph MAINLOOP["🔁 Main Loop Workflow"]
+        DailyReset["Reset Daily Trade Counter"]
+        LoadPred["Load Latest OHLCV Prediction Data"]
+        CalcVol["Calculate Volatility & Adaptive Thresholds"]
+        MultiConfirm["Multi-Frame Consensus Check"]
+        TradeLimit["Enforce Daily Trade Limit"]
+        QualityEval["Evaluate Trade Quality"]
+        EntryLogic["Enter Trade if Eligible"]
+        PosManage["Manage Open Position (Trailing Stop, Partial Exit, Full Exit)"]
+        HoldLogic["Hold Position if Exit Not Triggered"]
+        LogOutcome["Log All Action Outcomes"]
+        ScheduleNext["Schedule Next Run"]
+    end
+
+    %% DATA FLOW & DEPENDENCIES
+    ENV --> BOT
+    BOT --> CCXT_API
+    BOT --> SCORE_TRADE
+    BOT --> OHLCV_PRED
+    BOT --> MICRO_ORDER_LOG
+
+    BOT --> DailyReset
+    BOT --> LoadPred
+    BOT --> CalcVol
+    BOT --> MultiConfirm
+    BOT --> TradeLimit
+    BOT --> QualityEval
+    BOT --> EntryLogic
+    BOT --> PosManage
+    BOT --> HoldLogic
+    BOT --> LogOutcome
+    BOT --> ScheduleNext
+    LogOutcome --> MICRO_ORDER_LOG
+
+    OHLCV_PRED --> LoadPred
+    OHLCV_PRED --> CalcVol
+    OHLCV_PRED --> MultiConfirm
+
+    SCORE_TRADE --> QualityEval
+
+    EntryLogic --> CCXT_API
+    PosManage --> CCXT_API
+    CCXT_API --> LogOutcome
+
+    %% Error Handling
+    BOT --> ErrorHandling["🛡️ Enhanced Error Handling"]
+
+``````mermaid
+flowchart TD
+    %% ENVIRONMENT CONFIGURATION
+    subgraph ENV["🛠️ .env Config"]
+        EXCHANGE["EXCHANGE"]
+        API_KEY["KEY"]
+        API_SECRET["SECRET"]
+        PAIR["PAIR"]
+        MICRO_ORDER_AMOUNT["MICRO_ORDER_AMOUNT"]
+        MICRO_INTERVAL_MS["MICRO_INTERVAL_MS"]
+        BASE_PROFIT_PCT["BASE_PROFIT_PCT"]
+        BASE_LOSS_PCT["BASE_LOSS_PCT"]
+        FIB_HOLD_INDEX["FIB_HOLD_INDEX"]
+        MIN_HOLD_MS["MIN_HOLD_MS"]
+        MICRO_TIMEFRAME["MICRO_TIMEFRAME"]
+        MICRO_MAX_TRADES_PER_DAY["MICRO_MAX_TRADES_PER_DAY"]
+    end
+
+    %% DATA FILES
+    subgraph DATA["📂 Data Files"]
+        OHLCV_PRED["logs/json/ohlcv/ohlcv_ccxt_data_*_prediction.json"]
+        MICRO_ORDER_LOG["logs/micro_order.log"]
+    end
+
+    %% CORE MODULES
+    subgraph MODULES["🧩 Core Modules"]
+        BOT["microstructure/micro_ccxt_orders.js"]
+        SCORE_TRADE["tradeQualityScore.js"]
+    end
+
+    %% EXCHANGE LAYER
+    subgraph CCXT["🌐 Exchange Layer"]
+        CCXT_API["ccxt (Kraken, etc.)"]
+    end
+
+    %% MAIN LOGIC
+    subgraph MAINLOOP["🔁 Main Loop Workflow"]
+        DailyReset["Reset Daily Trade Counter"]
+        LoadPred["Load Latest OHLCV Prediction Data"]
+        CalcVol["Calculate Volatility & Adaptive Thresholds"]
+        MultiConfirm["Multi-Frame Consensus Check"]
+        TradeLimit["Enforce Daily Trade Limit"]
+        QualityEval["Evaluate Trade Quality"]
+        EntryLogic["Enter Trade if Eligible"]
+        PosManage["Manage Open Position (Trailing Stop, Partial Exit, Full Exit)"]
+        HoldLogic["Hold Position if Exit Not Triggered"]
+        LogOutcome["Log All Action Outcomes"]
+        ScheduleNext["Schedule Next Run"]
+    end
+
+    %% DATA FLOW & DEPENDENCIES
+    ENV --> BOT
+    BOT --> CCXT_API
+    BOT --> SCORE_TRADE
+    BOT --> OHLCV_PRED
+    BOT --> MICRO_ORDER_LOG
+
+    BOT --> DailyReset
+    BOT --> LoadPred
+    BOT --> CalcVol
+    BOT --> MultiConfirm
+    BOT --> TradeLimit
+    BOT --> QualityEval
+    BOT --> EntryLogic
+    BOT --> PosManage
+    BOT --> HoldLogic
+    BOT --> LogOutcome
+    BOT --> ScheduleNext
+    LogOutcome --> MICRO_ORDER_LOG
+
+    OHLCV_PRED --> LoadPred
+    OHLCV_PRED --> CalcVol
+    OHLCV_PRED --> MultiConfirm
+
+    SCORE_TRADE --> QualityEval
+
+    EntryLogic --> CCXT_API
+    PosManage --> CCXT_API
+    CCXT_API --> LogOutcome
+
+    %% Error Handling
+    BOT --> ErrorHandling["🛡️ Enhanced Error Handling"]
+
+```
+
 
 ## 🧩 Features
 
