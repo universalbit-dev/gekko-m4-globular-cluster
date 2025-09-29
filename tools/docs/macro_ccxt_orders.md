@@ -7,6 +7,104 @@
 This bot is an advanced, auto-tuned, multi-timeframe cryptocurrency trading engine built on [ccxt](https://github.com/ccxt/ccxt) and designed to make robust, automated trading decisions. It dynamically selects the best model and timeframe for trading, uses real-time OHLCV predictions, and scores trades for quality before execution.
 
 ---
+```mermaid
+flowchart TD
+    %% ENVIRONMENT CONFIGURATION
+    subgraph ENV["🛠️ .env Config"]
+        EXCHANGE["EXCHANGE"]
+        API_KEY["API_KEY"]
+        API_SECRET["API_SECRET"]
+        PAIR["PAIR"]
+        ORDER_AMOUNT["ORDER_AMOUNT"]
+        MIN_ALLOWED_ORDER_AMOUNT["MIN_ALLOWED_ORDER_AMOUNT"]
+        MAX_ORDER_AMOUNT["MAX_ORDER_AMOUNT"]
+        STOP_LOSS_PCT["STOP_LOSS_PCT"]
+        TAKE_PROFIT_PCT["TAKE_PROFIT_PCT"]
+        MACRO_MIN_WIN_RATE["MACRO_MIN_WIN_RATE"]
+        MACRO_MAX_VOLATILITY["MACRO_MAX_VOLATILITY"]
+        MACRO_TRADE_QUALITY_THRESHOLD["MACRO_TRADE_QUALITY_THRESHOLD"]
+    end
+
+    %% DATA & MODEL FILES
+    subgraph DATA["📂 Data & Model Files"]
+        WINNER_MODEL["challenge/model_winner.json"]
+        AUTO_TUNE["evaluation/autoTune_results.json"]
+        OHLCV_PRED["logs/json/ohlcv/ohlcv_ccxt_data_*_prediction.json"]
+        ORDER_LOG["logs/ccxt_order.log"]
+    end
+
+    %% CORE MODULES
+    subgraph MODULES["🧩 Core Modules"]
+        BOT["macro_ccxt_orders.js"]
+        SCORE_TRADE["tradeQualityScore.js"]
+        SCORE_RSI["evaluation/score/rsi_score.js"]
+        SCORE_ATR["evaluation/score/atr_score.js"]
+        BEST_PARAMS["getBestParams.js"]
+    end
+
+    %% EXCHANGE LAYER
+    subgraph CCXT["🌐 Exchange Layer"]
+        CCXT_API["ccxt (Kraken, etc.)"]
+    end
+
+    %% MAIN LOOP LOGIC
+    subgraph MAINLOOP["🔁 Main Loop Logic"]
+        InitPos["Initialize & Sync Position"]
+        PVVM_PVD["Batch PVVM/PVD Calculations"]
+        SelectTF["Select Best Timeframe & Model"]
+        ValidateSig["Validate Signal & Trade Quality"]
+        ExecTrade["Execute Trade (BUY/SELL)"]
+        HandleSLTP["Handle Stop-loss/Take-profit"]
+        LogAct["Log Actions & Reasons"]
+        ScheduleNext["Schedule Next Run"]
+    end
+
+    %% DATA FLOW & DEPENDENCIES
+    ENV --> BOT
+    BOT --> CCXT_API
+    BOT --> SCORE_TRADE
+    BOT --> SCORE_RSI
+    BOT --> SCORE_ATR
+    BOT --> BEST_PARAMS
+    BOT --> WINNER_MODEL
+    BOT --> AUTO_TUNE
+    BOT --> OHLCV_PRED
+    BOT --> ORDER_LOG
+    CCXT_API --> BOT
+
+    BOT --> InitPos
+    BOT --> PVVM_PVD
+    BOT --> SelectTF
+    BOT --> ValidateSig
+    BOT --> ExecTrade
+    BOT --> HandleSLTP
+    BOT --> LogAct
+    BOT --> ScheduleNext
+    LogAct --> ORDER_LOG
+
+    %% Error Handling
+    BOT --> ErrorHandling["🛡️ Enhanced Error Handling"]
+
+    OHLCV_PRED --> PVVM_PVD
+    WINNER_MODEL --> SelectTF
+    AUTO_TUNE --> SCORE_RSI
+    AUTO_TUNE --> SCORE_ATR
+    SCORE_RSI --> ValidateSig
+    SCORE_ATR --> ValidateSig
+    SCORE_TRADE --> ValidateSig
+    BEST_PARAMS --> SCORE_RSI
+    BEST_PARAMS --> SCORE_ATR
+
+    ExecTrade --> CCXT_API
+    HandleSLTP --> CCXT_API
+    CCXT_API --> LogAct
+
+    LogAct --> ScheduleNext
+
+    %% External Data Source
+    BOT --> Explorer["🗂️ explorer.js (OHLCV predictions)"]
+
+```
 
 ## 🚀 Features
 
