@@ -1,4 +1,9 @@
 # Microstructure Trading Bot (Advanced)
+
+## Overview
+
+This bot automates microstructure trading using advanced dynamic profit/loss management.  
+It is designed to operate on cryptocurrency exchanges via the [ccxt](https://github.com/ccxt/ccxt) library, using multi-timeframe AI signals for position management, and supports both long (buy) and short (sell) strategies.
 ```mermaid
 flowchart TD
   %% Macrostructure Trading Bot
@@ -95,19 +100,6 @@ flowchart TD
   MA_Start --- ENVFILE
   MI_Start --- ENVFILE
 ```
-/**
- * Microstructure trading bot: ADVANCED dynamic profit/loss management.
- * Features: Trailing stops, adaptive thresholds, partial exits, multi-frame confirmation, adaptive sizing, smart re-entry logic.
- * Uses explorer.js OHLCV multi-timeframe prediction files from logs/json/ohlcv.
- * WARNING: Executes real trades if credentials are set! 
- * Optimized with DEBUG messages and daily trade limit.
- * Supports both strong_bull and strong_bear entries (long/short).
- */
-
-## Overview
-
-This bot automates microstructure trading using advanced dynamic profit/loss management.  
-It is designed to operate on cryptocurrency exchanges via the [ccxt](https://github.com/ccxt/ccxt) library, using multi-timeframe AI signals for position management, and supports both long (buy) and short (sell) strategies.
 
 **Main Features:**
 - Trailing stops (dynamic stop-loss)
