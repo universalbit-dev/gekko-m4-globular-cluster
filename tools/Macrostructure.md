@@ -5,6 +5,103 @@
 This bot automates macrostructure-based trading using robust signal analysis and dynamic parameter tuning.  
 It is designed for cryptocurrency exchanges via the [ccxt](https://github.com/ccxt/ccxt) library, and makes use of multi-timeframe AI signals, auto-tuned model selection, and dynamic technical analysis metrics for trade execution and management.
 
+```mermaid
+flowchart TD
+  %% Macrostructure Trading Bot
+  subgraph Macrostructure_Trading_Bot
+    MA_Start["Startup"]
+    MA_SyncPosition["Sync Position State"]
+    MA_Loop["Main Cycle"]
+    MA_LoadSignals["Load Signals - Multi-Timeframe"]
+    MA_SelectBestTF["Select Best Timeframe (model_winner.json)"]
+    MA_AutoTune["Auto-Tune RSI ATR and Parameters"]
+    MA_ValidateSignal["Validate Signal and Skip Reasons"]
+    MA_TradeQuality["Pre-Trade Quality Score"]
+    MA_EntryCheck["Entry Conditions Met?"]
+    MA_Buy["Market Buy"]
+    MA_Sell["Market Sell"]
+    MA_SLTPCheck["Stop Loss or Take Profit Triggered?"]
+    MA_StopLoss["Sell - Stop Loss"]
+    MA_TakeProfit["Sell - Take Profit"]
+    MA_Log["Log Action or Skip or Error"]
+    MA_Schedule["Schedule Next Cycle"]
+    MA_Hold["Hold Position"]
+    MA_Error["Error Handling"]
+
+    MA_Start --> MA_SyncPosition --> MA_Loop
+    MA_Loop --> MA_LoadSignals --> MA_SelectBestTF --> MA_AutoTune --> MA_ValidateSignal --> MA_TradeQuality --> MA_EntryCheck
+    MA_EntryCheck -- Yes --> MA_Buy
+    MA_EntryCheck -- No --> MA_Log
+    MA_Buy --> MA_Schedule
+    MA_Buy --> MA_Hold
+    MA_Hold --> MA_SLTPCheck
+    MA_SLTPCheck -- Yes --> MA_StopLoss & MA_TakeProfit
+    MA_StopLoss --> MA_Log
+    MA_TakeProfit --> MA_Log
+    MA_SLTPCheck -- No --> MA_Log
+    MA_Sell --> MA_Log
+    MA_Log --> MA_Schedule
+    MA_Error --> MA_Schedule
+  end
+
+  %% Microstructure Trading Bot
+  subgraph Microstructure_Trading_Bot
+    MI_Start["Startup"]
+    MI_Loop["Main Cycle"]
+    MI_LoadSignals["Load Signals - Multi-Timeframe"]
+    MI_CalcPVVM["Calculate PVVM and PVD"]
+    MI_MultiFrameConfirm["Multi-Frame Confirmation"]
+    MI_AdaptiveThresh["Adaptive Take Profit and Stop Loss"]
+    MI_TradeQuality["Pre-Trade Quality Score"]
+    MI_EntryCheck["Entry Conditions Met?"]
+    MI_Buy["Market Buy"]
+    MI_Sell["Market Sell"]
+    MI_PositionOpen["Position Open?"]
+    MI_TrailingStop["Update Trailing Stop"]
+    MI_PartialExit["Partial Exit Condition?"]
+    MI_PartialSell["Partial Take Profit"]
+    MI_ExitLogic["Exit Condition Met?"]
+    MI_FullExit["Full Exit - Sell or Buy"]
+    MI_Log["Log Action or Skip or Error"]
+    MI_Schedule["Schedule Next Cycle"]
+    MI_Hold["Hold Position"]
+    MI_Error["Error Handling"]
+
+    MI_Start --> MI_Loop
+    MI_Loop --> MI_LoadSignals --> MI_CalcPVVM --> MI_MultiFrameConfirm --> MI_AdaptiveThresh --> MI_TradeQuality --> MI_EntryCheck
+    MI_EntryCheck -- Yes --> MI_Buy & MI_Sell
+    MI_EntryCheck -- No --> MI_Log
+    MI_Buy --> MI_PositionOpen
+    MI_Sell --> MI_PositionOpen
+    MI_PositionOpen -- Yes --> MI_TrailingStop --> MI_PartialExit
+    MI_PartialExit -- Yes --> MI_PartialSell --> MI_Log
+    MI_PartialExit -- No --> MI_ExitLogic
+    MI_ExitLogic -- Yes --> MI_FullExit --> MI_Log
+    MI_ExitLogic -- No --> MI_Hold --> MI_Log
+    MI_PositionOpen -- No --> MI_Log
+    MI_Log --> MI_Schedule
+    MI_Error --> MI_Schedule
+  end
+
+  %% Shared Data and Modules
+  subgraph Shared_Modules
+    SCORE["tradeQualityScore.js"]
+    OHLCV["OHLCV Prediction JSON"]
+    MODELWINNER["model_winner.json"]
+    AUTOTUNE["autoTune_results.json"]
+    ENVFILE[".env parameters"]
+  end
+
+  MA_LoadSignals --- OHLCV
+  MI_LoadSignals --- OHLCV
+  MA_SelectBestTF --- MODELWINNER
+  MA_AutoTune --- AUTOTUNE
+  MA_TradeQuality --- SCORE
+  MI_TradeQuality --- SCORE
+  MA_Start --- ENVFILE
+  MI_Start --- ENVFILE
+```
+
 **Main Features:**
 - **Auto-selects best timeframe** (`1m`, `5m`, `15m`, `1h`) using `model_winner.json`
 - **Auto-tuned parameters** (`RSI`, `ATR`, etc.) per timeframe
