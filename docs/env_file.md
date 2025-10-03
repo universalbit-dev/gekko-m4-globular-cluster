@@ -293,7 +293,7 @@ You can override variables for a single run (without changing .env files):
 
 ```bash
 export INTERVAL_MS=3600000
-node tools/training_ccxt_ohlcv.js
+node tools/backtotesting.js
 ```
 
 ---
