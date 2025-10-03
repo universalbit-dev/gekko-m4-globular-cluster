@@ -76,6 +76,12 @@ module.exports = {
       exec_mode: 'cluster'
     },
     {
+      name: 'backtesting',
+      script: 'backtotesting.js',
+      instances: 1,
+      exec_mode: 'cluster'
+    },
+    {
       name: 'microstructure',
       script: 'microstructure/micro_ccxt_orders.js',
       instances: 1,
