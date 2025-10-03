@@ -7,9 +7,14 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const fs = require('fs');
-const RSI = require('./indicator/RSI.js');
-const ATR = require('./indicator/ATR.js');
-// Add other indicators as needed
+
+const indicators = {
+  rsi: require('./indicator/RSI.js'),
+  atr: require('./indicator/ATR.js'),
+  adx: require('./indicator/ADX.js'),
+  dx: require('./indicator/DX.js'),
+  sma: require('./indicator/SMA.js')
+};
 
 // --- Interval config ---
 const EVALUATE_INTERVAL_MS = process.env.EVALUATE_INTERVAL_MS
@@ -101,19 +106,15 @@ function runEvaluate() {
   const results = config.tests.map(test => {
     const { indicator: indName, params, scoring = "abs" } = test;
     let indicator, values = [], result = {};
-    switch (indName.toLowerCase()) {
-      case 'rsi':
-        indicator = new RSI(params);
-        candles.forEach(c => { indicator.update(c.close); values.push(indicator.result); });
-        break;
-      case 'atr':
-        indicator = new ATR(params);
-        candles.forEach(c => { indicator.update(c); values.push(indicator.result); });
-        break;
-      // Add more indicators here
-      default:
-        throw new Error(`Unknown indicator: ${indName}`);
-    }
+    const indKey = indName.toLowerCase();
+    if (!indicators[indKey]) throw new Error(`Unknown indicator: ${indName}`);
+    indicator = new indicators[indKey](params);
+
+    candles.forEach(c => {
+      if (indKey === 'rsi' || indKey === 'sma') indicator.update(c.close);
+      else indicator.update(c);
+      values.push(indicator.value ?? indicator.result ?? null);
+    });
 
     const scorer = scoringMethods[scoring.toLowerCase()] || scoringMethods.abs;
     const score = scorer(candles, values, params);

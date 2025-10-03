@@ -1,36 +1,45 @@
 /**
  * autoTune.js
- * Auto-tunes indicator parameters with multiple scoring methods.
+ * Modular auto-tuning of indicator parameters with multiple scoring methods.
  * Runs ONCE or continuously, controlled by AUTOTUNE_INTERVAL_MS (.env), with INTERVAL_MS as fallback.
  * Reads .env at the top for robust environment variable loading.
  */
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-const fs = require('fs');
 
-const RSI = require('./indicator/RSI.js');
-const ATR = require('./indicator/ATR.js');
+const path = require('path');
+const fs = require('fs');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+// --- Import all indicators here ---
+const indicators = {
+  rsi: require('./indicator/RSI.js'),
+  atr: require('./indicator/ATR.js'),
+  adx: require('./indicator/ADX.js'),
+  dx: require('./indicator/DX.js'),
+  sma: require('./indicator/SMA.js')
+};
 
 // --- Interval config ---
-const AUTOTUNE_INTERVAL_MS = process.env.AUTOTUNE_INTERVAL_MS
-  ? parseInt(process.env.AUTOTUNE_INTERVAL_MS, 10)
-  : (process.env.INTERVAL_MS ? parseInt(process.env.INTERVAL_MS, 10) : 0);
+const AUTOTUNE_INTERVAL_MS = parseInt(process.env.AUTOTUNE_INTERVAL_MS || process.env.INTERVAL_MS || '0', 10);
 
-// --- Scoring helpers (unchanged) ---
-function absScore(values) { return values.reduce((sum, v) => sum + (v == null ? 0 : Math.abs(v)), 0); }
-function profitScore(ohlcvArr, signals, params) {
+// --- Scoring helpers ---
+function absScore(values) {
+  return values.reduce((sum, v) => sum + (v == null ? 0 : Math.abs(v)), 0);
+}
+
+function profitScore(candles, signals, params) {
   let position = 0, entry = 0, profit = 0;
   for (let i = 1; i < signals.length; ++i) {
     if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) {
-      position = 1; entry = ohlcvArr[i].close;
+      position = 1; entry = candles[i].close;
     }
     if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) {
-      profit += ohlcvArr[i].close - entry; position = 0;
+      profit += candles[i].close - entry; position = 0;
     }
   }
-  if (position) profit += ohlcvArr[ohlcvArr.length - 1].close - entry;
+  if (position) profit += candles[candles.length - 1].close - entry;
   return profit;
 }
+
 function sharpeScore(returns) {
   if (!returns.length) return 0;
   const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
@@ -38,22 +47,24 @@ function sharpeScore(returns) {
   const stddev = Math.sqrt(variance);
   return stddev === 0 ? 0 : mean / stddev;
 }
+
 function hitRateScore(trades) {
   if (!trades.length) return 0;
   const wins = trades.filter(t => t > 0).length;
   return wins / trades.length;
 }
-function simulateTrades(ohlcvArr, signals, params) {
+
+function simulateTrades(candles, signals, params) {
   let position = 0, entry = 0, trades = [];
   for (let i = 1; i < signals.length; ++i) {
     if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) {
-      position = 1; entry = ohlcvArr[i].close;
+      position = 1; entry = candles[i].close;
     }
     if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) {
-      trades.push(ohlcvArr[i].close - entry); position = 0;
+      trades.push(candles[i].close - entry); position = 0;
     }
   }
-  if (position) trades.push(ohlcvArr[ohlcvArr.length - 1].close - entry);
+  if (position) trades.push(candles[candles.length - 1].close - entry);
   return trades;
 }
 
@@ -64,7 +75,7 @@ const config = {
   indicators: [
     {
       name: 'rsi',
-      class: RSI,
+      class: indicators.rsi,
       paramName: 'interval',
       range: { from: 2, to: 30, step: 1 },
       scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
@@ -72,28 +83,55 @@ const config = {
     },
     {
       name: 'atr',
-      class: ATR,
-      paramName: 'interval',
+      class: indicators.atr,
+      paramName: 'period',
       range: { from: 2, to: 30, step: 1 },
       scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
       paramsTemplate: { buyLevel: 50, sellLevel: 200 }
     },
+    {
+      name: 'adx',
+      class: indicators.adx,
+      paramName: 'period',
+      range: { from: 2, to: 30, step: 1 },
+      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
+      paramsTemplate: { buyLevel: 20, sellLevel: 50 }
+    },
+    {
+      name: 'dx',
+      class: indicators.dx,
+      paramName: 'period',
+      range: { from: 2, to: 30, step: 1 },
+      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
+      paramsTemplate: { buyLevel: 20, sellLevel: 50 }
+    },
+    {
+      name: 'sma',
+      class: indicators.sma,
+      paramName: 'interval',
+      range: { from: 2, to: 30, step: 1 },
+      scoringList: ['abs'],
+      paramsTemplate: {}
+    }
+    // Add more indicators here as needed...
   ],
 };
 
+// --- Load OHLCV data ---
 function loadData(dataPath) {
   const fullPath = path.resolve(__dirname, dataPath);
-  const raw = fs.readFileSync(fullPath, 'utf8');
-  return JSON.parse(raw);
+  return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
 }
+
 function* paramRange({ from, to, step }) {
   for (let v = from; v <= to; v += step) yield v;
 }
+
 const scoringMethods = {
   abs: (candles, values, params) => absScore(values),
   profit: (candles, values, params) => profitScore(candles, values, params),
   sharpe: (candles, values, params) => {
-    let returns = [];
+    const returns = [];
     for (let i = 1; i < candles.length; ++i)
       returns.push((candles[i].close - candles[i - 1].close) / candles[i - 1].close);
     return sharpeScore(returns);
@@ -104,7 +142,8 @@ const scoringMethods = {
   }
 };
 
-function autoTuneIndicator({ name, class: IndicatorClass, paramName, range, scoringList, paramsTemplate }, candles) {
+function autoTuneIndicator(indConfig, candles) {
+  const { name, class: IndicatorClass, paramName, range, scoringList, paramsTemplate } = indConfig;
   const bests = {};
   for (const scoring of scoringList) {
     let bestScore = null, bestParam = null, bestLastValue = null, bestTimestamp = null, bestDetails = {};
@@ -114,15 +153,13 @@ function autoTuneIndicator({ name, class: IndicatorClass, paramName, range, scor
       const values = [];
       for (const c of candles) {
         try {
-          if (name === 'rsi') {
-            if (typeof c.close !== 'number') continue;
+          // Use .update() signature as expected by indicator
+          if (name === 'rsi' || name === 'sma') {
             indicator.update(c.close);
-          } else if (name === 'atr') {
-            if (typeof c.high !== 'number' || typeof c.low !== 'number' || typeof c.close !== 'number')
-              continue;
+          } else {
             indicator.update(c);
           }
-          values.push(indicator.result);
+          values.push(indicator.value ?? indicator.result ?? null);
         } catch (e) { continue; }
       }
       const score = scoringMethods[scoring](candles, values, params);

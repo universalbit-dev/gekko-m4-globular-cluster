@@ -41,6 +41,41 @@
       "indicator": "atr",
       "params": { "interval": 14, "buyLevel": 50, "sellLevel": 200 },
       "scoring": "hit-rate"
+    },
+    {
+      "indicator": "adx",
+      "params": { "period": 14, "buyLevel": 20, "sellLevel": 50 },
+      "scoring": "abs"
+    },
+    {
+      "indicator": "adx",
+      "params": { "period": 14, "buyLevel": 20, "sellLevel": 50 },
+      "scoring": "profit"
+    },
+    {
+      "indicator": "adx",
+      "params": { "period": 14, "buyLevel": 20, "sellLevel": 50 },
+      "scoring": "sharpe"
+    },
+    {
+      "indicator": "adx",
+      "params": { "period": 14, "buyLevel": 20, "sellLevel": 50 },
+      "scoring": "hit-rate"
+    },
+    {
+      "indicator": "dx",
+      "params": { "period": 14, "buyLevel": 20, "sellLevel": 50 },
+      "scoring": "abs"
+    },
+    {
+      "indicator": "sma",
+      "params": { "interval": 10 },
+      "scoring": "abs"
+    },
+    {
+      "indicator": "sma",
+      "params": { "interval": 21 },
+      "scoring": "abs"
     }
   ]
 }
