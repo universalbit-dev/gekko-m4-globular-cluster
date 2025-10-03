@@ -1,9 +1,6 @@
 /**
  * Average True Range (ATR) indicator.
- * Usage:
- *   const atr = new ATR({ period: 14 });
- *   atr.update(candle); // candle: [open, high, low, close, volume] or {open, high, low, close, volume}
- *   console.log(atr.value); // null until enough candles collected, then ATR number
+   updated by universalbit-dev
  */
 
 class ATR {
