@@ -2,7 +2,13 @@ require('dotenv').config()
 var config = {};
 config.debug =true;
 
-config.watch = {exchange:'exchangesimulator',currency:process.env.currency,asset:process.env.asset};
+config.watch = {
+  enabled: true,
+  exchange: process.env.EXCHANGE || 'exchangesimulator',
+  exchangeId: process.env.EXCHANGEID || '',          
+  currency: process.env.CURRENCY || 'GaiaNut',           
+  asset: process.env.ASSET || 'GaiaBolt'                   
+};
 
 config.trader={enabled:false,
 exchange:process.env.exchange,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
