@@ -12,12 +12,20 @@ config.watch = {
   asset: process.env.ASSET || 'GaiaBolt'                   
 };
 
+config.ccxtMarketData = {
+  enabled: process.env.CCXT_MARKET_DATA_ENABLED === 'true',
+  exchange: process.env.CCXT_MARKET_DATA_EXCHANGE,
+  pair: process.env.CCXT_MARKET_DATA_PAIR,
+  candleSize: process.env.CCXT_MARKET_DATA_CANDLE_SIZE,
+  fetchInterval: Number(process.env.CCXT_MARKET_DATA_FETCH_INTERVAL),
+  outputCsv: process.env.CCXT_MARKET_DATA_OUTPUT_CSV,
+  outputJson: process.env.CCXT_MARKET_DATA_OUTPUT_JSON
+};
+
 config.trader={enabled:false,
 exchange:process.env.exchange,exchangeId:process.env.exchangeId,currency:process.env.currency,asset:process.env.asset,key:process.env.key,secret:process.env.secret};
 
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:13,method:'INVERTER'};
-
-config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: process.env.SYMBOL,candleSize:process.env.OHLCV_CANDLE_SIZE,fetchInterval: process.env.INTERVAL_FETCH_DATA};
 
 config.INVERTER = {
   DI: Number(process.env.INVERTER_DI) || 13,

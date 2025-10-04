@@ -11,6 +11,16 @@ config.watch = {
   asset: process.env.ASSET || 'GaiaBolt'                   
 };
 
+config.ccxtMarketData = {
+  enabled: process.env.CCXT_MARKET_DATA_ENABLED === 'true',
+  exchange: process.env.CCXT_MARKET_DATA_EXCHANGE,
+  pair: process.env.CCXT_MARKET_DATA_PAIR,
+  candleSize: process.env.CCXT_MARKET_DATA_CANDLE_SIZE,
+  fetchInterval: Number(process.env.CCXT_MARKET_DATA_FETCH_INTERVAL),
+  outputCsv: process.env.CCXT_MARKET_DATA_OUTPUT_CSV,
+  outputJson: process.env.CCXT_MARKET_DATA_OUTPUT_JSON
+};
+
 config.trader={enabled:false};
 
 config.paperTrader = {enabled: false};
@@ -18,8 +28,6 @@ config.paperTrader = {enabled: false};
 config.tradingAdvisor = {enabled:true,candleSize:5,historySize:10,method:'CSVEXPORT'};
 
 config.CSVEXPORT={};
-
-config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: process.env.SYMBOL,candleSize:process.env.OHLCV_CANDLE_SIZE,fetchInterval: process.env.INTERVAL_FETCH_DATA};
 
 config.adapter='sqlite';config.adapter.path= 'plugins/sqlite';
 
