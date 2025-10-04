@@ -15,7 +15,7 @@ exchange:process.env.exchange,currency:process.env.currency,asset:process.env.as
 
 config.tradingAdvisor = {enabled:true,warmupPeriods:200 ,candleSize:13,historySize:21,method:'RSIBULLBEARADX'};
 
-config.ccxtMarketData = {enabled: true,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: process.env.SYMBOL,candleSize:process.env.OHLCV_CANDLE_SIZE,fetchInterval: process.env.INTERVAL_FETCH_DATA};
+config.ccxtMarketData = {enabled: false,exchange: process.env.EXCHANGE_MARKET_DATA_ID,symbol: process.env.SYMBOL,candleSize:process.env.OHLCV_CANDLE_SIZE,fetchInterval: process.env.INTERVAL_FETCH_DATA};
 
 config.RSIBULLBEARADX = {
   SMA_long: Number(process.env.RSIBULLBEARADX_SMA_LONG) || 200,
