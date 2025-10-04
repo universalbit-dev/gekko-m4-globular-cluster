@@ -6,7 +6,7 @@ config.debug = true;
 
 config.watch = {
   enabled: true,
-  exchange: process.env.EXCHANGE || 'exchangesimulator',
+  exchange: process.env.EXCHANGESIMULATOR || 'exchangesimulator',
   exchangeId: process.env.EXCHANGEID || '',          
   currency: process.env.CURRENCY || 'GaiaNut',           
   asset: process.env.ASSET || 'GaiaBolt'                   
