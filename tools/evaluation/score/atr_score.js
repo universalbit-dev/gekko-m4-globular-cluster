@@ -1,14 +1,8 @@
 /**
- * Multi-timeframe ATR score system using prediction data.
+ * Multi-timeframe ATR score system using prediction data, running continuously.
  * Usage:
- *   const scores = scoreATR({
- *     symbol: "BTC/EUR",
- *     exchange: "kraken",
- *     timeframes: ["1m", "5m", "15m", "1h"],
- *     period: 14,
- *     dataDir: "../../tools/logs/json/ohlcv"
- *   });
- *   console.log(scores);
+ *   node scoreATR.continuous.js
+ * Prints scores to console at regular intervals.
  */
 
 const fs = require('fs');
@@ -48,5 +42,25 @@ function scoreATR({
   }
   return results;
 }
+
+// --- Continuous Run ---
+const params = {
+  symbol: "BTC/EUR",
+  exchange: "kraken",
+  timeframes: ["1m", "5m", "15m", "1h"],
+  period: 14,
+  dataDir: "../../logs/json/ohlcv", // adjust path as needed
+  interval: 60000 // 1 minute
+};
+
+function loop() {
+  const scores = scoreATR(params);
+  const now = new Date().toISOString();
+  console.log(`[${now}] ATR Scores:`, scores);
+  // Optionally, log to file, trigger alerts, etc.
+}
+
+loop(); // Initial run
+setInterval(loop, params.interval);
 
 module.exports = scoreATR;

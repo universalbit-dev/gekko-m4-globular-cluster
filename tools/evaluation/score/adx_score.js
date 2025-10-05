@@ -3,11 +3,20 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Score ADX for given timeframes and candle data.
- * @param {Object} params - { symbol, exchange, timeframes, period, dataDir }
- * @returns {Object} - { [tf]: ADX value }
+ * Continuously score ADX for given timeframes and candle data.
+ * Prints results to console, can be extended to log or trigger actions.
+ * Usage: node scoreADX.continuous.js
  */
-module.exports = function scoreADX(params) {
+const params = {
+  symbol: 'BTC/EUR', // set as needed
+  exchange: 'kraken', // set as needed
+  timeframes: ['1m', '5m', '15m', '1h'], // set as needed
+  period: 14,
+  dataDir: path.resolve(__dirname, '../../logs/json/ohlcv'),
+  interval: 60000 // 1 minute, adjust as needed
+};
+
+function scoreADX(params) {
   const { timeframes, period = 14, dataDir } = params;
   const results = {};
 
@@ -32,4 +41,15 @@ module.exports = function scoreADX(params) {
   }
 
   return results;
-};
+}
+
+// --- Continuous Run ---
+function loop() {
+  const adxResults = scoreADX(params);
+  const now = new Date().toISOString();
+  console.log(`[${now}] ADX Results:`, adxResults);
+  // Optionally, log to file, trigger alerts, etc.
+}
+
+loop(); // Initial run
+setInterval(loop, params.interval);
