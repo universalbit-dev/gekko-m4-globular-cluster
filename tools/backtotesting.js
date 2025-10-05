@@ -1,5 +1,6 @@
 /**
- * Enhanced Backtesting: Only processes live exchange market data from ohlcv_ccxt_data*.json files.
+ * Enhanced Backtesting: Processes both prediction and raw market data from ohlcv_ccxt_data*.json files.
+ * Supports mapping integer label fields to proper signal labels for backtesting.
  * Usage: node backtesting.js
  */
 
@@ -22,23 +23,23 @@ const paramSets = [
   { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 62, min_hold: 10, name: "Balanced+" }
 ];
 
-// --- Discover only valid ccxt exchange files ---
+// --- Discover prediction and raw files for each timeframe ---
 function discoverExchangeDataFiles() {
   const files = fs.readdirSync(DATA_DIR)
     .filter(f =>
       f.startsWith('ohlcv_ccxt_data') &&
       f.endsWith('.json')
     );
-  // Map timeframes to their prediction/raw files
   const found = {};
   for (const tf of TIMEFRAMES) {
     const pred = `ohlcv_ccxt_data_${tf}_prediction.json`;
     const raw = `ohlcv_ccxt_data_${tf}.json`;
-    if (files.includes(pred)) found[tf] = pred;
-    else if (files.includes(raw)) found[tf] = raw;
+    found[tf] = {};
+    if (files.includes(pred)) found[tf].prediction = pred;
+    if (files.includes(raw)) found[tf].raw = raw;
   }
-  // Include aggregate file!
-  if (files.includes('ohlcv_ccxt_data.json')) found['multi'] = 'ohlcv_ccxt_data.json';
+  // Aggregate file (multi-timeframe)
+  if (files.includes('ohlcv_ccxt_data.json')) found['multi'] = { aggregate: 'ohlcv_ccxt_data.json' };
   return found;
 }
 
@@ -51,6 +52,21 @@ function extractTimeframesFromAggregate(data) {
     if (Array.isArray(data[tf])) result[tf] = data[tf];
   }
   return result;
+}
+
+// --- Map integer labels to signal labels ---
+function getMappedSignalLabel(point) {
+  // Priority: ensemble_label/challenge_label, else map integer label
+  if (point.ensemble_label) return point.ensemble_label;
+  if (point.challenge_label) return point.challenge_label;
+  // Map integer fields (if present)
+  if (typeof point.label !== "undefined") {
+    if (point.label === 1) return "strong_bull";
+    if (point.label === 2) return "strong_bear";
+    return "other";
+  }
+  // You may have other custom mappings here if needed
+  return "other";
 }
 
 // --- Backtest core ---
@@ -67,7 +83,7 @@ function backtest(data, params, label = '') {
 
   for (let i = 0; i < data.length; i++) {
     const point = data[i];
-    const signalLabel = point.ensemble_label || point.challenge_label || 'other';
+    const signalLabel = getMappedSignalLabel(point);
     const volatility = +point.volatility || 10;
     const close = +point.close;
     const win_rate = typeof point.win_rate === 'number' ? point.win_rate : 0.5;
@@ -197,6 +213,7 @@ function exportTradesCSV(allResults) {
       for (const t of res.trades) {
         allTrades.push({
           source: frame.source,
+          variant: frame.variant,
           strategy: res.params.name,
           entryIdx: t.entryIdx,
           exitIdx: t.exitIdx,
@@ -215,10 +232,31 @@ function exportTradesCSV(allResults) {
     }
   }
   const header = Object.keys(allTrades[0] || {
-    source: '', strategy: '', entryIdx: '', exitIdx: '', entry: '', exit: '', pnl: '', reason: '', tradeQuality: '', holdTime: '', win_rate: '', volatility: '', challenge_model: '', ensemble_model: ''
+    source: '', variant: '', strategy: '', entryIdx: '', exitIdx: '', entry: '', exit: '', pnl: '', reason: '', tradeQuality: '', holdTime: '', win_rate: '', volatility: '', challenge_model: '', ensemble_model: ''
   }).join(',');
   const rows = allTrades.map(x => Object.values(x).join(',')).join('\n');
   fs.writeFileSync(CSV_PATH, header + '\n' + rows);
+}
+
+// --- Print summary helper ---
+function printSummary(r, idx) {
+  const s = r.stats;
+  let color = "\x1b[0m";
+  if (s.totalPNL < 0) color = "\x1b[31m";
+  else if (s.totalPNL > 0) color = "\x1b[32m";
+  const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
+  console.log(
+    `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
+    ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
+    ` PNL:${s.totalPNL.toFixed(4)}` +
+    ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
+    ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
+    ` AvgPNL:${s.avgPNL.toFixed(4)}` +
+    ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
+    ` W:${s.wins} L:${s.losses}` +
+    ` Regime:${regime}` +
+    ` Signals: bull:${s.signalCount.strong_bull} bear:${s.signalCount.strong_bear} other:${s.signalCount.other}\x1b[0m`
+  );
 }
 
 // --- MAIN ---
@@ -226,74 +264,52 @@ function main() {
   let allResults = [];
   const files = discoverExchangeDataFiles();
 
-  // Process aggregate file first (multi-timeframe)
-  if (files.multi) {
+  // Process aggregate file first if present
+  if (files.multi && files.multi.aggregate) {
     let data;
-    try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files.multi), 'utf8')); }
-    catch { console.error(`[ERROR] Could not parse: ${files.multi}`); data = {}; }
+    try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files.multi.aggregate), 'utf8')); }
+    catch { console.error(`[ERROR] Could not parse: ${files.multi.aggregate}`); data = {}; }
     const tfs = extractTimeframesFromAggregate(data);
     for (const tf of TIMEFRAMES) {
       const arr = tfs[tf];
       if (!Array.isArray(arr) || arr.length === 0) continue;
       const results = paramSets.map(params => backtest(arr, params, `aggregate:${tf}`));
-      allResults.push({ source: `aggregate:${tf}`, results });
+      allResults.push({ source: `aggregate:${tf}`, variant: 'AGGREGATE', results });
 
-      // Summary for this tf
-      console.log(`=== [aggregate:${tf}] ===`);
-      results.forEach((r, idx) => {
-        const s = r.stats;
-        let color = "\x1b[0m";
-        if (s.totalPNL < 0) color = "\x1b[31m";
-        else if (s.totalPNL > 0) color = "\x1b[32m";
-        const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
-        console.log(
-          `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
-          ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
-          ` PNL:${s.totalPNL.toFixed(4)}` +
-          ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
-          ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
-          ` AvgPNL:${s.avgPNL.toFixed(4)}` +
-          ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
-          ` W:${s.wins} L:${s.losses}` +
-          ` Regime:${regime}` +
-          ` Signals: bull:${s.signalCount.strong_bull} bear:${s.signalCount.strong_bear} other:${s.signalCount.other}\x1b[0m`
-        );
-      });
+      // Print summary
+      console.log(`=== [aggregate:${tf}: AGGREGATE] ===`);
+      results.forEach((r, idx) => printSummary(r, idx));
     }
   }
 
-  // Process each separate file (skip aggregate if present)
+  // Process each timeframe's prediction and raw files
   for (const tf of TIMEFRAMES) {
     if (!files[tf]) continue;
-    let data;
-    try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf]), 'utf8')); }
-    catch { console.error(`[ERROR] Could not parse: ${files[tf]}`); continue; }
-    if (!Array.isArray(data) || data.length === 0) continue;
 
-    const results = paramSets.map(params => backtest(data, params, files[tf]));
-    allResults.push({ source: files[tf], results });
-
-    // Summary for this file
-    console.log(`=== [${files[tf]}] ===`);
-    results.forEach((r, idx) => {
-      const s = r.stats;
-      let color = "\x1b[0m";
-      if (s.totalPNL < 0) color = "\x1b[31m";
-      else if (s.totalPNL > 0) color = "\x1b[32m";
-      const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
-      console.log(
-        `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
-        ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
-        ` PNL:${s.totalPNL.toFixed(4)}` +
-        ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
-        ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
-        ` AvgPNL:${s.avgPNL.toFixed(4)}` +
-        ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
-        ` W:${s.wins} L:${s.losses}` +
-        ` Regime:${regime}` +
-        ` Signals: bull:${s.signalCount.strong_bull} bear:${s.signalCount.strong_bear} other:${s.signalCount.other}\x1b[0m`
-      );
-    });
+    // Prediction file
+    if (files[tf].prediction) {
+      let data;
+      try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].prediction), 'utf8')); }
+      catch { console.error(`[ERROR] Could not parse: ${files[tf].prediction}`); data = []; }
+      if (Array.isArray(data) && data.length > 0) {
+        const results = paramSets.map(params => backtest(data, params, files[tf].prediction));
+        allResults.push({ source: files[tf].prediction, variant: 'PREDICTION', results });
+        console.log(`=== [${files[tf].prediction}: PREDICTION] ===`);
+        results.forEach((r, idx) => printSummary(r, idx));
+      }
+    }
+    // Raw file
+    if (files[tf].raw) {
+      let data;
+      try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].raw), 'utf8')); }
+      catch { console.error(`[ERROR] Could not parse: ${files[tf].raw}`); data = []; }
+      if (Array.isArray(data) && data.length > 0) {
+        const results = paramSets.map(params => backtest(data, params, files[tf].raw));
+        allResults.push({ source: files[tf].raw, variant: 'RAW', results });
+        console.log(`=== [${files[tf].raw}: RAW] ===`);
+        results.forEach((r, idx) => printSummary(r, idx));
+      }
+    }
   }
 
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(allResults, null, 2));
