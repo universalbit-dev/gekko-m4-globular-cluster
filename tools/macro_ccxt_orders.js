@@ -16,7 +16,6 @@ const INDICATOR_SCORERS = {
   DX:  require('./evaluation/score/dx_score'),
   SMA: require('./evaluation/score/sma_score'),
 };
-
 const { getBestParam } = require('./getBestParams');
 const { scoreTrade } = require('./tradeQualityScore');
 
@@ -27,11 +26,9 @@ const OHLCV_DIR = path.resolve(__dirname, './logs/json/ohlcv');
 const ORDER_LOG_PATH = path.join(LOGS_DIR, 'ccxt_order.log');
 const WINNER_MODEL_PATH = path.resolve(__dirname, './challenge/model_winner.json');
 
-// --- Timeframe selection ---
+// --- Config ---
 const OHLCV_CANDLE_SIZES = (process.env.OHLCV_CANDLE_SIZE || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
 const TIMEFRAME = process.env.MACRO_TIMEFRAME || '1h';
-
-// --- Exchange Config ---
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
 const API_KEY = process.env.KEY || '';
 const API_SECRET = process.env.SECRET || '';
@@ -39,7 +36,6 @@ const PAIR = process.env.PAIR || 'BTC/EUR';
 const ORDER_AMOUNT = parseFloat(process.env.ORDER_AMOUNT) || 0.0001;
 const MIN_ALLOWED_ORDER_AMOUNT = parseFloat(process.env.MIN_ALLOWED_ORDER_AMOUNT) || 0.0001;
 const MAX_ORDER_AMOUNT = parseFloat(process.env.MAX_ORDER_AMOUNT) || 0.01;
-
 const INTERVAL_AFTER_TRADE = parseInt(process.env.INTERVAL_AFTER_TRADE, 10) || 30000;
 const INTERVAL_AFTER_SKIP = parseInt(process.env.INTERVAL_AFTER_SKIP, 10) || 90000;
 const INTERVAL_AFTER_HOLD = parseInt(process.env.INTERVAL_AFTER_HOLD, 10) || 180000;
@@ -53,7 +49,6 @@ let lastTradeTimestamp = 0;
 
 // --- Dynamic indicator configs using auto-tuned params ---
 function getAutoTunedParams(metric = 'profit') {
-  // Use getBestParam for each indicator and scoring type
   return {
     RSI: { interval: getBestParam('rsi', metric, autoTuneResultsPath) ?? 14 },
     ADX: { period: getBestParam('adx', metric, autoTuneResultsPath) ?? 14 },
@@ -63,20 +58,19 @@ function getAutoTunedParams(metric = 'profit') {
   };
 }
 
-let INDICATOR_CONFIGS = buildIndicatorConfigs();
-
 function buildIndicatorConfigs() {
   const best = getAutoTunedParams();
-  return [
-    { name: "RSI", scorer: INDICATOR_SCORERS.RSI, param: best.RSI },
-    { name: "ADX", scorer: INDICATOR_SCORERS.ADX, param: best.ADX },
-    { name: "DX",  scorer: INDICATOR_SCORERS.DX,  param: best.DX },
-    { name: "ATR", scorer: INDICATOR_SCORERS.ATR, param: best.ATR },
-    { name: "SMA", scorer: INDICATOR_SCORERS.SMA, param: best.SMA },
-  ];
+  return Object.entries(best).map(([name, param]) => {
+    const scorer = INDICATOR_SCORERS[name];
+    if (typeof scorer !== 'function') {
+      console.warn(`[WARN] Indicator ${name} is missing a scorer function.`);
+    }
+    return { name, scorer, param };
+  });
 }
 
-// --- Auto reload indicator configs on tune file change ---
+let INDICATOR_CONFIGS = buildIndicatorConfigs();
+
 fs.watchFile(autoTuneResultsPath, { interval: 60000 }, () => {
   INDICATOR_CONFIGS = buildIndicatorConfigs();
   console.log('[INFO][MACRO] Reloaded auto-tuned indicator configs:', INDICATOR_CONFIGS);
@@ -88,16 +82,18 @@ const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 function getIndicatorScores(tf) {
   const scores = {};
   for (const cfg of INDICATOR_CONFIGS) {
-    if (typeof cfg.scorer !== "function") {
-      console.warn(`[WARN] Indicator ${cfg.name} is missing a scorer function.`);
-      continue;
+    if (typeof cfg.scorer !== "function") continue;
+    try {
+      const scoreParams = {
+        symbol: PAIR, exchange: EXCHANGE, timeframes: [tf],
+        ...cfg.param,
+        dataDir: OHLCV_DIR
+      };
+      scores[cfg.name] = cfg.scorer(scoreParams)[tf];
+    } catch (e) {
+      console.warn(`[WARN] Error scoring ${cfg.name}: ${e.message}`);
+      scores[cfg.name] = null;
     }
-    const scoreParams = {
-      symbol: PAIR, exchange: EXCHANGE, timeframes: [tf],
-      ...cfg.param,
-      dataDir: OHLCV_DIR
-    };
-    scores[cfg.name] = cfg.scorer(scoreParams)[tf];
   }
   return scores;
 }
@@ -195,52 +191,33 @@ async function main() {
     return;
   }
   isRunning = true;
-
-  // --- Exchange Instance ---
-  const exchangeClass = ccxt[EXCHANGE];
-  if (!exchangeClass) {
-    console.error(`[DEBUG] Exchange '${EXCHANGE}' not supported by ccxt.`);
-    isRunning = false;
-    return;
-  }
-  const exchange = new exchangeClass({
-    apiKey: API_KEY,
-    secret: API_SECRET,
-    enableRateLimit: true,
-  });
-
-  // --- Adaptive params from backtest or .env ---
-  // These should be updated dynamically if bestParams changes
-  const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 0.003;
-  const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 0.006;
-  const MIN_QUALITY = parseFloat(process.env.MACRO_TRADE_QUALITY_THRESHOLD) || 70;
-  const MIN_HOLD = parseInt(process.env.MIN_HOLD, 10) || 10;
-  const MAX_VOLATILITY = parseFloat(process.env.MACRO_MAX_VOLATILITY) || 100;
-  const MIN_WIN_RATE = parseFloat(process.env.MACRO_MIN_WIN_RATE) || 0.2;
-
-  console.log(`[INFO] Macrostructure bot config [${TIMEFRAME}]:`, {
-    TAKE_PROFIT_PCT,
-    STOP_LOSS_PCT,
-    MIN_QUALITY,
-    MIN_HOLD
-  });
-
   try {
+    const exchangeClass = ccxt[EXCHANGE];
+    if (!exchangeClass) throw new Error(`Exchange '${EXCHANGE}' not supported by ccxt.`);
+    const exchange = new exchangeClass({
+      apiKey: API_KEY,
+      secret: API_SECRET,
+      enableRateLimit: true,
+    });
+
+    const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 0.003;
+    const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 0.006;
+    const MIN_QUALITY = parseFloat(process.env.MACRO_TRADE_QUALITY_THRESHOLD) || 70;
+    const MIN_HOLD = parseInt(process.env.MIN_HOLD, 10) || 10;
+    const MAX_VOLATILITY = parseFloat(process.env.MACRO_MAX_VOLATILITY) || 100;
+    const MIN_WIN_RATE = parseFloat(process.env.MACRO_MIN_WIN_RATE) || 0.2;
+
+    console.log(`[INFO] Macrostructure bot config [${TIMEFRAME}]:`, {
+      TAKE_PROFIT_PCT, STOP_LOSS_PCT, MIN_QUALITY, MIN_HOLD
+    });
+
     const signals = loadLatestSignals(OHLCV_CANDLE_SIZES, OHLCV_DIR);
-    if (signals.length === 0) {
-      scheduleNext(INTERVAL_AFTER_HOLD, "No multi-timeframe prediction signals found.");
-      isRunning = false; return;
-    }
+    if (signals.length === 0) return scheduleNext(INTERVAL_AFTER_HOLD, "No multi-timeframe prediction signals found.");
 
     const winnerAnalysis = loadWinnerAnalysis();
     const tf = selectBestTimeframe(winnerAnalysis, OHLCV_CANDLE_SIZES);
-
-    let lastSignal = signals.find(s => s.timeframe === tf)
-      || signals[signals.length - 1];
-    if (!lastSignal) {
-      scheduleNext(INTERVAL_AFTER_HOLD, "No valid signal selected.");
-      isRunning = false; return;
-    }
+    let lastSignal = signals.find(s => s.timeframe === tf) || signals[signals.length - 1];
+    if (!lastSignal) return scheduleNext(INTERVAL_AFTER_HOLD, "No valid signal selected.");
 
     const info = winnerAnalysis[tf] || {};
     const summary = info.summary || {};
@@ -258,26 +235,16 @@ async function main() {
     const win_rate = summary.win_rate, dominant_periods = summary.dominant_periods;
     const volatility = recentWin.volatility, active_model = summary.active_model;
 
-    if (!lastSignal.timestamp || isNaN(price) || !label) {
-      scheduleNext(INTERVAL_AFTER_SKIP, `Skipping invalid signal: ${JSON.stringify(lastSignal)}`);
-      isRunning = false; return;
-    }
-    if (!canTradeNow(lastSignal.timestamp)) {
-      scheduleNext(INTERVAL_AFTER_SKIP, `Aggregation interval not met for trade. Last: ${lastTradeTimestamp}, Current: ${lastSignal.timestamp}`);
-      isRunning = false; return;
-    }
-    if (winnerModel === "no_winner") {
-      scheduleNext(INTERVAL_AFTER_SKIP, "No active winner model for this timeframe.");
-      isRunning = false; return;
-    }
-    if (win_rate < MIN_WIN_RATE) {
-      scheduleNext(INTERVAL_AFTER_SKIP, `Win rate too low (${win_rate}).`);
-      isRunning = false; return;
-    }
-    if (volatility >= MAX_VOLATILITY) {
-      scheduleNext(INTERVAL_AFTER_SKIP, `Volatility too high (${volatility}).`);
-      isRunning = false; return;
-    }
+    if (!lastSignal.timestamp || isNaN(price) || !label)
+      return scheduleNext(INTERVAL_AFTER_SKIP, `Skipping invalid signal: ${JSON.stringify(lastSignal)}`);
+    if (!canTradeNow(lastSignal.timestamp))
+      return scheduleNext(INTERVAL_AFTER_SKIP, `Aggregation interval not met for trade. Last: ${lastTradeTimestamp}, Current: ${lastSignal.timestamp}`);
+    if (winnerModel === "no_winner")
+      return scheduleNext(INTERVAL_AFTER_SKIP, "No active winner model for this timeframe.");
+    if (win_rate < MIN_WIN_RATE)
+      return scheduleNext(INTERVAL_AFTER_SKIP, `Win rate too low (${win_rate}).`);
+    if (volatility >= MAX_VOLATILITY)
+      return scheduleNext(INTERVAL_AFTER_SKIP, `Volatility too high (${volatility}).`);
 
     const { ticker, balance } = await fetchTickerAndBalance(exchange);
     const currentPrice = ticker.last;
@@ -303,8 +270,7 @@ async function main() {
         result: null, reason: `Trade quality score too low (${tradeQuality.totalScore})`, fullSignal: lastSignal,
         indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown
       });
-      scheduleNext(INTERVAL_AFTER_SKIP, `Trade quality score too low (${tradeQuality.totalScore})`);
-      isRunning = false; return;
+      return scheduleNext(INTERVAL_AFTER_SKIP, `Trade quality score too low (${tradeQuality.totalScore})`);
     }
 
     // --- BUY logic ---
@@ -317,8 +283,7 @@ async function main() {
           result: null, reason: 'Insufficient balance for BUY', fullSignal: lastSignal,
           indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown
         });
-        scheduleNext(INTERVAL_AFTER_SKIP, "Insufficient balance for BUY.");
-        isRunning = false; return;
+        return scheduleNext(INTERVAL_AFTER_SKIP, "Insufficient balance for BUY.");
       }
       try {
         const result = await exchange.createMarketBuyOrder(PAIR, orderSize);
@@ -330,16 +295,15 @@ async function main() {
         });
         lastTradeTimestamp = Number(lastSignal.timestamp);
         console.log(`[DEBUG] [${lastSignal.timestamp}] BUY order submitted on ${tf}`);
-        scheduleNext(INTERVAL_AFTER_TRADE, "BUY order submitted.");
+        return scheduleNext(INTERVAL_AFTER_TRADE, "BUY order submitted.");
       } catch (err) {
         logOrder({ timestamp: lastSignal.timestamp, model: winnerModel, prediction, label,
           win_rate, dominant_periods, volatility, active_model, action: 'BUY',
           result: null, reason: 'Failed to submit BUY', error: err.message || err, fullSignal: lastSignal,
           indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown
         });
-        scheduleNext(INTERVAL_AFTER_ERROR, "Failed to submit BUY.");
+        return scheduleNext(INTERVAL_AFTER_ERROR, "Failed to submit BUY.");
       }
-      isRunning = false; return;
     }
     // Extend: SELL, STOP LOSS, TAKE PROFIT logic as needed for macro bot
 
