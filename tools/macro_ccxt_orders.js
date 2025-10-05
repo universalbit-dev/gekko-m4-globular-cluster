@@ -8,68 +8,20 @@ const fs = require('fs');
 const ccxt = require('ccxt');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const scoreRSI = require('./evaluation/score/rsi_score');
-const scoreATR = require('./evaluation/score/atr_score');
-const scoreADX = require('./evaluation/score/adx_score');
-const scoreDX = require('./evaluation/score/dx_score');
-const scoreSMA = require('./evaluation/score/sma_score');
+// --- Indicator Scorers ---
+const INDICATOR_SCORERS = {
+  RSI: require('./evaluation/score/rsi_score'),
+  ATR: require('./evaluation/score/atr_score'),
+  ADX: require('./evaluation/score/adx_score'),
+  DX:  require('./evaluation/score/dx_score'),
+  SMA: require('./evaluation/score/sma_score'),
+};
 
 const { getBestParam } = require('./getBestParams');
 const { scoreTrade } = require('./tradeQualityScore');
+
+// --- Paths ---
 const autoTuneResultsPath = path.resolve(__dirname, './evaluation/autoTune_results.json');
-
-// --- Load Auto-tuned Indicator Params ---
-let autoTuneParams = {};
-function loadAutoTuneParams() {
-  try {
-    if (fs.existsSync(autoTuneResultsPath)) {
-      autoTuneParams = JSON.parse(fs.readFileSync(autoTuneResultsPath));
-      console.log('[INFO][MACRO] Loaded auto-tuned indicator params:', autoTuneParams);
-    }
-  } catch (err) {
-    console.warn('[WARN][MACRO] Error loading autoTune_results.json:', err.message);
-  }
-}
-loadAutoTuneParams();
-fs.watchFile(autoTuneResultsPath, { interval: 60000 }, loadAutoTuneParams);
-
-// --- Helper to get best param for each indicator ---
-function getBestIndicatorParams(metric = 'profit') {
-  return {
-    RSI: { interval: autoTuneParams?.rsi?.[metric] ?? 14 },
-    ADX: { period: autoTuneParams?.adx?.[metric] ?? 14 },
-    DX:  { period: autoTuneParams?.dx?.[metric] ?? 14 },
-    ATR: { period: autoTuneParams?.atr?.[metric] ?? 14 },
-    SMA: { interval: autoTuneParams?.sma?.[metric] ?? 14 }
-  };
-}
-
-// --- Scorer mapping ---
-const INDICATOR_SCORERS = {
-  RSI: scoreRSI,
-  ATR: scoreATR,
-  ADX: scoreADX,
-  DX: scoreDX,
-  SMA: scoreSMA
-};
-
-// --- Dynamic indicator configs using auto-tuned params ---
-function buildIndicatorConfigs() {
-  const best = getBestIndicatorParams();
-  return [
-    { name: "RSI", scorer: INDICATOR_SCORERS.RSI, param: best.RSI },
-    { name: "ADX", scorer: INDICATOR_SCORERS.ADX, param: best.ADX },
-    { name: "DX",  scorer: INDICATOR_SCORERS.DX,  param: best.DX },
-    { name: "ATR", scorer: INDICATOR_SCORERS.ATR, param: best.ATR },
-    { name: "SMA", scorer: INDICATOR_SCORERS.SMA, param: best.SMA },
-  ];
-}
-
-let INDICATOR_CONFIGS = buildIndicatorConfigs();
-fs.watchFile(autoTuneResultsPath, { interval: 60000 }, () => {
-  INDICATOR_CONFIGS = buildIndicatorConfigs();
-});
-
 const LOGS_DIR = path.resolve(__dirname, './logs');
 const OHLCV_DIR = path.resolve(__dirname, './logs/json/ohlcv');
 const ORDER_LOG_PATH = path.join(LOGS_DIR, 'ccxt_order.log');
@@ -78,42 +30,6 @@ const WINNER_MODEL_PATH = path.resolve(__dirname, './challenge/model_winner.json
 // --- Timeframe selection ---
 const OHLCV_CANDLE_SIZES = (process.env.OHLCV_CANDLE_SIZE || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
 const TIMEFRAME = process.env.MACRO_TIMEFRAME || '1h';
-
-let bestParams = null;
-let strategyName = null;
-function loadBestParams() {
-  try {
-    const BACKTEST_PATH = path.resolve(__dirname, 'backtest_results.json');
-    if (fs.existsSync(BACKTEST_PATH)) {
-      const allResults = JSON.parse(fs.readFileSync(BACKTEST_PATH));
-      const tfResults = Array.isArray(allResults)
-        ? allResults.find(r => r.timeframe === TIMEFRAME)
-        : null;
-      if (tfResults && Array.isArray(tfResults.results) && tfResults.results.length > 0) {
-        const best = tfResults.results.reduce((best, curr) =>
-          curr.stats.totalPNL > best.stats.totalPNL ? curr : best, tfResults.results[0]
-        );
-        bestParams = best.params;
-        strategyName = bestParams.name || 'Unnamed';
-        console.log(`[INFO] Loaded best params for ${TIMEFRAME} from backtest_results.json:`, bestParams);
-      } else {
-        console.warn(`[WARN] No backtest params found for timeframe ${TIMEFRAME}, using .env/defaults.`);
-      }
-    } else {
-      console.warn('[WARN] backtest_results.json not found, using .env/defaults.');
-    }
-  } catch (err) {
-    console.warn('[WARN] Error loading backtest_results.json:', err.message, 'Using .env/defaults.');
-  }
-}
-loadBestParams();
-fs.watchFile(path.resolve(__dirname, '../backtest_results.json'), { interval: 5000 }, () => {
-  const prevStrategy = strategyName;
-  loadBestParams();
-  if (strategyName !== prevStrategy) {
-    console.log(`[ALERT] Strategy switched to ${strategyName} for ${TIMEFRAME}. Params:`, bestParams);
-  }
-});
 
 // --- Exchange Config ---
 const EXCHANGE = process.env.EXCHANGE || 'kraken';
@@ -129,29 +45,42 @@ const INTERVAL_AFTER_SKIP = parseInt(process.env.INTERVAL_AFTER_SKIP, 10) || 900
 const INTERVAL_AFTER_HOLD = parseInt(process.env.INTERVAL_AFTER_HOLD, 10) || 180000;
 const INTERVAL_AFTER_ERROR = parseInt(process.env.INTERVAL_AFTER_ERROR, 10) || 60000;
 
-// --- Adaptive params from backtest or .env ---
-const STOP_LOSS_PCT = (bestParams?.loss_pct !== undefined ? bestParams.loss_pct : parseFloat(process.env.STOP_LOSS_PCT)) || 0.003;
-const TAKE_PROFIT_PCT = (bestParams?.profit_pct !== undefined ? bestParams.profit_pct : parseFloat(process.env.TAKE_PROFIT_PCT)) || 0.006;
-const MIN_QUALITY = (bestParams?.trade_quality !== undefined ? bestParams.trade_quality : parseFloat(process.env.MACRO_TRADE_QUALITY_THRESHOLD)) || 70;
-const MIN_HOLD = (bestParams?.min_hold !== undefined ? bestParams.min_hold : parseInt(process.env.MIN_HOLD, 10)) || 10;
-const MAX_VOLATILITY = parseFloat(process.env.MACRO_MAX_VOLATILITY) || 100;
-const MIN_WIN_RATE = parseFloat(process.env.MACRO_MIN_WIN_RATE) || 0.2;
-
-const exchangeClass = ccxt[EXCHANGE];
-if (!exchangeClass) {
-  console.error(`[DEBUG] Exchange '${EXCHANGE}' not supported by ccxt.`);
-  process.exit(1);
-}
-const exchange = new exchangeClass({
-  apiKey: API_KEY,
-  secret: API_SECRET,
-  enableRateLimit: true,
-});
-
+// --- State ---
 let isRunning = false;
 let positionOpen = false;
 let entryPrice = null;
 let lastTradeTimestamp = 0;
+
+// --- Dynamic indicator configs using auto-tuned params ---
+function getAutoTunedParams(metric = 'profit') {
+  // Use getBestParam for each indicator and scoring type
+  return {
+    RSI: { interval: getBestParam('rsi', metric, autoTuneResultsPath) ?? 14 },
+    ADX: { period: getBestParam('adx', metric, autoTuneResultsPath) ?? 14 },
+    DX:  { period: getBestParam('dx', metric, autoTuneResultsPath) ?? 14 },
+    ATR: { period: getBestParam('atr', metric, autoTuneResultsPath) ?? 14 },
+    SMA: { interval: getBestParam('sma', metric, autoTuneResultsPath) ?? 14 },
+  };
+}
+
+let INDICATOR_CONFIGS = buildIndicatorConfigs();
+
+function buildIndicatorConfigs() {
+  const best = getAutoTunedParams();
+  return [
+    { name: "RSI", scorer: INDICATOR_SCORERS.RSI, param: best.RSI },
+    { name: "ADX", scorer: INDICATOR_SCORERS.ADX, param: best.ADX },
+    { name: "DX",  scorer: INDICATOR_SCORERS.DX,  param: best.DX },
+    { name: "ATR", scorer: INDICATOR_SCORERS.ATR, param: best.ATR },
+    { name: "SMA", scorer: INDICATOR_SCORERS.SMA, param: best.SMA },
+  ];
+}
+
+// --- Auto reload indicator configs on tune file change ---
+fs.watchFile(autoTuneResultsPath, { interval: 60000 }, () => {
+  INDICATOR_CONFIGS = buildIndicatorConfigs();
+  console.log('[INFO][MACRO] Reloaded auto-tuned indicator configs:', INDICATOR_CONFIGS);
+});
 
 // --- Utility Functions ---
 const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
@@ -196,7 +125,7 @@ function loadWinnerAnalysis() {
   catch { return {}; }
 }
 
-async function fetchTickerAndBalance() {
+async function fetchTickerAndBalance(exchange) {
   const pair = PAIR.toUpperCase();
   const [ticker, balance] = await Promise.all([
     exchange.fetchTicker(pair),
@@ -228,7 +157,7 @@ function logOrder({
     dominant_periods ? JSON.stringify(dominant_periods) : '',
     tradeQualityScore !== null ? tradeQualityScore : '',
     tradeQualityBreakdown !== null ? JSON.stringify(tradeQualityBreakdown) : '',
-    `[strategy: ${strategyName || 'default'}][tf: ${TIMEFRAME}]`
+    `[tf: ${TIMEFRAME}]`
   ].join('\t') + '\n';
   fs.appendFileSync(ORDER_LOG_PATH, logLine);
 }
@@ -250,7 +179,7 @@ function selectBestTimeframe(winnerAnalysis, candleSizes) {
     if (!info || !info.summary) continue;
     const winRate = info.summary.win_rate || 0;
     const volatility = info.recent_win?.volatility || Infinity;
-    if (info.summary.active_model === 'no_winner' || volatility > MAX_VOLATILITY) continue;
+    if (info.summary.active_model === 'no_winner' || volatility > (process.env.MACRO_MAX_VOLATILITY || 100)) continue;
     if (winRate > bestScore) {
       bestScore = winRate;
       bestTf = tf;
@@ -266,9 +195,30 @@ async function main() {
     return;
   }
   isRunning = true;
-  let nextInterval = INTERVAL_AFTER_HOLD;
 
-  console.log(`[INFO] Macrostructure bot config [${TIMEFRAME}] [strategy: ${strategyName || 'default'}]:`, {
+  // --- Exchange Instance ---
+  const exchangeClass = ccxt[EXCHANGE];
+  if (!exchangeClass) {
+    console.error(`[DEBUG] Exchange '${EXCHANGE}' not supported by ccxt.`);
+    isRunning = false;
+    return;
+  }
+  const exchange = new exchangeClass({
+    apiKey: API_KEY,
+    secret: API_SECRET,
+    enableRateLimit: true,
+  });
+
+  // --- Adaptive params from backtest or .env ---
+  // These should be updated dynamically if bestParams changes
+  const STOP_LOSS_PCT = parseFloat(process.env.STOP_LOSS_PCT) || 0.003;
+  const TAKE_PROFIT_PCT = parseFloat(process.env.TAKE_PROFIT_PCT) || 0.006;
+  const MIN_QUALITY = parseFloat(process.env.MACRO_TRADE_QUALITY_THRESHOLD) || 70;
+  const MIN_HOLD = parseInt(process.env.MIN_HOLD, 10) || 10;
+  const MAX_VOLATILITY = parseFloat(process.env.MACRO_MAX_VOLATILITY) || 100;
+  const MIN_WIN_RATE = parseFloat(process.env.MACRO_MIN_WIN_RATE) || 0.2;
+
+  console.log(`[INFO] Macrostructure bot config [${TIMEFRAME}]:`, {
     TAKE_PROFIT_PCT,
     STOP_LOSS_PCT,
     MIN_QUALITY,
@@ -278,7 +228,7 @@ async function main() {
   try {
     const signals = loadLatestSignals(OHLCV_CANDLE_SIZES, OHLCV_DIR);
     if (signals.length === 0) {
-      scheduleNext(nextInterval, "No multi-timeframe prediction signals found.");
+      scheduleNext(INTERVAL_AFTER_HOLD, "No multi-timeframe prediction signals found.");
       isRunning = false; return;
     }
 
@@ -288,7 +238,7 @@ async function main() {
     let lastSignal = signals.find(s => s.timeframe === tf)
       || signals[signals.length - 1];
     if (!lastSignal) {
-      scheduleNext(nextInterval, "No valid signal selected.");
+      scheduleNext(INTERVAL_AFTER_HOLD, "No valid signal selected.");
       isRunning = false; return;
     }
 
@@ -329,7 +279,7 @@ async function main() {
       isRunning = false; return;
     }
 
-    const { ticker, balance } = await fetchTickerAndBalance();
+    const { ticker, balance } = await fetchTickerAndBalance(exchange);
     const currentPrice = ticker.last;
     let orderSize = clamp(ORDER_AMOUNT, MIN_ALLOWED_ORDER_AMOUNT, MAX_ORDER_AMOUNT);
 
@@ -408,7 +358,7 @@ async function main() {
 
 // --- Startup ---
 (async () => {
-  console.log(`[DEBUG] Starting macro_ccxt_orders_optimized_tuning.js for timeframe ${TIMEFRAME} using multi-timeframe backtest integration [strategy: ${strategyName || 'default'}]`);
+  console.log(`[DEBUG] Starting macro_ccxt_orders_optimized_tuning.js for timeframe ${TIMEFRAME} using multi-timeframe backtest integration`);
   main();
 })();
 
