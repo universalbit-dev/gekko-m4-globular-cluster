@@ -1,56 +1,60 @@
 /**
- * Backtesting module for microstructure/macrostructure bots.
- * Simulates bot logic on historical data for parameter optimization and earning potential estimation.
- * Usage: node backtotesting.js
+ * Enhanced Backtesting: Only processes live exchange market data from ohlcv_ccxt_data*.json files.
+ * Usage: node backtesting.js
  */
 
 const fs = require('fs');
 const path = require('path');
 const { scoreTrade } = require('./tradeQualityScore');
 
-// --- CONFIG ---
-const TIMEFRAMES = ['1m', '5m', '15m', '1h'];
 const DATA_DIR = path.resolve(__dirname, 'logs/json/ohlcv');
 const OUTPUT_PATH = path.resolve(__dirname, 'backtest_results.json');
+const CSV_PATH = path.resolve(__dirname, 'backtest_trades.csv');
+const FEE_PCT = 0.0001; // Kraken fee: 0.01%
+const SLIPPAGE_PCT = 0.00005;
+const VERBOSE = process.env.BACKTEST_VERBOSE === "1";
+const TIMEFRAMES = ['1m', '5m', '15m', '1h'];
 
-// Modular indicator config
-const INDICATOR_CONFIGS = [
-  { name: "RSI", module: require('./evaluation/indicator/RSI'), param: { interval: 14 } },
-  { name: "ADX", module: require('./evaluation/indicator/ADX'), param: { period: 14 } },
-  { name: "DX",  module: require('./evaluation/indicator/DX'),  param: { period: 14 } },
-  { name: "ATR", module: require('./evaluation/indicator/ATR'), param: { period: 14 } },
-  { name: "SMA", module: require('./evaluation/indicator/SMA'), param: { interval: 14 } }
-  // Add more indicators here as needed
-];
-
-// Parameter sets to test (expand for parallel sweeps)
+// --- SCORE SYSTEMS/STRATEGY CONFIG ---
 const paramSets = [
-  { profit_pct: 0.004, loss_pct: 0.002, trade_quality: 55, min_hold: 10, name: "Conservative" },
-  { profit_pct: 0.006, loss_pct: 0.003, trade_quality: 60, min_hold: 10, name: "Aggressive" },
-  { profit_pct: 0.005, loss_pct: 0.0025, trade_quality: 58, min_hold: 12, name: "Balanced" }
+  { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 60, min_hold: 8, name: "Conservative+" },
+  { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 65, min_hold: 7, name: "Aggressive+" },
+  { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 62, min_hold: 10, name: "Balanced+" }
 ];
 
-// --- INDICATOR EVALUATION ---
-function getIndicatorScores(candles) {
-  const scores = {};
-  for (const cfg of INDICATOR_CONFIGS) {
-    const ind = new cfg.module(cfg.param);
-    const values = [];
-    for (const candle of candles) {
-      // Use .update signature as expected
-      // Most indicators accept the full candle, but RSI/SMA expect close
-      if (cfg.name === "RSI" || cfg.name === "SMA") ind.update(candle.close);
-      else ind.update(candle);
-      // Use .value, fallback to .result if not present
-      values.push(ind.value ?? ind.result ?? null);
-    }
-    scores[cfg.name] = values;
+// --- Discover only valid ccxt exchange files ---
+function discoverExchangeDataFiles() {
+  const files = fs.readdirSync(DATA_DIR)
+    .filter(f =>
+      f.startsWith('ohlcv_ccxt_data') &&
+      f.endsWith('.json')
+    );
+  // Map timeframes to their prediction/raw files
+  const found = {};
+  for (const tf of TIMEFRAMES) {
+    const pred = `ohlcv_ccxt_data_${tf}_prediction.json`;
+    const raw = `ohlcv_ccxt_data_${tf}.json`;
+    if (files.includes(pred)) found[tf] = pred;
+    else if (files.includes(raw)) found[tf] = raw;
   }
-  return scores;
+  // Include aggregate file!
+  if (files.includes('ohlcv_ccxt_data.json')) found['multi'] = 'ohlcv_ccxt_data.json';
+  return found;
 }
 
-// --- BACKTEST CORE ---
-function backtest(data, params) {
+// --- Handle aggregate file (multi-timeframe) ---
+function extractTimeframesFromAggregate(data) {
+  // Expect: { '1m': [...], '5m': [...], ... }
+  if (!data || typeof data !== 'object') return {};
+  const result = {};
+  for (const tf of TIMEFRAMES) {
+    if (Array.isArray(data[tf])) result[tf] = data[tf];
+  }
+  return result;
+}
+
+// --- Backtest core ---
+function backtest(data, params, label = '') {
   let position = null;
   let trades = [];
   let pnl = 0, wins = 0, losses = 0;
@@ -58,35 +62,34 @@ function backtest(data, params) {
   let maxDrawdown = 0;
   let equityCurve = [];
   let equity = 0;
-
-  // --- Evaluate indicators for this backtest
-  const indicatorScores = getIndicatorScores(data);
+  let signalCount = { strong_bull: 0, strong_bear: 0, other: 0 };
+  let holdTimes = [];
 
   for (let i = 0; i < data.length; i++) {
     const point = data[i];
-    const signalLabel = point.ensemble_label;
+    const signalLabel = point.ensemble_label || point.challenge_label || 'other';
     const volatility = +point.volatility || 10;
     const close = +point.close;
     const win_rate = typeof point.win_rate === 'number' ? point.win_rate : 0.5;
 
-    // You can use indicatorScores in your signals/tradeQuality if desired:
-    // Example: const rsiVal = indicatorScores.RSI[i];
-    // const adxVal = indicatorScores.ADX[i];
-    // const dxVal = indicatorScores.DX[i];
-    // const atrVal = indicatorScores.ATR[i];
-    // const smaVal = indicatorScores.SMA[i];
+    if (signalLabel === 'strong_bull') signalCount.strong_bull++;
+    else if (signalLabel === 'strong_bear') signalCount.strong_bear++;
+    else signalCount.other++;
 
     const tradeQuality = scoreTrade({
       signalStrength: getSignalScore(signalLabel),
       modelWinRate: win_rate,
       riskReward: params.profit_pct / params.loss_pct,
-      executionQuality: 90,
+      executionQuality: 95,
       volatility,
-      tradeOutcome: null,
-      // rsi: rsiVal, adx: adxVal, dx: dxVal, atr: atrVal, sma: smaVal // <== advanced scoring
+      tradeOutcome: null
     });
 
-    // Entry logic
+    if (VERBOSE) {
+      console.log(`[DEBUG][${label}][${i}] label:${signalLabel} tq:${tradeQuality.totalScore.toFixed(2)} close:${close}`);
+    }
+
+    // Entry logic (ML signals, trade quality threshold)
     if (!position && tradeQuality.totalScore >= params.trade_quality &&
         (signalLabel === 'strong_bull' || signalLabel === 'strong_bear')) {
       position = {
@@ -94,9 +97,12 @@ function backtest(data, params) {
         entry: close,
         entryIdx: i,
         quality: tradeQuality.totalScore,
-        indicators: Object.fromEntries(
-          Object.entries(indicatorScores).map(([k, arr]) => [k, arr[i]])
-        )
+        mlStats: {
+          win_rate,
+          volatility,
+          challenge_model: point.challenge_model,
+          ensemble_model: point.ensemble_model
+        }
       };
       tradeQualities.push(tradeQuality.totalScore);
     }
@@ -124,12 +130,17 @@ function backtest(data, params) {
         }
       }
       if (exit) {
-        const tradePNL = position.type === 'long'
-          ? close - position.entry
-          : position.entry - close;
+        // Kraken fee and slippage
+        const fee = FEE_PCT * position.entry + FEE_PCT * close;
+        const slippage = SLIPPAGE_PCT * position.entry;
+        let tradePNL = position.type === 'long'
+          ? close - position.entry - fee - slippage
+          : position.entry - close - fee - slippage;
         pnl += tradePNL;
         equity += tradePNL;
         if (tradePNL > 0) wins++; else losses++;
+        holdTimes.push(holdTime);
+
         trades.push({
           ...position,
           exit: close,
@@ -137,7 +148,8 @@ function backtest(data, params) {
           pnl: tradePNL,
           reason,
           signalLabel,
-          tradeQuality: position.quality
+          tradeQuality: position.quality,
+          holdTime
         });
         position = null;
       }
@@ -150,55 +162,143 @@ function backtest(data, params) {
   }
 
   const avgQuality = tradeQualities.length ? tradeQualities.reduce((a, b) => a + b, 0) / tradeQualities.length : 0;
+  const avgPNL = trades.length ? trades.reduce((a,b) => a + b.pnl, 0) / trades.length : 0;
+  const avgHoldTime = holdTimes.length ? holdTimes.reduce((a,b) => a + b, 0) / holdTimes.length : 0;
 
   return {
     params,
     trades,
-    indicatorScores, // Save for diagnostics/analytics
     stats: {
       totalPNL: pnl,
       winRate: trades.length ? wins / trades.length : 0,
       numTrades: trades.length,
       avgTradeQuality: avgQuality,
       maxDrawdown,
-      equityCurve
+      avgPNL,
+      avgHoldTime,
+      equityCurve,
+      wins,
+      losses,
+      signalCount
     }
   };
 }
 
 // --- UTILS ---
 function getSignalScore(signalLabel) {
-  return signalLabel === 'strong_bull' ? 90 : signalLabel === 'strong_bear' ? 90 : 50;
+  return signalLabel === 'strong_bull' ? 95 : signalLabel === 'strong_bear' ? 95 : 60;
+}
+
+// --- CSV EXPORT ---
+function exportTradesCSV(allResults) {
+  let allTrades = [];
+  for (const frame of allResults) {
+    for (const res of frame.results) {
+      for (const t of res.trades) {
+        allTrades.push({
+          source: frame.source,
+          strategy: res.params.name,
+          entryIdx: t.entryIdx,
+          exitIdx: t.exitIdx,
+          entry: t.entry,
+          exit: t.exit,
+          pnl: t.pnl,
+          reason: t.reason,
+          tradeQuality: t.tradeQuality,
+          holdTime: t.holdTime,
+          win_rate: t.mlStats?.win_rate || "",
+          volatility: t.mlStats?.volatility || "",
+          challenge_model: t.mlStats?.challenge_model || "",
+          ensemble_model: t.mlStats?.ensemble_model || ""
+        });
+      }
+    }
+  }
+  const header = Object.keys(allTrades[0] || {
+    source: '', strategy: '', entryIdx: '', exitIdx: '', entry: '', exit: '', pnl: '', reason: '', tradeQuality: '', holdTime: '', win_rate: '', volatility: '', challenge_model: '', ensemble_model: ''
+  }).join(',');
+  const rows = allTrades.map(x => Object.values(x).join(',')).join('\n');
+  fs.writeFileSync(CSV_PATH, header + '\n' + rows);
 }
 
 // --- MAIN ---
 function main() {
   let allResults = [];
-  for (const tf of TIMEFRAMES) {
-    const DATA_PATH = path.join(DATA_DIR, `ohlcv_ccxt_data_${tf}_prediction.json`);
-    if (!fs.existsSync(DATA_PATH)) {
-      console.error(`[ERROR] Data file not found: ${DATA_PATH}`);
-      continue;
-    }
-    const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
-    const results = paramSets.map(params => backtest(data, params));
-    allResults.push({ timeframe: tf, results });
+  const files = discoverExchangeDataFiles();
 
-    // Summary for this timeframe
-    console.log(`=== [${tf}] ===`);
+  // Process aggregate file first (multi-timeframe)
+  if (files.multi) {
+    let data;
+    try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files.multi), 'utf8')); }
+    catch { console.error(`[ERROR] Could not parse: ${files.multi}`); data = {}; }
+    const tfs = extractTimeframesFromAggregate(data);
+    for (const tf of TIMEFRAMES) {
+      const arr = tfs[tf];
+      if (!Array.isArray(arr) || arr.length === 0) continue;
+      const results = paramSets.map(params => backtest(arr, params, `aggregate:${tf}`));
+      allResults.push({ source: `aggregate:${tf}`, results });
+
+      // Summary for this tf
+      console.log(`=== [aggregate:${tf}] ===`);
+      results.forEach((r, idx) => {
+        const s = r.stats;
+        let color = "\x1b[0m";
+        if (s.totalPNL < 0) color = "\x1b[31m";
+        else if (s.totalPNL > 0) color = "\x1b[32m";
+        const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
+        console.log(
+          `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
+          ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
+          ` PNL:${s.totalPNL.toFixed(4)}` +
+          ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
+          ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
+          ` AvgPNL:${s.avgPNL.toFixed(4)}` +
+          ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
+          ` W:${s.wins} L:${s.losses}` +
+          ` Regime:${regime}` +
+          ` Signals: bull:${s.signalCount.strong_bull} bear:${s.signalCount.strong_bear} other:${s.signalCount.other}\x1b[0m`
+        );
+      });
+    }
+  }
+
+  // Process each separate file (skip aggregate if present)
+  for (const tf of TIMEFRAMES) {
+    if (!files[tf]) continue;
+    let data;
+    try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf]), 'utf8')); }
+    catch { console.error(`[ERROR] Could not parse: ${files[tf]}`); continue; }
+    if (!Array.isArray(data) || data.length === 0) continue;
+
+    const results = paramSets.map(params => backtest(data, params, files[tf]));
+    allResults.push({ source: files[tf], results });
+
+    // Summary for this file
+    console.log(`=== [${files[tf]}] ===`);
     results.forEach((r, idx) => {
       const s = r.stats;
+      let color = "\x1b[0m";
+      if (s.totalPNL < 0) color = "\x1b[31m";
+      else if (s.totalPNL > 0) color = "\x1b[32m";
+      const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
       console.log(
-        `[${r.params.name || idx}] Trades:${s.numTrades}` +
+        `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
         ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
         ` PNL:${s.totalPNL.toFixed(4)}` +
         ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
-        ` AvgQuality:${s.avgTradeQuality.toFixed(2)}`
+        ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
+        ` AvgPNL:${s.avgPNL.toFixed(4)}` +
+        ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
+        ` W:${s.wins} L:${s.losses}` +
+        ` Regime:${regime}` +
+        ` Signals: bull:${s.signalCount.strong_bull} bear:${s.signalCount.strong_bear} other:${s.signalCount.other}\x1b[0m`
       );
     });
   }
+
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(allResults, null, 2));
-  console.log('Multi-timeframe backtest complete. Results saved to', OUTPUT_PATH);
+  exportTradesCSV(allResults);
+  console.log('Full backtest complete. Results saved to', OUTPUT_PATH, 'and', CSV_PATH);
 }
 
 // --- EXPORTS for integration ---
@@ -207,15 +307,6 @@ module.exports = {
   paramSets
 };
 
-const INTERVAL_MS = 60 * 1000; // 1 minute, change as needed
-
-function continuousMain() {
-  main();
-  setTimeout(continuousMain, INTERVAL_MS);
-}
-
 if (require.main === module) {
   main();
-  // Uncomment to enable continuous run:
-  continuousMain();
 }
