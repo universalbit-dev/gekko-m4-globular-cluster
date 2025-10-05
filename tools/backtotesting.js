@@ -1,7 +1,7 @@
 /**
  * Enhanced Backtesting: Processes both prediction and raw market data from ohlcv_ccxt_data*.json files.
  * Supports mapping integer label fields to proper signal labels for backtesting.
- * Usage: node backtesting.js
+ * Usage: node backtotesting.js
  */
 
 const fs = require('fs');
