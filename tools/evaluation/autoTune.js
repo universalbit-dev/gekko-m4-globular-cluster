@@ -110,7 +110,7 @@ const config = {
       class: indicators.sma,
       paramName: 'interval',
       range: { from: 2, to: 30, step: 1 },
-      scoringList: ['abs'],
+      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
       paramsTemplate: {}
     }
     // Add more indicators here as needed...
