@@ -2,6 +2,7 @@
  * Enhanced Backtesting: Processes both prediction and raw market data from ohlcv_ccxt_data*.json files.
  * Supports mapping integer label fields to proper signal labels for backtesting.
  * Usage: node backtotesting.js
+ * To run continuously: set BACKTEST_INTERVAL_MS in env, or default to 60s.
  */
 
 const fs = require('fs');
@@ -15,6 +16,7 @@ const FEE_PCT = 0.0001; // Kraken fee: 0.01%
 const SLIPPAGE_PCT = 0.00005;
 const VERBOSE = process.env.BACKTEST_VERBOSE === "1";
 const TIMEFRAMES = ['1m', '5m', '15m', '1h'];
+const BACKTEST_INTERVAL_MS = parseInt(process.env.BACKTEST_INTERVAL_MS || "60000", 10);
 
 // --- SCORE SYSTEMS/STRATEGY CONFIG ---
 const paramSets = [
@@ -45,7 +47,6 @@ function discoverExchangeDataFiles() {
 
 // --- Handle aggregate file (multi-timeframe) ---
 function extractTimeframesFromAggregate(data) {
-  // Expect: { '1m': [...], '5m': [...], ... }
   if (!data || typeof data !== 'object') return {};
   const result = {};
   for (const tf of TIMEFRAMES) {
@@ -56,16 +57,13 @@ function extractTimeframesFromAggregate(data) {
 
 // --- Map integer labels to signal labels ---
 function getMappedSignalLabel(point) {
-  // Priority: ensemble_label/challenge_label, else map integer label
   if (point.ensemble_label) return point.ensemble_label;
   if (point.challenge_label) return point.challenge_label;
-  // Map integer fields (if present)
   if (typeof point.label !== "undefined") {
     if (point.label === 1) return "strong_bull";
     if (point.label === 2) return "strong_bear";
     return "other";
   }
-  // You may have other custom mappings here if needed
   return "other";
 }
 
@@ -146,7 +144,6 @@ function backtest(data, params, label = '') {
         }
       }
       if (exit) {
-        // Kraken fee and slippage
         const fee = FEE_PCT * position.entry + FEE_PCT * close;
         const slippage = SLIPPAGE_PCT * position.entry;
         let tradePNL = position.type === 'long'
@@ -171,7 +168,6 @@ function backtest(data, params, label = '') {
       }
     }
     equityCurve.push(equity);
-    // Drawdown calculation
     const peak = Math.max(...equityCurve);
     const dd = peak - equity;
     if (dd > maxDrawdown) maxDrawdown = dd;
@@ -259,62 +255,68 @@ function printSummary(r, idx) {
   );
 }
 
-// --- MAIN ---
-function main() {
-  let allResults = [];
-  const files = discoverExchangeDataFiles();
+// --- MAIN LOOP (continuous mode) ---
+async function runBacktestLoop() {
+  while (true) {
+    try {
+      let allResults = [];
+      const files = discoverExchangeDataFiles();
 
-  // Process aggregate file first if present
-  if (files.multi && files.multi.aggregate) {
-    let data;
-    try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files.multi.aggregate), 'utf8')); }
-    catch { console.error(`[ERROR] Could not parse: ${files.multi.aggregate}`); data = {}; }
-    const tfs = extractTimeframesFromAggregate(data);
-    for (const tf of TIMEFRAMES) {
-      const arr = tfs[tf];
-      if (!Array.isArray(arr) || arr.length === 0) continue;
-      const results = paramSets.map(params => backtest(arr, params, `aggregate:${tf}`));
-      allResults.push({ source: `aggregate:${tf}`, variant: 'AGGREGATE', results });
-
-      // Print summary
-      console.log(`=== [aggregate:${tf}: AGGREGATE] ===`);
-      results.forEach((r, idx) => printSummary(r, idx));
-    }
-  }
-
-  // Process each timeframe's prediction and raw files
-  for (const tf of TIMEFRAMES) {
-    if (!files[tf]) continue;
-
-    // Prediction file
-    if (files[tf].prediction) {
-      let data;
-      try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].prediction), 'utf8')); }
-      catch { console.error(`[ERROR] Could not parse: ${files[tf].prediction}`); data = []; }
-      if (Array.isArray(data) && data.length > 0) {
-        const results = paramSets.map(params => backtest(data, params, files[tf].prediction));
-        allResults.push({ source: files[tf].prediction, variant: 'PREDICTION', results });
-        console.log(`=== [${files[tf].prediction}: PREDICTION] ===`);
-        results.forEach((r, idx) => printSummary(r, idx));
+      // Aggregate file
+      if (files.multi && files.multi.aggregate) {
+        let data;
+        try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files.multi.aggregate), 'utf8')); }
+        catch { console.error(`[ERROR] Could not parse: ${files.multi.aggregate}`); data = {}; }
+        const tfs = extractTimeframesFromAggregate(data);
+        for (const tf of TIMEFRAMES) {
+          const arr = tfs[tf];
+          if (!Array.isArray(arr) || arr.length === 0) continue;
+          const results = paramSets.map(params => backtest(arr, params, `aggregate:${tf}`));
+          allResults.push({ source: `aggregate:${tf}`, variant: 'AGGREGATE', results });
+          console.log(`=== [aggregate:${tf}: AGGREGATE] ===`);
+          results.forEach((r, idx) => printSummary(r, idx));
+        }
       }
-    }
-    // Raw file
-    if (files[tf].raw) {
-      let data;
-      try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].raw), 'utf8')); }
-      catch { console.error(`[ERROR] Could not parse: ${files[tf].raw}`); data = []; }
-      if (Array.isArray(data) && data.length > 0) {
-        const results = paramSets.map(params => backtest(data, params, files[tf].raw));
-        allResults.push({ source: files[tf].raw, variant: 'RAW', results });
-        console.log(`=== [${files[tf].raw}: RAW] ===`);
-        results.forEach((r, idx) => printSummary(r, idx));
-      }
-    }
-  }
 
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(allResults, null, 2));
-  exportTradesCSV(allResults);
-  console.log('Full backtest complete. Results saved to', OUTPUT_PATH, 'and', CSV_PATH);
+      // Each timeframe prediction & raw
+      for (const tf of TIMEFRAMES) {
+        if (!files[tf]) continue;
+        if (files[tf].prediction) {
+          let data;
+          try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].prediction), 'utf8')); }
+          catch { console.error(`[ERROR] Could not parse: ${files[tf].prediction}`); data = []; }
+          if (Array.isArray(data) && data.length > 0) {
+            const results = paramSets.map(params => backtest(data, params, files[tf].prediction));
+            allResults.push({ source: files[tf].prediction, variant: 'PREDICTION', results });
+            console.log(`=== [${files[tf].prediction}: PREDICTION] ===`);
+            results.forEach((r, idx) => printSummary(r, idx));
+          }
+        }
+        if (files[tf].raw) {
+          let data;
+          try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].raw), 'utf8')); }
+          catch { console.error(`[ERROR] Could not parse: ${files[tf].raw}`); data = []; }
+          if (Array.isArray(data) && data.length > 0) {
+            const results = paramSets.map(params => backtest(data, params, files[tf].raw));
+            allResults.push({ source: files[tf].raw, variant: 'RAW', results });
+            console.log(`=== [${files[tf].raw}: RAW] ===`);
+            results.forEach((r, idx) => printSummary(r, idx));
+          }
+        }
+      }
+
+      fs.writeFileSync(OUTPUT_PATH, JSON.stringify(allResults, null, 2));
+      exportTradesCSV(allResults);
+      console.log('Full backtest complete. Results saved to', OUTPUT_PATH, 'and', CSV_PATH);
+
+    } catch (err) {
+      console.error('[ERROR][BACKTEST] Exception in main loop:', err);
+    }
+
+    // Wait for the interval before next run
+    console.log(`[INFO][BACKTEST] Sleeping for ${BACKTEST_INTERVAL_MS / 1000}s...`);
+    await new Promise(res => setTimeout(res, BACKTEST_INTERVAL_MS));
+  }
 }
 
 // --- EXPORTS for integration ---
@@ -323,6 +325,7 @@ module.exports = {
   paramSets
 };
 
+// --- Entry ---
 if (require.main === module) {
-  main();
+  runBacktestLoop();
 }
