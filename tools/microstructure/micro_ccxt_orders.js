@@ -2,6 +2,7 @@
  * Microstructure trading bot: modular, auto-tuned, multi-timeframe.
  * Enhanced: syncs live trading with latest backtest results for adaptive position management!
  * Executes real trades if credentials are set!
+ * Optimized: Uses only autoTune_results.json for indicator configuration and supports dynamic metric selection.
  */
 
 const path = require('path');
@@ -9,12 +10,6 @@ const fs = require('fs');
 const ccxt = require('ccxt');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-const scoreRSI = require('../evaluation/score/rsi_score');
-const scoreATR = require('../evaluation/score/atr_score');
-const scoreADX = require('../evaluation/score/adx_score');
-const scoreDX  = require('../evaluation/score/dx_score');
-const scoreSMA = require('../evaluation/score/sma_score');
-const { getBestParam } = require('../getBestParams');
 const { scoreTrade } = require('../tradeQualityScore');
 
 const autoTuneResultsPath = path.resolve(__dirname, '../evaluation/autoTune_results.json');
@@ -40,53 +35,55 @@ let isRunning = false;
 let positionOpen = false;
 let entryPrice = null;
 let lastTradeTimestamp = 0;
-
-// --- Indicator scoring configs, auto-tuned ---
-function getAutoTunedParams(metric = 'profit') {
-  return {
-    RSI: { interval: getBestParam('rsi', metric, autoTuneResultsPath) ?? 14 },
-    ADX: { period: getBestParam('adx', metric, autoTuneResultsPath) ?? 14 },
-    DX:  { period: getBestParam('dx',  metric, autoTuneResultsPath) ?? 14 },
-    ATR: { period: getBestParam('atr', metric, autoTuneResultsPath) ?? 14 },
-    SMA: { interval: getBestParam('sma', metric, autoTuneResultsPath) ?? 14 }
-  };
-}
-let INDICATOR_CONFIGS = buildIndicatorConfigs();
-function buildIndicatorConfigs() {
-  const best = getAutoTunedParams();
-  return [
-    { name: "RSI", scorer: scoreRSI, param: best.RSI },
-    { name: "ADX", scorer: scoreADX, param: best.ADX },
-    { name: "DX",  scorer: scoreDX,  param: best.DX },
-    { name: "ATR", scorer: scoreATR, param: best.ATR },
-    { name: "SMA", scorer: scoreSMA, param: best.SMA },
-  ];
-}
-fs.watchFile(autoTuneResultsPath, { interval: 60000 }, () => {
-  INDICATOR_CONFIGS = buildIndicatorConfigs();
-  console.log('[INFO][MICRO] Reloaded auto-tuned indicator configs:', INDICATOR_CONFIGS);
-});
+let autoTuneCache = null;
+let autoTuneCacheMTime = 0;
 
 // --- Utility Functions ---
 const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 
-function getIndicatorScores(tf) {
-  const scores = {};
-  for (const cfg of INDICATOR_CONFIGS) {
-    if (typeof cfg.scorer !== "function") {
-      console.warn(`[WARN] Indicator ${cfg.name} missing scorer`);
-      continue;
-    }
-    const scoreParams = {
-      symbol: MICRO_PAIR, exchange: MICRO_EXCHANGE, timeframes: [tf],
-      ...cfg.param,
-      dataDir: OHLCV_DIR
-    };
-    scores[cfg.name] = cfg.scorer(scoreParams)[tf];
+function getBestParamCached(indicator, metric, resultsPath = autoTuneResultsPath) {
+  try {
+    const stats = loadAutoTuneCache();
+    const res = stats.find(r => r.indicator === indicator && r.scoring === metric);
+    return res ? res.bestParam : null;
+  } catch {
+    return null;
   }
-  return scores;
 }
 
+function loadAutoTuneCache() {
+  // Hot reload if file changed
+  const stat = fs.statSync(autoTuneResultsPath);
+  if (!autoTuneCache || stat.mtimeMs !== autoTuneCacheMTime) {
+    autoTuneCache = JSON.parse(fs.readFileSync(autoTuneResultsPath, 'utf8'));
+    autoTuneCacheMTime = stat.mtimeMs;
+    console.log('[INFO][MICRO] Reloaded autoTune_results.json');
+  }
+  return autoTuneCache;
+}
+
+fs.watchFile(autoTuneResultsPath, { interval: 60000 }, () => {
+  autoTuneCache = null;
+});
+
+// --- Indicator Param Loader: supports multiple metrics!
+function getIndicatorParams(metric = process.env.MICRO_METRIC || 'profit') {
+  const INDICATORS = [
+    { key: 'rsi', param: 'interval', default: 14 },
+    { key: 'adx', param: 'period',   default: 14 },
+    { key: 'dx',  param: 'period',   default: 14 },
+    { key: 'atr', param: 'period',   default: 14 },
+    { key: 'sma', param: 'interval', default: 14 },
+  ];
+  const params = {};
+  for (const { key, param, default: def } of INDICATORS) {
+    const best = getBestParamCached(key, metric);
+    params[key.toUpperCase()] = { [param]: best ?? def };
+  }
+  return params;
+}
+
+// --- Load latest signals for all micro timeframes ---
 function loadLatestSignals(timeframes, dir) {
   return timeframes.map(tf => {
     const fp = path.join(dir, `ohlcv_ccxt_data_${tf}_prediction.json`);
@@ -111,7 +108,7 @@ function getLatestBacktestStats(tf, strategyName = "Aggressive+", variant = "RAW
     const results = JSON.parse(fs.readFileSync(BACKTEST_JSON_PATH, 'utf8'));
     // Find the result for this timeframe and strategy
     const tfResult = results.find(r =>
-      r.source.includes(tf) && r.variant === variant
+      r.source.includes(tf) && (!r.variant || r.variant === variant)
     );
     if (!tfResult) return null;
     const strategyResult = tfResult.results.find(x => x.params.name === strategyName);
@@ -140,7 +137,7 @@ function hasEnoughBalance(balance, action, orderSize, currentPrice) {
 
 function logOrder({
   timestamp, model, prediction, label, action, result, reason, error = null, fullSignal,
-  indicatorScores = {}, tradeQualityScore = null, tradeQualityBreakdown = null, backtestStats = null
+  indicatorParams = {}, tradeQualityScore = null, tradeQualityBreakdown = null, backtestStats = null
 }) {
   const logLine = [
     new Date().toISOString(),
@@ -148,7 +145,7 @@ function logOrder({
     error ? `ERROR: ${error}` : 'SUCCESS',
     error ? '' : JSON.stringify(result),
     reason || '', fullSignal ? JSON.stringify(fullSignal) : '',
-    JSON.stringify(indicatorScores),
+    JSON.stringify(indicatorParams),
     tradeQualityScore !== null ? tradeQualityScore : '',
     tradeQualityBreakdown !== null ? JSON.stringify(tradeQualityBreakdown) : '',
     backtestStats !== null ? JSON.stringify(backtestStats) : ''
@@ -202,8 +199,9 @@ async function main() {
       isRunning = false; return;
     }
 
-    // --- Indicator Scoring ---
-    const indicatorScores = getIndicatorScores(tf);
+    // --- Get auto-tuned indicator parameters for the selected metric ---
+    const metric = process.env.MICRO_METRIC || 'profit'; // e.g. 'profit', 'sharpe', 'hit-rate', 'abs'
+    const indicatorParams = getIndicatorParams(metric);
 
     // --- Enhanced: Get latest backtest stats for this timeframe/strategy ---
     const backtestStats = getLatestBacktestStats(tf, "Aggressive+", "RAW");
@@ -217,23 +215,22 @@ async function main() {
     // --- Trade Quality Score (pre-trade) ---
     const tradeQuality = scoreTrade({
       signalStrength: lastSignal.prediction === 'strong_bull' ? 90 : lastSignal.prediction === 'strong_bear' ? 90 : 50,
-      modelWinRate: backtestStats.winRate * 100, // use backtest winRate as modelWinRate
+      modelWinRate: backtestStats.winRate * 100,
       riskReward: 2,
       executionQuality: 90,
       volatility: 1,
       tradeOutcome: null,
-      ...Object.fromEntries(Object.entries(indicatorScores).map(([k, v]) => [`${k.toLowerCase()}Score`, v]))
+      ...Object.fromEntries(Object.entries(indicatorParams).map(([k, v]) => [`${k.toLowerCase()}Param`, v]))
     });
     console.log(`[DEBUG][MICRO] Trade Quality Score (pre-trade): ${tradeQuality.totalScore}`, tradeQuality.breakdown);
 
     // --- Sync trading to backtest regime ---
     if (backtestStats.totalPNL <= 0 || backtestStats.winRate < 0.5) {
-      // Don't trade in a negative regime!
       logOrder({
         timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
         label: lastSignal.label, action: 'SKIP', result: null,
         reason: `Backtest regime negative (PNL=${backtestStats.totalPNL}, WinRate=${backtestStats.winRate})`,
-        fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore,
+        fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore,
         tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
       });
       scheduleNext(INTERVAL_AFTER_SKIP, "Backtest regime negative.");
@@ -244,7 +241,7 @@ async function main() {
       logOrder({
         timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
         label: lastSignal.label, action: 'SKIP', result: null, reason: `Trade quality low (${tradeQuality.totalScore})`,
-        fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+        fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
       });
       scheduleNext(INTERVAL_AFTER_SKIP, `Trade quality too low (${tradeQuality.totalScore})`);
       isRunning = false; return;
@@ -255,11 +252,11 @@ async function main() {
     let orderSize = clamp(ORDER_AMOUNT, 0.0001, 0.01);
 
     // --- Simple BUY logic ---
-    if (!positionOpen && lastSignal.prediction === 'strong_bull' && indicatorScores.RSI !== null && indicatorScores.RSI < 30) {
+    if (!positionOpen && lastSignal.prediction === 'strong_bull' && canTradeNow(lastSignal.timestamp)) {
       if (!hasEnoughBalance(balance, 'BUY', orderSize, currentPrice)) {
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'BUY', result: null, reason: 'Insufficient balance for BUY',
-          fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore,
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore,
           tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
         });
         scheduleNext(INTERVAL_AFTER_SKIP, "Insufficient balance for BUY.");
@@ -270,8 +267,8 @@ async function main() {
         positionOpen = true; entryPrice = result.price || result.average || currentPrice;
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'BUY', result,
-          reason: `strong_bull & RSI < 30 for ${tf} (RSI=${indicatorScores.RSI})`,
-          fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          reason: `strong_bull & auto-tuned params for ${tf}`,
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
         });
         lastTradeTimestamp = Number(lastSignal.timestamp);
         console.log(`[DEBUG][MICRO][${lastSignal.timestamp}] BUY order submitted on ${tf}`);
@@ -279,7 +276,7 @@ async function main() {
       } catch (err) {
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'BUY', result: null, reason: 'Failed to submit BUY', error: err.message || err,
-          fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
         });
         scheduleNext(INTERVAL_AFTER_ERROR, "Failed to submit BUY.");
       }
@@ -293,7 +290,7 @@ async function main() {
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'SELL', result,
           reason: `Backtest regime negative (PNL=${backtestStats.totalPNL}, WinRate=${backtestStats.winRate}) - closing position`,
-          fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
         });
         positionOpen = false; entryPrice = null;
         lastTradeTimestamp = Number(lastSignal.timestamp);
@@ -301,7 +298,7 @@ async function main() {
       } catch (err) {
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'SELL', result: null, reason: 'Failed to submit SELL', error: err.message || err,
-          fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
         });
         scheduleNext(INTERVAL_AFTER_ERROR, "Failed to submit SELL.");
       }
@@ -310,7 +307,7 @@ async function main() {
 
     logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
       label: lastSignal.label, action: 'HOLD', result: null, reason: `No trade condition met on ${tf}`,
-      fullSignal: lastSignal, indicatorScores, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+      fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
     });
     scheduleNext(MICRO_INTERVAL, `No trade condition met on ${tf}.`);
   } catch (e) {
