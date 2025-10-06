@@ -19,6 +19,24 @@ module.exports = {
       exec_mode: 'cluster'
     },
     {
+      name: 'chart_ccxt_recognition',
+      script: 'chart/chart_ccxt_recognition.js',
+      instances: 1,
+      exec_mode: 'cluster'
+    },
+    {
+      name: 'chart_ccxt_recognition_magnitude',
+      script: 'chart/chart_ccxt_recognition_magnitude.js',
+      instances: 1,
+      exec_mode: 'cluster'
+    },
+    {
+      name: 'chart_ccxt_timeframe',
+      script: 'chart/multi_timeframe_ohlcv.js',
+      instances: 1,
+      exec_mode: 'cluster'
+    },    
+    {
       name: 'label_ohlcv',
       script: 'train/label_ohlcv.js',
       instances: 1,
