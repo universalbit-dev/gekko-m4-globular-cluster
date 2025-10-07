@@ -8,17 +8,17 @@
  *   node explorer.js          # normal fetch/update mode
  *   node explorer.js clean    # resets all ohlcv_ccxt_data*.json files to empty arrays
  */
-
+const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const fs = require('fs');
-const path = require('path');
 const ccxt = require('ccxt');
 
 const DATA_DIR = path.resolve(__dirname, './logs/json/ohlcv');
 const EXCHANGE_NAME = process.env.EXCHANGE || 'kraken';
 const PAIR = process.env.PAIR || 'BTC/EUR';
-const TIMEFRAMES = (process.env.OHLCV_CANDLE_SIZE || '1m').split(',').map(s => s.trim()).filter(Boolean); // e.g. '1m,5m,15m,1h'
-const FETCH_LIMIT = parseInt(process.env.FETCH_LIMIT) || 60;
+// Default: fetch 1m,5m,15m,1h (comma separated list in .env)
+const TIMEFRAMES = (process.env.OHLCV_CANDLE_SIZE || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
+const FETCH_LIMIT = parseInt(process.env.FETCH_LIMIT) || 200; // Fetch more candles per call for speed
 
 // --- Ensure directory exists ---
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -82,12 +82,14 @@ async function fetchAndUpdateOHLCV() {
   let exchange;
   try {
     exchange = new ccxt[EXCHANGE_NAME]({ enableRateLimit: true });
+    await exchange.loadMarkets();
   } catch (err) {
     console.error(`[Explorer] Exchange "${EXCHANGE_NAME}" not supported by ccxt.`, err);
     return;
   }
 
-  for (const tf of TIMEFRAMES) {
+  // Fetch all timeframes in parallel (for speed)
+  await Promise.all(TIMEFRAMES.map(async (tf) => {
     // Load single timeframe file
     const tfFile = path.join(DATA_DIR, `ohlcv_ccxt_data_${tf}.json`);
     let tfArr = loadJsonArray(tfFile);
@@ -105,6 +107,7 @@ async function fetchAndUpdateOHLCV() {
 
     let newRows = [];
     try {
+      // CCXT: fetchOHLCV params: symbol, timeframe, since, limit
       const candles = await exchange.fetchOHLCV(PAIR, tf, since, FETCH_LIMIT);
 
       newRows = candles
@@ -136,12 +139,17 @@ async function fetchAndUpdateOHLCV() {
         console.log(`[Explorer] No new data for ${PAIR} [${tf}] from ${EXCHANGE_NAME}`);
       }
     } catch (err) {
-      console.error(`[Explorer][${tf}] Fetch error:`, err);
+      if (err instanceof ccxt.NetworkError || err instanceof ccxt.ExchangeNotAvailable) {
+        console.warn(`[Explorer][${tf}] Network error, will retry next cycle: ${err.message}`);
+      } else if (err instanceof ccxt.DDoSProtection) {
+        console.warn(`[Explorer][${tf}] DDoS Protection/Rate limit: ${err.message}`);
+      } else {
+        console.error(`[Explorer][${tf}] Fetch error:`, err);
+      }
     }
-  }
+  }));
 }
 
 // --- Run Fetch/Update Once and then at intervals ---
 fetchAndUpdateOHLCV();
-setInterval(fetchAndUpdateOHLCV, 60 * 1000); // every minute
-
+setInterval(fetchAndUpdateOHLCV, 120 * 1000); // every 2 minute
