@@ -1,80 +1,44 @@
 module.exports = {
   apps : [
     {
-      name: 'challenge_analysis',
+      name: 'explorer ccxt data multiple timeframes data',
+      script: 'explorer.js',
+      instances: 1,
+      exec_mode: 'cluster'
+    },
+    {
+      name: 'challenge convnet and tensorflowjs',
       script: 'challenge/challenge_analysis.js',
       instances: 1,
       exec_mode: 'cluster'
     },
     {
-      name: 'challenge_log_writer',
+      name: 'challenge logger',
       script: 'challenge/challenge_log_writer.js',
       instances: 1,
       exec_mode: 'cluster'
     },
     {
-      name: 'chart_recognition',
-      script: 'chart/chart_recognition.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'chart_ccxt_recognition',
+      name: 'chart ccxt recognition',
       script: 'chart/chart_ccxt_recognition.js',
       instances: 1,
       exec_mode: 'cluster'
     },
     {
-      name: 'chart_ccxt_recognition_magnitude',
+      name: 'chart ccxt recognition multiple timeframes magnitude',
       script: 'chart/chart_ccxt_recognition_magnitude.js',
       instances: 1,
       exec_mode: 'cluster'
     },
     {
-      name: 'chart_ccxt_timeframe',
-      script: 'chart/multi_timeframe_ohlcv.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },    
-    {
-      name: 'label_ohlcv',
-      script: 'train/label_ohlcv.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'label_ohlcv_multi',
+      name: 'labeling multiple timeframes ohlcv data',
       script: 'train/label_ohlcv_multi.js',
       instances: 1,
       exec_mode: 'cluster'
     },
     {
-      name: 'pm2-tools-watchdog',
-      script: 'pm2-tools-watchdog.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'train_ccxt_ohlcv',
-      script: 'train/train_ccxt_ohlcv.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'train_ccxt_ohlcv_tf',
-      script: 'train/train_ccxt_ohlcv_tf.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'train_ohlcv',
+      name: 'train simulator ohlcv data',
       script: 'train/train_ohlcv.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'train_multi_timeframe_ohlcv',
-      script: 'train/multi_timeframe_ohlcv.js',
       instances: 1,
       exec_mode: 'cluster',
       env: {
@@ -82,20 +46,26 @@ module.exports = {
       }
     },
     {
-      name: 'explorer',
-      script: 'explorer.js',
+      name: 'train ccxt ohlcv data',
+      script: 'train/train_ccxt_ohlcv.js',
       instances: 1,
-      exec_mode: 'cluster'
+      exec_mode: 'cluster',
+      env: {
+      TF_CPP_MIN_LOG_LEVEL: '2'
+      }
+    },
+    {
+      name: 'train ccxt ohlcv tf',
+      script: 'train/train_ccxt_ohlcv_tf.js',
+      instances: 1,
+      exec_mode: 'cluster',
+      env: {
+      TF_CPP_MIN_LOG_LEVEL: '2'
+    }
     },
     {
       name: 'macrostructure',
       script: 'macro_ccxt_orders.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'backtesting',
-      script: 'backtotesting.js',
       instances: 1,
       exec_mode: 'cluster'
     },
@@ -106,20 +76,14 @@ module.exports = {
       exec_mode: 'cluster'
     },
     {
-      name: 'index',
-      script: 'microstructure/index.js',
-      instances: 1,
-      exec_mode: 'fork'
-    },
-    {
-      name: 'evaluation',
-      script: 'evaluation/evaluate.js',
+      name: 'backtest',
+      script: 'backtotesting.js',
       instances: 1,
       exec_mode: 'cluster'
     },
     {
-      name: 'autoTune',
-      script: 'evaluation/autoTune.js',
+      name: 'CPU watchdog',
+      script: 'pm2-tools-watchdog.js',
       instances: 1,
       exec_mode: 'cluster'
     }
