@@ -45,17 +45,6 @@ module.exports = {
       }
     },
     {
-      name: "multi_timeframe_ohlcv",
-      script: "multi_timeframe_ohlcv.js",
-      instances: "1",
-      exec_mode: "cluster",
-      cwd: __dirname,
-      watch: false,
-      env: {
-        NODE_ENV: "production"
-      }
-    },
-    {
       name: "label_ohlcv",
       script: "label_ohlcv.js",
       instances: "1",
