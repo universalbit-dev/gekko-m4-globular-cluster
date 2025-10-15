@@ -4,6 +4,7 @@
  * - Robust latest-model discovery per timeframe
  * - Handles predictions for all available models
  * - Outputs enhanced prediction JSON per timeframe
+ * - Writes concise macrostructure signals to macro_signal.log for macro bots
  * - Runs at interval (MULTI_INTERVAL_MS)
  */
 
@@ -14,11 +15,18 @@ const convnetjs = require('../../core/convnet.js');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const OHLCV_DIR = path.resolve(__dirname, '../logs/json/ohlcv');
+const LOG_DIR = path.resolve(__dirname, '../logs');
+const MACRO_SIGNAL_LOG = path.join(LOG_DIR, 'macro_signal.log');
 const TIMEFRAMES = (process.env.TRAIN_OHLCV_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
 const TF_MODEL_ROOT = path.resolve(__dirname, '../trained/trained_ccxt_ohlcv_tf');
 const CONVNET_MODEL_ROOT = path.resolve(__dirname, '../trained/trained_ccxt_ohlcv');
 const EPSILON = 1e-8;
-const MULTI_INTERVAL_MS = parseInt(process.env.MULTI_INTERVAL_MS) || 3600000; // Default: 1 minute
+const MULTI_INTERVAL_MS = parseInt(process.env.MULTI_INTERVAL_MS) || 3600000; // Default: 1 hour
+
+// --- Ensure log directory exists ---
+function ensureLogDir() {
+  if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
+}
 
 // --- TensorFlow Loader Utilities ---
 function findLatestTfModelDir(tfFrame) {
@@ -135,6 +143,10 @@ function predictTensorFlow(model, candle) {
 // --- Main Recognition Function ---
 async function runRecognitionMulti() {
   console.log(`[Multi-timeframe OHLCV] MULTI_INTERVAL_MS: ${MULTI_INTERVAL_MS}`);
+  ensureLogDir(); // Ensure logs dir exists for macro_signal.log
+
+  const macroSignals = {}; // Collect latest signals for all timeframes
+
   const convnetModel = loadConvNetModel();
   if (!convnetModel) console.log(`[WARN] ConvNetJS model not found. Skipping ConvNet predictions.`);
   for (const tf of TIMEFRAMES) {
@@ -198,6 +210,34 @@ async function runRecognitionMulti() {
     } catch (e) {
       console.error(`[ERROR] Failed to write prediction JSON for ${tf}:`, e);
     }
+
+    // Macro signal logging: log latest (last) candle's signal for this timeframe
+    if (enhancedCandles.length > 0) {
+      const lastCandle = enhancedCandles[enhancedCandles.length - 1];
+      macroSignals[tf] = {
+        timestamp: lastCandle.timestamp || null,
+        close: lastCandle.close,
+        ensemble_label: lastCandle.ensemble_label,
+        prediction_convnet: lastCandle.prediction_convnet,
+        prediction_tf: lastCandle.prediction_tf,
+        timeframe: tf,
+        logged_at: new Date().toISOString()
+      };
+    }
+  }
+
+  // --- Write macro signals to macro_signal.log ---
+  try {
+    Object.values(macroSignals).forEach(sig => {
+      fs.appendFileSync(
+        MACRO_SIGNAL_LOG,
+        JSON.stringify(sig) + "\n"
+      );
+    });
+    if (Object.keys(macroSignals).length)
+      console.log(`[chart_c] Appended macro signals for TFs: ${Object.keys(macroSignals).join(', ')} to macro_signal.log`);
+  } catch (e) {
+    console.error(`[ERROR] Failed to write macro_signal.log:`, e);
   }
 }
 
