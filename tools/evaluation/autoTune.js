@@ -1,45 +1,34 @@
 /**
  * autoTune.js
- * Modular auto-tuning of indicator parameters with multiple scoring methods.
- * Runs ONCE or continuously, controlled by AUTOTUNE_INTERVAL_MS (.env), with INTERVAL_MS as fallback.
- * Reads .env at the top for robust environment variable loading.
+ * Modular auto-tuning of indicator parameters with robust fallback and extensibility.
+ * Runs ONCE or continuously (AUTOTUNE_INTERVAL_MS from .env).
  */
 
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-// --- Import all indicators here ---
 const indicators = {
   rsi: require('./indicator/RSI.js'),
   atr: require('./indicator/ATR.js'),
   adx: require('./indicator/ADX.js'),
-  dx: require('./indicator/DX.js'),
+  dx:  require('./indicator/DX.js'),
   sma: require('./indicator/SMA.js')
 };
 
-// --- Interval config ---
 const AUTOTUNE_INTERVAL_MS = parseInt(process.env.AUTOTUNE_INTERVAL_MS || process.env.INTERVAL_MS || '0', 10);
 
 // --- Scoring helpers ---
-function absScore(values) {
-  return values.reduce((sum, v) => sum + (v == null ? 0 : Math.abs(v)), 0);
-}
-
+function absScore(values) { return values.reduce((sum, v) => sum + (v == null ? 0 : Math.abs(v)), 0); }
 function profitScore(candles, signals, params) {
   let position = 0, entry = 0, profit = 0;
   for (let i = 1; i < signals.length; ++i) {
-    if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) {
-      position = 1; entry = candles[i].close;
-    }
-    if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) {
-      profit += candles[i].close - entry; position = 0;
-    }
+    if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) { position = 1; entry = candles[i].close; }
+    if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) { profit += candles[i].close - entry; position = 0; }
   }
   if (position) profit += candles[candles.length - 1].close - entry;
   return profit;
 }
-
 function sharpeScore(returns) {
   if (!returns.length) return 0;
   const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
@@ -47,22 +36,16 @@ function sharpeScore(returns) {
   const stddev = Math.sqrt(variance);
   return stddev === 0 ? 0 : mean / stddev;
 }
-
 function hitRateScore(trades) {
   if (!trades.length) return 0;
   const wins = trades.filter(t => t > 0).length;
   return wins / trades.length;
 }
-
 function simulateTrades(candles, signals, params) {
   let position = 0, entry = 0, trades = [];
   for (let i = 1; i < signals.length; ++i) {
-    if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) {
-      position = 1; entry = candles[i].close;
-    }
-    if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) {
-      trades.push(candles[i].close - entry); position = 0;
-    }
+    if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) { position = 1; entry = candles[i].close; }
+    if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) { trades.push(candles[i].close - entry); position = 0; }
   }
   if (position) trades.push(candles[candles.length - 1].close - entry);
   return trades;
@@ -73,59 +56,21 @@ const config = {
   dataPath: '../logs/json/ohlcv/ohlcv_ccxt_data.json',
   resultsPath: './autoTune_results.json',
   indicators: [
-    {
-      name: 'rsi',
-      class: indicators.rsi,
-      paramName: 'interval',
-      range: { from: 2, to: 30, step: 1 },
-      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
-      paramsTemplate: { buyLevel: 30, sellLevel: 70 }
-    },
-    {
-      name: 'atr',
-      class: indicators.atr,
-      paramName: 'period',
-      range: { from: 2, to: 30, step: 1 },
-      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
-      paramsTemplate: { buyLevel: 50, sellLevel: 200 }
-    },
-    {
-      name: 'adx',
-      class: indicators.adx,
-      paramName: 'period',
-      range: { from: 2, to: 30, step: 1 },
-      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
-      paramsTemplate: { buyLevel: 20, sellLevel: 50 }
-    },
-    {
-      name: 'dx',
-      class: indicators.dx,
-      paramName: 'period',
-      range: { from: 2, to: 30, step: 1 },
-      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
-      paramsTemplate: { buyLevel: 20, sellLevel: 50 }
-    },
-    {
-      name: 'sma',
-      class: indicators.sma,
-      paramName: 'interval',
-      range: { from: 2, to: 30, step: 1 },
-      scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'],
-      paramsTemplate: {}
-    }
-    // Add more indicators here as needed...
-  ],
+    { name: 'rsi', class: indicators.rsi, paramName: 'interval', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 30, sellLevel: 70 }, default: 14 },
+    { name: 'atr', class: indicators.atr, paramName: 'period', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 50, sellLevel: 200 }, default: 14 },
+    { name: 'adx', class: indicators.adx, paramName: 'period', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 20, sellLevel: 50 }, default: 14 },
+    { name: 'dx',  class: indicators.dx,  paramName: 'period', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 20, sellLevel: 50 }, default: 14 },
+    { name: 'sma', class: indicators.sma, paramName: 'interval', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: {}, default: 14 }
+  ]
 };
 
-// --- Load OHLCV data ---
 function loadData(dataPath) {
   const fullPath = path.resolve(__dirname, dataPath);
+  if (!fs.existsSync(fullPath)) throw new Error(`OHLCV data not found: ${fullPath}`);
   return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
 }
 
-function* paramRange({ from, to, step }) {
-  for (let v = from; v <= to; v += step) yield v;
-}
+function* paramRange({ from, to, step }) { for (let v = from; v <= to; v += step) yield v; }
 
 const scoringMethods = {
   abs: (candles, values, params) => absScore(values),
@@ -153,12 +98,8 @@ function autoTuneIndicator(indConfig, candles) {
       const values = [];
       for (const c of candles) {
         try {
-          // Use .update() signature as expected by indicator
-          if (name === 'rsi' || name === 'sma') {
-            indicator.update(c.close);
-          } else {
-            indicator.update(c);
-          }
+          if (name === 'rsi' || name === 'sma') indicator.update(c.close);
+          else indicator.update(c);
           values.push(indicator.value ?? indicator.result ?? null);
         } catch (e) { continue; }
       }
@@ -167,11 +108,7 @@ function autoTuneIndicator(indConfig, candles) {
       let extra = {};
       if (scoring === 'hit-rate') {
         const trades = simulateTrades(candles, values, params);
-        extra = {
-          totalTrades: trades.length,
-          wins: trades.filter(t => t > 0).length,
-          losses: trades.filter(t => t <= 0).length
-        };
+        extra = { totalTrades: trades.length, wins: trades.filter(t => t > 0).length, losses: trades.filter(t => t <= 0).length };
       }
 
       if (bestScore === null || score > bestScore) {
@@ -197,7 +134,13 @@ function autoTuneIndicator(indConfig, candles) {
 }
 
 function runAutoTune() {
-  const candles = loadData(config.dataPath);
+  let candles;
+  try {
+    candles = loadData(config.dataPath);
+  } catch (e) {
+    console.error(`[AUTOTUNE][ERROR] ${e.message}`);
+    return;
+  }
   const results = [];
   for (const ind of config.indicators) {
     const bestByScoring = autoTuneIndicator(ind, candles);
@@ -209,7 +152,10 @@ function runAutoTune() {
       );
     }
   }
-  fs.writeFileSync(config.resultsPath, JSON.stringify(results, null, 2));
+  // Atomically write results
+  const tmpPath = config.resultsPath + '.tmp';
+  fs.writeFileSync(tmpPath, JSON.stringify(results, null, 2));
+  fs.renameSync(tmpPath, config.resultsPath);
   console.log(`[AUTOTUNE] Auto-tune complete. Results saved to ${config.resultsPath}`);
 }
 
