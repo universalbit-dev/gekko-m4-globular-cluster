@@ -152,4 +152,4 @@ async function fetchAndUpdateOHLCV() {
 
 // --- Run Fetch/Update Once and then at intervals ---
 fetchAndUpdateOHLCV();
-setInterval(fetchAndUpdateOHLCV, 120 * 1000); // every 2 minute
+setInterval(fetchAndUpdateOHLCV, 120 * 1000); // every minute
