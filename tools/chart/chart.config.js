@@ -34,8 +34,8 @@ module.exports = {
       }
     },
     {
-      name: "multi_timeframe_ohlcv",
-      script: "multi_timeframe_ohlcv.js",
+      name: "chart_ccxt_recognition_multi",
+      script: "chart_ccxt_multi.js",
       instances: 1,
       exec_mode: "cluster",
       cwd: __dirname,
