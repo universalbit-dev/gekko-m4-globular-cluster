@@ -2,7 +2,7 @@
  * RSI Bull and Bear + ADX modifier with Fibonacci Analysis
  * Functional version for macro/microstructure integration.
  * (CC-BY-SA 4.0) Tommie Hansen, enhanced by universalbit-dev
- */
+*/
 
 const RSI = require('../indicator/RSI.js');
 const ADX = require('../indicator/ADX.js');
