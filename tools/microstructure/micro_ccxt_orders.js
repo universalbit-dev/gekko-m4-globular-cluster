@@ -3,6 +3,13 @@
  * Enhanced: syncs live trading with latest backtest results for adaptive position management!
  * Executes real trades if credentials are set!
  * Optimized: Uses only autoTune_results.json for indicator configuration and supports dynamic metric selection.
+ * Robust: Never crashes or gets stuck. Recoverable after log cleaning or file errors.
+ * Diagnostics: Tracks cycles, last error, and last trade for runtime visibility.
+ * Improvements:
+ * - Enhanced backtest stats diagnostics (pinpoints missing tf, variant, or strategy)
+ * - Logs possible causes for missing stats
+ * - Reports available strategies for each timeframe/variant when missing
+ * - Prints a summary of last N cycles and errors
  */
 
 const path = require('path');
@@ -15,8 +22,7 @@ const { scoreTrade } = require('../tradeQualityScore');
 const autoTuneResultsPath = path.resolve(__dirname, '../evaluation/autoTune_results.json');
 const OHLCV_DIR = path.resolve(__dirname, '../logs/json/ohlcv');
 const ORDER_LOG_PATH = path.resolve(__dirname, '../logs/micro_ccxt_orders.log');
-const BACKTEST_JSON_PATH = path.resolve(__dirname, '../backtest_results.json');
-const BACKTEST_CSV_PATH = path.resolve(__dirname, '../backtest_trades.csv');
+const BACKTEST_JSON_PATH = path.resolve(__dirname, '../backtest/backtest_results.json');
 
 const MICRO_TIMEFRAMES = (process.env.MICRO_TIMEFRAMES || '1m,5m,15m').split(',').map(s => s.trim()).filter(Boolean);
 const MICRO_PAIR = process.env.MICRO_PAIR || process.env.PAIR || 'BTC/EUR';
@@ -26,6 +32,10 @@ const MICRO_INTERVAL = parseInt(process.env.MICRO_INTERVAL_MS, 10) || 300000;
 
 const API_KEY    = process.env.KEY    || '';
 const API_SECRET = process.env.SECRET || '';
+
+const STRATEGY = process.env.MICRO_STRATEGY || '15m Balanced+';
+const VARIANT  = process.env.MICRO_VARIANT  || 'PREDICTION';
+const METRIC   = process.env.MICRO_METRIC   || 'hit-rate';
 
 const INTERVAL_AFTER_TRADE = 30000;
 const INTERVAL_AFTER_SKIP  = 60000;
@@ -37,37 +47,42 @@ let entryPrice = null;
 let lastTradeTimestamp = 0;
 let autoTuneCache = null;
 let autoTuneCacheMTime = 0;
+let diagnostics = { cycles: 0, lastError: null, lastTrade: null, history: [] };
 
 // --- Utility Functions ---
 const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 
-function getBestParamCached(indicator, metric, resultsPath = autoTuneResultsPath) {
+function safeJsonRead(filePath, fallback = null) {
   try {
-    const stats = loadAutoTuneCache();
-    const res = stats.find(r => r.indicator === indicator && r.scoring === metric);
-    return res ? res.bestParam : null;
-  } catch {
-    return null;
+    if (!fs.existsSync(filePath)) return fallback;
+    const text = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(text);
+  } catch (err) {
+    console.warn(`[MICRO][WARN] Failed to read/parse ${filePath}:`, err);
+    return fallback;
   }
 }
 
 function loadAutoTuneCache() {
-  // Hot reload if file changed
-  const stat = fs.statSync(autoTuneResultsPath);
-  if (!autoTuneCache || stat.mtimeMs !== autoTuneCacheMTime) {
-    autoTuneCache = JSON.parse(fs.readFileSync(autoTuneResultsPath, 'utf8'));
-    autoTuneCacheMTime = stat.mtimeMs;
-    console.log('[INFO][MICRO] Reloaded autoTune_results.json');
+  try {
+    const stat = fs.statSync(autoTuneResultsPath);
+    if (!autoTuneCache || stat.mtimeMs !== autoTuneCacheMTime) {
+      autoTuneCache = JSON.parse(fs.readFileSync(autoTuneResultsPath, 'utf8'));
+      autoTuneCacheMTime = stat.mtimeMs;
+      console.log('[MICRO][INFO] Reloaded autoTune_results.json');
+    }
+    return autoTuneCache;
+  } catch (err) {
+    console.warn('[MICRO][WARN] Could not load autoTune_results.json:', err);
+    return [];
   }
-  return autoTuneCache;
 }
 
 fs.watchFile(autoTuneResultsPath, { interval: 60000 }, () => {
   autoTuneCache = null;
 });
 
-// --- Indicator Param Loader: supports multiple metrics!
-function getIndicatorParams(metric = process.env.MICRO_METRIC || 'profit') {
+function getIndicatorParams(metric = METRIC) {
   const INDICATORS = [
     { key: 'rsi', param: 'interval', default: 14 },
     { key: 'adx', param: 'period',   default: 14 },
@@ -75,57 +90,78 @@ function getIndicatorParams(metric = process.env.MICRO_METRIC || 'profit') {
     { key: 'atr', param: 'period',   default: 14 },
     { key: 'sma', param: 'interval', default: 14 },
   ];
+  const stats = loadAutoTuneCache();
   const params = {};
   for (const { key, param, default: def } of INDICATORS) {
-    const best = getBestParamCached(key, metric);
-    params[key.toUpperCase()] = { [param]: best ?? def };
+    const res = stats.find(r => r.indicator === key && r.scoring === metric);
+    params[key.toUpperCase()] = { [param]: res ? res.bestParam : def };
   }
   return params;
 }
 
-// --- Load latest signals for all micro timeframes ---
 function loadLatestSignals(timeframes, dir) {
   return timeframes.map(tf => {
     const fp = path.join(dir, `ohlcv_ccxt_data_${tf}_prediction.json`);
-    if (!fs.existsSync(fp)) return null;
-    try {
-      const arr = JSON.parse(fs.readFileSync(fp, 'utf8'));
-      if (arr.length > 0) {
-        const last = arr[arr.length - 1];
-        last.timeframe = tf;
-        return last;
-      }
-    } catch (err) {
-      console.warn(`[DEBUG] [SIGNAL LOAD] Error reading ${fp}:`, err);
+    const arr = safeJsonRead(fp, []);
+    if (Array.isArray(arr) && arr.length > 0) {
+      const last = arr[arr.length - 1];
+      last.timeframe = tf;
+      return last;
     }
     return null;
   }).filter(Boolean);
 }
 
-// --- Enhanced: Read latest backtest stats for microstructure logic ---
-function getLatestBacktestStats(tf, strategyName = "Aggressive+", variant = "RAW") {
-  try {
-    const results = JSON.parse(fs.readFileSync(BACKTEST_JSON_PATH, 'utf8'));
-    // Find the result for this timeframe and strategy
-    const tfResult = results.find(r =>
-      r.source.includes(tf) && (!r.variant || r.variant === variant)
-    );
-    if (!tfResult) return null;
-    const strategyResult = tfResult.results.find(x => x.params.name === strategyName);
-    return strategyResult ? strategyResult.stats : null;
-  } catch (err) {
-    console.warn(`[WARN] Could not read backtest_results.json:`, err);
+// --- Enhanced backtest stats diagnostics ---
+function getLatestBacktestStats(tf, strategyName = STRATEGY, variant = VARIANT, diagnosticsRef = null) {
+  const results = safeJsonRead(BACKTEST_JSON_PATH, []);
+  if (!Array.isArray(results) || results.length === 0) {
+    if (diagnosticsRef) diagnosticsRef.lastError = {stage: 'backtest', message: `Backtest results file missing or empty.`};
     return null;
   }
+  // Find tf/variant
+  const tfResult = results.find(r =>
+    r.source && r.source.includes(tf) && (!r.variant || r.variant === variant)
+  );
+  if (!tfResult) {
+    if (diagnosticsRef) diagnosticsRef.lastError = {
+      stage: 'backtest',
+      message: `No entry for timeframe [${tf}] and variant [${variant}] in backtest results. (Sources found: ${results.map(x => x.source).join(', ')})`
+    };
+    return null;
+  }
+  // Find strategy
+  const stratResult = tfResult.results.find(x => x.params.name === strategyName);
+  if (!stratResult) {
+    if (diagnosticsRef) diagnosticsRef.lastError = {
+      stage: 'backtest',
+      message: `No strategy "${strategyName}" found for [${tf}] [${variant}]. Available: ${tfResult.results.map(r=>r.params.name).join(', ')}`
+    };
+    return null;
+  }
+  // Zero trades
+  if (!stratResult.stats || stratResult.stats.numTrades === 0) {
+    if (diagnosticsRef) diagnosticsRef.lastError = {
+      stage: 'backtest',
+      message: `Stats present for [${tf}] [${strategyName}] [${variant}], but no trades executed. Lower threshold or check signal quality.`
+    };
+    return null;
+  }
+  // All good
+  return stratResult.stats;
 }
 
 async function fetchTickerAndBalance(exchange) {
-  const pair = MICRO_PAIR.toUpperCase();
-  const [ticker, balance] = await Promise.all([
-    exchange.fetchTicker(pair),
-    exchange.fetchBalance()
-  ]);
-  return { ticker, balance };
+  try {
+    const pair = MICRO_PAIR.toUpperCase();
+    const [ticker, balance] = await Promise.all([
+      exchange.fetchTicker(pair),
+      exchange.fetchBalance()
+    ]);
+    return { ticker, balance };
+  } catch (err) {
+    throw new Error('Failed to fetch ticker or balance: ' + err.message);
+  }
 }
 
 function hasEnoughBalance(balance, action, orderSize, currentPrice) {
@@ -137,7 +173,7 @@ function hasEnoughBalance(balance, action, orderSize, currentPrice) {
 
 function logOrder({
   timestamp, model, prediction, label, action, result, reason, error = null, fullSignal,
-  indicatorParams = {}, tradeQualityScore = null, tradeQualityBreakdown = null, backtestStats = null
+  indicatorParams = {}, tradeQualityScore = null, tradeQualityBreakdown = null, backtestStats = null, diagnosticsExtra = null
 }) {
   const logLine = [
     new Date().toISOString(),
@@ -148,7 +184,8 @@ function logOrder({
     JSON.stringify(indicatorParams),
     tradeQualityScore !== null ? tradeQualityScore : '',
     tradeQualityBreakdown !== null ? JSON.stringify(tradeQualityBreakdown) : '',
-    backtestStats !== null ? JSON.stringify(backtestStats) : ''
+    backtestStats !== null ? JSON.stringify(backtestStats) : '',
+    diagnosticsExtra !== null ? JSON.stringify(diagnosticsExtra) : ''
   ].join('\t') + '\n';
   fs.appendFileSync(ORDER_LOG_PATH, logLine);
 }
@@ -158,35 +195,64 @@ function canTradeNow(currentTimestamp) {
 }
 
 function scheduleNext(ms, reason = "") {
-  if (reason) console.log(`[DEBUG] Scheduling next run in ${ms / 1000}s. Reason: ${reason}`);
-  else console.log(`[DEBUG] Scheduling next run in ${ms / 1000}s`);
+  if (reason) console.log(`[MICRO][INFO] Next run in ${ms / 1000}s. Reason: ${reason}`);
   setTimeout(main, ms);
+}
+
+function printDiagnostics() {
+  diagnostics.history = diagnostics.history || [];
+  diagnostics.history.push({
+    cycle: diagnostics.cycles,
+    error: diagnostics.lastError,
+    lastTrade: diagnostics.lastTrade,
+    ts: new Date().toISOString()
+  });
+  if (diagnostics.history.length > 10) diagnostics.history = diagnostics.history.slice(-10);
+  console.log(`[MICRO][DIAGNOSTICS]`, {
+  cycles: diagnostics.cycles,
+  lastError: diagnostics.lastError,
+  lastTrade: diagnostics.lastTrade,
+  timestamp: new Date().toISOString(),
+  recentErrors: diagnostics.history.map(h => ({
+    cycle: h.cycle,
+    error: h.error ? JSON.stringify(h.error) : null,
+    lastTrade: h.lastTrade,
+    ts: h.ts
+  }))
+});
 }
 
 // --- Main Trading Logic ---
 async function main() {
+  diagnostics.cycles++;
   if (isRunning) {
-    console.warn(`[DEBUG] Previous cycle still running, skipping at ${new Date().toISOString()}.`);
+    console.warn(`[MICRO][WARN] Previous cycle still running, skipping at ${new Date().toISOString()}.`);
     return;
   }
   isRunning = true;
 
-  // --- Exchange Instance ---
-  const exchangeClass = ccxt[MICRO_EXCHANGE];
-  if (!exchangeClass) {
-    console.error(`[DEBUG] Exchange '${MICRO_EXCHANGE}' not supported by ccxt.`);
-    isRunning = false;
-    return;
+  let exchange;
+  try {
+    const ExchangeClass = ccxt[MICRO_EXCHANGE];
+    if (!ExchangeClass) throw new Error(`Exchange '${MICRO_EXCHANGE}' not supported by ccxt.`);
+    exchange = new ExchangeClass({
+      apiKey: API_KEY,
+      secret: API_SECRET,
+      enableRateLimit: true,
+    });
+  } catch (err) {
+    diagnostics.lastError = {stage: 'exchange_init', message: err.message || err};
+    console.error(`[MICRO][ERROR] Exchange init failed:`, err);
+    printDiagnostics();
+    scheduleNext(INTERVAL_AFTER_ERROR, "Exchange init failed.");
+    isRunning = false; return;
   }
-  const exchange = new exchangeClass({
-    apiKey: API_KEY,
-    secret: API_SECRET,
-    enableRateLimit: true,
-  });
 
   try {
     const signals = loadLatestSignals(MICRO_TIMEFRAMES, OHLCV_DIR);
     if (signals.length === 0) {
+      diagnostics.lastError = {stage: 'signal', message: 'No prediction signals found'};
+      printDiagnostics();
       scheduleNext(MICRO_INTERVAL, "No prediction signals found.");
       isRunning = false; return;
     }
@@ -195,34 +261,35 @@ async function main() {
     const tf        = MICRO_TIMEFRAMES[0];
     const lastSignal = signals.find(s => s.timeframe === tf) || signals[signals.length - 1];
     if (!lastSignal || !lastSignal.timestamp || typeof lastSignal.close === 'undefined') {
+      diagnostics.lastError = {stage: 'signal', message: 'No valid signal'};
+      printDiagnostics();
       scheduleNext(MICRO_INTERVAL, "No valid signal.");
       isRunning = false; return;
     }
 
     // --- Get auto-tuned indicator parameters for the selected metric ---
-    const metric = process.env.MICRO_METRIC || 'profit'; // e.g. 'profit', 'sharpe', 'hit-rate', 'abs'
-    const indicatorParams = getIndicatorParams(metric);
+    const indicatorParams = getIndicatorParams(METRIC);
 
     // --- Enhanced: Get latest backtest stats for this timeframe/strategy ---
-    const backtestStats = getLatestBacktestStats(tf, "Aggressive+", "RAW");
+    const backtestStats = getLatestBacktestStats(tf, STRATEGY, VARIANT, diagnostics);
     if (!backtestStats) {
-      console.warn(`[WARN][MICRO] No backtest stats for ${tf} Aggressive+ RAW, skipping trade.`);
+      printDiagnostics();
       scheduleNext(MICRO_INTERVAL, "No backtest stats.");
       isRunning = false; return;
     }
-    console.log(`[DEBUG][MICRO] Latest backtest stats for ${tf} Aggressive+ RAW:`, backtestStats);
+    console.log(`[MICRO][DEBUG] Latest backtest stats for ${tf} ${STRATEGY} ${VARIANT}:`, backtestStats);
 
     // --- Trade Quality Score (pre-trade) ---
     const tradeQuality = scoreTrade({
       signalStrength: lastSignal.prediction === 'strong_bull' ? 90 : lastSignal.prediction === 'strong_bear' ? 90 : 50,
-      modelWinRate: backtestStats.winRate * 100,
+      modelWinRate: backtestStats.winRate,
       riskReward: 2,
       executionQuality: 90,
       volatility: 1,
       tradeOutcome: null,
       ...Object.fromEntries(Object.entries(indicatorParams).map(([k, v]) => [`${k.toLowerCase()}Param`, v]))
     });
-    console.log(`[DEBUG][MICRO] Trade Quality Score (pre-trade): ${tradeQuality.totalScore}`, tradeQuality.breakdown);
+    console.log(`[MICRO][DEBUG] Trade Quality Score (pre-trade): ${tradeQuality.totalScore}`, tradeQuality.breakdown);
 
     // --- Sync trading to backtest regime ---
     if (backtestStats.totalPNL <= 0 || backtestStats.winRate < 0.5) {
@@ -231,8 +298,9 @@ async function main() {
         label: lastSignal.label, action: 'SKIP', result: null,
         reason: `Backtest regime negative (PNL=${backtestStats.totalPNL}, WinRate=${backtestStats.winRate})`,
         fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore,
-        tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+        tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
       });
+      printDiagnostics();
       scheduleNext(INTERVAL_AFTER_SKIP, "Backtest regime negative.");
       isRunning = false; return;
     }
@@ -241,8 +309,9 @@ async function main() {
       logOrder({
         timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
         label: lastSignal.label, action: 'SKIP', result: null, reason: `Trade quality low (${tradeQuality.totalScore})`,
-        fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+        fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
       });
+      printDiagnostics();
       scheduleNext(INTERVAL_AFTER_SKIP, `Trade quality too low (${tradeQuality.totalScore})`);
       isRunning = false; return;
     }
@@ -257,27 +326,32 @@ async function main() {
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'BUY', result: null, reason: 'Insufficient balance for BUY',
           fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore,
-          tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
         });
+        printDiagnostics();
         scheduleNext(INTERVAL_AFTER_SKIP, "Insufficient balance for BUY.");
         isRunning = false; return;
       }
       try {
         const result = await exchange.createMarketBuyOrder(MICRO_PAIR, orderSize);
         positionOpen = true; entryPrice = result.price || result.average || currentPrice;
+        diagnostics.lastTrade = {action: 'BUY', timestamp: lastSignal.timestamp, tf};
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'BUY', result,
           reason: `strong_bull & auto-tuned params for ${tf}`,
-          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
         });
         lastTradeTimestamp = Number(lastSignal.timestamp);
-        console.log(`[DEBUG][MICRO][${lastSignal.timestamp}] BUY order submitted on ${tf}`);
+        printDiagnostics();
+        console.log(`[MICRO][INFO][${lastSignal.timestamp}] BUY order submitted on ${tf}`);
         scheduleNext(INTERVAL_AFTER_TRADE, "BUY order submitted.");
       } catch (err) {
+        diagnostics.lastError = {stage: 'buy', message: err.message || err};
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'BUY', result: null, reason: 'Failed to submit BUY', error: err.message || err,
-          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
         });
+        printDiagnostics();
         scheduleNext(INTERVAL_AFTER_ERROR, "Failed to submit BUY.");
       }
       isRunning = false; return;
@@ -287,19 +361,23 @@ async function main() {
     if (positionOpen && (backtestStats.totalPNL <= 0 || backtestStats.winRate < 0.5)) {
       try {
         const result = await exchange.createMarketSellOrder(MICRO_PAIR, orderSize);
+        diagnostics.lastTrade = {action: 'SELL', timestamp: lastSignal.timestamp, tf};
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'SELL', result,
           reason: `Backtest regime negative (PNL=${backtestStats.totalPNL}, WinRate=${backtestStats.winRate}) - closing position`,
-          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
         });
         positionOpen = false; entryPrice = null;
         lastTradeTimestamp = Number(lastSignal.timestamp);
+        printDiagnostics();
         scheduleNext(INTERVAL_AFTER_TRADE, "SELL order submitted (regime negative).");
       } catch (err) {
+        diagnostics.lastError = {stage: 'sell', message: err.message || err};
         logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
           label: lastSignal.label, action: 'SELL', result: null, reason: 'Failed to submit SELL', error: err.message || err,
-          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+          fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
         });
+        printDiagnostics();
         scheduleNext(INTERVAL_AFTER_ERROR, "Failed to submit SELL.");
       }
       isRunning = false; return;
@@ -307,25 +385,30 @@ async function main() {
 
     logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model, prediction: lastSignal.prediction,
       label: lastSignal.label, action: 'HOLD', result: null, reason: `No trade condition met on ${tf}`,
-      fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats
+      fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics
     });
+    printDiagnostics();
     scheduleNext(MICRO_INTERVAL, `No trade condition met on ${tf}.`);
   } catch (e) {
-    console.error('[DEBUG][MICRO] UNCAUGHT EXCEPTION:', e);
+    diagnostics.lastError = {stage: 'main', message: e.message || e};
+    printDiagnostics();
+    console.error('[MICRO][UNCAUGHT EXCEPTION]:', e);
     scheduleNext(INTERVAL_AFTER_ERROR, "Uncaught exception.");
   }
   isRunning = false;
 }
 
 // --- Startup ---
-(async () => {
-  console.log(`[DEBUG] Starting micro_ccxt_orders.js for timeframes ${MICRO_TIMEFRAMES.join(', ')} using auto-tuning and synced to backtest stats`);
-  main();
-})();
+console.log(`[MICRO][INFO] microstructure.js starting for timeframes ${MICRO_TIMEFRAMES.join(', ')} with strategy [${STRATEGY}], variant [${VARIANT}], metric [${METRIC}]`);
+main();
 
 process.on('uncaughtException', (err) => {
-  console.error('[DEBUG][MICRO] UNCAUGHT EXCEPTION:', err);
+  diagnostics.lastError = {stage: 'uncaughtException', message: err.message || err};
+  printDiagnostics();
+  console.error('[MICRO][UNCAUGHT EXCEPTION]:', err);
 });
 process.on('unhandledRejection', (reason) => {
-  console.error('[DEBUG][MICRO] UNHANDLED REJECTION:', reason);
+  diagnostics.lastError = {stage: 'unhandledRejection', message: reason && reason.message ? reason.message : reason};
+  printDiagnostics();
+  console.error('[MICRO][UNHANDLED REJECTION]:', reason);
 });
