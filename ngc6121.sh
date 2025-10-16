@@ -4,6 +4,26 @@ echo "============================================"
 echo "   NGC6121 Setup Script - Gekko M4 Cluster  "
 echo "============================================"
 
+# Check Node.js version (require >= 24)
+required_node_major=24
+current_node_major=$(node -v | sed 's/v\([0-9]*\).*/\1/')
+if [ "$current_node_major" -lt "$required_node_major" ]; then
+  echo "ERROR: Node.js v24 or newer is required. You have: $(node -v)"
+  exit 1
+fi
+
+# System dependency check
+echo ""
+echo ">> Checking system dependencies..."
+for cmd in g++ make python3 npm node-gyp; do
+  if ! command -v $cmd &>/dev/null; then
+    echo "ERROR: Required system package '$cmd' is not installed!"
+    echo "       Install all dependencies using:"
+    echo "         sudo apt update && sudo apt install -y build-essential g++ python3 make node-gyp"
+    exit 2
+  fi
+done
+
 # Install npm dependencies
 echo ""
 echo ">> Installing Node.js dependencies..."
@@ -14,10 +34,11 @@ echo ""
 echo ">> Running npm audit fix to address vulnerabilities..."
 npm audit fix
 
-# Install PM2 globally
+# Reinstall PM2 globally to ensure correct Node version
 echo ""
-echo ">> Installing PM2 globally..."
-npm install pm2 -g
+echo ">> (Re)Installing PM2 globally for Node.js v$current_node_major..."
+npm uninstall -g pm2 2>/dev/null
+npm install -g pm2
 
 # Start simulator.config.js with PM2
 echo ""
@@ -45,4 +66,4 @@ echo " Files are kept in sync across the cluster. "
 echo "============================================"
 # Exit the script
 echo ">> Script completed. Exiting."
-exit
+exit 0
