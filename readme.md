@@ -45,13 +45,13 @@ The **Gekko M4 Globular Cluster** repository is a feature-rich implementation de
 
 Before setting up the project, make sure your environment meets the following requirements:
 
-- **System**: Linux (Tested on `Linux 6.11.0-24-generic`)
-- **Node.js**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
-- **Tested on Node.js version**: `20`
-- **Packages**: Required build tools
+- **Node.js 24**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
+- **Packages**: Required build tools for native module compilation:
    ```bash
-   sudo apt install -y build-essential
+   sudo apt update
+   sudo apt install -y build-essential g++ python3 make node-gyp
    ```
+
 ---
 
 #### **Installation & Setup**
@@ -59,11 +59,18 @@ Before setting up the project, make sure your environment meets the following re
 ##### Install Node.js Using [`nvm`](https://github.com/nvm-sh/nvm)
 To manage and install Node.js, use `nvm` (Node Version Manager):
 
-* Install Node.js version `20`:
+* Install Node.js version `24`:
    ```bash
-   nvm install 20
+   nvm install 24
+   nvm use 24
    ```
-#### Feel free to test installation and contribute using **Node.js** version 24.  
+* **Verify your version:**
+   ```bash
+   node -v
+   ```
+   Should print something like `v24.x.x`
+---
+ 
 
 ##### Clone the Repository
 
