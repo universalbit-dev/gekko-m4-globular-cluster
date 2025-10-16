@@ -1,5 +1,5 @@
 /**
- * challenge_log_writer.js (future-price win/loss version, multi-timeframe, enhanced, robust, flexible models)
+ * challenge_log_writer_multiframe.js (future-price win/loss version, multi-timeframe, enhanced, robust, flexible models)
  * - Robust to missing data, supports any CHLOG_MODEL_LIST and dynamic timeframes
  * - Processes prediction logs for each timeframe and writes out challenge logs with win/loss per model
  * - Auto-creates missing input log file with header if needed
@@ -152,6 +152,7 @@ function writeChallengeLog(tf) {
   }
 
   const winnerLabelCol = getWinnerLabelColumn(tf);
+  //The mapping is crucial for automated challenge log generation and model evaluation
   const entries = signals.map((signal, i) => {
     const futureSignal = signals[i + FUTURE_OFFSET] || null;
     return formatChallengeLogEntry(signal, futureSignal, winnerLabelCol);
