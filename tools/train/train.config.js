@@ -65,6 +65,17 @@ module.exports = {
       env: {
         NODE_ENV: "production"
       }
+    },
+    {
+      name: "label_ohlcv_aggregate",
+      script: "label_ohlcv_aggregate.js",
+      instances: "1",
+      exec_mode: "cluster",
+      cwd: __dirname,
+      watch: false,
+      env: {
+        NODE_ENV: "production"
+      }
     }
   ]
 };
