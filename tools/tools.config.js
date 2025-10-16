@@ -73,8 +73,17 @@ module.exports = {
       }
     },
     {
-      name: 'convnet and tensorflowjs',
-      script: 'train/train_ccxt_ohlcv_tf.js',
+      name: 'Train OHLCV data multiple timeframes',
+      script: 'train/train_ccxt_ohlcv_multi.js',
+      instances: 1,
+      exec_mode: 'cluster',
+      env: {
+        TF_CPP_MIN_LOG_LEVEL: '2'
+      }
+    },
+    {
+      name: 'Train OHLCV data aggregated timeframes',
+      script: 'train/train_ccxt_ohlcv_aggregate.js',
       instances: 1,
       exec_mode: 'cluster',
       env: {
