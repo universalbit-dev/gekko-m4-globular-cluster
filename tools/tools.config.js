@@ -49,6 +49,12 @@ module.exports = {
       exec_mode: 'cluster'
     },
     {
+      name: "label_ohlcv_aggregate",
+      script: "train/label_ohlcv_aggregate.js",
+      instances: "1",
+      exec_mode: "cluster"
+    },
+    {
       name: 'train simulator ohlcv data',
       script: 'train/train_ohlcv.js',
       instances: 1,
