@@ -29,6 +29,11 @@ echo ""
 echo ">> Installing Node.js dependencies..."
 npm install
 
+# Link local tools module
+echo ""
+echo ">> Linking local tools/ module..."
+npm link tools
+
 # Fix vulnerabilities with npm audit fix
 echo ""
 echo ">> Running npm audit fix to address vulnerabilities..."
