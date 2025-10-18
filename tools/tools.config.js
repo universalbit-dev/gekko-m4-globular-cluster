@@ -113,6 +113,18 @@ module.exports = {
       script: 'backtest/backtotesting.js',
       instances: 1,
       exec_mode: 'cluster'
+    },
+    {
+      name: 'autotune',
+      script: 'evaluation/autoTune.js',
+      instances: 1,
+      exec_mode: 'cluster'
+    },
+    {
+      name: 'evaluate',
+      script: 'evaluation/evaluate.js',
+      instances: 1,
+      exec_mode: 'cluster'
     }
   ]
 };
