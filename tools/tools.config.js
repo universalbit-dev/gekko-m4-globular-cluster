@@ -113,12 +113,6 @@ module.exports = {
       script: 'backtest/backtotesting.js',
       instances: 1,
       exec_mode: 'cluster'
-    },
-    {
-      name: 'CPU watchdog',
-      script: 'pm2-tools-watchdog.js',
-      instances: 1,
-      exec_mode: 'cluster'
     }
   ]
 };
