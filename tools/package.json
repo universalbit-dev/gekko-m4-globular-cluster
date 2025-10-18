@@ -1,0 +1,13 @@
+{
+  "name": "tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Custom tools for Gekko M4 cluster",
+  "main": "tools.config.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "pm2": "^5.3.0"
+  }
+}
