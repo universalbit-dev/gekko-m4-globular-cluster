@@ -55,12 +55,6 @@ module.exports = {
   args      : '-c env/simulator/trade_csvexport.js',
   instances : "1",
   exec_mode : "cluster",
-  },
-  {
-  name: "pm2-cpu-watchdog",
-  script    : "./pm2-cpu-watchdog.js",
-  instances : "1",
-  exec_mode : "fork",
-  },
+  }
 ]
 }
