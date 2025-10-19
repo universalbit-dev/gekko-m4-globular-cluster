@@ -21,9 +21,9 @@ const BACKTEST_INTERVAL_MS = parseInt(process.env.BACKTEST_INTERVAL_MS || "10000
 // Allow per-timeframe paramSets
 const paramSetsByTf = {
   '1m': [
-    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 60, min_hold: 8, name: "1m Conservative+" },
-    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 60, min_hold: 7, name: "1m Aggressive+" },
-    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 60, min_hold: 10, name: "1m Balanced+" }
+    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "1m Conservative+" },
+    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "1m Aggressive+" },
+    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "1m Balanced+" }
   ],
   '5m': [
     { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "5m Conservative+" },
@@ -36,9 +36,9 @@ const paramSetsByTf = {
     { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "15m Balanced+" }
   ],
   '1h': [
-    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 65, min_hold: 8, name: "1h Conservative+" },
-    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 65, min_hold: 7, name: "1h Aggressive+" },
-    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 65, min_hold: 10, name: "1h Balanced+" }
+    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "1h Conservative+" },
+    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "1h Aggressive+" },
+    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "1h Balanced+" }
   ]
 };
 
