@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const { scoreTrade } = require('../tradeQualityScore');
 
 const DATA_DIR = path.resolve(__dirname, '../logs/json/ohlcv');
@@ -18,29 +18,11 @@ const VERBOSE = process.env.BACKTEST_VERBOSE === "1";
 const TIMEFRAMES = ['1m', '5m', '15m', '1h'];
 const BACKTEST_INTERVAL_MS = parseInt(process.env.BACKTEST_INTERVAL_MS || "10000", 10);
 
-// Allow per-timeframe paramSets
-const paramSetsByTf = {
-  '1m': [
-    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "1m Conservative+" },
-    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "1m Aggressive+" },
-    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "1m Balanced+" }
-  ],
-  '5m': [
-    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "5m Conservative+" },
-    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "5m Aggressive+" },
-    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "5m Balanced+" }
-  ],
-  '15m': [
-    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "15m Conservative+" },
-    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "15m Aggressive+" },
-    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "15m Balanced+" }
-  ],
-  '1h': [
-    { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "1h Conservative+" },
-    { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "1h Aggressive+" },
-    { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "1h Balanced+" }
-  ]
-};
+const paramSets = [
+  { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "Conservative+" },
+  { profit_pct: 0.008, loss_pct: 0.003, trade_quality: 50, min_hold: 7, name: "Aggressive+" },
+  { profit_pct: 0.007, loss_pct: 0.0025, trade_quality: 50, min_hold: 10, name: "Balanced+" }
+];
 
 function discoverExchangeDataFiles() {
   const files = fs.readdirSync(DATA_DIR)
@@ -99,62 +81,6 @@ function getSignalScore(label) {
 
 function clampPnlPct(pnl, entry) {
   return entry ? Math.max(-100, Math.min(100, (pnl / entry) * 100)) : 0;
-}
-
-function printSummary(r, idx) {
-  const s = r.stats;
-  let color = "\x1b[0m";
-  if (s.totalPNL < 0) color = "\x1b[31m";
-  else if (s.totalPNL > 0) color = "\x1b[32m";
-  const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
-  console.log(
-    `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
-    ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
-    ` PNL:${s.totalPNL.toFixed(4)}` +
-    ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
-    ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
-    ` AvgPNL:${s.avgPNL.toFixed(4)}` +
-    ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
-    ` W:${s.wins} L:${s.losses}` +
-    ` Regime:${regime}` +
-    ` Signals: strong_bull:${s.signalCount.strong_bull} strong_bear:${s.signalCount.strong_bear} bull:${s.signalCount.bull} bear:${s.signalCount.bear} other:${s.signalCount.other}` +
-    `\nNoTradeReasons: ${JSON.stringify(s.noTradeReasons)}\x1b[0m`
-  );
-}
-
-function exportTradesCSV(allResults) {
-  let allTrades = [];
-  for (const frame of allResults) {
-    for (const res of frame.results) {
-      for (const t of res.trades) {
-        allTrades.push({
-          source: frame.source,
-          variant: frame.variant,
-          strategy: res.params.name,
-          entryIdx: t.entryIdx,
-          exitIdx: t.exitIdx,
-          entry: t.entry,
-          exit: t.exit,
-          pnl: t.pnl,
-          reason: t.reason,
-          tradeQuality: t.tradeQuality,
-          realizedQuality: t.realizedQuality,
-          holdTime: t.holdTime,
-          win_rate: t.mlStats?.win_rate || "",
-          volatility: t.mlStats?.volatility || "",
-          ensemble_confidence: t.mlStats?.ensemble_confidence || "",
-          signal_age: t.mlStats?.signalAge || "",
-          regime_align: t.mlStats?.regimeAlign || "",
-          challenge_model: t.mlStats?.challenge_model || "",
-          ensemble_model: t.mlStats?.ensemble_model || ""
-        });
-      }
-    }
-  }
-  if (!allTrades.length) return;
-  const header = Object.keys(allTrades[0]).join(',');
-  const rows = allTrades.map(x => Object.values(x).join(',')).join('\n');
-  fs.writeFileSync(CSV_PATH, header + '\n' + rows);
 }
 
 function backtest(data, params, label = '', regimeAlignFn = null) {
@@ -307,14 +233,68 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
   };
 }
 
+function exportTradesCSV(allResults) {
+  let allTrades = [];
+  for (const frame of allResults) {
+    for (const res of frame.results) {
+      for (const t of res.trades) {
+        allTrades.push({
+          source: frame.source,
+          variant: frame.variant,
+          strategy: res.params.name,
+          entryIdx: t.entryIdx,
+          exitIdx: t.exitIdx,
+          entry: t.entry,
+          exit: t.exit,
+          pnl: t.pnl,
+          reason: t.reason,
+          tradeQuality: t.tradeQuality,
+          realizedQuality: t.realizedQuality,
+          holdTime: t.holdTime,
+          win_rate: t.mlStats?.win_rate || "",
+          volatility: t.mlStats?.volatility || "",
+          ensemble_confidence: t.mlStats?.ensemble_confidence || "",
+          signal_age: t.mlStats?.signalAge || "",
+          regime_align: t.mlStats?.regimeAlign || "",
+          challenge_model: t.mlStats?.challenge_model || "",
+          ensemble_model: t.mlStats?.ensemble_model || ""
+        });
+      }
+    }
+  }
+  if (!allTrades.length) return;
+  const header = Object.keys(allTrades[0]).join(',');
+  const rows = allTrades.map(x => Object.values(x).join(',')).join('\n');
+  fs.writeFileSync(CSV_PATH, header + '\n' + rows);
+}
+
+function printSummary(r, idx) {
+  const s = r.stats;
+  let color = "\x1b[0m";
+  if (s.totalPNL < 0) color = "\x1b[31m";
+  else if (s.totalPNL > 0) color = "\x1b[32m";
+  const regime = s.totalPNL < -2000 ? "Bear" : s.totalPNL > 2000 ? "Bull" : "Flat";
+  console.log(
+    `${color}[${r.params.name || idx}] Trades:${s.numTrades}` +
+    ` WinRate:${(s.winRate * 100).toFixed(2)}%` +
+    ` PNL:${s.totalPNL.toFixed(4)}` +
+    ` MaxDD:${s.maxDrawdown.toFixed(4)}` +
+    ` AvgQuality:${s.avgTradeQuality.toFixed(2)}` +
+    ` AvgPNL:${s.avgPNL.toFixed(4)}` +
+    ` AvgHold:${s.avgHoldTime.toFixed(2)}` +
+    ` W:${s.wins} L:${s.losses}` +
+    ` Regime:${regime}` +
+    ` Signals: strong_bull:${s.signalCount.strong_bull} strong_bear:${s.signalCount.strong_bear} bull:${s.signalCount.bull} bear:${s.signalCount.bear} other:${s.signalCount.other}` +
+    `\nNoTradeReasons: ${JSON.stringify(s.noTradeReasons)}\x1b[0m`
+  );
+}
+
 async function runBacktestLoop() {
-  let lastResultsHash = '';
   while (true) {
     try {
       let allResults = [];
       const files = discoverExchangeDataFiles();
 
-      // Aggregate file
       if (files.multi && files.multi.aggregate) {
         let data;
         try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files.multi.aggregate), 'utf8')); }
@@ -323,7 +303,7 @@ async function runBacktestLoop() {
         for (const tf of TIMEFRAMES) {
           const arr = tfs[tf];
           if (!Array.isArray(arr) || arr.length === 0) continue;
-          const results = (paramSetsByTf[tf] || []).map(params => backtest(arr, params, `aggregate:${tf}`));
+          const results = paramSets.map(params => backtest(arr, params, `aggregate:${tf}`));
           allResults.push({ source: `aggregate:${tf}`, variant: 'AGGREGATE', results });
           console.log(`=== [aggregate:${tf}: AGGREGATE] ===`);
           results.forEach((r, idx) => printSummary(r, idx));
@@ -337,7 +317,7 @@ async function runBacktestLoop() {
           try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].prediction), 'utf8')); }
           catch { console.error(`[ERROR] Could not parse: ${files[tf].prediction}`); data = []; }
           if (Array.isArray(data) && data.length > 0) {
-            const results = (paramSetsByTf[tf] || []).map(params => backtest(data, params, files[tf].prediction));
+            const results = paramSets.map(params => backtest(data, params, files[tf].prediction));
             allResults.push({ source: files[tf].prediction, variant: 'PREDICTION', results });
             console.log(`=== [${files[tf].prediction}: PREDICTION] ===`);
             results.forEach((r, idx) => printSummary(r, idx));
@@ -348,7 +328,7 @@ async function runBacktestLoop() {
           try { data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, files[tf].raw), 'utf8')); }
           catch { console.error(`[ERROR] Could not parse: ${files[tf].raw}`); data = []; }
           if (Array.isArray(data) && data.length > 0) {
-            const results = (paramSetsByTf[tf] || []).map(params => backtest(data, params, files[tf].raw));
+            const results = paramSets.map(params => backtest(data, params, files[tf].raw));
             allResults.push({ source: files[tf].raw, variant: 'RAW', results });
             console.log(`=== [${files[tf].raw}: RAW] ===`);
             results.forEach((r, idx) => printSummary(r, idx));
@@ -356,15 +336,9 @@ async function runBacktestLoop() {
         }
       }
 
-      // Only write if results changed (simple hash)
-      const resultsString = JSON.stringify(allResults);
-      const resultsHash = require('crypto').createHash('md5').update(resultsString).digest('hex');
-      if (resultsHash !== lastResultsHash) {
-        fs.writeFileSync(OUTPUT_PATH, resultsString);
-        exportTradesCSV(allResults);
-        lastResultsHash = resultsHash;
-        console.log('Full backtest complete. Results saved to', OUTPUT_PATH, 'and', CSV_PATH);
-      }
+      fs.writeFileSync(OUTPUT_PATH, JSON.stringify(allResults, null, 2));
+      exportTradesCSV(allResults);
+      console.log('Full backtest complete. Results saved to', OUTPUT_PATH, 'and', CSV_PATH);
 
     } catch (err) {
       console.error('[ERROR][BACKTEST] Exception in main loop:', err);
@@ -375,7 +349,7 @@ async function runBacktestLoop() {
   }
 }
 
-module.exports = { backtest, paramSetsByTf };
+module.exports = { backtest, paramSets };
 
 if (require.main === module) {
   runBacktestLoop();
