@@ -9,7 +9,7 @@ const ConvNet = require('../../core/convnet.js'); // Adjust path as needed
 // Set INTERVAL_MS in .env to synchronize intervals.
 const INTERVAL_MS = parseInt(process.env.INTERVAL_MS, 10) || 3600000; // default 1h
 //Simulator Json Data
-const filePath = path.resolve(__dirname, '../../logs/json/ohlcv/ohlcv_data.json');
+const filePath = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_data.json');
 // Check once at the top level of your script
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(filePath, '[]', 'utf8');
@@ -17,7 +17,7 @@ if (!fs.existsSync(filePath)) {
 function trainAndSave() {
   let data;
   try {
-    data = JSON.parse(fs.readFileSync('logs/json/ohlcv/ohlcv_data.json', 'utf8'));
+    data = JSON.parse(fs.readFileSync('../logs/json/ohlcv/ohlcv_data.json', 'utf8'));
   } catch (e) {
     console.error('Failed to read or parse ohlcv_data.json:', e.message);
     return;
@@ -59,10 +59,6 @@ function trainAndSave() {
   fs.writeFileSync(filename, JSON.stringify(net.toJSON()));
   console.log(`[${timestamp}] Model Saved as ${filename}`);
 }
-
-/*
-[2025-07-28T08-58-26-522Z] Model Saved as trained_ohlcv/trained_ohlcv_2025-07-28T08-58-26-522Z.json
-*/
 
 // Initial run
 trainAndSave();
