@@ -19,7 +19,7 @@ for cmd in g++ make python3 npm node-gyp; do
   if ! command -v $cmd &>/dev/null; then
     echo "ERROR: Required system package '$cmd' is not installed!"
     echo "       Install all dependencies using:"
-    echo "         sudo apt update && sudo apt install -y build-essential g++ python3 make node-gyp"
+    echo "         sudo apt update && sudo apt install -y build-essential g++ python3 node-gyp make node-gyp"
     exit 2
   fi
 done
