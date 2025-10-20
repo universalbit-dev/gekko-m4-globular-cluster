@@ -54,30 +54,30 @@ module.exports = {
       instances: 1,
       exec_mode: 'cluster'
     },
-
-    
     {
       name: 'train-runner',
       script: 'train.sh',
-      interpreter: '/bin/bash',               
-      args: '--all --verbose --parallel',
-      cwd: './',                         
-      instances: 1,
-      exec_mode: 'fork',
-      autorestart: true,                      
-      watch: false
-    },
-
-    {
-      name: 'chart-runner',
-      script: 'chart.sh',
       interpreter: '/bin/bash',
-      args: '--all --verbose',
-      cwd: './chart',
+      args: '--all --verbose --parallel',
+      cwd: './',
       instances: 1,
       exec_mode: 'fork',
       autorestart: true,
       watch: false
+    },
+    {
+      name: 'chart-runner',
+      script: 'chart.sh',
+      interpreter: '/bin/bash',
+      args: '--all --verbose --parallel',
+      cwd: './chart',
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: true,
+      watch: false,
+      env: {
+      NODE_VERSION: '20'
+      }
     }
   ]
 };
