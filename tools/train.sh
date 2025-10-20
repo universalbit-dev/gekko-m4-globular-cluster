@@ -11,7 +11,7 @@
 # - returns a non-zero exit code if any script fails
 #
 # Usage:
-#   ./tools/train.sh --list
+#   ./tools/train.sh --all --verbose --parallel
 #   ./tools/train.sh multi
 #   ./tools/train.sh train_ccxt_ohlcv_multi.js
 #   ./tools/train.sh aggregate multi    # runs aggregate then multi
@@ -66,7 +66,7 @@ Options:
   --verbose      Print extra info before running each script
 
 Script identifiers:
-  You can supply either the exact filename (train_<< >>.js) or a short alias:
+  You can supply either the exact filename (train_xxx.js) or a short alias:
     multi, aggregate, ohlcv, ccxt, ir, label_multi, label_aggregate
 
 Examples:
@@ -191,8 +191,8 @@ run_one() {
     echo "[train.sh] Running $script with $(node -v) (cwd=$TRAIN_DIR)"
   fi
 
-  # run the script, capture exit code
-  node "$fullpath"
+  # Run the script with TRAIN_DIR as cwd so scripts using relative paths behave correctly
+  (cd "$TRAIN_DIR" && node "./$script")
   return $?
 }
 
