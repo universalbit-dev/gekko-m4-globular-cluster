@@ -19,7 +19,7 @@ const ATR_PERIOD = parseInt(process.env.CHALLENGE_ATR_PERIOD, 10) || 14;
 
 const MODEL_LIST = (process.env.CHALLENGE_MODEL_LIST
   ? process.env.CHALLENGE_MODEL_LIST.split(',').map(m => m.trim()).filter(Boolean)
-  : ['convnet', 'tf']).filter(m => ['convnet', 'tf'].includes(m));
+  : ['tf']).filter(m => ['tf'].includes(m));
 const TIMEFRAMES = (process.env.CHALLENGE_TIMEFRAMES
   ? process.env.CHALLENGE_TIMEFRAMES.split(',').map(tf => tf.trim()).filter(Boolean)
   : ['1m','5m','15m','1h']);
