@@ -7,7 +7,7 @@ module.exports = {
       exec_mode: 'cluster'
     },
     {
-      name: 'challenge convnet and tensorflowjs',
+      name: 'challenge',
       script: 'challenge/challenge_analysis.js',
       instances: 1,
       exec_mode: 'cluster'
@@ -17,60 +17,6 @@ module.exports = {
       script: 'challenge/challenge_log_writer.js',
       instances: 1,
       exec_mode: 'cluster'
-    },
-    {
-      name: 'chart recognition',
-      script: 'chart/chart_recognition.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'chart ccxt recognition',
-      script: 'chart/chart_ccxt_recognition.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'chart ccxt recognition multiple',
-      script: 'chart/chart_ccxt_multi.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'chart ccxt magnitude',
-      script: 'chart/chart_ccxt_recognition_magnitude.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: 'labeling multiple timeframes ohlcv data',
-      script: 'train/label_ohlcv_multi.js',
-      instances: 1,
-      exec_mode: 'cluster'
-    },
-    {
-      name: "label_ohlcv_aggregate",
-      script: "train/label_ohlcv_aggregate.js",
-      instances: "1",
-      exec_mode: "cluster"
-    },
-    {
-      name: 'train simulator ohlcv data',
-      script: 'train/train_ohlcv.js',
-      instances: 1,
-      exec_mode: 'cluster',
-      env: {
-        TF_CPP_MIN_LOG_LEVEL: '2'
-      }
-    },
-    {
-      name: 'train ccxt ohlcv data',
-      script: 'train/train_ccxt_ohlcv.js',
-      instances: 1,
-      exec_mode: 'cluster',
-      env: {
-        TF_CPP_MIN_LOG_LEVEL: '2'
-      }
     },
     {
       name: 'macrostructure',
@@ -107,6 +53,34 @@ module.exports = {
       script: 'evaluation/evaluate.js',
       instances: 1,
       exec_mode: 'cluster'
+    },
+    {
+      name: 'train-runner',
+      script: 'train.sh',
+      interpreter: '/bin/bash',       
+      args: '--all --verbose --parallel',      
+      cwd: './',                
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_BIN: 20
+      }
+    },
+    {
+      name: 'chart-runner',
+      script: 'chart/chart.sh',
+      interpreter: '/bin/bash',       
+      args: '--all --verbose --parallel',       
+      cwd: './chart',          
+      instances: 1,
+      exec_mode: 'fork',
+      autorestart: false,
+      watch: false,
+      env: {
+        NODE_BIN: 20
+      }
     }
   ]
 };
