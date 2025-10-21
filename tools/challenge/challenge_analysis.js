@@ -1,252 +1,275 @@
 /**
  * challenge_analysis.js
- * - Multi-timeframe, rolling win rate, dominance detection, robust output.
- * - Volatility (ATR) calculation and reporting.
+ * - Rolling win-rate / dominance detector (single-model optimized)
+ * - Uses last-N resolved events (non-pending) for robust live activation
+ * - Atomic writes and non-overlap guard
+ *
+ * New behaviour:
+ * - CHALLENGE_RECENT_EVENTS controls how many resolved events to examine (default 20)
+ * - Analyzer activates winner if:
+ *     a) dominant period detected, OR
+ *     b) last-N resolved events >= MIN_EVENTS AND recent_win_rate >= MIN_WIN_RATE
  */
-
 const path = require('path');
 const fs = require('fs');
+
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const CHALLENGE_LOG_DIR = path.resolve(__dirname, './');
 const MODEL_WINNER_PATH = path.resolve(__dirname, './model_winner.json');
-const CHALLENGE_INTERVAL_MS = parseInt(process.env.CHALLENGE_INTERVAL_MS, 10) || 15 * 60 * 1000;
-const WINDOW_SIZE = parseInt(process.env.WINDOW_SIZE, 10) || 50;
-const MIN_WIN_RATE = parseFloat(process.env.CHALLENGE_MIN_WIN_RATE) || 0.618;
-const DOMINANCE_THRESHOLD = parseFloat(process.env.CHALLENGE_DOMINANCE_THRESHOLD) || 0.618;
-const DOMINANCE_MIN_LENGTH = parseInt(process.env.CHALLENGE_DOMINANCE_MIN_LENGTH, 10) || 13;
-const ATR_PERIOD = parseInt(process.env.CHALLENGE_ATR_PERIOD, 10) || 14;
 
-const MODEL_LIST = (process.env.CHALLENGE_MODEL_LIST
-  ? process.env.CHALLENGE_MODEL_LIST.split(',').map(m => m.trim()).filter(Boolean)
-  : ['tf']).filter(m => ['tf'].includes(m));
+const CHALLENGE_INTERVAL_MS = parseInt(process.env.CHALLENGE_INTERVAL_MS, 10) || 15 * 60 * 1000;
+const WINDOW_SIZE = Math.max(3, parseInt(process.env.WINDOW_SIZE, 10) || 50);
+const MIN_WIN_RATE = parseFloat(process.env.CHALLENGE_MIN_WIN_RATE) || 0.55;
+const DOMINANCE_THRESHOLD = parseFloat(process.env.CHALLENGE_DOMINANCE_THRESHOLD) || 0.618;
+const DOMINANCE_MIN_LENGTH = Math.max(3, parseInt(process.env.CHALLENGE_DOMINANCE_MIN_LENGTH, 10) || 8);
+const ATR_PERIOD = Math.max(2, parseInt(process.env.CHALLENGE_ATR_PERIOD, 10) || 14);
+const MIN_EVENTS = Math.max(1, parseInt(process.env.CHALLENGE_MIN_EVENTS, 10) || 5);
+
+// NEW: how many resolved (win/loss) events to inspect for recent_win_rate
+const CHALLENGE_RECENT_EVENTS = Math.max(1, parseInt(process.env.CHALLENGE_RECENT_EVENTS, 10) || 20);
+
+const SINGLE_MODEL = (process.env.CHALLENGE_SINGLE_MODEL || 'tf').trim();
+const MODEL_LIST = [SINGLE_MODEL];
+
 const TIMEFRAMES = (process.env.CHALLENGE_TIMEFRAMES
   ? process.env.CHALLENGE_TIMEFRAMES.split(',').map(tf => tf.trim()).filter(Boolean)
   : ['1m','5m','15m','1h']);
 
-// --- Parse .log file into array of row objects ---
-function parseChallengeLogFile(filePath, modelList) {
+// parse
+function parseChallengeLogFile(filePath) {
   if (!fs.existsSync(filePath)) return [];
   try {
-    const lines = fs.readFileSync(filePath, 'utf8').trim().split('\n');
+    const raw = fs.readFileSync(filePath, 'utf8').trim();
+    if (!raw) return [];
+    const lines = raw.split('\n');
     if (lines.length < 2) return [];
-    const header = lines[0].split('\t');
-    return lines.slice(1).map(line => {
-      const parts = line.split('\t');
+    const header = lines[0].split('\t').map(h => h.trim());
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split('\t');
       const obj = {};
-      header.forEach((col, idx) => { obj[col] = parts[idx]; });
-      return obj;
-    });
+      for (let j = 0; j < header.length; j++) {
+        const key = header[j] || `col${j}`;
+        obj[key] = (parts[j] === undefined) ? '' : parts[j].trim();
+      }
+      ['open','high','low','close','volume','entry_price','next_price'].forEach(k => {
+        if (typeof obj[k] === 'string' && obj[k] !== '') {
+          const n = Number(obj[k]);
+          if (!Number.isNaN(n)) obj[k] = n;
+        }
+      });
+      rows.push(obj);
+    }
+    return rows;
   } catch (err) {
-    console.error(`[${new Date().toISOString()}] Error reading log file: ${filePath}: ${err}`);
+    console.error(`[${new Date().toISOString()}] Error reading/parsing log file: ${filePath}:`, err && err.message);
     return [];
   }
 }
 
-// --- ATR calculation ---
-function calculateATR(candles, period = 14) {
-  if (!Array.isArray(candles) || candles.length < 2) return [];
-  let atrs = [];
-  for (let i = 0; i < candles.length; i++) {
-    if (i === 0) {
-      atrs.push(null); // ATR not defined for first candle
-      continue;
-    }
-    let trs = [];
-    for (let j = Math.max(1, i - period + 1); j <= i; j++) {
-      const cur = candles[j];
-      const prev = candles[j-1];
-      const high = Number(cur.high);
-      const low = Number(cur.low);
-      const prevClose = Number(prev.close);
-      const tr = Math.max(
-        high - low,
-        Math.abs(high - prevClose),
-        Math.abs(low - prevClose)
-      );
-      trs.push(tr);
-    }
-    const atr = trs.reduce((a, b) => a + b, 0) / trs.length;
-    atrs.push(atr);
+// ATR fast
+function calculateATRFast(candles, period = 14) {
+  if (!Array.isArray(candles) || candles.length < 2) return new Array(candles.length).fill(null);
+  const trs = new Array(candles.length).fill(0);
+  for (let i = 1; i < candles.length; i++) {
+    const cur = candles[i];
+    const prev = candles[i - 1];
+    const high = Number(cur.high || 0);
+    const low = Number(cur.low || 0);
+    const prevClose = Number(prev.close || 0);
+    const tr = Math.max(
+      high - low,
+      Math.abs(high - prevClose),
+      Math.abs(low - prevClose)
+    );
+    trs[i] = tr;
+  }
+  const csum = new Array(trs.length).fill(0);
+  for (let i = 1; i < trs.length; i++) csum[i] = csum[i - 1] + trs[i];
+  const atrs = new Array(candles.length).fill(null);
+  for (let i = 1; i < candles.length; i++) {
+    const start = Math.max(1, i - period + 1);
+    const totalTR = csum[i] - csum[start - 1];
+    const count = i - start + 1;
+    atrs[i] = count > 0 ? (totalTR / count) : null;
   }
   return atrs;
 }
 
-// --- Rolling win rate calculation ---
-function rollingWinRate(results, model, windowSize) {
-  const winRates = [];
-  let wins = 0, total = 0;
+// rolling win rate (window)
+function rollingWinRateSingle(results, model, windowSize) {
+  const winRates = new Array(results.length).fill(null);
+  let wins = 0;
+  let denom = 0;
+  const queue = [];
   for (let i = 0; i < results.length; i++) {
-    if (i >= windowSize) {
-      const old = results[i - windowSize][`${model}_result`];
+    const res = String(results[i][`${model}_result`] || '').toLowerCase();
+    queue.push(res);
+    if (res === 'win') wins++;
+    if (res === 'win' || res === 'loss') denom++;
+    if (queue.length > windowSize) {
+      const old = queue.shift();
       if (old === 'win') wins--;
-      if (old === 'win' || old === 'loss') total--;
+      if (old === 'win' || old === 'loss') denom--;
     }
-    const cur = results[i][`${model}_result`];
-    if (cur === 'win') wins++;
-    if (cur === 'win' || cur === 'loss') total++;
-    winRates.push(total > 0 ? wins / total : null);
+    winRates[i] = denom > 0 ? (wins / denom) : null;
   }
   return winRates;
 }
 
-// --- Detect dominant periods (above threshold for min length) ---
+// find dominant periods
 function findDominantPeriods(winRates, results, threshold, minLength) {
-  let periods = [], start = null;
+  const periods = [];
+  let start = -1;
   for (let i = 0; i < winRates.length; i++) {
     if (winRates[i] !== null && winRates[i] > threshold) {
-      if (start === null) start = i;
+      if (start === -1) start = i;
     } else {
-      if (start !== null && (i - start) >= minLength)
+      if (start !== -1 && (i - start) >= minLength) {
         periods.push({ start, end: i - 1 });
-      start = null;
+      }
+      start = -1;
     }
   }
-  if (start !== null && (winRates.length - start) >= minLength)
+  if (start !== -1 && (winRates.length - start) >= minLength) {
     periods.push({ start, end: winRates.length - 1 });
-  // Merge contiguous/overlapping periods
-  const merged = [];
-  for (const p of periods) {
-    if (merged.length && merged[merged.length - 1].end >= p.start - 1) {
-      merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, p.end);
-    } else {
-      merged.push({ ...p });
-    }
   }
-  return merged.map(p => ({
+  return periods.map(p => ({
     start_ts: results[p.start].timestamp,
     end_ts: results[p.end].timestamp,
     length: p.end - p.start + 1
   }));
 }
 
-// --- Find most recent 'win' for the winner model ---
-function findRecentWinEntry(rows, winner_model) {
-  const result_col = `${winner_model}_result`;
+// look back and compute recent win rate using resolved events (non-pending)
+function computeRecentResolvedStats(rows, model, maxEvents) {
+  let wins = 0, losses = 0, pending = 0;
+  const resolved = [];
+  for (let i = rows.length - 1; i >= 0 && resolved.length < maxEvents; i--) {
+    const v = String(rows[i][`${model}_result`] || '').toLowerCase();
+    if (v === 'win' || v === 'loss') {
+      resolved.push(v);
+      if (v === 'win') wins++;
+      else losses++;
+    } else {
+      pending++;
+    }
+  }
+  const totalResolved = wins + losses;
+  const recentWinRate = totalResolved > 0 ? (wins / totalResolved) : 0;
+  return { wins, losses, pending, totalResolved, recentWinRate, resolvedCount: totalResolved };
+}
+
+function findRecentWinEntry(rows, model) {
+  const col = `${model}_result`;
   for (let i = rows.length - 1; i >= 0; i--) {
-    if (rows[i][result_col] === 'win') return rows[i];
+    if (String(rows[i][col]).toLowerCase() === 'win') return rows[i];
   }
   return null;
 }
 
-// --- Print analysis ---
-function printAnalysisPerTimeframe(tf, results, winRateMap, active_model, win_rate, dominantPeriods) {
-  const lastIdx = results.length - 1;
+function printAnalysisPerTimeframe(tf, counts, active_model, win_rate, dominantPeriods, lastLogTs) {
   const nowIso = new Date().toISOString();
   console.log(`[${nowIso}] [${tf}] Model winner: ${active_model} | Win rate: ${(win_rate || 0).toFixed(3)}`);
-  console.log(`Log timestamp: ${results[lastIdx]?.timestamp || 'N/A'}`);
-  console.log(`--- Rolling Win Rates (Window: ${WINDOW_SIZE}) ---`);
-  for (const model of MODEL_LIST) {
-    const periods = dominantPeriods[model];
-    console.log(`[${tf}] ${model.toUpperCase()} Dominant Periods (win rate > ${DOMINANCE_THRESHOLD}):`);
-    if (periods.length === 0) {
-      console.log('  None');
-    } else {
-      const seen = new Set();
-      periods.forEach(p => {
-        const key = `${p.start_ts}|${p.end_ts}`;
-        if (!seen.has(key)) {
-          console.log(`  ${p.start_ts} - ${p.end_ts}, length: ${p.length}`);
-          seen.add(key);
-        }
-      });
-    }
+  console.log(`Log timestamp: ${lastLogTs || 'N/A'}`);
+  console.log(`Counts (wins/losses/pending in recent window): ${counts.wins}/${counts.losses}/${counts.pending} (resolved:${counts.totalResolved})`);
+  console.log(`--- Dominant Periods (win rate > ${DOMINANCE_THRESHOLD}, minLen=${DOMINANCE_MIN_LENGTH}) ---`);
+  if (!dominantPeriods || dominantPeriods.length === 0) {
+    console.log('  None');
+  } else {
+    dominantPeriods.forEach(p => {
+      console.log(`  ${p.start_ts} - ${p.end_ts} (len=${p.length})`);
+    });
   }
 }
 
-// --- Main analysis and output ---
-function analyzeAndWriteMultiFrame() {
-  const winnerObj = {};
-  for (const tf of TIMEFRAMES) {
-    const filePath = path.join(CHALLENGE_LOG_DIR, `challenge_${tf}.log`);
-    const results = parseChallengeLogFile(filePath, MODEL_LIST);
-    if (results.length === 0) {
-      console.log(`[${new Date().toISOString()}] [${tf}] No challenge log data found.`);
-      continue;
-    }
-    // Calculate ATR volatility for this timeframe
-    const atrs = calculateATR(results, ATR_PERIOD);
-
-    // Rolling win rates and dominant periods for all models
-    const winRateMap = {};
-    const dominantPeriods = {};
-    for (const model of MODEL_LIST) {
-      winRateMap[model] = rollingWinRate(results, model, WINDOW_SIZE);
-      dominantPeriods[model] = findDominantPeriods(winRateMap[model], results, DOMINANCE_THRESHOLD, DOMINANCE_MIN_LENGTH);
-    }
-
-    // Winner model selection.
-    // 1. Priority: dominant period
-    // 2. Otherwise: highest win rate above threshold
-    // 3. Otherwise: flag as 'no_winner'
-    let active_model = null;
-    let win_rate = 0;
-    let dominance_found = false;
-    for (const model of MODEL_LIST) {
-      if (dominantPeriods[model].length > 0) {
-        active_model = model;
-        win_rate = winRateMap[model][results.length - 1] || 0;
-        dominance_found = true;
-        break;
-      }
-    }
-    if (!dominance_found) {
-      // fallback: use highest win rate above threshold
-      for (const model of MODEL_LIST) {
-        const wr = winRateMap[model][results.length - 1] || 0;
-        if (wr > win_rate && wr >= MIN_WIN_RATE) {
-          win_rate = wr;
-          active_model = model;
-        }
-      }
-    }
-    // If no model meets MIN_WIN_RATE, flag as 'no_winner'
-    if (!active_model) {
-      active_model = 'no_winner';
-      win_rate = 0;
-    }
-
-    // Find most recent win entry for the active_model (if there is a winner)
-    let recentWin = null;
-    let volatility = null;
-    if (active_model !== 'no_winner') {
-      recentWin = findRecentWinEntry(results, active_model);
-      if (recentWin) {
-        const idx = results.findIndex(r => r.timestamp === recentWin.timestamp);
-        volatility = atrs[idx] || null;
-      }
-    }
-    // For fallback, use latest candle
-    if (!recentWin) {
-      recentWin = results[results.length - 1];
-      volatility = atrs[results.length - 1] || null;
-    }
-
-    winnerObj[tf] = {
-      summary: {
-        active_model,
-        win_rate,
-        dominant_periods: active_model !== 'no_winner' ? dominantPeriods[active_model] : [],
-        analysis_timestamp: new Date().toISOString(),
-        log_timestamp: results[results.length - 1].timestamp
-      },
-      recent_win: Object.assign({}, recentWin, { volatility })
-    };
-
-    printAnalysisPerTimeframe(tf, results, winRateMap, active_model, win_rate, dominantPeriods);
-  }
-
+function writeModelWinnerAtomic(targetPath, dataObj) {
   try {
-    fs.writeFileSync(MODEL_WINNER_PATH, JSON.stringify(winnerObj, null, 2));
+    const tmp = `${targetPath}.tmp`;
+    fs.writeFileSync(tmp, JSON.stringify(dataObj, null, 2), { encoding: 'utf8' });
+    fs.renameSync(tmp, targetPath);
     console.log(`[${new Date().toISOString()}] model_winner.json updated.`);
   } catch (err) {
-    console.error(`[${new Date().toISOString()}] Error writing model_winner.json:`, err);
+    console.error(`[${new Date().toISOString()}] Error writing ${targetPath}:`, err && err.message);
   }
 }
 
+function analyzeAndWriteMultiFrame() {
+  const out = {};
+  for (const tf of TIMEFRAMES) {
+    try {
+      const filePath = path.join(CHALLENGE_LOG_DIR, `challenge_${tf}.log`);
+      const rows = parseChallengeLogFile(filePath);
+      if (!rows || rows.length === 0) {
+        console.log(`[${new Date().toISOString()}] [${tf}] No challenge log data found.`);
+        continue;
+      }
+
+      const atrs = calculateATRFast(rows, ATR_PERIOD);
+      const winRates = rollingWinRateSingle(rows, SINGLE_MODEL, WINDOW_SIZE);
+      const dominantPeriods = findDominantPeriods(winRates, rows, DOMINANCE_THRESHOLD, DOMINANCE_MIN_LENGTH);
+
+      // NEW: compute recent resolved event stats (non-pending)
+      const stats = computeRecentResolvedStats(rows, SINGLE_MODEL, CHALLENGE_RECENT_EVENTS);
+
+      // selection: prefer dominant periods; else check recent resolved events
+      let active_model = 'no_winner';
+      let final_win_rate = 0;
+      if (dominantPeriods.length > 0) {
+        active_model = SINGLE_MODEL;
+        final_win_rate = winRates[winRates.length - 1] || 0;
+      } else {
+        if (stats.resolvedCount >= MIN_EVENTS && stats.recentWinRate >= MIN_WIN_RATE) {
+          active_model = SINGLE_MODEL;
+          final_win_rate = stats.recentWinRate;
+        }
+      }
+
+      // recent win or fallback
+      let recentWin = null;
+      if (active_model !== 'no_winner') recentWin = findRecentWinEntry(rows, SINGLE_MODEL);
+      if (!recentWin) recentWin = rows[rows.length - 1];
+      const idx = rows.findIndex(r => r.timestamp === recentWin.timestamp);
+      const volatility = (idx >= 0) ? (atrs[idx] || null) : null;
+
+      out[tf] = {
+        summary: {
+          active_model,
+          win_rate: final_win_rate,
+          dominant_periods: active_model !== 'no_winner' ? dominantPeriods : [],
+          analysis_timestamp: new Date().toISOString(),
+          log_timestamp: rows[rows.length - 1].timestamp
+        },
+        recent_win: Object.assign({}, recentWin, { volatility })
+      };
+
+      printAnalysisPerTimeframe(tf, stats, active_model, final_win_rate, dominantPeriods, out[tf].summary.log_timestamp);
+    } catch (err) {
+      console.error(`[${new Date().toISOString()}] Error analyzing timeframe ${tf}:`, err && err.message);
+    }
+  }
+
+  writeModelWinnerAtomic(MODEL_WINNER_PATH, out);
+}
+
+let _running = false;
 function startContinuousAnalysis() {
-  analyzeAndWriteMultiFrame();
-  setInterval(analyzeAndWriteMultiFrame, CHALLENGE_INTERVAL_MS);
+  async function tick() {
+    if (_running) {
+      console.log(`[${new Date().toISOString()}] Previous analysis still running, skipping this interval.`);
+      return;
+    }
+    _running = true;
+    try {
+      analyzeAndWriteMultiFrame();
+    } finally {
+      _running = false;
+    }
+  }
+
+  tick();
+  setInterval(tick, CHALLENGE_INTERVAL_MS);
 }
 
 startContinuousAnalysis();
