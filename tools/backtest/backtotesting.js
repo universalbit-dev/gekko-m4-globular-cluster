@@ -1,7 +1,13 @@
+#!/usr/bin/env node
 /**
  * Optimized Enhanced Backtesting: Fast, robust, and clear.
  * Advanced: Integrates advanced tradeQualityScore with ensemble confidence, regime alignment, and signal age.
  * Usage: node backtotesting.js
+ *
+ * ENHANCEMENTS in this version:
+ * - Robust label mapper (handles numeric/string/array/object ensemble/legacy labels)
+ * - Derives ensemble label from model predictions when explicit ensemble_label is missing
+ * - Safer parsing and defensive checks around fields used for scoring
  */
 
 const fs = require('fs');
@@ -46,20 +52,116 @@ function extractTimeframesFromAggregate(data) {
   );
 }
 
-function getMappedSignalLabel(point) {
-  if (point.ensemble_label) return point.ensemble_label;
-  if (point.challenge_label) return point.challenge_label;
-  if (typeof point.label !== "undefined") {
-    if (point.label === 1) return "strong_bull";
-    if (point.label === 2) return "strong_bear";
-    return "other";
+/* Robust label normalization & ensemble derivation
+ *
+ * Returns canonical labels: "strong_bull", "strong_bear", "bull", "bear", "other"
+ * Accepts numeric labels (1,2,0,-1), strings ("bull","bear","strong_bull"), arrays, or small objects.
+ */
+function normalizeLabel(raw) {
+  if (raw === null || raw === undefined) return null;
+
+  if (Array.isArray(raw)) {
+    const mapped = raw.map(r => normalizeLabel(r)).filter(Boolean);
+    if (!mapped.length) return null;
+    // majority vote
+    const counts = mapped.reduce((acc, v) => { acc[v] = (acc[v] || 0) + 1; return acc; }, {});
+    return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
   }
-  return "other";
+
+  if (typeof raw === 'object') {
+    if (raw.label !== undefined) return normalizeLabel(raw.label);
+    if (raw.prediction !== undefined) return normalizeLabel(raw.prediction);
+    if (raw.ensemble_label !== undefined) return normalizeLabel(raw.ensemble_label);
+    if (raw.challenge_label !== undefined) return normalizeLabel(raw.challenge_label);
+    return null;
+  }
+
+  if (typeof raw === 'string') {
+    const s = raw.trim().toLowerCase();
+    if (/^-?\d+$/.test(s)) return normalizeLabel(Number(s));
+    if (s === 'strong_bull' || s === 'strong-bull' || s === 'strongbull' || s === '1' || s === '+1') return 'strong_bull';
+    if (s === 'strong_bear' || s === 'strong-bear' || s === 'strongbear' || s === '-1' || s === '2') return 'strong_bear';
+    if (s === 'bull' || s === 'up' || s === 'buy') return 'bull';
+    if (s === 'bear' || s === 'down' || s === 'sell') return 'bear';
+    if (s === 'flat' || s === 'neutral' || s === 'other' || s === '0' || s === 'none') return 'other';
+    return 'other';
+  }
+
+  if (typeof raw === 'number') {
+    if (raw === 1) return 'strong_bull';
+    if (raw === 2) return 'strong_bear';
+    if (raw === 0) return 'other';
+    if (raw < 0) return 'strong_bear';
+    return 'other';
+  }
+
+  return null;
 }
 
+function deriveEnsembleFromPredictions(point) {
+  // prefer explicit model predictions fields if present
+  const a = point.prediction_convnet ?? point.prediction_convnet_raw ?? null;
+  const b = point.prediction_tf ?? point.prediction_tf_raw ?? null;
+  if (a == null || b == null) return null;
+  const na = normalizeLabel(a);
+  const nb = normalizeLabel(b);
+  if (!na || !nb) return null;
+  if (na === nb) return na;
+  // prefer a strong label if present
+  const isStrong = l => typeof l === 'string' && l.startsWith('strong_');
+  if (isStrong(na) && !isStrong(nb)) return na;
+  if (isStrong(nb) && !isStrong(na)) return nb;
+  return 'other';
+}
+
+/* New getMappedSignalLabel with robust precedence:
+   1) explicit ensemble_label
+   2) derived ensemble from model predictions
+   3) challenge_label
+   4) legacy label
+   5) boolean flags (is_bull/is_bear)
+   6) fallback 'other'
+*/
+function getMappedSignalLabel(point = {}) {
+  if (point.ensemble_label !== undefined && point.ensemble_label !== null) {
+    const v = normalizeLabel(point.ensemble_label);
+    if (v) return v;
+  }
+
+  const derived = deriveEnsembleFromPredictions(point);
+  if (derived) return derived;
+
+  if (point.challenge_label !== undefined && point.challenge_label !== null) {
+    const v = normalizeLabel(point.challenge_label);
+    if (v) return v;
+  }
+
+  if (point.label !== undefined && point.label !== null) {
+    const v = normalizeLabel(point.label);
+    if (v) return v;
+  }
+
+  if (point.is_bull === true) return 'strong_bull';
+  if (point.is_bear === true) return 'strong_bear';
+
+  return 'other';
+}
+
+/* Ensemble confidence: improved to use explicit ensemble_confidence if present,
+   otherwise derive from agreement of model preds (100 if equal, 75 if one strong + one mild, 50 otherwise)
+*/
 function computeEnsembleConfidence(point) {
-  return (!point.prediction_convnet || !point.prediction_tf) ? 50
-    : (point.prediction_convnet === point.prediction_tf ? 100 : 50);
+  if (typeof point.ensemble_confidence === 'number') return point.ensemble_confidence;
+  const a = point.prediction_convnet ?? null;
+  const b = point.prediction_tf ?? null;
+  if (a == null || b == null) return 50;
+  const na = normalizeLabel(a);
+  const nb = normalizeLabel(b);
+  if (!na || !nb) return 50;
+  if (na === nb) return 100;
+  const isStrong = l => typeof l === 'string' && l.startsWith('strong_');
+  if (isStrong(na) || isStrong(nb)) return 75;
+  return 50;
 }
 
 function computeSignalAge(point, now) {
@@ -69,8 +171,18 @@ function computeSignalAge(point, now) {
   return (typeof ts === "number" && !isNaN(ts)) ? Math.max(0, Math.round((now - ts) / 1000)) : 0;
 }
 
-function logNoTrade(i, signalLabel, tq, threshold, reasons, point) {
-  if (VERBOSE) console.log(`[NO-TRADE][${i}] label:${signalLabel} tq:${tq.toFixed(2)}/${threshold} reasons:${reasons.join('; ')} close:${point.close}`);
+// Enhanced logging: include tradeQuality breakdown and the scoring context
+function logNoTrade(i, signalLabel, tq, threshold, reasons, point, debugCtx = null) {
+  if (!VERBOSE) return;
+  // tq may be an object with totalScore and breakdown, or a number
+  const total = (tq && typeof tq.totalScore === 'number') ? tq.totalScore : (typeof tq === 'number' ? tq : 0);
+  console.log(`[NO-TRADE][${i}] label:${signalLabel} tq:${(total||0).toFixed(2)}/${threshold} reasons:${reasons.join('; ')} close:${point.close}`);
+  if (tq && tq.breakdown) {
+    console.log(`  tradeQuality.breakdown: ${JSON.stringify(tq.breakdown, null, 2)}`);
+  }
+  if (debugCtx) {
+    console.log(`  debug inputs: ${JSON.stringify(debugCtx, null, 2)}`);
+  }
 }
 
 function getSignalScore(label) {
@@ -91,10 +203,12 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
 
   for (let i = 0; i < data.length; i++) {
     const point = data[i];
-    const signalLabel = getMappedSignalLabel(point);
-    const volatility = +point.volatility || 10;
-    const close = +point.close;
-    const win_rate = typeof point.win_rate === 'number' ? point.win_rate : 0.5;
+
+    // defensive defaults
+    const signalLabel = getMappedSignalLabel(point) || 'other';
+    const volatility = Number(point.volatility) || 10;
+    const close = Number(point.close) || 0;
+    const win_rate = (typeof point.win_rate === 'number') ? point.win_rate : 0.5;
 
     if (signalLabel in signalCount) signalCount[signalLabel]++;
     else signalCount.other++;
@@ -105,11 +219,10 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
     const signalAge = computeSignalAge(point, now);
     const regimeAlign = typeof point.regime_align === 'number'
       ? point.regime_align
-      : regimeAlignFn
-        ? regimeAlignFn(point, i, data)
-        : 50;
+      : (regimeAlignFn ? regimeAlignFn(point, i, data) : 50);
 
-    const tradeQuality = scoreTrade({
+    // Prepare debug context to inspect inputs to scoreTrade
+    const debugCtx = {
       signalStrength: getSignalScore(signalLabel),
       modelWinRate: win_rate,
       riskReward: params.profit_pct / params.loss_pct,
@@ -119,18 +232,31 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
       ensembleConfidence,
       signalAge,
       regimeAlign
+    };
+
+    const tradeQuality = scoreTrade({
+      signalStrength: debugCtx.signalStrength,
+      modelWinRate: debugCtx.modelWinRate,
+      riskReward: debugCtx.riskReward,
+      executionQuality: debugCtx.executionQuality,
+      volatility: debugCtx.volatility,
+      tradeOutcome: debugCtx.tradeOutcome,
+      ensembleConfidence: debugCtx.ensembleConfidence,
+      signalAge: debugCtx.signalAge,
+      regimeAlign: debugCtx.regimeAlign
     });
 
     let entryReasons = [];
     if (position) entryReasons.push('already_in_position');
     if (!(signalLabel === 'strong_bull' || signalLabel === 'strong_bear')) entryReasons.push('not_strong_signal');
-    if (tradeQuality.totalScore < params.trade_quality) entryReasons.push('low_trade_quality');
+    if (tradeQuality == null || typeof tradeQuality.totalScore !== 'number' || tradeQuality.totalScore < params.trade_quality) entryReasons.push('low_trade_quality');
     if (!position && entryReasons.length > 0) {
-      logNoTrade(i, signalLabel, tradeQuality.totalScore, params.trade_quality, entryReasons, point);
+      // Pass the full tradeQuality object and debugCtx for richer logs
+      logNoTrade(i, signalLabel, tradeQuality, params.trade_quality, entryReasons, point, debugCtx);
       entryReasons.forEach(r => noTradeReasons[r] = (noTradeReasons[r] || 0) + 1);
     }
 
-    if (!position && tradeQuality.totalScore >= params.trade_quality &&
+    if (!position && tradeQuality && tradeQuality.totalScore >= params.trade_quality &&
         (signalLabel === 'strong_bull' || signalLabel === 'strong_bear')) {
       position = {
         type: signalLabel === 'strong_bull' ? 'long' : 'short',
@@ -149,7 +275,13 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
         }
       };
       tradeQualities.push(tradeQuality.totalScore);
-      if (VERBOSE) console.log(`[TRADE-ENTRY][${label}][${i}] Entered ${position.type} tq:${tradeQuality.totalScore.toFixed(2)} close:${close}`);
+      if (VERBOSE) {
+        console.log(`[TRADE-ENTRY][${label}][${i}] Entered ${position.type} tq:${tradeQuality.totalScore.toFixed(2)} close:${close}`);
+        if (tradeQuality && tradeQuality.breakdown) {
+          console.log(`  tradeQuality.breakdown: ${JSON.stringify(tradeQuality.breakdown, null, 2)}`);
+        }
+        console.log(`  mlStats: ${JSON.stringify(position.mlStats, null, 2)}`);
+      }
     }
 
     if (position) {
