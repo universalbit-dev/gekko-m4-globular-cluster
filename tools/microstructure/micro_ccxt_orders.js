@@ -33,7 +33,7 @@ const MICRO_INTERVAL = parseInt(process.env.MICRO_INTERVAL_MS, 10) || 300000;
 const API_KEY    = process.env.KEY    || '';
 const API_SECRET = process.env.SECRET || '';
 
-const STRATEGY = process.env.MICRO_STRATEGY || '15m Balanced+';
+const STRATEGY = process.env.MICRO_STRATEGY || 'Balanced+';
 const VARIANT  = process.env.MICRO_VARIANT  || 'PREDICTION';
 const METRIC   = process.env.MICRO_METRIC   || 'hit-rate';
 
