@@ -54,21 +54,20 @@ Before setting up the project, make sure your environment meets the following re
 
 ---
 
-#### **Installation & Setup**
-
+#### **Installation & Setup** []
 ##### Install Node.js Using [`nvm`](https://github.com/nvm-sh/nvm)
 To manage and install Node.js, use `nvm` (Node Version Manager):
 
-* Install Node.js version `24`:
+* Install Node.js version `20`:
    ```bash
-   nvm install 24
-   nvm use 24
+   nvm install 20
+   nvm use 20
    ```
 * **Verify your version:**
    ```bash
    node -v
    ```
-   Should print something like `v24.x.x`
+   Should print something like `v20.x.x`
 ---
  
 
