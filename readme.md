@@ -45,7 +45,7 @@ The **Gekko M4 Globular Cluster** repository is a feature-rich implementation de
 
 Before setting up the project, make sure your environment meets the following requirements:
 
-- **Node.js 24**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
+- **Node.js 20**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
 - **Packages**: Required build tools for native module compilation:
    ```bash
    sudo apt update
