@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # NGC6121 Setup Script - Gekko M4 Cluster
-# - Requires Node.js v24+
+# - Requires Node.js v20+
 # - Ensures build toolchain is installed
 # - Ensures node-gyp is available (installs globally if missing)
 # - Installs npm deps, links local tools if present
@@ -24,8 +24,8 @@ if ! command -v node &>/dev/null; then
   exit 1
 fi
 
-# Check Node.js version (require >= 24)
-required_node_major=24
+# Check Node.js version (require >= 20)
+required_node_major=20
 current_node_major=$(node -v | sed -E 's/v([0-9]+).*/\1/')
 if [ -z "$current_node_major" ]; then
   echo "ERROR: Unable to parse Node.js version: $(node -v)"
