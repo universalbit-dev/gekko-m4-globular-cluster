@@ -66,37 +66,15 @@ module.exports = {
       watch: false
     },
     {
-      name: "chart_ccxt_multi",
-      script: "chart_ccxt_multi.js",
+      name: 'chart-runner',
+      script: 'chart.sh',
+      interpreter: '/bin/bash',
+      args: '--all --verbose --parallel',
+      cwd: './',
       instances: 1,
-      exec_mode: "cluster",
-      cwd: __dirname,
-      watch: false,
-      env: {
-        NODE_ENV: "production"
-      }
-    },
-    {
-      name: "chart_ccxt_recognition",
-      script: "chart_ccxt_recognition.js",
-      instances: 1,
-      exec_mode: "cluster",
-      cwd: __dirname,
-      watch: false,
-      env: {
-        NODE_ENV: "production"
-      }
-    },
-    {
-      name: "chart_ccxt_recognition_magnitude",
-      script: "chart_ccxt_recognition_magnitude.js",
-      instances: 1,
-      exec_mode: "cluster",
-      cwd: __dirname,
-      watch: false,
-      env: {
-        NODE_ENV: "production"
-      }
+      exec_mode: 'fork',
+      autorestart: true,
+      watch: false
     }
   ]
 };
