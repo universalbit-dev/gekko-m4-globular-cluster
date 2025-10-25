@@ -4,6 +4,7 @@
 
 This bot automates microstructure trading using advanced dynamic profit/loss management.  
 It is designed to operate on cryptocurrency exchanges via the [ccxt](https://github.com/ccxt/ccxt) library, using multi-timeframe AI signals for position management, and supports both long (buy) and short (sell) strategies.
+
 ```mermaid
 flowchart TD
   %% Macrostructure Trading Bot
@@ -111,6 +112,7 @@ flowchart TD
 - Daily trade limit (protects against excessive trades)
 - DEBUG logging (easy troubleshooting and transparency)
 - Real trading if API credentials are provided
+- Safe DRY_RUN simulation (no real orders) and verbose DEBUG diagnostics (DRY_RUN=1 / DEBUG=1) — simulates ticker, balances and order execution for safe testing
 
 ---
 
