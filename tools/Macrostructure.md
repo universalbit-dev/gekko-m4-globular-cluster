@@ -113,6 +113,7 @@ flowchart TD
 - **Easy parameter tuning** via `.env` and auto-tuning files
 - **Multi-timeframe analysis** for enhanced robustness
 - **Stateful position management** (open/closed detection, entry price tracking)
+- **Safe DRY_RUN simulation** (no real orders) and verbose DEBUG diagnostics (DRY_RUN=1 / DEBUG=1) — simulates ticker, balances and order execution for safe testing
 
 ---
 
