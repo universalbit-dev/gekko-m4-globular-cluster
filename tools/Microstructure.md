@@ -7,6 +7,80 @@ safely in development and production.
 
 Last updated: 2025-10-27
 
+## Architecture
+```mermaid
+flowchart TD
+  %% Microstructure Trading Bot — cleaned Mermaid diagram (no styles)
+  subgraph Inputs["Inputs / Data Sources"]
+    OHLCV["Per-TF prediction JSONs\ntools/logs/json/ohlcv/*.json"]
+    AUTOTUNE["Auto-tune results\ntools/evaluation/autoTune_results.json"]
+    BACKTEST["Backtest results\ntools/backtest/backtest_results.json"]
+    ENV["Environment (.env)\nMICRO_*, KEY/SECRET, DRY_RUN, DEBUG"]
+  end
+
+  subgraph Pre["Pre-processing & Validation"]
+    Loader["loadLatestSignals()"]
+    Sanitizer["sanitizeSignal()\n-> ensemble_label, ensemble_confidence"]
+    Validator["validate_predictions.js\n(optional CI/cron)"]
+    Aggregator["aggregator.js\n(windowing & OHLCV aggregates)"]
+  end
+
+  subgraph Analysis["Analysis & Gating"]
+    AutoTuneUse["getIndicatorParams() (autoTune cache)"]
+    BacktestChk["getLatestBacktestStats()\n(regime check)"]
+    TradeQuality["scoreTrade() -> tradeQuality.totalScore"]
+    BalanceFetch["fetchTickerAndBalance()\n(DRY safe)"]
+  end
+
+  subgraph Exec["Decisioning & Execution"]
+    Decide["Entry/Exit Logic\npre-trade gates\nmulti-TF preference"]
+    Simulate["simulateOrderResult() (DRY_RUN)"]
+    Exchange["ccxt Exchange\ncreateMarketBuyOrder / Sell"]
+    OrderLog["logOrder() -> tools/logs/micro_ccxt_orders.log"]
+    State["State: positionOpen, entryPrice, lastTradeTimestamp"]
+    Scheduler["scheduleNext() / INTERVAL_*"]
+    Diagnostics["diagnostics + error handlers"]
+  end
+
+  subgraph Outputs["Outputs / Artifacts"]
+    OUT_LOG["tools/logs/micro_ccxt_orders.log"]
+    OUT_SIGNAL["tools/logs/ccxt_signal.log"]
+    OUT_AGG["tools/logs/json/ohlcv/aggregated_<TF>.json"]
+    STDOUT["Console diagnostics / DEBUG logs"]
+  end
+
+  %% Data flow
+  OHLCV --> Loader
+  Loader --> Sanitizer
+  Sanitizer --> Aggregator
+  Validator --> Sanitizer
+  AUTOTUNE --> AutoTuneUse
+  BACKTEST --> BacktestChk
+  Sanitizer --> TradeQuality
+  AutoTuneUse --> TradeQuality
+  BacktestChk --> TradeQuality
+  TradeQuality --> Decide
+  BalanceFetch --> Decide
+  ENV -->|config & toggles| Decide
+  Decide -->|entry/exit| Simulate
+  Decide -->|entry/exit| Exchange
+  Simulate --> OrderLog
+  Exchange --> OrderLog
+  OrderLog --> OUT_LOG
+  Decide --> State
+  State --> Scheduler
+  Diagnostics --> STDOUT
+  OrderLog --> Diagnostics
+  Aggregator --> OUT_AGG
+  Sanitizer --> OUT_SIGNAL
+  OUT_SIGNAL --> Outputs
+
+  %% Useful links (renderers that support 'click' will make these nodes clickable)
+  click AUTOTUNE "https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/main/tools/evaluation/autoTune_results.json" "Auto-tune results"
+  click BACKTEST "https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/main/tools/backtest/backtest_results.json" "Backtest results"
+  click OHLCV "https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/main/tools/logs/json/ohlcv" "OHLCV prediction JSONs"
+```
+
 ---
 
 ## Summary — what changed
