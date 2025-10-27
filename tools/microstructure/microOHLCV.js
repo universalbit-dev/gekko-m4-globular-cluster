@@ -1,6 +1,6 @@
+const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const fs = require('fs');
-const path = require('path');
 
 // Config: target aggregation timeframe for microstructure (e.g.,'1m' '5m', '15m', '1h')
 const OHLCV_CANDLE_SIZE = process.env.MICRO_OHLCV_CANDLE_SIZE || '1m';
