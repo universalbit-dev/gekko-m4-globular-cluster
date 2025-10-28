@@ -45,11 +45,10 @@ mapfile -t AVAILABLE_SCRIPTS < <(cd "$TRAIN_DIR" 2>/dev/null && ls -1 *.js 2>/de
 
 # shorthand aliases mapping to filenames (if present)
 declare -A ALIASES
-ALIASES[multi]="train_ccxt_ohlcv_multi.js"
+ALIASES[tensorflowjs]="train_ccxt_ohlcv_multi.js"
 ALIASES[aggregate]="train_ccxt_ohlcv_aggregate.js"
 ALIASES[ohlcv]="train_ohlcv.js"
-ALIASES[ccxt]="train_ccxt_ohlcv.js"
-ALIASES[ir]="train_ccxt_ohlcv_ir.js"
+ALIASES[convnet]="train_ccxt_ohlcv.js"
 ALIASES[label_multi]="label_ohlcv_multi.js"
 ALIASES[label_aggregate]="label_ohlcv_aggregate.js"
 
