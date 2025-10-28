@@ -1,171 +1,108 @@
+#!/usr/bin/env node
 /**
  * autoTune.js
- * Modular auto-tuning of indicator parameters with robust fallback and extensibility.
- * Runs ONCE or continuously (AUTOTUNE_INTERVAL_MS from .env).
+ *
+ * Consumes evaluation outputs (single file or directory of evaluation JSONs)
+ * and produces a compact autoTune_results.json containing the best params per indicator.
+ *
+ * Goals / improvements:
+ * - Resilient reads (skip invalid files)
+ * - Support single-file or directory input
+ * - Choose best parameter set per indicator by score (configurable scoring key)
+ * - Atomic write of results and optional merging with existing file
+ * - CLI: --input <file|dir>, --out <path>, --score-key <score|sharpe|...>
+ *
+ * Example:
+ *  node tools/evaluation/autoTune.js --input tools/evaluation/evaluate_results.json --out tools/evaluation/autoTune_results.json
  */
-
 const path = require('path');
 const fs = require('fs');
+
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-const indicators = {
-  rsi: require('./indicator/RSI.js'),
-  atr: require('./indicator/ATR.js'),
-  adx: require('./indicator/ADX.js'),
-  dx:  require('./indicator/DX.js'),
-  sma: require('./indicator/SMA.js')
-};
-
-const AUTOTUNE_INTERVAL_MS = parseInt(process.env.AUTOTUNE_INTERVAL_MS || process.env.INTERVAL_MS || '0', 10);
-
-// --- Scoring helpers ---
-function absScore(values) { return values.reduce((sum, v) => sum + (v == null ? 0 : Math.abs(v)), 0); }
-function profitScore(candles, signals, params) {
-  let position = 0, entry = 0, profit = 0;
-  for (let i = 1; i < signals.length; ++i) {
-    if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) { position = 1; entry = candles[i].close; }
-    if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) { profit += candles[i].close - entry; position = 0; }
-  }
-  if (position) profit += candles[candles.length - 1].close - entry;
-  return profit;
+function safeReadJson(fp) {
+  try { if (!fp || !fs.existsSync(fp)) return null; const txt = fs.readFileSync(fp, 'utf8'); return txt ? JSON.parse(txt) : null; } catch (e) { console.warn('safeReadJson error', fp, e && e.message ? e.message : e); return null; }
 }
-function sharpeScore(returns) {
-  if (!returns.length) return 0;
-  const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-  const variance = returns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / returns.length;
-  const stddev = Math.sqrt(variance);
-  return stddev === 0 ? 0 : mean / stddev;
+function safeWriteJson(fp, obj) {
+  try { const tmp = fp + '.tmp'; fs.mkdirSync(path.dirname(fp), { recursive: true }); fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf8'); fs.renameSync(tmp, fp); return true; } catch (e) { console.error('safeWriteJson failed', e && e.message ? e.message : e); return false; }
 }
-function hitRateScore(trades) {
-  if (!trades.length) return 0;
-  const wins = trades.filter(t => t > 0).length;
-  return wins / trades.length;
-}
-function simulateTrades(candles, signals, params) {
-  let position = 0, entry = 0, trades = [];
-  for (let i = 1; i < signals.length; ++i) {
-    if (!position && params.buyLevel !== undefined && signals[i] < params.buyLevel) { position = 1; entry = candles[i].close; }
-    if (position && params.sellLevel !== undefined && signals[i] > params.sellLevel) { trades.push(candles[i].close - entry); position = 0; }
-  }
-  if (position) trades.push(candles[candles.length - 1].close - entry);
-  return trades;
+function listJsonFilesInDir(dir) {
+  try { if (!fs.existsSync(dir)) return []; return fs.readdirSync(dir).filter(f => f.endsWith('.json')).map(f => path.join(dir, f)); } catch (e) { return []; }
 }
 
-// --- Configurable scoring logic per indicator ---
-const config = {
-  dataPath: '../logs/json/ohlcv/ohlcv_ccxt_data.json',
-  resultsPath: './autoTune_results.json',
-  indicators: [
-    { name: 'rsi', class: indicators.rsi, paramName: 'interval', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 30, sellLevel: 70 }, default: 14 },
-    { name: 'atr', class: indicators.atr, paramName: 'period', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 50, sellLevel: 200 }, default: 14 },
-    { name: 'adx', class: indicators.adx, paramName: 'period', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 20, sellLevel: 50 }, default: 14 },
-    { name: 'dx',  class: indicators.dx,  paramName: 'period', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: { buyLevel: 20, sellLevel: 50 }, default: 14 },
-    { name: 'sma', class: indicators.sma, paramName: 'interval', range: { from: 2, to: 30, step: 1 }, scoringList: ['abs', 'profit', 'sharpe', 'hit-rate'], paramsTemplate: {}, default: 14 }
-  ]
-};
-
-function loadData(dataPath) {
-  const fullPath = path.resolve(__dirname, dataPath);
-  if (!fs.existsSync(fullPath)) throw new Error(`OHLCV data not found: ${fullPath}`);
-  return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+function getArgVal(name, def = null) {
+  const i = process.argv.indexOf(name);
+  if (i === -1) return def;
+  return process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : def;
 }
 
-function* paramRange({ from, to, step }) { for (let v = from; v <= to; v += step) yield v; }
+const input = getArgVal('--input') || process.env.AUTOTUNE_INPUT || path.resolve(__dirname, 'evaluate_results.json');
+const outPath = getArgVal('--out') || process.env.AUTOTUNE_OUTPUT || path.resolve(__dirname, 'autoTune_results.json');
+const scoreKey = getArgVal('--score-key') || process.env.AUTOTUNE_SCORE_KEY || 'score';
 
-const scoringMethods = {
-  abs: (candles, values, params) => absScore(values),
-  profit: (candles, values, params) => profitScore(candles, values, params),
-  sharpe: (candles, values, params) => {
-    const returns = [];
-    for (let i = 1; i < candles.length; ++i)
-      returns.push((candles[i].close - candles[i - 1].close) / candles[i - 1].close);
-    return sharpeScore(returns);
-  },
-  'hit-rate': (candles, values, params) => {
-    const trades = simulateTrades(candles, values, params);
-    return hitRateScore(trades);
-  }
-};
-
-function autoTuneIndicator(indConfig, candles) {
-  const { name, class: IndicatorClass, paramName, range, scoringList, paramsTemplate } = indConfig;
-  const bests = {};
-  for (const scoring of scoringList) {
-    let bestScore = null, bestParam = null, bestLastValue = null, bestTimestamp = null, bestDetails = {};
-    for (const param of paramRange(range)) {
-      const params = { ...paramsTemplate, [paramName]: param };
-      const indicator = new IndicatorClass(params);
-      const values = [];
-      for (const c of candles) {
-        try {
-          if (name === 'rsi' || name === 'sma') indicator.update(c.close);
-          else indicator.update(c);
-          values.push(indicator.value ?? indicator.result ?? null);
-        } catch (e) { continue; }
-      }
-      const score = scoringMethods[scoring](candles, values, params);
-
-      let extra = {};
-      if (scoring === 'hit-rate') {
-        const trades = simulateTrades(candles, values, params);
-        extra = { totalTrades: trades.length, wins: trades.filter(t => t > 0).length, losses: trades.filter(t => t <= 0).length };
-      }
-
-      if (bestScore === null || score > bestScore) {
-        bestScore = score;
-        bestParam = param;
-        bestLastValue = values.length ? values[values.length - 1] : null;
-        bestTimestamp = candles.length ? candles[candles.length - 1].timestamp : null;
-        bestDetails = extra;
-      }
-    }
-    bests[scoring] = {
-      indicator: name,
-      paramName,
-      bestParam,
-      scoring,
-      bestScore,
-      bestLastValue,
-      bestTimestamp,
-      ...bestDetails
-    };
-  }
-  return bests;
-}
-
-function runAutoTune() {
-  let candles;
-  try {
-    candles = loadData(config.dataPath);
-  } catch (e) {
-    console.error(`[AUTOTUNE][ERROR] ${e.message}`);
-    return;
-  }
-  const results = [];
-  for (const ind of config.indicators) {
-    const bestByScoring = autoTuneIndicator(ind, candles);
-    for (const scoring of ind.scoringList) {
-      const res = bestByScoring[scoring];
-      results.push(res);
-      console.log(
-        `[AUTOTUNE] Best ${ind.name} ${ind.paramName} for ${scoring}: ${res.bestParam} (score: ${res.bestScore})`
-      );
-    }
-  }
-  // Atomically write results
-  const tmpPath = config.resultsPath + '.tmp';
-  fs.writeFileSync(tmpPath, JSON.stringify(results, null, 2));
-  fs.renameSync(tmpPath, config.resultsPath);
-  console.log(`[AUTOTUNE] Auto-tune complete. Results saved to ${config.resultsPath}`);
-}
-
-// --- Run once or continuously based on interval ---
-if (AUTOTUNE_INTERVAL_MS > 0) {
-  console.log(`[AUTOTUNE] Running continuously every ${AUTOTUNE_INTERVAL_MS / 1000}s`);
-  (async function loop() {
-    runAutoTune();
-    setTimeout(loop, AUTOTUNE_INTERVAL_MS);
-  })();
+// gather candidate files
+let files = [];
+if (fs.existsSync(input)) {
+  const s = fs.statSync(input);
+  if (s.isDirectory()) files = listJsonFilesInDir(input);
+  else files = [input];
 } else {
-  runAutoTune();
+  // try common fallback: tools/evaluation/*.json
+  files = listJsonFilesInDir(path.resolve(__dirname));
 }
+if (!files.length) { console.warn('No evaluation JSON files found for autoTune'); process.exit(0); }
+
+// aggregate entries
+const allEntries = [];
+for (const f of files) {
+  const data = safeReadJson(f);
+  if (!data) continue;
+  // data expected to be an array of result objects
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      allEntries.push(Object.assign({}, item, { __source: f }));
+    }
+  } else if (typeof data === 'object' && data.results && Array.isArray(data.results)) {
+    for (const item of data.results) allEntries.push(Object.assign({}, item, { __source: f }));
+  }
+}
+
+// group by indicator + params signature (we'll pick best per indicator/params)
+const byIndicator = {};
+for (const e of allEntries) {
+  if (!e || !e.indicator) continue;
+  const key = String(e.indicator).toLowerCase();
+  byIndicator[key] ??= [];
+  byIndicator[key].push(e);
+}
+
+// pick best param set per indicator by scoreKey
+const autoTune = [];
+for (const [ind, entries] of Object.entries(byIndicator)) {
+  // group by params JSON string
+  const byParams = new Map();
+  for (const e of entries) {
+    const paramsKey = JSON.stringify(e.params || {});
+    const arr = byParams.get(paramsKey) || [];
+    arr.push(e);
+    byParams.set(paramsKey, arr);
+  }
+  // compute aggregate score per params (mean)
+  let best = null;
+  for (const [paramsKey, arr] of byParams.entries()) {
+    const scores = arr.map(a => Number(a[scoreKey] ?? a.score ?? 0)).filter(n => isFinite(n));
+    const meanScore = scores.length ? (scores.reduce((a,b)=>a+b,0)/scores.length) : Number.NEGATIVE_INFINITY;
+    const entry = { indicator: ind, params: JSON.parse(paramsKey), meanScore, samples: arr.length, examples: arr.slice(0,3) };
+    if (!best || entry.meanScore > best.meanScore) best = entry;
+  }
+  if (best) autoTune.push({ indicator: ind, bestParams: best.params, meanScore: best.meanScore, samples: best.samples, examples: best.examples });
+}
+
+if (!autoTune.length) { console.warn('autoTune: no valid entries'); process.exit(0); }
+
+// write autoTune results atomically
+const wrote = safeWriteJson(outPath, { generated_at: new Date().toISOString(), results: autoTune });
+if (wrote) console.log('autoTune: wrote', outPath);
+else console.error('autoTune: failed to write', outPath);
+
+module.exports = { autoTune };
