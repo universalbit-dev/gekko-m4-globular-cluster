@@ -16,7 +16,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const OHLCV_DIR = path.resolve(__dirname, '../logs/json/ohlcv');
 const TIMEFRAMES = (process.env.TRAIN_OHLCV_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
 const TF_MODEL_ROOT = path.resolve(__dirname, '../trained/trained_ccxt_ohlcv_tf');
-const CONVNET_MODEL_ROOT = path.resolve(__dirname, '../trained/trained_ccxt_ohlcv');
+const CONVNET_MODEL_ROOT = path.resolve(__dirname, '../trained');
 const EPSILON = 1e-8;
 const TRAIN_INTERVAL_MS = parseInt(process.env.TRAIN_INTERVAL_MS, 10) || 300000; // default 5m
 
