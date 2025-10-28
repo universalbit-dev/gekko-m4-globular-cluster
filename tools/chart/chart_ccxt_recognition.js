@@ -29,7 +29,7 @@ const LOGS_ROOT = path.resolve(__dirname, '../logs');
 const CSV_DIR = path.resolve(__dirname, '../../logs/csv');
 const OHLCV_JSON_DIR = path.resolve(__dirname, '../logs/json/ohlcv');
 const TRAINED_ROOT = path.resolve(__dirname, '../trained'); // tools/trained
-const MODEL_DIR = path.join(TRAINED_ROOT, ''); // per-timeframes subfolders live here
+const MODEL_DIR = path.join(TRAINED_ROOT, 'trained_ccxt_ohlcv'); // per-timeframes subfolders live here
 const SIGNAL_LOG_PATH = path.resolve(__dirname, '../logs/ccxt_signal.log');
 
 const LABELS = ['bull', 'bear', 'idle'];
@@ -38,7 +38,7 @@ const TIMEFRAMES = (process.env.TIMEFRAMES || process.env.TIMEFRAME || '1m,5m,15
   .split(',').map(s => s.trim()).filter(Boolean);
 
 // Behavior flags
-const PREFER_JSON ='1';
+const PREFER_JSON = '1';
 const VALIDATE_INPUT_JSON = !/^(0|false|no)$/i.test(String(process.env.VALIDATE_INPUT_JSON || '1'));
 const APPEND_PREDICTION = /^(1|true|yes)$/i.test(String(process.env.APPEND_PREDICTION || '0'));
 const PRED_TMP_SUFFIX = '.tmp';
