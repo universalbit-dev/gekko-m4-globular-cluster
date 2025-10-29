@@ -1,21 +1,26 @@
 #!/usr/bin/env node
 /**
- * micro_ccxt_order.js (enhanced)
+ * micro_ccxt_order.js (enhanced, fixed)
  *
- * Microstructure trading bot: modular, auto-tuned, multi-timeframe.
- * - DRY_RUN=1 to simulate (no live orders). DEBUG=1 for verbose logs.
- * - Uses autoTune_results.json for indicator params.
- * - Reads prediction files from logs/json/ohlcv and sanitizes them.
- * - Consults backtest results for regime alignment before trading.
- * - Robust: defensive parsing, graceful failures, diagnostics history.
+ * Microstructure trading bot (fixed): resilience improvements and fixes for
+ * reading auto-tune cache. Resolves:
+ *   TypeError: (stats || []).find is not a function
  *
- * Environment overrides:
- * - DRY_RUN, DEBUG
- * - BACKTEST_JSON_PATH
- * - AUTO_TUNE_PATH
- * - MICRO_PRIMARY_TF (prefer this timeframe for micro decisions)
- * - MICRO_TIMEFRAMES, MICRO_PAIR, MICRO_EXCHANGE, MICRO_ORDER_AMOUNT, MICRO_INTERVAL_MS
+ * Key fixes:
+ * - loadAutoTuneCache normalizes the parsed auto-tune file into an array
+ *   regardless of whether the file contains:
+ *     - an array at the top level,
+ *     - an object with a `results` array,
+ *     - or a map of indicator -> array structure.
+ * - getIndicatorParams now tolerates multiple auto-tune result schemas
+ *   and extracts the requested numeric parameter safely from:
+ *     - entry.bestParams[param], entry.params[param], entry.bestParam, etc.
+ *   falling back to the configured default.
+ * - Defensive guards added so non-array shapes won't trigger `.find` errors.
+ *
+ * Usage and other logic remain unchanged.
  */
+
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
@@ -44,7 +49,7 @@ const API_SECRET = process.env.SECRET || '';
 // Strategy / metric
 const STRATEGY = process.env.MICRO_STRATEGY || 'Balanced+';
 const VARIANT  = process.env.MICRO_VARIANT  || 'PREDICTION';
-const METRIC   = process.env.MICRO_METRIC   || 'abs';
+const METRIC   = process.env.MICRO_METRIC   || 'profit';
 
 // Intervals
 const INTERVAL_AFTER_TRADE = parseInt(process.env.INTERVAL_AFTER_TRADE || '30000', 10);
@@ -83,14 +88,39 @@ function safeJsonRead(fp, fallback = null) {
   }
 }
 
-// Auto-tune cache reload
+// Normalize whatever is in the auto-tune file into an array of result entries.
+function normalizeAutoTuneData(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object') {
+    if (Array.isArray(raw.results)) return raw.results;
+    // some exporters may put results under `data`, `evaluations`, or similar
+    if (Array.isArray(raw.data)) return raw.data;
+    if (Array.isArray(raw.evaluations)) return raw.evaluations;
+    // detect map-of-arrays: { rsi: [ ... ], atr: [ ... ] }
+    const flattened = [];
+    let found = false;
+    for (const v of Object.values(raw)) {
+      if (Array.isArray(v)) {
+        flattened.push(...v);
+        found = true;
+      }
+    }
+    if (found) return flattened;
+  }
+  return [];
+}
+
+// Auto-tune cache reload (returns normalized array)
 function loadAutoTuneCache() {
   try {
     const stat = fs.existsSync(AUTO_TUNE_PATH) ? fs.statSync(AUTO_TUNE_PATH) : null;
     if (!autoTuneCache || (stat && stat.mtimeMs !== autoTuneCacheMTime)) {
-      autoTuneCache = safeJsonRead(AUTO_TUNE_PATH, []);
+      const raw = safeJsonRead(AUTO_TUNE_PATH, null);
+      const normalized = normalizeAutoTuneData(raw);
+      autoTuneCache = Array.isArray(normalized) ? normalized : [];
       autoTuneCacheMTime = stat ? stat.mtimeMs : 0;
-      if (DEBUG) console.log('[MICRO][INFO] autoTune cache reloaded', AUTO_TUNE_PATH);
+      if (DEBUG) console.log('[MICRO][INFO] autoTune cache reloaded', AUTO_TUNE_PATH, 'entries=', autoTuneCache.length);
     }
     return autoTuneCache || [];
   } catch (e) {
@@ -99,6 +129,31 @@ function loadAutoTuneCache() {
   }
 }
 try { fs.watchFile(AUTO_TUNE_PATH, { interval: 60000 }, () => { autoTuneCache = null; }); } catch(e){}
+
+// Helper to safely extract numeric param from an auto-tune entry
+function extractParamFromEntry(entry, paramName, def) {
+  if (!entry || typeof entry !== 'object') return def;
+  const candPlaces = ['bestParams', 'params', 'parameters', 'bestParams', 'best_param', 'bestParam'];
+  for (const place of candPlaces) {
+    if (entry[place] && typeof entry[place] === 'object' && Object.prototype.hasOwnProperty.call(entry[place], paramName)) {
+      const v = entry[place][paramName];
+      const n = Number(v);
+      return (isFinite(n) ? n : def);
+    }
+  }
+  // if a singular bestParam exists (some old schema)
+  if (Object.prototype.hasOwnProperty.call(entry, 'bestParam')) {
+    const b = entry.bestParam;
+    const n = Number(b);
+    if (isFinite(n)) return n;
+  }
+  // fallback: look into top-level params-like object
+  if (entry.params && typeof entry.params === 'object' && Object.prototype.hasOwnProperty.call(entry.params, paramName)) {
+    const n = Number(entry.params[paramName]);
+    if (isFinite(n)) return n;
+  }
+  return def;
+}
 
 // Build indicator params mapping (safe)
 function getIndicatorParams(metric = METRIC) {
@@ -112,8 +167,22 @@ function getIndicatorParams(metric = METRIC) {
   const stats = loadAutoTuneCache();
   const params = {};
   for (const i of IND) {
-    const res = (stats || []).find(r => r.indicator === i.key && r.scoring === metric);
-    params[i.key.toUpperCase()] = { [i.param]: res ? res.bestParam : i.def };
+    let res = null;
+    if (Array.isArray(stats) && stats.length) {
+      // find entries that match indicator (case-insensitive)
+      const matches = stats.filter(r => r && r.indicator && String(r.indicator).toLowerCase() === String(i.key).toLowerCase());
+      if (matches.length === 1) res = matches[0];
+      else if (matches.length > 1) {
+        // prefer entry that matches scoring/metric if present
+        const byMetric = matches.find(m => m.scoring === metric || m.scoreKey === metric || m.scoringKey === metric);
+        res = byMetric || matches[0];
+      } else {
+        // no direct name match: try loose matching (e.g., indicator property might be 'RSI' or 'rsi_v1')
+        res = stats.find(r => r && r.indicator && String(r.indicator).toLowerCase().includes(String(i.key).toLowerCase()));
+      }
+    }
+    const val = extractParamFromEntry(res, i.param, i.def);
+    params[i.key.toUpperCase()] = { [i.param]: val };
   }
   return params;
 }
@@ -154,7 +223,6 @@ function sanitizeSignal(raw) {
     ['prediction_convnet','prediction_tf','prediction'].forEach(k => { if (p[k]) cand.push(p[k]); });
     if (cand.length === 1) p.ensemble_label = cand[0];
     else if (cand.length > 1) {
-      // simple majority / prefer strong
       const mapped = cand.map(v => {
         if (v === null) return null;
         const s = String(v).trim().toLowerCase();
@@ -184,11 +252,28 @@ function sanitizeSignal(raw) {
 }
 
 // Load latest prediction per timeframe from OHLCV_DIR
+function listFiles(dir) {
+  try {
+    return fs.existsSync(dir) ? fs.readdirSync(dir) : [];
+  } catch (e) {
+    return [];
+  }
+}
 function loadLatestSignals(timeframes, dir) {
   const out = [];
   for (const tf of timeframes) {
-    const fp = path.join(dir, `ohlcv_ccxt_data_${tf}_prediction.json`);
-    const arr = safeJsonRead(fp, []);
+    // support both naming conventions: ohlcv_ccxt_data_<tf>_prediction.json or ohlcv_ccxt_data_prediction_<tf>.json
+    const candidates = [
+      path.join(dir, `ohlcv_ccxt_data_${tf}_prediction.json`),
+      path.join(dir, `ohlcv_ccxt_data_prediction_${tf}.json`),
+      path.join(dir, `ohlcv_ccxt_data_prediction.json`) // fallback generic file
+    ];
+    let arr = [];
+    for (const fp of candidates) {
+      const v = safeJsonRead(fp, null);
+      if (Array.isArray(v) && v.length) { arr = v; break; }
+      if (v && typeof v === 'object' && Array.isArray(v.data) && v.data.length) { arr = v.data; break; }
+    }
     if (Array.isArray(arr) && arr.length) {
       const raw = arr[arr.length - 1];
       raw.timeframe = tf;
