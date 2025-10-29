@@ -16,7 +16,9 @@
 #   ./maintenance-clean.sh
 #
 # Notes:
-#   - The tools/ cleanup step now excludes package.json and package-lock.json by basename.
+#   - The tools/ cleanup step now excludes package.json, package-lock.json and
+#     evaluate.json by basename so evaluate.json in tools/evaluate or
+#     tools/evaluation won't be removed.
 #   - If you want to protect additional filenames or paths, add them to the
 #     TOOLS_EXCLUDE_NAMES array below or modify the exclusion in the find command.
 ###############################################################################
@@ -65,9 +67,10 @@ echo "Removing files like *.log.YYYY-MM-DD* from logs directory and all subdirec
 find ./logs -type f -name '*.log.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*' -print -delete || true
 
 # Clean tools directory and all subdirectories of .log, .csv, .json files
-# IMPORTANT: exclude package.json and package-lock.json so the tools package metadata is preserved.
+# IMPORTANT: exclude package.json, package-lock.json and evaluate.json so the
+# tools package metadata and evaluation config are preserved.
 # If you need to exclude other file basenames, add them to TOOLS_EXCLUDE_NAMES below.
-TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" )
+TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" "evaluate.json" )
 
 echo "Removing .log, .csv, and .json files from tools directory (excluding: ${TOOLS_EXCLUDE_NAMES[*]})..."
 # Build exclusion expression for find
