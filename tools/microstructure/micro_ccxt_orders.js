@@ -32,7 +32,12 @@ const { scoreTrade } = require('../tradeQualityScore');
 const AUTO_TUNE_PATH = process.env.AUTO_TUNE_PATH || path.resolve(__dirname, '../evaluation/autoTune_results.json');
 const OHLCV_DIR = process.env.OHLCV_DIR || path.resolve(__dirname, '../logs/json/ohlcv');
 const ORDER_LOG_PATH = process.env.MICRO_ORDER_LOG || path.resolve(__dirname, '../logs/micro_ccxt_orders.log');
-const BACKTEST_JSON_PATH = process.env.BACKTEST_JSON_PATH || path.resolve(__dirname, '../backtest/backtest_results.json');
+
+// Resolve BACKTEST_JSON_PATH relative to this script file (tools/microstructure/)
+const BACKTEST_JSON_PATH = process.env.BACKTEST_JSON_PATH
+  || path.resolve(__dirname, '..', 'backtest', 'backtest_results.json');
+
+console.log('[MICRO][INFO] BACKTEST_JSON_PATH resolved to', BACKTEST_JSON_PATH);
 
 // Micro config
 const MICRO_TIMEFRAMES = (process.env.MICRO_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
