@@ -54,7 +54,7 @@ const API_SECRET = process.env.SECRET || '';
 // Strategy / metric
 const STRATEGY = process.env.MICRO_STRATEGY || 'Balanced+';
 const VARIANT  = process.env.MICRO_VARIANT  || 'PREDICTION';
-const METRIC   = process.env.MICRO_METRIC   || 'profit';
+const METRIC   = process.env.MICRO_METRIC   || 'abs';
 
 // Intervals
 const INTERVAL_AFTER_TRADE = parseInt(process.env.INTERVAL_AFTER_TRADE || '30000', 10);
