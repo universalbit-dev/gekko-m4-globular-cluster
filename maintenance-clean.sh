@@ -40,7 +40,7 @@ DELETE_INSTEAD_OF_ARCHIVE=false
 ARCHIVE_FLAG=false
 
 # Default protected basenames (never delete unless --force)
-TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" "evaluate.json" )
+TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" "evaluate.json" "backtotesting.js")
 
 # Additional dynamic protections (from CLI --protect or --protect-file)
 CLI_PROTECT_LIST=()    # comma separated from --protect
