@@ -5,17 +5,19 @@ const fs = require('fs-extra');
 const rfs = require('rotating-file-stream');
 
 /**
- * CCXT Market Data Plugin
- * Loads live OHLCV data for any CCXT-supported exchange, pair, interval.
- * Reads config from .env block:
- *   CCXT_MARKET_DATA_ENABLED
- *   CCXT_MARKET_DATA_EXCHANGE
- *   CCXT_MARKET_DATA_PAIR
- *   CCXT_MARKET_DATA_CANDLE_SIZE
- *   CCXT_MARKET_DATA_FETCH_INTERVAL
- *   CCXT_MARKET_DATA_OUTPUT_CSV
- *   CCXT_MARKET_DATA_OUTPUT_JSON
- */
+* CCXT Market Data Plugin
+* Loads live OHLCV data for any CCXT-supported exchange, pair, interval.
+*
+* Reads config from .env file: gekko-m4-globular-cluster/.env
+* CCXT_MARKET_DATA_ENABLED=true
+* CCXT_MARKET_DATA_EXCHANGE=kraken
+* CCXT_MARKET_DATA_PAIR=BTC/EUR
+* CCXT_MARKET_DATA_CANDLE_SIZE=1h
+* CCXT_MARKET_DATA_FETCH_INTERVAL=3600000
+* CCXT_MARKET_DATA_OUTPUT_CSV=./logs/csv/ohlcv_ccxt_data.csv
+* CCXT_MARKET_DATA_OUTPUT_JSON=./logs/json/ohlcv/ohlcv_ccxt_data.json
+*
+*/
 
 class CCXTMarketData {
   constructor() {
