@@ -40,15 +40,22 @@ DELETE_INSTEAD_OF_ARCHIVE=false
 ARCHIVE_FLAG=false
 
 # Default protected basenames (never delete unless --force)
-TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" "evaluate.json" "backtotesting.js")
+TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" "evaluate.json" )
 
 # Additional dynamic protections (from CLI --protect or --protect-file)
 CLI_PROTECT_LIST=()    # comma separated from --protect
 FILE_PROTECT_LIST=()   # read from --protect-file (one filename per line)
 
-# Patterns for temp/backup files
+# Patterns for temp/backup files (project-wide)
 PATTERNS=( "*.js~" "*.toml~" "*.json.swp" ".*.json.swp" "*.swp" "*.swo" "*~" "#*#" "*.bak" "*.tmp" )
+# Rotated logs pattern used additionally where appropriate
 LOG_ROTATED_PATTERN='*.log.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*'
+
+# Special directories to handle (same semantics as backtest/trained/logs)
+BACKTEST_DIR="./tools/backtest"
+TRAINED_DIR="./tools/trained"
+TOOLS_LOGS_DIR="./tools/logs"
+ROOT_LOGS_DIR="./logs"
 
 log() {
   local ts; ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -217,52 +224,107 @@ MINUTES=$(( RETENTION_DAYS * 24 * 60 ))
 
 shopt -s nullglob
 
-# --- COMPLETE remove/archive of tools/backtest content ---
-BACKTEST_DIR="./tools/backtest"
-if [ -d "$BACKTEST_DIR" ]; then
-  # If dry-run, show what would be archived/removed based on age (mmin)
-  if [ "$DRY_RUN" = true ]; then
-    # show files older than retention
-    find "$BACKTEST_DIR" -mindepth 1 -mmin +"$MINUTES" -print || true
-    # also show directories that would be removed/archived
-    find "$BACKTEST_DIR" -mindepth 1 -maxdepth 2 -type d -print || true
+# Helper to build find age args: returns empty when no age filter is desired (RETENTION_DAYS <= 0)
+find_age_args() {
+  if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+    # No age filtering; operate on all matching files
+    echo ""
   else
-    # Archive or delete files older than retention
-    while IFS= read -r -d '' f; do
-      if [ -f "$f" ]; then
-        archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
-      fi
-    done < <(find "$BACKTEST_DIR" -mindepth 1 -type f -mmin +"$MINUTES" -print0 || true)
-
-    # Remove or archive directories under BACKTEST_DIR (no age check; treat as removable)
-    while IFS= read -r -d '' d; do
-      # if delete mode -> remove directory fully; else archive entire directory
-      if [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ]; then
-        rm -rf -- "$d" && log "Deleted directory $d"
-      else
-        mkdir -p "$ARCHIVE_DIR"
-        mv -f -- "$d" "$ARCHIVE_DIR/$(date +%Y%m%d-%H%M%S)-$(basename "$d")" && log "Archived directory $d"
-      fi
-    done < <(find "$BACKTEST_DIR" -mindepth 1 -maxdepth 2 -type d -print0 || true)
+    # Use -mmin +N for files older than N minutes
+    echo "-mmin +$MINUTES"
   fi
-else
-  log "No $BACKTEST_DIR directory found"
-fi
+}
 
-# --- Remove common temp/backup patterns project-wide ---
-for pattern in "${PATTERNS[@]}"; do
-  log "Scanning pattern: $pattern"
+# Function to process a directory with the backtest/trained/logs semantics
+# It only targets .log, rotated logs, and .json files. It will NOT remove .js files.
+# Directories will NOT be deleted or archived by this function — only files are handled.
+# Container directories like $DIR/json and $DIR/csv are preserved (and not rmdir'ed).
+process_special_dir() {
+  local DIR="$1"
+  if [ ! -d "$DIR" ]; then
+    log "No $DIR directory found"
+    return 0
+  fi
+
+  log "Handling special dir (files only): $DIR"
+
   if [ "$DRY_RUN" = true ]; then
-    find . -type f -name "$pattern" -print || true
-  else
+    if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+      # list all targeted files (no age filter)
+      find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -print || true
+    else
+      # list only targeted files older than retention
+      find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -mmin +"$MINUTES" -print || true
+    fi
+    return 0
+  fi
+
+  # Archive or delete targeted files ONLY; do not touch directories.
+  if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
     while IFS= read -r -d '' f; do
+      [ -f "$f" ] || continue
+      # check protection by basename
       base=$(basename "$f")
       if is_protected "$base" && [ "$FORCE" = false ]; then
         log "Skipping protected file by basename: $f"
         continue
       fi
       archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
-    done < <(find . -type f -name "$pattern" -print0 || true)
+    done < <(find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -print0 || true)
+  else
+    while IFS= read -r -d '' f; do
+      [ -f "$f" ] || continue
+      base=$(basename "$f")
+      if is_protected "$base" && [ "$FORCE" = false ]; then
+        log "Skipping protected file by basename: $f"
+        continue
+      fi
+      archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+    done < <(find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -mmin +"$MINUTES" -print0 || true)
+  fi
+
+  # Do NOT delete or archive directories here. Leave directory structure intact.
+}
+
+# --- COMPLETE remove/archive of tools/backtest content (files only) ---
+process_special_dir "$BACKTEST_DIR"
+
+# --- COMPLETE remove/archive of tools/trained content (files only) ---
+process_special_dir "$TRAINED_DIR"
+
+# --- COMPLETE remove/archive of tools/logs and root logs (files only) ---
+process_special_dir "$TOOLS_LOGS_DIR"
+process_special_dir "$ROOT_LOGS_DIR"
+
+# --- Remove common temp/backup patterns project-wide ---
+for pattern in "${PATTERNS[@]}"; do
+  log "Scanning pattern: $pattern"
+  if [ "$DRY_RUN" = true ]; then
+    if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+      find . -type f -name "$pattern" -print || true
+    else
+      find . -type f -name "$pattern" -mmin +"$MINUTES" -print || true
+    fi
+  else
+    if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+      while IFS= read -r -d '' f; do
+        base=$(basename "$f")
+        if is_protected "$base" && [ "$FORCE" = false ]; then
+          log "Skipping protected file by basename: $f"
+          continue
+        fi
+        archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+      done < <(find . -type f -name "$pattern" -print0 || true)
+    else
+      while IFS= read -r -d '' f; do
+        base=$(basename "$f")
+        if is_protected "$base" && [ "$FORCE" = false ]; then
+          log "Skipping protected file by basename: $f"
+          continue
+        fi
+        archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+      done < <(find . -type f -name "$pattern" -mmin +"$MINUTES" -print0 || true)
+    fi
   fi
 done
 
