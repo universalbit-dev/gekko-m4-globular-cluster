@@ -1,86 +1,61 @@
 #!/usr/bin/env node
 /**
- * micro_ccxt_order.js (enhanced, fixed)
+ * tools/microstructure/micro_ccxt_orders.js
  *
- * Microstructure trading bot (fixed): resilience improvements and fixes for
- * reading auto-tune cache. Resolves:
- *   TypeError: (stats || []).find is not a function
+ * Microstructure — index-driven, simulation-first
  *
- * Key fixes:
- * - loadAutoTuneCache normalizes the parsed auto-tune file into an array
- *   regardless of whether the file contains:
- *     - an array at the top level,
- *     - an object with a `results` array,
- *     - or a map of indicator -> array structure.
- * - getIndicatorParams now tolerates multiple auto-tune result schemas
- *   and extracts the requested numeric parameter safely from:
- *     - entry.bestParams[param], entry.params[param], entry.bestParam, etc.
- *   falling back to the configured default.
- * - Defensive guards added so non-array shapes won't trigger `.find` errors.
+ * - Uses in-process microstructure/index.js (if present) as decision maker.
+ * - Falls back to OHLCV prediction files only if index data not available.
+ * - FORCE_DRY default true so no live orders are submitted during testing.
+ * - Persists simulated position state to ./logs/position_state_micro.json.
  *
- * Usage and other logic remain unchanged.
+ * Usage:
+ *   DEBUG=1 FORCE_DRY=1 node tools/microstructure/micro_ccxt_orders.js
+ *   To run once: DEBUG=1 FORCE_DRY=1 node tools/microstructure/micro_ccxt_orders.js --once
+ *
+ * Safety:
+ * - Live orders will not be placed unless you explicitly set FORCE_DRY=0 and DRY_RUN=0
+ *   and supply valid API keys. Keep FORCE_DRY=1 for tests.
  */
 
-const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const ccxt = require('ccxt');
-const { scoreTrade } = require('../tradeQualityScore');
-
-// Configurable paths (env overrides allowed)
-const AUTO_TUNE_PATH = process.env.AUTO_TUNE_PATH || path.resolve(__dirname, '../evaluation/autoTune_results.json');
+const LOG_PREFIX = '[microstructure]';
+const INDEX_MODULE = path.resolve(__dirname, './index.js'); //micro-structure orchestrator
 const OHLCV_DIR = process.env.OHLCV_DIR || path.resolve(__dirname, '../logs/json/ohlcv');
-const ORDER_LOG_PATH = process.env.MICRO_ORDER_LOG || path.resolve(__dirname, '../logs/micro_ccxt_orders.log');
+const ORDER_LOG_PATH = process.env.MICRO_ORDER_LOG || path.resolve(__dirname, './logs/micro_ccxt_orders.log');
+const POSITION_STATE_PATH = path.resolve(__dirname, './logs/position_state_micro.json');
 
-// Resolve BACKTEST_JSON_PATH relative to this script file (tools/microstructure/)
-const BACKTEST_JSON_PATH = process.env.BACKTEST_JSON_PATH
-  || path.resolve(__dirname, '..', 'backtest', 'backtest_results.json');
-
-console.log('[MICRO][INFO] BACKTEST_JSON_PATH resolved to', BACKTEST_JSON_PATH);
-
-// Micro config
-const MICRO_TIMEFRAMES = (process.env.MICRO_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
-const MICRO_PRIMARY_TF = (process.env.MICRO_PRIMARY_TF || MICRO_TIMEFRAMES[0] || '1m').trim();
+// Basic config (env overrides)
 const MICRO_PAIR = (process.env.MICRO_PAIR || process.env.PAIR || 'BTC/EUR').toUpperCase();
-const MICRO_EXCHANGE = process.env.MICRO_EXCHANGE || process.env.EXCHANGE || 'kraken';
-const ORDER_AMOUNT = parseFloat(process.env.MICRO_ORDER_AMOUNT || process.env.ORDER_AMOUNT || '0.001');
-const MICRO_INTERVAL = parseInt(process.env.MICRO_INTERVAL_MS || process.env.MICRO_INTERVAL || '300000', 10);
+const MICRO_TIMEFRAMES = (process.env.MICRO_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
+const MICRO_PRIMARY_TF = process.env.MICRO_PRIMARY_TF || MICRO_TIMEFRAMES[0];
+const MICRO_ORDER_AMOUNT = Number(process.env.MICRO_ORDER_AMOUNT || process.env.ORDER_AMOUNT || 0.0001);
+const MICRO_INTERVAL_MS = Number(process.env.MICRO_INTERVAL_MS || 300000);
 
-// API keys
-const API_KEY    = process.env.KEY    || '';
-const API_SECRET = process.env.SECRET || '';
-
-// Strategy / metric
-const STRATEGY = process.env.MICRO_STRATEGY || 'Balanced+';
-const VARIANT  = process.env.MICRO_VARIANT  || 'PREDICTION';
-const METRIC   = process.env.MICRO_METRIC   || 'abs';
-
-// Intervals
-const INTERVAL_AFTER_TRADE = parseInt(process.env.INTERVAL_AFTER_TRADE || '30000', 10);
-const INTERVAL_AFTER_SKIP  = parseInt(process.env.INTERVAL_AFTER_SKIP || '60000', 10);
-const INTERVAL_AFTER_ERROR = parseInt(process.env.INTERVAL_AFTER_ERROR || '60000', 10);
-
-// DRY_RUN & DEBUG from environment
-const DRY_RUN = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || '0'));
 const DEBUG = /^(1|true|yes)$/i.test(String(process.env.DEBUG || '0'));
+const FORCE_DRY = !((process.env.FORCE_DRY === '0' || process.env.FORCE_DRY === 'false') === true) || /^(1|true|yes)$/i.test(String(process.env.FORCE_DRY || '1'));
+const DRY_RUN = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || '1'));
+const ONCE = process.argv.includes('--once');
 
-// Simulation defaults (used only when DRY_RUN=true)
-const SIM_PRICE = parseFloat(process.env.SIM_PRICE || '30000');
-const SIM_BASE_BALANCE = parseFloat(process.env.SIM_BASE_BALANCE || '0.01');
-const SIM_QUOTE_BALANCE = parseFloat(process.env.SIM_QUOTE_BALANCE || '1000');
+const SIM_PRICE = Number(process.env.SIM_PRICE || 30000);
+const SIM_BASE_BALANCE = Number(process.env.SIM_BASE_BALANCE || 0.01);
+const SIM_QUOTE_BALANCE = Number(process.env.SIM_QUOTE_BALANCE || 1000);
 
-// State & diagnostics
-let isRunning = false;
-let positionOpen = false;
-let entryPrice = null;
-let lastTradeTimestamp = 0;
-let autoTuneCache = null;
-let autoTuneCacheMTime = 0;
+// state
+let running = false;
 let diagnostics = { cycles: 0, lastError: null, lastTrade: null, history: [] };
+let position = { open: false, side: null, entryPrice: null, amount: 0, openedAt: 0 };
+let lastTradeAt = 0;
 
-// Helpers
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+// helpers
+function logDebug(...args) { if (DEBUG) console.log(LOG_PREFIX, '[DEBUG]', ...args); }
+function logInfo(...args) { console.log(LOG_PREFIX, '[INFO]', ...args); }
+function logWarn(...args) { console.warn(LOG_PREFIX, '[WARN]', ...args); }
+function logError(...args) { console.error(LOG_PREFIX, '[ERROR]', ...args); }
+
 function safeJsonRead(fp, fallback = null) {
   try {
     if (!fp || !fs.existsSync(fp)) return fallback;
@@ -88,192 +63,70 @@ function safeJsonRead(fp, fallback = null) {
     if (!txt || !txt.trim()) return fallback;
     return JSON.parse(txt);
   } catch (e) {
-    if (DEBUG) console.warn('[MICRO][WARN] safeJsonRead parse error', fp, e && e.message ? e.message : e);
+    if (DEBUG) logWarn('safeJsonRead parse error', fp, e && e.message ? e.message : e);
     return fallback;
   }
 }
-
-// Normalize whatever is in the auto-tune file into an array of result entries.
-function normalizeAutoTuneData(raw) {
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw === 'object') {
-    if (Array.isArray(raw.results)) return raw.results;
-    // some exporters may put results under `data`, `evaluations`, or similar
-    if (Array.isArray(raw.data)) return raw.data;
-    if (Array.isArray(raw.evaluations)) return raw.evaluations;
-    // detect map-of-arrays: { rsi: [ ... ], atr: [ ... ] }
-    const flattened = [];
-    let found = false;
-    for (const v of Object.values(raw)) {
-      if (Array.isArray(v)) {
-        flattened.push(...v);
-        found = true;
-      }
-    }
-    if (found) return flattened;
-  }
-  return [];
-}
-
-// Auto-tune cache reload (returns normalized array)
-function loadAutoTuneCache() {
+function safeJsonWrite(fp, obj) {
   try {
-    const stat = fs.existsSync(AUTO_TUNE_PATH) ? fs.statSync(AUTO_TUNE_PATH) : null;
-    if (!autoTuneCache || (stat && stat.mtimeMs !== autoTuneCacheMTime)) {
-      const raw = safeJsonRead(AUTO_TUNE_PATH, null);
-      const normalized = normalizeAutoTuneData(raw);
-      autoTuneCache = Array.isArray(normalized) ? normalized : [];
-      autoTuneCacheMTime = stat ? stat.mtimeMs : 0;
-      if (DEBUG) console.log('[MICRO][INFO] autoTune cache reloaded', AUTO_TUNE_PATH, 'entries=', autoTuneCache.length);
-    }
-    return autoTuneCache || [];
+    fs.mkdirSync(path.dirname(fp), { recursive: true });
+    fs.writeFileSync(fp, JSON.stringify(obj, null, 2));
   } catch (e) {
-    if (DEBUG) console.warn('[MICRO][WARN] loadAutoTuneCache error', e && e.message ? e.message : e);
-    return [];
+    logError('safeJsonWrite error', fp, e && e.message ? e.message : e);
   }
 }
-try { fs.watchFile(AUTO_TUNE_PATH, { interval: 60000 }, () => { autoTuneCache = null; }); } catch(e){}
-
-// Helper to safely extract numeric param from an auto-tune entry
-function extractParamFromEntry(entry, paramName, def) {
-  if (!entry || typeof entry !== 'object') return def;
-  const candPlaces = ['bestParams', 'params', 'parameters', 'bestParams', 'best_param', 'bestParam'];
-  for (const place of candPlaces) {
-    if (entry[place] && typeof entry[place] === 'object' && Object.prototype.hasOwnProperty.call(entry[place], paramName)) {
-      const v = entry[place][paramName];
-      const n = Number(v);
-      return (isFinite(n) ? n : def);
+function loadPositionState() {
+  try {
+    const st = safeJsonRead(POSITION_STATE_PATH, null);
+    if (st && st.position) {
+      position = st.position;
+      lastTradeAt = st.lastTradeAt || 0;
+      logDebug('Restored position state', position);
     }
-  }
-  // if a singular bestParam exists (some old schema)
-  if (Object.prototype.hasOwnProperty.call(entry, 'bestParam')) {
-    const b = entry.bestParam;
-    const n = Number(b);
-    if (isFinite(n)) return n;
-  }
-  // fallback: look into top-level params-like object
-  if (entry.params && typeof entry.params === 'object' && Object.prototype.hasOwnProperty.call(entry.params, paramName)) {
-    const n = Number(entry.params[paramName]);
-    if (isFinite(n)) return n;
-  }
-  return def;
+  } catch (e) { /* ignore */ }
+}
+function savePositionState() {
+  try { safeJsonWrite(POSITION_STATE_PATH, { position, lastTradeAt, ts: Date.now() }); } catch (e) {}
 }
 
-// Build indicator params mapping (safe)
-function getIndicatorParams(metric = METRIC) {
-  const IND = [
-    { key: 'rsi', param: 'interval', def: 14 },
-    { key: 'adx', param: 'period', def: 14 },
-    { key: 'dx',  param: 'period', def: 14 },
-    { key: 'atr', param: 'period', def: 14 },
-    { key: 'sma', param: 'interval', def: 14 },
-  ];
-  const stats = loadAutoTuneCache();
-  const params = {};
-  for (const i of IND) {
-    let res = null;
-    if (Array.isArray(stats) && stats.length) {
-      // find entries that match indicator (case-insensitive)
-      const matches = stats.filter(r => r && r.indicator && String(r.indicator).toLowerCase() === String(i.key).toLowerCase());
-      if (matches.length === 1) res = matches[0];
-      else if (matches.length > 1) {
-        // prefer entry that matches scoring/metric if present
-        const byMetric = matches.find(m => m.scoring === metric || m.scoreKey === metric || m.scoringKey === metric);
-        res = byMetric || matches[0];
-      } else {
-        // no direct name match: try loose matching (e.g., indicator property might be 'RSI' or 'rsi_v1')
-        res = stats.find(r => r && r.indicator && String(r.indicator).toLowerCase().includes(String(i.key).toLowerCase()));
-      }
-    }
-    const val = extractParamFromEntry(res, i.param, i.def);
-    params[i.key.toUpperCase()] = { [i.param]: val };
-  }
-  return params;
-}
-
-// sanitize a raw signal record (maps noisy keys and normalizes "N/A" -> null)
-function normalizeMissing(v) {
-  if (v === null || v === undefined) return null;
-  if (typeof v === 'string') {
-    const s = v.trim().toLowerCase();
-    if (!s || s === 'n/a' || s === 'na' || s === 'none' || s === 'null') return null;
-    return v.trim();
-  }
-  return v;
-}
-function normalizeKeys(raw) {
-  if (!raw || typeof raw !== 'object') return raw;
-  const out = Object.assign({}, raw);
-  for (const k of Object.keys(raw)) {
-    if (/prediction/i.test(k) && !['prediction','prediction_tf','prediction_convnet','prediction_tf_raw','prediction_convnet_raw'].includes(k)) {
-      const low = k.toLowerCase();
-      if (low.includes('convnet')) out.prediction_convnet = out.prediction_convnet ?? raw[k];
-      else if (low.includes('tf')) out.prediction_tf = out.prediction_tf ?? raw[k];
-      else out.prediction = out.prediction ?? raw[k];
-    }
-  }
+// normalize incoming index signals
+function normalizeIndexEntry(entry) {
+  if (!entry || typeof entry !== 'object') return null;
+  // expected: { timestamp, signal, score, price, prediction, summary, recent_win, ... }
+  const out = Object.assign({}, entry);
+  // map summary.win_rate -> winRate for compatibility
+  if (out.summary && out.summary.win_rate !== undefined) out.summary.winRate = out.summary.win_rate;
   return out;
 }
-function sanitizeSignal(raw) {
-  if (!raw || typeof raw !== 'object') return raw;
-  let p = normalizeKeys(raw);
-  ['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].forEach(k => {
-    if (k in p) p[k] = normalizeMissing(p[k]);
-  });
-  if (!p.signal_timestamp && p.timestamp) p.signal_timestamp = p.timestamp;
-  // derive ensemble_label if not present
-  if (!p.ensemble_label) {
-    const cand = [];
-    ['prediction_convnet','prediction_tf','prediction'].forEach(k => { if (p[k]) cand.push(p[k]); });
-    if (cand.length === 1) p.ensemble_label = cand[0];
-    else if (cand.length > 1) {
-      const mapped = cand.map(v => {
-        if (v === null) return null;
-        const s = String(v).trim().toLowerCase();
-        if (s.includes('strong') || s === '1' || s === '+1') return 'strong_bull';
-        if (s.includes('bear') || s === '-1' || s === '2') return 'strong_bear';
-        if (s.includes('bull') || s === 'buy' || s === 'up') return 'bull';
-        return 'other';
-      }).filter(Boolean);
-      const counts = mapped.reduce((acc, x) => { acc[x] = (acc[x]||0)+1; return acc; }, {});
-      const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
-      if (top) p.ensemble_label = top[0];
-    }
+
+// attempt to load index.js data structure
+function loadIndexData() {
+  try {
+    if (!fs.existsSync(INDEX_MODULE)) return null;
+    // require fresh copy to pick up updates
+    delete require.cache[require.resolve(INDEX_MODULE)];
+    const idx = require(INDEX_MODULE);
+    // index may export a function or an object. If function, prefer result if sync.
+    const data = (typeof idx === 'function') ? (() => { try { return idx(); } catch(e){ return idx; } })() : idx;
+    return data || null;
+  } catch (e) {
+    if (DEBUG) logWarn('loadIndexData error', e && e.message ? e.message : e);
+    return null;
   }
-  // ensemble_confidence if missing
-  if (!p.ensemble_confidence) {
-    p.ensemble_confidence = (() => {
-      const cand = [];
-      ['prediction_convnet','prediction_tf','prediction'].forEach(k => { if (p[k]) cand.push(String(p[k])); });
-      if (!cand.length) return 50;
-      const uniq = new Set(cand.map(c=>c.toLowerCase()));
-      if (uniq.size === 1) return 100;
-      if (cand.some(c => /strong/i.test(c))) return 75;
-      return 50;
-    })();
-  }
-  return p;
 }
 
-// Load latest prediction per timeframe from OHLCV_DIR
-function listFiles(dir) {
-  try {
-    return fs.existsSync(dir) ? fs.readdirSync(dir) : [];
-  } catch (e) {
-    return [];
-  }
-}
-function loadLatestSignals(timeframes, dir) {
+// fallback: load latest signals from OHLCV dir prediction files
+function loadLatestSignalsFromOHLCV(timeframes, dir) {
   const out = [];
   for (const tf of timeframes) {
-    // support both naming conventions: ohlcv_ccxt_data_<tf>_prediction.json or ohlcv_ccxt_data_prediction_<tf>.json
     const candidates = [
       path.join(dir, `ohlcv_ccxt_data_${tf}_prediction.json`),
       path.join(dir, `ohlcv_ccxt_data_prediction_${tf}.json`),
-      path.join(dir, `ohlcv_ccxt_data_prediction.json`) // fallback generic file
+      path.join(dir, `ohlcv_ccxt_data_prediction.json`),
+      path.join(dir, `ohlcv_ccxt_data_${tf}.json`),
+      path.join(dir, `ohlcv_ccxt_data.json`)
     ];
-    let arr = [];
+    let arr = null;
     for (const fp of candidates) {
       const v = safeJsonRead(fp, null);
       if (Array.isArray(v) && v.length) { arr = v; break; }
@@ -282,307 +135,303 @@ function loadLatestSignals(timeframes, dir) {
     if (Array.isArray(arr) && arr.length) {
       const raw = arr[arr.length - 1];
       raw.timeframe = tf;
-      out.push(sanitizeSignal(raw));
+      out.push(raw);
     }
   }
   return out;
 }
 
-// Backtest stats lookup with diagnostics
-function getLatestBacktestStats(tf, strategyName = STRATEGY, variant = VARIANT, diagnosticsRef = null) {
-  const results = safeJsonRead(BACKTEST_JSON_PATH, []);
-  if (!Array.isArray(results) || !results.length) {
-    if (diagnosticsRef) diagnosticsRef.lastError = { stage: 'backtest', message: 'Backtest results file missing or empty.' };
-    return null;
-  }
-  const tfResult = results.find(r => r.source && String(r.source).includes(tf) && (!r.variant || r.variant === variant));
-  if (!tfResult) {
-    if (diagnosticsRef) diagnosticsRef.lastError = { stage: 'backtest', message: `No entry for timeframe [${tf}] variant [${variant}].` };
-    return null;
-  }
-  const stratResult = (tfResult.results || []).find(x => x.params && x.params.name === strategyName);
-  if (!stratResult) {
-    if (diagnosticsRef) diagnosticsRef.lastError = { stage: 'backtest', message: `No strategy ${strategyName} found for ${tf}.` };
-    return null;
-  }
-  if (!stratResult.stats || stratResult.stats.numTrades === 0) {
-    if (diagnosticsRef) diagnosticsRef.lastError = { stage: 'backtest', message: `Stats present for ${tf}/${strategyName} but no trades executed.` };
-    return null;
-  }
-  return stratResult.stats;
+function formatSignalForDecision(tf, entry) {
+  // unify keys used by decision code
+  const sig = {};
+  sig.tf = tf;
+  sig.timestamp = entry.timestamp || entry.signal_timestamp || Date.now();
+  sig.signal = entry.signal || entry.ensemble_label || entry.prediction || null;
+  sig.ensemble_label = entry.ensemble_label || entry.signal || entry.prediction || null;
+  sig.ensemble_confidence = (entry.summary && entry.summary.winRate !== undefined) ? entry.summary.winRate * 100 : (entry.ensemble_confidence || entry.summary && entry.summary.win_rate ? entry.summary.win_rate * 100 : (entry.ensemble_confidence || 50));
+  sig.price = Number(entry.price || entry.close || entry.recent_win && entry.recent_win.close || SIM_PRICE);
+  sig.volatility = (entry.recent_win && entry.recent_win.volatility) || (entry.volatility) || 0;
+  sig.raw = entry;
+  return sig;
 }
 
-// Fetch ticker and balance (DRY_RUN-safe)
-async function fetchTickerAndBalance(exchange) {
-  if (DRY_RUN) return { ticker: { last: Number(process.env.SIM_PRICE || SIM_PRICE) }, balance: simulatedBalance() };
-  try {
-    const [ticker, balance] = await Promise.all([exchange.fetchTicker(MICRO_PAIR), exchange.fetchBalance()]);
-    return { ticker, balance };
-  } catch (err) {
-    throw new Error('Failed to fetch ticker/balance: ' + (err && err.message ? err.message : String(err)));
-  }
+// simulated order result & logging
+function simulateOrderResult(action, price, amount) {
+  return { id: `sim-${Date.now()}`, timestamp: Date.now(), datetime: new Date().toISOString(), symbol: MICRO_PAIR, type: 'market', side: action.toLowerCase(), price, amount, info: { simulated: true } };
 }
-function simulatedBalance() {
-  const [base, quote] = MICRO_PAIR.split('/').map(s => s.toUpperCase());
-  const free = {};
-  free[base] = Number(process.env.SIM_BASE_BALANCE || SIM_BASE_BALANCE);
-  free[quote] = Number(process.env.SIM_QUOTE_BALANCE || SIM_QUOTE_BALANCE);
-  return { free, total: { ...free } };
-}
-function hasEnoughBalance(balance, action, orderSize, currentPrice) {
-  const [base, quote] = MICRO_PAIR.split('/').map(s => s.toUpperCase());
-  if (action === 'BUY')  return (balance?.free?.[quote] || 0) >= orderSize * currentPrice;
-  if (action === 'SELL') return (balance?.free?.[base]  || 0) >= orderSize;
-  return false;
-}
-
-// Structured order logging
-function logOrder({
-  timestamp, model, prediction, label, action, result, reason, error = null, fullSignal,
-  indicatorParams = {}, tradeQualityScore = null, tradeQualityBreakdown = null, backtestStats = null, diagnosticsExtra = null, dry = false
-}) {
-  const lineParts = [
+function logOrder({ ts, action, result, reason, fullSignal, dry = true }) {
+  const parts = [
     new Date().toISOString(),
-    timestamp || '',
-    model || '',
-    prediction || '',
-    label || '',
+    ts || '',
     action || '',
-    error ? `ERROR: ${error}` : (dry ? 'DRY' : 'SUCCESS'),
-    error ? '' : JSON.stringify(result || {}),
+    dry ? 'DRY' : 'LIVE',
+    result ? JSON.stringify(result) : '',
     reason || '',
-    fullSignal ? JSON.stringify(fullSignal) : '',
-    JSON.stringify(indicatorParams),
-    tradeQualityScore !== null ? tradeQualityScore : '',
-    tradeQualityBreakdown !== null ? JSON.stringify(tradeQualityBreakdown) : '',
-    backtestStats !== null ? JSON.stringify(backtestStats) : '',
-    diagnosticsExtra !== null ? JSON.stringify(diagnosticsExtra) : ''
+    fullSignal ? JSON.stringify({ tf: fullSignal.tf, ensemble_label: fullSignal.ensemble_label, price: fullSignal.price }) : ''
   ];
   try {
     fs.mkdirSync(path.dirname(ORDER_LOG_PATH), { recursive: true });
-    fs.appendFileSync(ORDER_LOG_PATH, lineParts.join('\t') + '\n');
+    fs.appendFileSync(ORDER_LOG_PATH, parts.join('\t') + '\n');
   } catch (e) {
-    console.error('[MICRO][ERROR] Unable to write order log:', e && e.message ? e.message : e);
+    logError('Unable to write order log:', e && e.message ? e.message : e);
   }
 }
 
-// Throttle & scheduling helpers
-function canTradeNow(ts) {
-  const t = Number(ts) || Date.now();
-  return !lastTradeTimestamp || (t - lastTradeTimestamp) > MICRO_INTERVAL;
+// simple gating rules (adjust as needed)
+function shouldOpenPosition(signal, stats) {
+  // require strong_bull in ensemble_label or prediction, and not already open
+  const lbl = String(signal.ensemble_label || '').toLowerCase();
+  if (lbl.includes('strong_bull') || lbl === 'strong_bull' || String(signal.signal).toLowerCase().includes('buy')) return true;
+  // allow less strict if score or summary suggests positive regime
+  if ((signal.raw && signal.raw.score && Number(signal.raw.score) > 60) || (stats && stats.winRate > 0.45)) return true;
+  return false;
 }
-function scheduleNext(ms, reason) {
-  if (DEBUG) console.log(`[MICRO][INFO] Next run in ${ms/1000}s. Reason: ${reason}`);
-  setTimeout(main, ms);
-}
-function printDiagnostics() {
-  diagnostics.history = diagnostics.history || [];
-  diagnostics.history.push({ cycle: diagnostics.cycles, error: diagnostics.lastError, lastTrade: diagnostics.lastTrade, ts: new Date().toISOString() });
-  if (diagnostics.history.length > 20) diagnostics.history = diagnostics.history.slice(-20);
-  console.log('[MICRO][DIAGNOSTICS]', {
-    cycles: diagnostics.cycles, lastError: diagnostics.lastError, lastTrade: diagnostics.lastTrade, DRY_RUN, DEBUG
-  });
+function shouldClosePosition(signal, stats) {
+  const lbl = String(signal.ensemble_label || '').toLowerCase();
+  if (lbl.includes('strong_bear') || lbl === 'strong_bear' || String(signal.signal).toLowerCase().includes('sell')) return true;
+  if (stats && stats.winRate < 0.35) return true;
+  return false;
 }
 
-// Simulated order result
-function simulateOrderResult(action, price, amount) {
-  return { id: `sim-${Date.now()}`, timestamp: Date.now(), datetime: new Date().toISOString(), symbol: MICRO_PAIR, type: 'market', side: action === 'BUY' ? 'buy' : 'sell', price, amount, info: { simulated: true } };
+function canThrottle() {
+  const throttleMs = Number(process.env.ORDER_THROTTLE_MS || 300000);
+  return !lastTradeAt || (Date.now() - lastTradeAt) > throttleMs;
 }
 
-// --- Main trading loop ---
-async function main() {
+// Replacement for decideAndAct - clearer, modular, and easy to maintain.
+// Drop this function into micro_ccxt_orders.js replacing the old decideAndAct implementation.
+
+async function decideAndAct() {
   diagnostics.cycles++;
-  if (isRunning) { if (DEBUG) console.warn('[MICRO][WARN] Cycle still running; skipping.'); return; }
-  isRunning = true;
-
-  let exchange = null;
-  try {
-    if (!DRY_RUN) {
-      const ExchangeClass = ccxt[MICRO_EXCHANGE];
-      if (!ExchangeClass) throw new Error(`Exchange ${MICRO_EXCHANGE} not available in ccxt`);
-      exchange = new ExchangeClass({ apiKey: API_KEY, secret: API_SECRET, enableRateLimit: true });
-      if (DEBUG && exchange) console.log('[MICRO][INFO] Exchange initialized');
-    } else if (DEBUG) {
-      console.log('[MICRO][DRY] Running in DRY_RUN mode (no live orders)');
-    }
-  } catch (e) {
-    diagnostics.lastError = { stage: 'exchange_init', message: e && e.message ? e.message : String(e) };
-    printDiagnostics();
-    scheduleNext(INTERVAL_AFTER_ERROR, 'Exchange init failed');
-    isRunning = false; return;
+  if (running) {
+    logDebug('Previous cycle still running, skipping');
+    return;
   }
+  running = true;
+
+  // Small helpers local to this function to keep flow readable
+  const pickIndexSignal = (idx) => {
+    if (!idx || typeof idx !== 'object') return null;
+    // prefer primary timeframe, else first available from MICRO_TIMEFRAMES
+    const tryGet = (key) => {
+      if (Object.prototype.hasOwnProperty.call(idx, key)) return idx[key];
+      // case-insensitive
+      for (const k of Object.keys(idx)) if (String(k).toLowerCase() === String(key).toLowerCase()) return idx[k];
+      // loose contains match
+      for (const k of Object.keys(idx)) if (String(k).toLowerCase().includes(String(key).toLowerCase())) return idx[k];
+      return null;
+    };
+
+    // prefer primary TF
+    let entry = tryGet(MICRO_PRIMARY_TF);
+    if (entry) return { tf: MICRO_PRIMARY_TF, entry };
+
+    for (const tf of MICRO_TIMEFRAMES) {
+      entry = tryGet(tf);
+      if (entry) return { tf, entry };
+    }
+    return null;
+  };
+
+  const pickOHLCVSignal = (preds) => {
+    if (!Array.isArray(preds) || !preds.length) return null;
+    // prefer primary TF if present
+    let sig = preds.find(p => String(p.timeframe || p.tf) === String(MICRO_PRIMARY_TF));
+    if (sig) return { tf: MICRO_PRIMARY_TF, entry: sig };
+    // else return first
+    const first = preds[0];
+    return { tf: first.timeframe || first.tf || 'unknown', entry: first };
+  };
+
+  const safeFormat = (tf, rawEntry) => {
+    try { return formatSignalForDecision(tf, normalizeIndexEntry(rawEntry)); } catch (e) { return null; }
+  };
 
   try {
-    // load latest signals (sanitized)
-    const signals = loadLatestSignals(MICRO_TIMEFRAMES, OHLCV_DIR);
-    if (!signals.length) {
-      diagnostics.lastError = { stage: 'signal', message: 'No prediction signals found' };
-      printDiagnostics();
-      scheduleNext(MICRO_INTERVAL, 'No prediction signals');
-      isRunning = false; return;
-    }
+    // 1) Try in-memory index.js
+    const idx = loadIndexData();
+    let chosenSignal = null;
+    let chosenTf = null;
+    let backtestStats = null;
 
-    // prefer primary timeframe signal if available
-    let lastSignal = signals.find(s => s.timeframe === MICRO_PRIMARY_TF) || signals[0];
-    if (!lastSignal || !lastSignal.timestamp) {
-      diagnostics.lastError = { stage: 'signal', message: 'No valid lastSignal' };
-      printDiagnostics();
-      scheduleNext(MICRO_INTERVAL, 'Invalid lastSignal');
-      isRunning = false; return;
-    }
-
-    // indicator params & backtest stats
-    const indicatorParams = getIndicatorParams(METRIC);
-    const backtestStats = getLatestBacktestStats(lastSignal.timeframe || MICRO_PRIMARY_TF, STRATEGY, VARIANT, diagnostics);
-    if (!backtestStats) {
-      printDiagnostics();
-      scheduleNext(MICRO_INTERVAL, 'Missing backtest stats');
-      isRunning = false; return;
-    }
-    if (DEBUG) console.log('[MICRO][DEBUG] backtestStats:', backtestStats);
-
-    // pre-trade trade quality
-    const signalStrength = (String(lastSignal.ensemble_label || lastSignal.prediction || '').toLowerCase().includes('bull') ? 90 : (String(lastSignal.ensemble_label || lastSignal.prediction || '').toLowerCase().includes('bear') ? 90 : 50));
-    const tradeQuality = scoreTrade({
-      signalStrength,
-      modelWinRate: backtestStats.winRate || 0.5,
-      riskReward: 2,
-      executionQuality: 90,
-      volatility: Number(lastSignal.volatility) || 1,
-      tradeOutcome: null,
-      ensembleConfidence: Number(lastSignal.ensemble_confidence) || 50,
-      signalAge: Number(lastSignal.signal_timestamp ? (Date.now() - Number(lastSignal.signal_timestamp))/1000 : 0),
-      regimeAlign: 50,
-      ...Object.fromEntries(Object.entries(indicatorParams).map(([k,v]) => [`${k.toLowerCase()}Param`, v]))
-    });
-    if (DEBUG) console.log('[MICRO][DEBUG] tradeQuality.totalScore=', tradeQuality.totalScore);
-
-    // enforce regime: skip if backtest poor
-    if ((backtestStats.totalPNL || 0) <= 0 || (backtestStats.winRate || 0) < 0.5) {
-      logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label,
-        action: 'SKIP', result: null, reason: `Backtest regime not favorable (PNL=${backtestStats.totalPNL}, winRate=${backtestStats.winRate})`,
-        fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: DRY_RUN
-      });
-      printDiagnostics();
-      scheduleNext(INTERVAL_AFTER_SKIP, 'Regime skip');
-      isRunning = false; return;
-    }
-
-    if ((tradeQuality.totalScore || 0) < 65) {
-      logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label,
-        action: 'SKIP', result: null, reason: `Trade quality too low (${tradeQuality.totalScore})`,
-        fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: DRY_RUN
-      });
-      printDiagnostics();
-      scheduleNext(INTERVAL_AFTER_SKIP, 'Low trade quality');
-      isRunning = false; return;
-    }
-
-    const { ticker, balance } = await fetchTickerAndBalance(exchange);
-    const currentPrice = Number(ticker?.last) || Number(process.env.SIM_PRICE || SIM_PRICE);
-    const orderSize = clamp(ORDER_AMOUNT, 0.00001, 0.1);
-
-    // ENTRY: buy on strong_bull
-    if (!positionOpen && (String(lastSignal.ensemble_label || lastSignal.prediction).toLowerCase().includes('strong_bull') || String(lastSignal.ensemble_label || lastSignal.prediction).toLowerCase() === 'strong_bull') && canTradeNow(lastSignal.signal_timestamp || lastSignal.timestamp)) {
-      if (!hasEnoughBalance(balance, 'BUY', orderSize, currentPrice)) {
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label,
-          action: 'SKIP', result: null, reason: 'Insufficient balance', fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: DRY_RUN
-        });
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_SKIP, 'Insufficient balance');
-        isRunning = false; return;
-      }
-
-      if (DRY_RUN) {
-        const res = simulateOrderResult('BUY', currentPrice, orderSize);
-        positionOpen = true; entryPrice = res.price; diagnostics.lastTrade = { action: 'BUY', timestamp: lastSignal.timestamp, tf: lastSignal.timeframe, simulated: true };
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'BUY', result: res, reason: `DRY strong_bull ${lastSignal.timeframe}`, fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: true });
-        lastTradeTimestamp = Number(lastSignal.signal_timestamp || lastSignal.timestamp) || Date.now();
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_TRADE, 'DRY buy');
-        isRunning = false; return;
-      }
-
-      // live
-      try {
-        const res = await exchange.createMarketBuyOrder(MICRO_PAIR, orderSize);
-        positionOpen = true; entryPrice = res.price || res.average || currentPrice; diagnostics.lastTrade = { action: 'BUY', timestamp: lastSignal.timestamp, tf: lastSignal.timeframe };
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'BUY', result: res, reason: `LIVE strong_bull ${lastSignal.timeframe}`, fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: false });
-        lastTradeTimestamp = Number(lastSignal.signal_timestamp || lastSignal.timestamp) || Date.now();
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_TRADE, 'Live buy submitted');
-        isRunning = false; return;
-      } catch (e) {
-        diagnostics.lastError = { stage: 'buy', message: e && e.message ? e.message : String(e) };
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'BUY', result: null, reason: 'Failed to submit BUY', error: e && e.message ? e.message : String(e), fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: false });
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_ERROR, 'Buy failed');
-        isRunning = false; return;
+    if (idx) {
+      const pick = pickIndexSignal(idx);
+      if (pick) {
+        const formatted = safeFormat(pick.tf, pick.entry);
+        if (formatted) {
+          chosenSignal = formatted;
+          chosenTf = pick.tf;
+        }
       }
     }
 
-    // EXIT: sell if position open and regime negative or signal bear
-    if (positionOpen && ((backtestStats.totalPNL || 0) <= 0 || (backtestStats.winRate || 0) < 0.5 || String(lastSignal.ensemble_label || lastSignal.prediction).toLowerCase().includes('bear'))) {
-      if (!hasEnoughBalance(balance, 'SELL', orderSize, currentPrice)) {
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'SKIP', result: null, reason: 'Insufficient balance to SELL', fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: DRY_RUN });
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_SKIP, 'Insufficient balance sell');
-        isRunning = false; return;
-      }
-
-      if (DRY_RUN) {
-        const res = simulateOrderResult('SELL', currentPrice, orderSize);
-        positionOpen = false; entryPrice = null; diagnostics.lastTrade = { action: 'SELL', timestamp: lastSignal.timestamp, tf: lastSignal.timeframe, simulated: true };
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'SELL', result: res, reason: `DRY regime negative or bear ${lastSignal.timeframe}`, fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: true });
-        lastTradeTimestamp = Number(lastSignal.signal_timestamp || lastSignal.timestamp) || Date.now();
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_TRADE, 'DRY sell');
-        isRunning = false; return;
-      }
-
-      try {
-        const res = await exchange.createMarketSellOrder(MICRO_PAIR, orderSize);
-        positionOpen = false; entryPrice = null; diagnostics.lastTrade = { action: 'SELL', timestamp: lastSignal.timestamp, tf: lastSignal.timeframe };
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'SELL', result: res, reason: `LIVE regime negative/bear ${lastSignal.timeframe}`, fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: false });
-        lastTradeTimestamp = Number(lastSignal.signal_timestamp || lastSignal.timestamp) || Date.now();
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_TRADE, 'Live sell executed');
-        isRunning = false; return;
-      } catch (e) {
-        diagnostics.lastError = { stage: 'sell', message: e && e.message ? e.message : String(e) };
-        logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'SELL', result: null, reason: 'Failed to submit SELL', error: e && e.message ? e.message : String(e), fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: false });
-        printDiagnostics();
-        scheduleNext(INTERVAL_AFTER_ERROR, 'Sell failed');
-        isRunning = false; return;
+    // 2) fallback to OHLCV prediction files if no index-driven signal
+    if (!chosenSignal) {
+      const preds = loadLatestSignalsFromOHLCV(MICRO_TIMEFRAMES, OHLCV_DIR);
+      const picked = pickOHLCVSignal(preds);
+      if (picked) {
+        const formatted = safeFormat(picked.tf, picked.entry);
+        if (formatted) {
+          chosenSignal = formatted;
+          chosenTf = picked.tf;
+        }
       }
     }
 
-    // No-op: log HOLD
-    logOrder({ timestamp: lastSignal.timestamp, model: lastSignal.model || '', prediction: lastSignal.prediction, label: lastSignal.label, action: 'HOLD', result: null, reason: `No trade condition met on ${lastSignal.timeframe}`, fullSignal: lastSignal, indicatorParams, tradeQualityScore: tradeQuality.totalScore, tradeQualityBreakdown: tradeQuality.breakdown, backtestStats, diagnosticsExtra: diagnostics, dry: DRY_RUN });
-    printDiagnostics();
-    scheduleNext(MICRO_INTERVAL, 'No trade');
-  } catch (errMain) {
-    diagnostics.lastError = { stage: 'main', message: errMain && errMain.message ? errMain.message : String(errMain) };
-    printDiagnostics();
-    console.error('[MICRO][UNCAUGHT]', errMain && errMain.stack ? errMain.stack : errMain);
-    scheduleNext(INTERVAL_AFTER_ERROR, 'Unhandled exception');
-  } finally {
-    isRunning = false;
+    // 3) No signal -> schedule and exit
+    if (!chosenSignal) {
+      logDebug('No signal available from index or OHLCV files');
+      scheduleNext(MICRO_INTERVAL_MS, 'no signal');
+      running = false;
+      return;
+    }
+
+    logDebug('Selected decision:', chosenTf, chosenSignal.ensemble_label, 'price', chosenSignal.price);
+
+    // 4) Optional lightweight stats extracted from index summary (if present)
+    if (chosenSignal.raw && chosenSignal.raw.summary) {
+      const s = chosenSignal.raw.summary;
+      backtestStats = {
+        totalPNL: Number(s.totalPNL ?? s.pnl ?? 0),
+        winRate: Number(s.winRate ?? s.win_rate ?? 0),
+        avgTradeQuality: Number(s.avgTradeQuality ?? s.avg_trade_quality ?? 0),
+        totalTrades: Number(s.totalTrades ?? s.numTrades ?? 0)
+      };
+    } else {
+      backtestStats = null;
+    }
+
+    // 5) Throttle early to avoid rapid repeated actions
+    if (!canThrottle()) {
+      logDebug('Throttled by lastTradeAt', lastTradeAt);
+      scheduleNext(MICRO_INTERVAL_MS, 'throttled');
+      running = false;
+      return;
+    }
+
+    // 6) Decision logic (single, explicit place where open/close decisions happen)
+    // Keep this section compact so it's easy to tune: primary checks first, fallbacks next.
+    const decision = (() => {
+      // strong immediate signals
+      const lbl = String(chosenSignal.ensemble_label || '').toLowerCase();
+      if (lbl.includes('strong_bull') || (chosenSignal.raw && String(chosenSignal.raw.recent_win?.winner_label || '').toLowerCase().includes('strong_bull'))) {
+        return { type: 'open', reason: 'strong_bull' };
+      }
+      if (lbl.includes('strong_bear') || (chosenSignal.raw && String(chosenSignal.raw.recent_win?.winner_label || '').toLowerCase().includes('strong_bear'))) {
+        return { type: 'close', reason: 'strong_bear' };
+      }
+
+      // score / winRate gating
+      const score = Number(chosenSignal.raw?.score ?? 0);
+      const winRate = Number(backtestStats?.winRate ?? 0);
+      if (score >= Number(process.env.MIN_SCORE_FOR_OPEN || 60) || winRate >= Number(process.env.MIN_WINRATE_FOR_OPEN || 0.45)) {
+        // prefer open when not clearly bear
+        if (!lbl.includes('bear')) return { type: 'open', reason: 'score_or_winrate_pass' };
+      }
+      if (lbl.includes('bear') || score < (Number(process.env.MIN_SCORE_FOR_OPEN || 60) * 0.4)) {
+        return { type: 'close', reason: 'bear_or_low_score' };
+      }
+
+      return { type: 'hold', reason: 'no_clear_signal' };
+    })();
+
+    // 7) Execute decision: open, close, or hold (simulation-first)
+    const now = Date.now();
+    if (decision.type === 'open' && !position.open) {
+      // balance check (simulated)
+      const [base, quote] = MICRO_PAIR.split('/').map(s => s.toUpperCase());
+      const freeQuote = Number(process.env.SIM_QUOTE_BALANCE || SIM_QUOTE_BALANCE);
+      const required = MICRO_ORDER_AMOUNT * chosenSignal.price;
+      if (freeQuote < required) {
+        logInfo('Insufficient simulated quote to open position', { required, freeQuote });
+        logOrder({ ts: chosenSignal.timestamp, action: 'SKIP', reason: 'insufficient simulated quote', fullSignal: chosenSignal, dry: true });
+        scheduleNext(MICRO_INTERVAL_MS, 'skip-insufficient');
+        running = false;
+        return;
+      }
+
+      const res = simulateOrderResult('BUY', chosenSignal.price, MICRO_ORDER_AMOUNT);
+      position = { open: true, side: 'long', entryPrice: res.price, amount: MICRO_ORDER_AMOUNT, openedAt: now };
+      lastTradeAt = now;
+      diagnostics.lastTrade = { action: 'BUY', id: res.id, ts: now, simulated: true };
+      logInfo('Simulated BUY', { id: res.id, price: res.price, amount: res.amount });
+      logOrder({ ts: chosenSignal.timestamp, action: 'BUY', result: res, reason: `simulated open (${decision.reason})`, fullSignal: chosenSignal, dry: true });
+      savePositionState();
+      scheduleNext(MICRO_INTERVAL_MS, 'post-open');
+      running = false;
+      return;
+    }
+
+    if (decision.type === 'close' && position.open) {
+      const [base] = MICRO_PAIR.split('/').map(s => s.toUpperCase());
+      const freeBase = position.amount || 0;
+      if (freeBase < (position.amount || MICRO_ORDER_AMOUNT)) {
+        logInfo('Insufficient simulated base to close', { available: freeBase, needed: position.amount || MICRO_ORDER_AMOUNT });
+        logOrder({ ts: chosenSignal.timestamp, action: 'SKIP', reason: 'insufficient simulated base', fullSignal: chosenSignal, dry: true });
+        scheduleNext(MICRO_INTERVAL_MS, 'skip-insufficient-base');
+        running = false;
+        return;
+      }
+
+      const res = simulateOrderResult('SELL', chosenSignal.price, position.amount || MICRO_ORDER_AMOUNT);
+      position = { open: false, side: null, entryPrice: null, amount: 0, openedAt: 0 };
+      lastTradeAt = now;
+      diagnostics.lastTrade = { action: 'SELL', id: res.id, ts: now, simulated: true };
+      logInfo('Simulated SELL', { id: res.id, price: res.price, amount: res.amount });
+      logOrder({ ts: chosenSignal.timestamp, action: 'SELL', result: res, reason: `simulated close (${decision.reason})`, fullSignal: chosenSignal, dry: true });
+      savePositionState();
+      scheduleNext(MICRO_INTERVAL_MS, 'post-close');
+      running = false;
+      return;
+    }
+
+    // 8) Hold path: avoid noisy repeated HOLD logs by using cooldown
+    {
+      const HOLD_LOG_COOLDOWN_MS = Number(process.env.HOLD_LOG_COOLDOWN_MS || 5 * 60 * 1000);
+      const nowTs = Date.now();
+      // initialize holder variables on first run (attached to diagnostics to persist across restarts)
+      diagnostics._lastLoggedAction = diagnostics._lastLoggedAction || null;
+      diagnostics._lastHoldLoggedAt = diagnostics._lastHoldLoggedAt || 0;
+
+      const shouldLogHold = diagnostics._lastLoggedAction !== 'HOLD' || (nowTs - diagnostics._lastHoldLoggedAt) > HOLD_LOG_COOLDOWN_MS;
+      if (shouldLogHold) {
+        logDebug('HOLD — no conditions met for trade', { reason: decision.reason });
+        logOrder({ ts: chosenSignal.timestamp, action: 'HOLD', reason: decision.reason || 'no-op', fullSignal: chosenSignal, dry: true });
+        diagnostics._lastLoggedAction = 'HOLD';
+        diagnostics._lastHoldLoggedAt = nowTs;
+      } else {
+        logDebug('HOLD suppressed (duplicate) until cooldown expires');
+      }
+      scheduleNext(MICRO_INTERVAL_MS, 'hold');
+      running = false;
+      return;
+    }
+  } catch (err) {
+    diagnostics.lastError = { stage: 'main', message: err && err.message ? err.message : String(err) };
+    logError('Main loop error', err && err.stack ? err.stack : err);
+    scheduleNext(MICRO_INTERVAL_MS, 'error');
+    running = false;
   }
 }
 
-// Start
-console.log(`[MICRO][INFO] starting micro bot: TFs=${MICRO_TIMEFRAMES.join(',')} primary=${MICRO_PRIMARY_TF} pair=${MICRO_PAIR} exchange=${MICRO_EXCHANGE} DRY_RUN=${DRY_RUN} DEBUG=${DEBUG}`);
-main();
+// scheduling
+function scheduleNext(ms, reason) {
+  logDebug('Next run in ms=', ms, 'reason=', reason);
+  setTimeout(decideAndAct, ms);
+}
 
-// Global handlers
-process.on('uncaughtException', (e) => {
-  diagnostics.lastError = { stage: 'uncaughtException', message: e && e.message ? e.message : String(e) };
-  printDiagnostics();
-  console.error('[MICRO][FATAL]', e);
-});
-process.on('unhandledRejection', (r) => {
-  diagnostics.lastError = { stage: 'unhandledRejection', message: r && r.message ? r.message : String(r) };
-  printDiagnostics();
-  console.error('[MICRO][FATAL] unhandledRejection', r);
-});
+// startup
+loadPositionState();
+logInfo('micro_ccxt_orders (index-driven) starting', { MICRO_PAIR, MICRO_PRIMARY_TF, FORCE_DRY: FORCE_DRY, DRY_RUN: DRY_RUN, DEBUG });
+decideAndAct();
+if (!ONCE) {
+  setInterval(() => {
+    if (!running) decideAndAct();
+  }, MICRO_INTERVAL_MS).unref();
+}
+
+// graceful shutdown
+process.on('SIGINT', () => { savePositionState(); logInfo('exiting'); process.exit(0); });
+process.on('SIGTERM', () => { savePositionState(); logInfo('exiting'); process.exit(0); });
+process.on('uncaughtException', (err) => { diagnostics.lastError = { stage: 'uncaughtException', message: err && err.message ? err.message : err }; logError(err); savePositionState(); process.exit(1); });
+process.on('unhandledRejection', (r) => { diagnostics.lastError = { stage: 'unhandledRejection', message: r && r.message ? r.message : r }; logError(r); savePositionState(); process.exit(1); });
