@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * tools/microstructure/micro_ccxt_orders.js
+ * tools/micro_ccxt_orders.js
  *
- * Microstructure — index-driven, simulation-first
+ * Microstructure trading bot — index-driven, simulation-first
  *
- * - Uses in-process microstructure/index.js (if present) as decision maker.
+ * - Uses in-process microstructure/index.js (if present) as primary decision source.
  * - Falls back to OHLCV prediction files only if index data not available.
  * - FORCE_DRY default true so no live orders are submitted during testing.
  * - Persists simulated position state to ./logs/position_state_micro.json.
  *
  * Usage:
- *   DEBUG=1 FORCE_DRY=1 node tools/microstructure/micro_ccxt_orders.js
- *   To run once: DEBUG=1 FORCE_DRY=1 node tools/microstructure/micro_ccxt_orders.js --once
+ *   DEBUG=1 FORCE_DRY=1 node tools/micro_ccxt_orders.js
+ *   To run once: DEBUG=1 FORCE_DRY=1 node tools/micro_ccxt_orders.js --once
  *
  * Safety:
  * - Live orders will not be placed unless you explicitly set FORCE_DRY=0 and DRY_RUN=0
