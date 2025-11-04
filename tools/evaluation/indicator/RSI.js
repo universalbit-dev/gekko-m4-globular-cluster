@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * tools/indicators/RSI.js
+ * tools/evaluation/indicator/RSI.js
  *
  * Optimized Wilder-style RSI (smoothed) for per-candle updates.
  * - O(1) per update using rolling averages of gains/losses (exponential smoothing).

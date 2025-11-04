@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * tools/indicators/ADX.js
+ * tools/evaluation/indicator/ADX.js
  *
  * Efficient ADX implementation (Average Directional Index).
  * - Inputs per candle: high, low, close

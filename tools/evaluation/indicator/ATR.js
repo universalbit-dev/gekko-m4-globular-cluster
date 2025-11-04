@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * tools/indicators/ATR.js
+ * tools/evaluation/indicator/ATR.js
  *
  * Optimized Average True Range (ATR) with Wilder smoothing.
  * - Usage:

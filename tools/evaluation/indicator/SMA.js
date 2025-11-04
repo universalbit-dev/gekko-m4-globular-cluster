@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * tools/indicators/SMA.js
+ * tools/evaluation/indicator/SMA.js
  *
  * Optimized Simple Moving Average (SMA)
  * - O(1) per update using circular buffer + running sum

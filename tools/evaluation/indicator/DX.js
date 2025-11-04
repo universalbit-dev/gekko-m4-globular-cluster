@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * tools/indicators/DX.js
+ * tools/evaluation/indicator/DX.js
  *
  * Directional Movement Index (DX) core calculation:
  * - Computes DX = 100 * (|+DI - -DI| / (+DI + -DI))
