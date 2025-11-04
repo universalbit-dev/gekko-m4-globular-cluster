@@ -1,65 +1,42 @@
+#!/usr/bin/env node
 /**
- * Directional Movement Index (DX) Indicator
- * Ported from Tulip Indicators: https://tulipindicators.org/dx
- * Author: gab0, updated by universalbit-dev
+ * tools/indicators/DX.js
+ *
+ * Directional Movement Index (DX) core calculation:
+ * - Computes DX = 100 * (|+DI - -DI| / (+DI + -DI))
+ * - Requires smoothed +DI and -DI inputs (from smoothed True Range & directional movement).
+ * - This module provides a per-step incremental compute given smoothed +DM, -DM and ATR.
+ *
+ * Usage:
+ *   const dx = new DX();
+ *   dx.update(smoothedPlusDM, smoothedMinusDM, atr) -> dxValue or null
+ *   dx.reset()
  */
-const ATR = require('./ATR.js');
 
 class DX {
-  constructor(params = 14) {
-    // Accept DX(period) or DX({period: ...})
-    let period = typeof params === 'object' ? params.period : params;
-    if (!Number.isInteger(period) || period <= 0) {
-      throw new Error(`DX: period must be a positive integer (got '${period}')`);
-    }
-    this.period = period;
-    this.atr = new ATR({ period });
-    this.lastCandle = null;
-    this.age = 0;
-
-    this.dmUp = 0;
-    this.dmDown = 0;
-    this.diUp = 0;
-    this.diDown = 0;
-    this.result = null;
+  constructor() {
     this.value = null;
-    this._weight = (period - 1) / period;
   }
 
-  update(candle) {
-    this.atr.update(candle);
-    if (this.lastCandle) {
-      const upMove = candle.high - this.lastCandle.high;
-      const downMove = this.lastCandle.low - candle.low;
+  reset() {
+    this.value = null;
+  }
 
-      let up = 0, down = 0;
-      if (upMove > 0 && upMove > downMove) up = upMove;
-      if (downMove > 0 && downMove > upMove) down = downMove;
-
-      this.dmUp = this._weight * this.dmUp + up;
-      this.dmDown = this._weight * this.dmDown + down;
-
-      if (this.atr.value) {
-        this.diUp = this.dmUp / this.atr.value;
-        this.diDown = this.dmDown / this.atr.value;
-
-        const dmDiff = Math.abs(this.diUp - this.diDown);
-        const dmSum = this.diUp + this.diDown;
-
-        if (this.age >= this.period && dmSum !== 0) {
-          this.result = 100 * dmDiff / dmSum;
-          this.value = this.result;
-        } else {
-          this.result = null;
-          this.value = null;
-        }
-      } else {
-        this.result = null;
-        this.value = null;
-      }
-    }
-    this.lastCandle = candle;
-    this.age++;
+  /**
+   * smPlus, smMinus: smoothed directional movements (same smoothing as ATR's TR smoothing)
+   * atr: average true range (non-zero)
+   */
+  update(smPlus, smMinus, atr) {
+    const p = Number(smPlus || 0);
+    const m = Number(smMinus || 0);
+    const a = Number(atr || 0);
+    if (!isFinite(p) || !isFinite(m) || !isFinite(a) || a <= 0) return this.value = null;
+    const plusDI = (p / a) * 100;
+    const minusDI = (m / a) * 100;
+    const denom = plusDI + minusDI;
+    if (denom === 0) { this.value = 0; return this.value; }
+    this.value = (Math.abs(plusDI - minusDI) / denom) * 100;
+    return this.value;
   }
 }
 

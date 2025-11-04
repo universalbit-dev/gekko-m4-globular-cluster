@@ -1,135 +1,132 @@
-// url: (local file) - optimized ADX indicator
-// Lean, incremental ADX implementation optimized for per-candle update throughput.
+#!/usr/bin/env node
+/**
+ * tools/indicators/ADX.js
+ *
+ * Efficient ADX implementation (Average Directional Index).
+ * - Inputs per candle: high, low, close
+ * - Internally computes DM+, DM-, TR, applies Wilder smoothing, computes +DI, -DI, DX,
+ *   and then ADX as Wilder-smoothed DX over the period.
+ * - O(1) per update, minimal allocations.
+ *
+ * Usage:
+ *   const adx = new ADX(14);
+ *   adx.update({high, low, close});
+ *   adx.value -> current ADX (null until warmed)
+ *   adx.plusDI, adx.minusDI, adx.dx available
+ *   adx.reset(); adx.warmup(arrayOfOHLC)
+ */
 
-class ADXIndicator {
+const ATR = require('./ATR');
+const DX = require('./DX');
+
+class ADX {
   constructor(period = 14) {
     this.period = Math.max(1, Math.floor(period));
-    // internal DX object — keep required rolling components
-    this.prevHigh = null;
-    this.prevLow = null;
-    this.prevClose = null;
-
-    // smoothed directional movement and true range trackers
-    this.smoothedPlusDM = 0;
-    this.smoothedMinusDM = 0;
-    this.smoothedTR = 0;
-
-    // ADX values
-    this.adx = NaN; // current ADX result
-    this._dxSum = 0; // used during initialization
-    this._dxCount = 0; // count of DX samples collected for init
-
-    // convenience ratio (used in update)
-    this._alpha = (this.period - 1) / this.period;
+    this._prev = null; // {high,low,close}
+    // smoothed accumulators
+    this._smPlus = 0;
+    this._smMinus = 0;
+    this._smTR = 0; // tracked same as ATR.trSMA
+    this._adxSMA = 0; // Wilder smoothing for DX -> ADX
+    this._dx = new DX();
+    this.atr = new ATR(this.period);
+    this._count = 0;
+    this.value = null;
+    this.plusDI = null;
+    this.minusDI = null;
+    this.dx = null;
   }
 
-  // safe numeric helper
-  _num(v) {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : NaN;
-  }
+  get ready() { return this._count >= this.period; }
 
-  // reset to empty state
   reset() {
-    this.prevHigh = this.prevLow = this.prevClose = null;
-    this.smoothedPlusDM = 0;
-    this.smoothedMinusDM = 0;
-    this.smoothedTR = 0;
-    this.adx = NaN;
-    this._dxSum = 0;
-    this._dxCount = 0;
+    this._prev = null;
+    this._smPlus = 0;
+    this._smMinus = 0;
+    this._smTR = 0;
+    this._adxSMA = 0;
+    this._dx.reset();
+    this.atr.reset();
+    this._count = 0;
+    this.value = null;
+    this.plusDI = null;
+    this.minusDI = null;
+    this.dx = null;
   }
 
-  // warmup using an array of candles: faster than calling update repeatedly from outside
-  warmup(candles) {
-    if (!Array.isArray(candles)) return;
-    for (let i = 0; i < candles.length; i++) {
-      this.update(candles[i]);
-    }
+  warmup(ohlcArray) {
+    if (!Array.isArray(ohlcArray)) return;
+    this.reset();
+    for (const o of ohlcArray) this.update(o);
   }
 
-  // update with a single candle {high, low, close}
-  update(candle) {
-    if (!candle) return;
-    const high = this._num(candle.high);
-    const low = this._num(candle.low);
-    const close = this._num(candle.close);
+  update(o) {
+    const high = Number(o.high), low = Number(o.low), close = Number(o.close);
+    if (![high, low, close].every(v => isFinite(v))) return this.value;
 
-    // need previous candle to compute differences
-    if (this.prevHigh === null || this.prevLow === null || this.prevClose === null) {
-      this.prevHigh = high;
-      this.prevLow = low;
-      this.prevClose = close;
-      return;
+    // compute True Range via ATR helper (which also does smoothing)
+    const atrVal = this.atr.update({ high, low, close }); // returns null until warmed
+    // compute raw directional movements
+    if (this._prev === null) {
+      this._prev = { high, low, close };
+      return this.value;
     }
+    const upMove = high - this._prev.high;
+    const downMove = this._prev.low - low;
+    const plusDM = (upMove > 0 && upMove > downMove) ? upMove : 0;
+    const minusDM = (downMove > 0 && downMove > upMove) ? downMove : 0;
 
-    // compute directional movement
-    const upMove = high - this.prevHigh;
-    const downMove = this.prevLow - low;
-
-    let plusDM = 0;
-    let minusDM = 0;
-    if (upMove > downMove && upMove > 0) plusDM = upMove;
-    else if (downMove > upMove && downMove > 0) minusDM = downMove;
-
-    // true range components
-    const tr1 = high - low;
-    const tr2 = Math.abs(high - this.prevClose);
-    const tr3 = Math.abs(low - this.prevClose);
-    const trueRange = Math.max(tr1, tr2, tr3);
-
-    // initialize smoothed sums if still in warm-up
-    if (this._dxCount < this.period) {
-      // accumulate smoothed values to compute initial averages
-      this.smoothedPlusDM += plusDM;
-      this.smoothedMinusDM += minusDM;
-      this.smoothedTR += trueRange;
+    // smooth DM and TR in Wilder style using same period as ATR
+    if (this._count < this.period) {
+      // accumulate simple average until warm
+      this._smPlus = (this._smPlus * this._count + plusDM) / (this._count + 1);
+      this._smMinus = (this._smMinus * this._count + minusDM) / (this._count + 1);
+      // ATR already provides trSMA-like value in atr.atr.trSMA internal; but we only have atrVal
+      // use atrVal as smoothed TR estimate for DI calculation when available
+      this._count++;
     } else {
-      // Wilder smoothing: smoothed = prev_smoothed - (prev_smoothed/period) + current
-      this.smoothedPlusDM = this.smoothedPlusDM - (this.smoothedPlusDM / this.period) + plusDM;
-      this.smoothedMinusDM = this.smoothedMinusDM - (this.smoothedMinusDM / this.period) + minusDM;
-      this.smoothedTR = this.smoothedTR - (this.smoothedTR / this.period) + trueRange;
+      // Wilder smoothing: new = (old*(n-1) + current)/n
+      this._smPlus = (this._smPlus * (this.period - 1) + plusDM) / this.period;
+      this._smMinus = (this._smMinus * (this.period - 1) + minusDM) / this.period;
     }
 
-    // if we are still collecting initial samples
-    if (this._dxCount < this.period) {
-      this._dxCount++;
-      if (this._dxCount === this.period) {
-        // finalize initial smoothed values by averaging
-        this.smoothedPlusDM = this.smoothedPlusDM / this.period;
-        this.smoothedMinusDM = this.smoothedMinusDM / this.period;
-        this.smoothedTR = this.smoothedTR / this.period;
-        // first DX & ADX calculation
-        const plusDI = (this.smoothedPlusDM / this.smoothedTR) * 100;
-        const minusDI = (this.smoothedMinusDM / this.smoothedTR) * 100;
-        const dx = (Math.abs(plusDI - minusDI) / (plusDI + minusDI)) * 100;
-        this._dxSum = dx;
-        this.adx = dx; // initial ADX approximated as first DX
-      }
+    // when atrVal is present use it as smoothed TR; otherwise fallback to estimate
+    const smTR = atrVal || this._smTR || (this._smPlus + this._smMinus) || 0;
+    this._smTR = smTR;
+
+    // compute +DI and -DI and DX when smTR available
+    if (smTR > 0) {
+      this.plusDI = (this._smPlus / smTR) * 100;
+      this.minusDI = (this._smMinus / smTR) * 100;
+      const dxVal = this._dx.update(this._smPlus, this._smMinus, smTR);
+      this.dx = dxVal;
     } else {
-      // compute DX for this period
-      const plusDI = (this.smoothedPlusDM / this.smoothedTR) * 100;
-      const minusDI = (this.smoothedMinusDM / this.smoothedTR) * 100;
-      const dx = (Math.abs(plusDI - minusDI) / (plusDI + minusDI || 1)) * 100;
-
-      // Wilder smoothing for ADX: ADX = (prev_ADX*(period-1) + dx) / period
-      this.adx = ((this.adx * (this.period - 1)) + dx) / this.period;
+      this.plusDI = 0;
+      this.minusDI = 0;
+      this.dx = 0;
     }
 
-    // rotate previous candle
-    this.prevHigh = high;
-    this.prevLow = low;
-    this.prevClose = close;
+    // ADX smoothing: Wilder smoothing of DX over period
+    if (this._count < this.period) {
+      // accumulate simple average
+      this._adxSMA = (this._adxSMA * (this._count - 1 >= 0 ? this._count - 1 : 0) + (this.dx || 0)) / Math.max(1, this._count);
+    } else if (this._count === this.period) {
+      // initialize adxSMA as average of first period's DX: approximate by using current value
+      this._adxSMA = this.dx || 0;
+    } else {
+      // Wilder smooth
+      this._adxSMA = ((this._adxSMA * (this.period - 1)) + (this.dx || 0)) / this.period;
+    }
+
+    if (this._count >= this.period) {
+      this.value = this._adxSMA;
+    }
+
+    this._prev = { high, low, close };
+    return this.value;
   }
 
-  // expose result as 'result' for compatibility or .value
-  get result() {
-    return Number.isFinite(this.adx) ? this.adx : null;
-  }
-
-  get value() {
-    return this.result;
-  }
+  next(o) { return this.update(o); }
 }
 
-module.exports = ADXIndicator;
+module.exports = ADX;

@@ -1,57 +1,76 @@
+#!/usr/bin/env node
 /**
- * Average True Range (ATR) indicator.
-   updated by universalbit-dev
+ * tools/indicators/ATR.js
+ *
+ * Optimized Average True Range (ATR) with Wilder smoothing.
+ * - Usage:
+ *     const a = new ATR(14);
+ *     a.update({ high, low, close });
+ *     a.next(h,l,c) -> value
+ *     a.warmup(arrayOfOHLC) where array entries are objects {high,low,close}
  */
 
 class ATR {
-  constructor({ period = 14 } = {}) {
-    if (typeof period !== 'number' || period < 1) {
-      throw new Error('ATR: period must be a positive integer');
-    }
-    this.period = period;
-    this.buffer = [];
+  constructor(period = 14) {
+    this.period = Math.max(1, Math.floor(period));
+    this.prevClose = null;
+    this.trSMA = 0; // smoothed TR (Wilder)
+    this._count = 0;
     this.value = null;
   }
 
-  // Accepts candle as array or object
-  update(candle) {
-    let high, low, close;
-    if (Array.isArray(candle)) {
-      // [open, high, low, close, volume]
-      high = candle[1]; low = candle[2]; close = candle[3];
-    } else if (typeof candle === 'object' && candle !== null) {
-      high = candle.high; low = candle.low; close = candle.close;
-    } else {
-      throw new Error('ATR: candle must be an array or object');
-    }
-    if (![high, low, close].every(Number.isFinite)) {
-      throw new Error('ATR: Candle must have numeric high, low, close');
-    }
+  get ready() { return this._count >= this.period; }
 
-    this.buffer.push({ high, low, close });
-    if (this.buffer.length > this.period + 1) {
-      this.buffer.shift();
-    }
-    if (this.buffer.length < this.period + 1) {
-      this.value = null;
-      return;
-    }
-
-    // Calculate True Range for last period candles
-    let trs = [];
-    for (let i = 1; i < this.buffer.length; i++) {
-      const prevClose = this.buffer[i - 1].close;
-      const currHigh = this.buffer[i].high;
-      const currLow = this.buffer[i].low;
-      const tr = Math.max(
-        currHigh - currLow,
-        Math.abs(currHigh - prevClose),
-        Math.abs(currLow - prevClose)
-      );
-      trs.push(tr);
-    }
-    this.value = trs.reduce((sum, tr) => sum + tr, 0) / this.period;
+  reset() {
+    this.prevClose = null;
+    this.trSMA = 0;
+    this._count = 0;
+    this.value = null;
   }
+
+  warmup(ohlcArray) {
+    if (!Array.isArray(ohlcArray)) return;
+    this.reset();
+    for (const o of ohlcArray) {
+      const h = Number(o.high), l = Number(o.low), c = Number(o.close);
+      if (!isFinite(h) || !isFinite(l) || !isFinite(c)) continue;
+      this.update({ high: h, low: l, close: c });
+    }
+  }
+
+  // accept either (h,l,c) or object {high,low,close}
+  update(h, l, c) {
+    let high, low, close;
+    if (h && typeof h === 'object') {
+      high = Number(h.high); low = Number(h.low); close = Number(h.close);
+    } else {
+      high = Number(h); low = Number(l); close = Number(c);
+    }
+    if (![high, low, close].every(v => isFinite(v))) return this.value;
+
+    const tr = Math.max(
+      high - low,
+      this.prevClose !== null ? Math.abs(high - this.prevClose) : 0,
+      this.prevClose !== null ? Math.abs(low - this.prevClose) : 0
+    );
+
+    this.prevClose = close;
+
+    if (this._count < this.period) {
+      // accumulate simple average until warm
+      this.trSMA = (this.trSMA * this._count + tr) / (this._count + 1);
+      this._count++;
+      this.value = this.trSMA;
+      return this.value;
+    }
+
+    // Wilder smoothing
+    this.trSMA = (this.trSMA * (this.period - 1) + tr) / this.period;
+    this.value = this.trSMA;
+    return this.value;
+  }
+
+  next(h, l, c) { return this.update(h, l, c); }
 }
 
 module.exports = ATR;
