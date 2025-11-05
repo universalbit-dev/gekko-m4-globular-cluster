@@ -12,11 +12,20 @@
 *~
 *.sass-cache
 
-# Folders to ignore
+# Folders to ignore (top-level)
 node_modules/
 strategies/
 exchange/
 env/
 tools/
-# Ignore specific file inside tools directory
-tools/ccxt_orders.js
+plugin/
+
+# Ignore specific file inside tools directory (kept for explicitness)
+tools/macro_ccxt_orders.js
+tools/microstructure/micro_ccxt_orders.js
+tools/explorer.js
+
+# Also ignore any occurrences of these directories anywhere in the tree
+**/plugin/
+**/tools/
+**/strategies/
