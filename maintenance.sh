@@ -1,230 +1,347 @@
 #!/usr/bin/env bash
 #
-# maintenance.sh
-# Safe maintenance for project log folders.
+# maintenance.sh (enhanced)
+# Author: universalbit-dev
 #
-# By default this script (empties) old log and data files under project
-# log directories instead of deleting them. To actually delete files pass --delete.
-#
-# Usage:
-#   sudo chmod +x maintenance.sh 	#Setup running permission
-#   ./maintenance.sh [RETENTION_DAYS] [options]
-#   ./maintenance.sh 1 			#Starting maintenance-clean retention=1d
+# Running Permission : sudo chmod +x maintenance.sh
+# Usage: ./maintenance.sh [OPTIONS]
 # Options:
-#   -n, --dry-run        Print actions but don't change files
-#   -y, --yes, --force   Non-interactive (assume yes)
-#   -v, --verbose        Verbose output
-#   --delete             Actually remove files instead of truncating (dangerous)
-#   --paths=LIST         Comma-separated list of root paths to scan (defaults below)
-#   -h, --help           Show this help and exit
+#   --dry-run             : Show actions without making changes
+#   --force               : Allow deletion of protected files
+#   --days N              : Retention window in days (default: 7)
+#   --delete              : Permanently delete matched files instead of archiving
+#   --archive             : Operate on existing archive dir (use with --delete to remove archive contents)
+#   --protect LIST        : Comma-separated basenames to protect (e.g. "foo.json,bar.log")
+#   --protect-file PATH   : Path to file listing basenames to protect (one per line)
+#   --help, -h            : Show this help and exit
 #
+# Examples:
+#   ./maintenance-clean.sh --dry-run --days 1
+#   ./maintenance-clean.sh --days 30
+#   ./maintenance-clean.sh --archive --delete --force
+#
+# Safely clean temporary, backup and rotated log files;
+# restart processes via pm2 when available.
+#
+# Notes:
+#   - By default the script archives files (to ./maintenance_archive). Use --delete to remove.
+#   - Use --dry-run to preview changes before applying them.
+#   - Protected basenames (package.json, package-lock.json, evaluate.json) are preserved
+#     unless overridden via --protect/--protect-file or removed with --force.
 set -euo pipefail
 
-SCRIPT_NAME="$(basename "$0")"
-DEFAULT_RETENTION_DAYS=3
-# Protected basenames (never touch)
-: "${PROTECTED_BASENAMES:=package.json package-lock.json evaluate.json}"
-# Default log paths to scan (only existing ones will be used)
-DEFAULT_LOG_PATHS="./logs,./tools/logs,./tools/microstructure/logs"
+LOCKFILE="/var/lock/maintenance-clean.lock"
+LOCAL_LOCK="./maintenance-clean.lock"
+ARCHIVE_DIR="./maintenance_archive"
+MAINT_LOG="./maintenance.log"
+RETENTION_DAYS=3
+DRY_RUN=false
+FORCE=false
+DELETE_INSTEAD_OF_ARCHIVE=false
+ARCHIVE_FLAG=false
 
-# Only truncate/delete files matching these extensions (case-insensitive)
-DEFAULT_FILE_EXT="(.log|.jsonl|.json|.csv|.txt|.log.gz)"
+# Default protected basenames (never delete unless --force)
+TOOLS_EXCLUDE_NAMES=( "package.json" "package-lock.json" "evaluate.json" )
 
-log()  { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
-err()  { log "ERROR: $*" >&2; }
-die()  { err "$*"; exit 1; }
+# Additional dynamic protections (from CLI --protect or --protect-file)
+CLI_PROTECT_LIST=()    # comma separated from --protect
+FILE_PROTECT_LIST=()   # read from --protect-file (one filename per line)
 
-usage() {
-  cat <<USAGE
-$SCRIPT_NAME [RETENTION_DAYS] [options]
+# Patterns for temp/backup files (project-wide)
+PATTERNS=( "*.swp" "*.swo" "*~" "#*#" "*.bak" "*.tmp" )
+# Rotated logs pattern used additionally where appropriate
+LOG_ROTATED_PATTERN='*.log.[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*'
 
-Truncate (empty) old log/data files under project logs directories.
-Defaults: retention=${DEFAULT_RETENTION_DAYS} days, scan paths=${DEFAULT_LOG_PATHS}
-Options:
-  -n, --dry-run        Print actions, do not change files.
-  -y, --yes, --force   Do not prompt.
-  -v, --verbose        Verbose output.
-  --delete             Actually delete files instead of truncating (dangerous).
-  --paths=LIST         Comma-separated list of paths to scan (overrides default).
-  -h, --help           Show this help and exit.
+# Special directories to handle (same semantics as backtest/trained/logs)
+BACKTEST_DIR="./tools/backtest/bad_examples"
+TRAINED_DIR="./tools/trained"
+TOOLS_LOGS_DIR="./tools/logs"
+ROOT_LOGS_DIR="./logs"
 
-Examples:
-  $SCRIPT_NAME              # truncate files older than 7 days in ./logs & ./tools/logs
-  $SCRIPT_NAME 1 --dry-run  # show what would be truncated for 1 day retention
-  $SCRIPT_NAME 30 --paths=./logs --yes
-  $SCRIPT_NAME 7 --delete --yes   # WARNING: actually remove files
-USAGE
+log() {
+  local ts; ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  echo "[$ts] $1"
+  printf "[%s] %s\n" "$ts" "$1" >> "$MAINT_LOG" 2>/dev/null || true
 }
 
-# --------------------------
-# Parse args
-# --------------------------
-RETENTION_DAYS=""
-DRY_RUN=false
-ASSUME_YES=false
-VERBOSE=false
-DO_DELETE=false
-PATHS_CSV=""
+usage() {
+  cat <<EOF
+Usage: $0 [--dry-run] [--force] [--days N] [--delete] [--protect files] [--protect-file path]
+  --dry-run         : show actions without changes
+  --force           : allow deletion of protected files (for basenames listed in --protect or TOOLS_EXCLUDE_NAMES)
+  --days N          : retention window in days (default: ${RETENTION_DAYS})
+  --delete          : permanently delete files rather than archive
+  --protect LIST    : comma-separated basenames to protect (e.g. "foo.json,bar.log")
+  --protect-file FP : path to a file listing basenames to protect (one per line)
+  --help            : show this help
+  --archive         : operate on the existing archive dir (use with --delete to remove archive contents)
+EOF
+  exit 2
+}
 
-while (( "$#" )); do
-  case "$1" in
-    -n|--dry-run) DRY_RUN=true; shift ;;
-    -y|--yes|--force) ASSUME_YES=true; shift ;;
-    -v|--verbose) VERBOSE=true; shift ;;
-    --delete) DO_DELETE=true; shift ;;
-    --paths=*) PATHS_CSV="${1#--paths=}"; shift ;;
-    -h|--help) usage; exit 0 ;;
-    --) shift; break ;;
-    -*)
-      err "Unknown option: $1"; usage; exit 2 ;;
-    *)
-      if [ -z "$RETENTION_DAYS" ]; then RETENTION_DAYS="$1"; shift; else shift; fi
-      ;;
-  esac
-done
+choose_lockfile() {
+  if [ -w /var/lock ] 2>/dev/null; then echo "$LOCKFILE"; else echo "$LOCAL_LOCK"; fi
+}
 
-if [ -z "$RETENTION_DAYS" ]; then RETENTION_DAYS="${DEFAULT_RETENTION_DAYS}"; fi
-RETENTION_DAYS="${RETENTION_DAYS%%[^0-9]*}"
-if ! [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]]; then die "Invalid retention value: $RETENTION_DAYS"; fi
-
-# Build list of scan roots
-if [ -n "$PATHS_CSV" ]; then
-  IFS=',' read -r -a SCAN_ROOTS <<< "$PATHS_CSV"
-else
-  IFS=',' read -r -a SCAN_ROOTS <<< "$DEFAULT_LOG_PATHS"
-fi
-
-# Keep only existing roots
-EXISTING_ROOTS=()
-for p in "${SCAN_ROOTS[@]}"; do
-  # trim whitespace
-  rp="$(printf '%s' "$p" | xargs)"
-  [ -z "$rp" ] && continue
-  if [ -e "$rp" ]; then
-    EXISTING_ROOTS+=("$rp")
-  else
-    [ "$VERBOSE" = true ] && log "Skipping missing path: $rp"
-  fi
-done
-
-if [ "${#EXISTING_ROOTS[@]}" -eq 0 ]; then
-  die "No log paths found to scan. Provide --paths or create ./logs"
-fi
-
-read -r -a PROTECTED_ARR <<< "$(printf '%s' "$PROTECTED_BASENAMES")"
-
-log "Protected basenames: ${PROTECTED_ARR[*]}"
-log "Starting maintenance-clean (truncate mode by default). retention=${RETENTION_DAYS}d"
-log "Scan roots: ${EXISTING_ROOTS[*]}"
-[ "$VERBOSE" = true ] && log "Dry run: $DRY_RUN ; Assume yes: $ASSUME_YES ; Delete mode: $DO_DELETE"
-
-# Helper: check protected basename (case-insensitive)
-is_protected() {
-  local path="$1"; local base
-  base="$(basename "$path")"
-  for b in "${PROTECTED_ARR[@]}"; do
-    [ -z "$b" ] && continue
-    if [ "$base" = "$b" ] || [ "${base,,}" = "${b,,}" ]; then
-      return 0
+acquire_lock() {
+  local lf; lf="$(choose_lockfile)"
+  if command -v flock >/dev/null 2>&1; then
+    exec 200>"$lf"
+    if ! flock -n 200; then
+      echo "Another maintenance run active (lock: $lf). Exiting."
+      exit 0
     fi
+  else
+    if [ -f "$lf" ]; then
+      local pid; pid=$(cat "$lf" 2>/dev/null || true)
+      if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        echo "Another maintenance run active (pid: $pid). Exiting."
+        exit 0
+      fi
+    fi
+    echo $$ > "$lf"
+    trap 'rm -f "$lf" >/dev/null 2>&1 || true' EXIT
+  fi
+}
+
+# Add an entry to DYNAMIC_PROTECTED array (stores basenames)
+DYNAMIC_PROTECTED=()
+add_protected() {
+  local entry="$1"
+  # normalize: only basename
+  local base
+  base="$(basename "$entry")"
+  # skip empty
+  [ -z "$base" ] && return
+  # avoid duplicates
+  for e in "${DYNAMIC_PROTECTED[@]}"; do
+    [ "$e" = "$base" ] && return
+  done
+  DYNAMIC_PROTECTED+=( "$base" )
+}
+
+# Build combined protected set (TOOLS_EXCLUDE_NAMES + CLI + FILE)
+build_protected_set() {
+  # start with static list
+  for n in "${TOOLS_EXCLUDE_NAMES[@]}"; do add_protected "$n"; done
+  # CLI_PROTECT_LIST: comma separated values
+  IFS=',' read -r -a cli_items <<< "${CLI_PROTECT_LIST[*]-}"
+  for ci in "${cli_items[@]}"; do
+    [ -z "$ci" ] && continue
+    # strip whitespace
+    ci="$(echo "$ci" | xargs)"
+    add_protected "$ci"
+  done
+  # FILE_PROTECT_LIST: entries collected from file(s)
+  for fp in "${FILE_PROTECT_LIST[@]}"; do
+    [ ! -f "$fp" ] && { log "Protect-file not found: $fp"; continue; }
+    while IFS= read -r line || [ -n "$line" ]; do
+      # ignore empty lines and comments
+      line="$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+      [ -z "$line" ] && continue
+      case "$line" in \#*) continue ;; esac
+      add_protected "$line"
+    done < "$fp"
+  done
+}
+
+# Ensure maintenance log and archive dir exist (so log() and moves work)
+mkdir -p "$(dirname "$MAINT_LOG")" 2>/dev/null || true
+touch "$MAINT_LOG" 2>/dev/null || true
+mkdir -p "$ARCHIVE_DIR" 2>/dev/null || true
+
+# Returns 0 if the basename is protected
+is_protected() {
+  local base="$1"
+  for p in "${DYNAMIC_PROTECTED[@]}"; do
+    [ "$base" = "$p" ] && return 0
   done
   return 1
 }
 
-# Build find command template for streaming
-# We search for files older than retention days and matching extensions
-# Use -iname to match case-insensitive extensions
-find_template=(find)
-find_template+=( )
-# We'll append each root later
-
-# Candidate statistics
-processed=0
-truncated=0
-deleted=0
-skipped_protected=0
-failed=0
-progress_interval=100
-
-log "Scanning and truncating files older than ${RETENTION_DAYS} days (extensions: ${DEFAULT_FILE_EXT})..."
-
-for root in "${EXISTING_ROOTS[@]}"; do
-  # Use a safe find invocation per root
-  if [ "$VERBOSE" = true ]; then
-    log "Finding in root: $root"
+archive_or_delete() {
+  local fp="$1"; local action="$2"
+  if [ "$DRY_RUN" = true ]; then
+    echo "[DRY-RUN] Would ${action} $fp"; return 0
   fi
-  # Construct find: find "$root" -type f -mtime +N \( -iname '*.log' -o -iname '*.jsonl' -o ... \) -print0
-  find_cmd=(find "$root" -mindepth 1 -type f -mtime +"$RETENTION_DAYS" -print0)
-  # Stream results
-  "${find_cmd[@]}" | while IFS= read -r -d '' file; do
-    processed=$((processed+1))
-    # protect known basenames
-    if is_protected "$file"; then
-      skipped_protected=$((skipped_protected+1))
-      [ "$VERBOSE" = true ] && log "Skipping protected file: $file"
-      continue
-    fi
+  if [ "$action" = "archive" ]; then
+    mkdir -p "$ARCHIVE_DIR"
+    local dest="$ARCHIVE_DIR/$(date +%Y%m%d-%H%M%S)-$(basename "$fp")"
+    mv -f -- "$fp" "$dest" && log "Archived $fp -> $dest"
+  else
+    rm -rf -- "$fp" && log "Deleted $fp"
+  fi
+}
 
-    # Only operate on expected log/data file extensions to avoid touching unexpected content.
-    case "${file,,}" in
-      *.log|*.log.*|*.jsonl|*.json|*.csv|*.txt)
-        # ok
-        ;;
-      *)
-        [ "$VERBOSE" = true ] && log "Skipping non-log file (not matched extension): $file"
-        continue
-        ;;
-    esac
-
-    if [ "$DRY_RUN" = true ]; then
-      printf '%s %s\n' "TRUNCATE" "$file"
-      continue
-    fi
-
-    # Ask for confirmation once if not forced
-    if [ "$ASSUME_YES" != true ] && [ "$processed" -eq 1 ]; then
-      printf '\n'
-      printf 'About to %s %s files older than %sd in %s. Proceed? [y/N]: ' \
-        "$([ "$DO_DELETE" = true ] && echo "DELETE" || echo "TRUNCATE")" "$([ "${#EXISTING_ROOTS[@]}" -gt 1 ] && echo "in multiple roots" || echo "$root")" "$RETENTION_DAYS" "$root"
-      read -r answer || answer="n"
-      case "$answer" in
-        y|Y|yes|YES) ;;
-        *) log "Aborted by user."; exit 0 ;;
-      esac
-    fi
-
-    if [ "$DO_DELETE" = true ]; then
-      if rm -f -- "$file"; then
-        deleted=$((deleted+1))
-        [ "$VERBOSE" = true ] && log "Deleted file: $file"
-      else
-        err "Failed to delete: $file"
-        failed=$((failed+1))
-      fi
-    else
-      # Truncate in-place (preserves inode/permissions)
-      if : > "$file"; then
-        truncated=$((truncated+1))
-        [ "$VERBOSE" = true ] && log "Truncated file: $file"
-      else
-        err "Failed to truncate: $file"
-        failed=$((failed+1))
-      fi
-    fi
-
-    if (( processed % progress_interval == 0 )); then
-      log "Processed ${processed} files... truncated=${truncated} deleted=${deleted} skipped_protected=${skipped_protected} failed=${failed}"
-    fi
-  done
+# CLI parsing
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --dry-run) DRY_RUN=true; shift ;;
+    --force) FORCE=true; shift ;;
+    --days) shift; RETENTION_DAYS="${1:-$RETENTION_DAYS}"; shift ;;
+    --delete) DELETE_INSTEAD_OF_ARCHIVE=true; shift ;;
+    --archive) ARCHIVE_FLAG=true; shift ;;
+    --protect) shift; CLI_PROTECT_LIST=("${1:-}"); shift ;;
+    --protect-file) shift; FILE_PROTECT_LIST+=( "${1:-}" ); shift ;;
+    --help|-h) usage ;;
+    *) echo "Unknown arg: $1"; usage ;;
+  esac
 done
 
-log "Finished. Processed=${processed}, truncated=${truncated}, deleted=${deleted}, skipped_protected=${skipped_protected}, failed=${failed}"
-if [ "$DRY_RUN" = true ]; then
-  log "DRY RUN complete; no files changed."
-  exit 0
+# Build protected set
+build_protected_set
+
+# Log protection set for visibility
+log "Protected basenames: ${DYNAMIC_PROTECTED[*]}"
+
+
+if [ "$DRY_RUN" = true ]; then log "Running in DRY-RUN mode (no file modifications)."; fi
+if [ "$FORCE" = true ]; then log "FORCE enabled: protected files may be deleted/archived."; fi
+if [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ]; then log "DELETE mode enabled: files will be permanently removed (no archive)."; fi
+
+acquire_lock
+# If user explicitly asked to act on archive and also requested delete, remove archive contents.
+# Safety: require --archive plus --delete. Honor --dry-run.
+if [ "$ARCHIVE_FLAG" = true ] && [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ]; then
+  if [ ! -d "$ARCHIVE_DIR" ]; then
+    log "Archive directory not found: $ARCHIVE_DIR"
+  else
+    if [ "$DRY_RUN" = true ]; then
+      log "[DRY-RUN] Would remove all files under archive dir: $ARCHIVE_DIR/*"
+      # show what would be removed
+      find "$ARCHIVE_DIR" -mindepth 1 -print || true
+    else
+      log "Removing all contents of archive directory: $ARCHIVE_DIR"
+      # remove contents but keep the archive dir itself
+      rm -rf -- "${ARCHIVE_DIR:?}/"* || true
+      log "Archive directory contents removed: $ARCHIVE_DIR"
+    fi
+  fi
 fi
-if [ "$failed" -gt 0 ]; then
-  err "Some items failed to change. Check permissions or locks."
-  exit 2
+log "Starting maintenance-clean (retention=${RETENTION_DAYS}d)"
+
+# Convert to minutes for precise selection (N * 24h)
+MINUTES=$(( RETENTION_DAYS * 24 * 60 ))
+
+shopt -s nullglob
+
+# Helper to build find age args: returns empty when no age filter is desired (RETENTION_DAYS <= 0)
+find_age_args() {
+  if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+    # No age filtering; operate on all matching files
+    echo ""
+  else
+    # Use -mmin +N for files older than N minutes
+    echo "-mmin +$MINUTES"
+  fi
+}
+
+# Function to process a directory with the backtest/trained/logs semantics
+# It only targets .log, rotated logs, and .json files. It will NOT remove .js files.
+# Directories will NOT be deleted or archived by this function — only files are handled.
+# Container directories like $DIR/json and $DIR/csv are preserved (and not rmdir'ed).
+process_special_dir() {
+  local DIR="$1"
+  if [ ! -d "$DIR" ]; then
+    log "No $DIR directory found"
+    return 0
+  fi
+
+  log "Handling special dir (files only): $DIR"
+
+  if [ "$DRY_RUN" = true ]; then
+    if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+      # list all targeted files (no age filter)
+      find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -print || true
+    else
+      # list only targeted files older than retention
+      find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -mmin +"$MINUTES" -print || true
+    fi
+    return 0
+  fi
+
+  # Archive or delete targeted files ONLY; do not touch directories.
+  if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+    while IFS= read -r -d '' f; do
+      [ -f "$f" ] || continue
+      # check protection by basename
+      base=$(basename "$f")
+      if is_protected "$base" && [ "$FORCE" = false ]; then
+        log "Skipping protected file by basename: $f"
+        continue
+      fi
+      archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+    done < <(find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -print0 || true)
+  else
+    while IFS= read -r -d '' f; do
+      [ -f "$f" ] || continue
+      base=$(basename "$f")
+      if is_protected "$base" && [ "$FORCE" = false ]; then
+        log "Skipping protected file by basename: $f"
+        continue
+      fi
+      archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+    done < <(find "$DIR" -mindepth 1 -type f \( -iname "*.log" -o -iname "$LOG_ROTATED_PATTERN" -o -iname "*.json" \) -mmin +"$MINUTES" -print0 || true)
+  fi
+
+  # Do NOT delete or archive directories here. Leave directory structure intact.
+}
+
+# --- COMPLETE remove/archive of tools/backtest content (files only) ---
+process_special_dir "$BACKTEST_DIR"
+
+# --- COMPLETE remove/archive of tools/trained content (files only) ---
+process_special_dir "$TRAINED_DIR"
+
+# --- COMPLETE remove/archive of tools/logs and root logs (files only) ---
+process_special_dir "$TOOLS_LOGS_DIR"
+process_special_dir "$ROOT_LOGS_DIR"
+
+# --- Remove common temp/backup patterns project-wide ---
+for pattern in "${PATTERNS[@]}"; do
+  log "Scanning pattern: $pattern"
+  if [ "$DRY_RUN" = true ]; then
+    if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+      find . -type f -name "$pattern" -print || true
+    else
+      find . -type f -name "$pattern" -mmin +"$MINUTES" -print || true
+    fi
+  else
+    if [ "${RETENTION_DAYS:-0}" -le 0 ]; then
+      while IFS= read -r -d '' f; do
+        base=$(basename "$f")
+        if is_protected "$base" && [ "$FORCE" = false ]; then
+          log "Skipping protected file by basename: $f"
+          continue
+        fi
+        archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+      done < <(find . -type f -name "$pattern" -print0 || true)
+    else
+      while IFS= read -r -d '' f; do
+        base=$(basename "$f")
+        if is_protected "$base" && [ "$FORCE" = false ]; then
+          log "Skipping protected file by basename: $f"
+          continue
+        fi
+        archive_or_delete "$f" "$( [ "$DELETE_INSTEAD_OF_ARCHIVE" = true ] && echo delete || echo archive )"
+      done < <(find . -type f -name "$pattern" -mmin +"$MINUTES" -print0 || true)
+    fi
+  fi
+done
+
+log "Maintenance cleanup completed. Archive dir: ${ARCHIVE_DIR}"
+
+# Restart pm2 processes only if pm2 is available (keep original behavior)
+if command -v pm2 >/dev/null 2>&1; then
+  log "Restarting pm2 processes..."
+  pm2 restart all || log "pm2 restart all failed (continuing)..."
+  if [ -f simulator.config.js ]; then
+    log "Starting main simulator with pm2..."
+    pm2 start simulator.config.js || log "pm2 start simulator.config.js failed (continuing)..."
+  fi
+else
+  log "pm2 not found in PATH; skipping pm2 restart/start steps."
 fi
+
+log "All done. New logs will be generated as your processes restart (if pm2 was available)."
 exit 0
