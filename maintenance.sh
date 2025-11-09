@@ -16,9 +16,9 @@
 #   --help, -h            : Show this help and exit
 #
 # Examples:
-#   ./maintenance-clean.sh --dry-run --days 1
-#   ./maintenance-clean.sh --days 30
-#   ./maintenance-clean.sh --archive --delete --force
+#   ./maintenance.sh --dry-run --days 1
+#   ./maintenance.sh --days 30
+#   ./maintenance.sh --archive --delete --force
 #
 # Safely clean temporary, backup and rotated log files;
 # restart processes via pm2 when available.
