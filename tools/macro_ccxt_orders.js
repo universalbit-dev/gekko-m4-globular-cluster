@@ -2,16 +2,16 @@
 /**
  * tools/macro_ccxt_orders.js
  *
- * Optimized macrostructure trading bot — DRY_RUN-first, index/backtest-aware, safer
+ * Optimized macrostructure — DRY_RUN-first, index/backtest-aware, safer
  *
- * Key improvements over prior version:
- * - Consolidated configuration and constants (single place).
- * - Removed duplicated logic and made decision flow linear and easy to read.
- * - Added robust printDiagnostics (prevents ReferenceError).
- * - Reduced noisy HOLD logs by cooldown and only logging state changes.
- * - Structured JSONL audit file for easy post-processing and CSV export.
- * - Clearer separation between DRY and LIVE paths; explicit guards for ENABLE_LIVE and FORCE_DRY.
- * - Better error handling and non-throwing diagnostics writes.
+ * This variant uses winston for log management and limits log growth via file rotation
+ * (maxsize + maxFiles). Environment variables control log path, max size and file count.
+ *
+ * New env variables:
+ *  - MACRO_LOG_PATH        path to the rotating log file (default ./tools/logs/macro_ccxt_orders.log)
+ *  - MACRO_LOG_MAXSIZE     max bytes per file before rotation (default 5*1024*1024)
+ *  - MACRO_LOG_MAXFILES    number of rotated files to keep (default 5)
+ *  - MACRO_LOG_LEVEL       log level (info/debug)
  *
  * Keep FORCE_DRY=1 and DRY_RUN=1 in .env for safe testing.
  */
@@ -20,19 +20,55 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const LOG_PREFIX = '[macrostructure]';
+// ---- Logging (winston rotating file) ----
+let logger;
+const DEFAULT_LOG_PATH = process.env.MACRO_LOG_PATH || path.resolve(__dirname, './logs/macro_ccxt_orders.log');
+const LOG_MAXSIZE = Number(process.env.MACRO_LOG_MAXSIZE || String(5 * 1024 * 1024)); // bytes
+const LOG_MAXFILES = Number(process.env.MACRO_LOG_MAXFILES || '5');
+const LOG_LEVEL = process.env.MACRO_LOG_LEVEL || (process.env.DEBUG === '1' ? 'debug' : 'info');
 
-// Config (from .env)
+try {
+  const winston = require('winston');
+  const { combine, timestamp, printf, colorize } = winston.format;
+  const logFormat = printf(({ level, message, timestamp }) => `${timestamp} [macrostructure] ${level}: ${message}`);
+  // Ensure log directory exists
+  try { fs.mkdirSync(path.dirname(DEFAULT_LOG_PATH), { recursive: true }); } catch (e) {}
+  const transports = [
+    new winston.transports.File({
+      filename: DEFAULT_LOG_PATH,
+      level: LOG_LEVEL,
+      maxsize: LOG_MAXSIZE,
+      maxFiles: LOG_MAXFILES,
+      tailable: true,
+      format: combine(timestamp(), logFormat)
+    }),
+    new winston.transports.Console({
+      level: LOG_LEVEL,
+      format: combine(colorize(), timestamp(), logFormat)
+    })
+  ];
+  logger = winston.createLogger({ level: LOG_LEVEL, transports, exitOnError: false });
+} catch (e) {
+  // fallback to console
+  logger = {
+    debug: (...a) => { if (LOG_LEVEL === 'debug') console.debug('[macrostructure][DEBUG]', ...a); },
+    info:  (...a) => console.log('[macrostructure][INFO]', ...a),
+    warn:  (...a) => console.warn('[macrostructure][WARN]', ...a),
+    error: (...a) => console.error('[macrostructure][ERROR]', ...a)
+  };
+}
+
+// ---- Config (env overrides) ----
 const TIMEFRAMES = (process.env.MACRO_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
 const PAIR = process.env.MACRO_PAIR || process.env.PAIR || 'BTC/EUR';
 const ORDER_AMOUNT = Number(process.env.ORDER_AMOUNT || '0.0001');
-const MIN_ALLOWED_ORDER_AMOUNT = Number(process.env.MIN_ALLOWED_ORDER_AMOUNT || '0.0001');
+const MIN_ALLOWED_ORDER_AMOUNT = Number(process.env.MIN_ALLOWED_ORDER_AMOUNT || '0.00005');
 const MAX_ORDER_AMOUNT = Number(process.env.MAX_ORDER_AMOUNT || '0.01');
 
-const INTERVAL_AFTER_TRADE = Number(process.env.INTERVAL_AFTER_TRADE || 30000);
-const INTERVAL_AFTER_SKIP = Number(process.env.INTERVAL_AFTER_SKIP || 90000);
-const INTERVAL_AFTER_HOLD = Number(process.env.INTERVAL_AFTER_HOLD || 180000);
-const INTERVAL_AFTER_ERROR = Number(process.env.INTERVAL_AFTER_ERROR || 60000);
+const INTERVAL_AFTER_TRADE = Number(process.env.INTERVAL_AFTER_TRADE || 30 * 1000);
+const INTERVAL_AFTER_SKIP = Number(process.env.INTERVAL_AFTER_SKIP || 90 * 1000);
+const INTERVAL_AFTER_HOLD = Number(process.env.INTERVAL_AFTER_HOLD || 180 * 1000);
+const INTERVAL_AFTER_ERROR = Number(process.env.INTERVAL_AFTER_ERROR || 60 * 1000);
 
 const EXCHANGE = process.env.MACRO_EXCHANGE || 'kraken';
 const API_KEY = process.env.MACRO_KEY || '';
@@ -43,41 +79,33 @@ const BACKTEST_RESULTS_PATH = process.env.MACRO_BACKTEST_JSON_PATH
   : path.resolve(__dirname, './backtest/backtest_results.json');
 
 const MACRO_SIGNAL_LOG = path.resolve(__dirname, './logs/macro_signal.log');
-const ORDER_LOG_PATH = path.resolve(__dirname, './logs/ccxt_order.log');
+const ORDER_TAB_LOG = path.resolve(__dirname, './logs/ccxt_order.log');
 const ORDER_AUDIT_JSONL = path.resolve(__dirname, './logs/ccxt_order_audit.jsonl');
 const DIAG_PATH = path.resolve(__dirname, './logs/macro_diagnostics.json');
 
-// Runtime flags
 const DEBUG = /^(1|true|yes)$/i.test(String(process.env.DEBUG || '0'));
-const DRY_RUN = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || '1')); // default to simulation
-const FORCE_DRY = !((process.env.FORCE_DRY === '0' || process.env.FORCE_DRY === 'false') === true) || /^(1|true|yes)$/i.test(String(process.env.FORCE_DRY || '1'));
+const DRY_RUN = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || '1')); // default simulation
+const FORCE_DRY = /^(1|true|yes)$/i.test(String(process.env.FORCE_DRY || '1'));
 const ENABLE_LIVE = /^(1|true|yes)$/i.test(String(process.env.ENABLE_LIVE || '0'));
 
-// Simulation defaults
 const SIM_PRICE = Number(process.env.SIM_PRICE || 30000);
 const SIM_BASE_BALANCE = Number(process.env.SIM_BASE_BALANCE || 0.01);
 const SIM_QUOTE_BALANCE = Number(process.env.SIM_QUOTE_BALANCE || 1000);
 
-// Trading guards
 const MACRO_MIN_WIN_RATE = Number(process.env.MACRO_MIN_WIN_RATE || 0.2);
 const HOLD_LOG_COOLDOWN_MS = Number(process.env.HOLD_LOG_COOLDOWN_MS || 5 * 60 * 1000);
 
-const DRY_INTERVAL_MS = Number(process.env.DRY_INTERVAL_MS || 15000);
-const NOMINAL_INTERVAL_MS = Number(process.env.MACRO_INTERVAL_MS || 180000);
+const DRY_INTERVAL_MS = Number(process.env.DRY_INTERVAL_MS || 15 * 1000);
+const NOMINAL_INTERVAL_MS = Number(process.env.MACRO_INTERVAL_MS || 180 * 1000);
 const INTERVAL_MS = DRY_RUN ? DRY_INTERVAL_MS : NOMINAL_INTERVAL_MS;
 
-// Internal state
+// ---- Runtime state ----
 let isRunning = false;
 let positionOpen = false;
 let lastTradeAt = 0;
 let diagnostics = { cycles: 0, lastError: null, lastTrade: null, _lastLoggedAction: null, _lastHoldLoggedAt: 0 };
 
-// ---- Helpers ----
-function logDebug(...args) { if (DEBUG) console.log(LOG_PREFIX, '[DEBUG]', ...args); }
-function logInfo(...args) { console.log(LOG_PREFIX, '[INFO]', ...args); }
-function logWarn(...args) { console.warn(LOG_PREFIX, '[WARN]', ...args); }
-function logError(...args) { console.error(LOG_PREFIX, '[ERROR]', ...args); }
-
+// ---- I/O helpers ----
 function safeJsonRead(fp, fallback = null) {
   try {
     if (!fp || !fs.existsSync(fp)) return fallback;
@@ -85,7 +113,7 @@ function safeJsonRead(fp, fallback = null) {
     if (!txt || !txt.trim()) return fallback;
     return JSON.parse(txt);
   } catch (e) {
-    if (DEBUG) logWarn('safeJsonRead parse error', fp, e && e.message ? e.message : e);
+    if (DEBUG) logger.warn('safeJsonRead parse error', fp, e && e.message ? e.message : e);
     return fallback;
   }
 }
@@ -94,22 +122,23 @@ function safeJsonWrite(fp, obj) {
     fs.mkdirSync(path.dirname(fp), { recursive: true });
     fs.writeFileSync(fp, JSON.stringify(obj, null, 2));
   } catch (e) {
-    if (DEBUG) logWarn('safeJsonWrite failed', e && e.message ? e.message : e);
+    if (DEBUG) logger.warn('safeJsonWrite failed', fp, e && e.message ? e.message : e);
   }
 }
 
-// Legacy tab-separated log + JSONL audit
+// Append tab-separated legacy log
 function appendOrderLog(parts) {
   try {
-    fs.mkdirSync(path.dirname(ORDER_LOG_PATH), { recursive: true });
-    fs.appendFileSync(ORDER_LOG_PATH, parts.join('\t') + '\n');
-  } catch (e) { logWarn('appendOrderLog failed', e && e.message ? e.message : e); }
+    fs.mkdirSync(path.dirname(ORDER_TAB_LOG), { recursive: true });
+    fs.appendFileSync(ORDER_TAB_LOG, parts.join('\t') + '\n');
+  } catch (e) { logger.warn('appendOrderLog failed', e && e.message ? e.message : e); }
 }
+// Append JSONL audit
 function appendAuditJson(obj) {
   try {
     fs.mkdirSync(path.dirname(ORDER_AUDIT_JSONL), { recursive: true });
     fs.appendFileSync(ORDER_AUDIT_JSONL, JSON.stringify(obj) + '\n');
-  } catch (e) { logWarn('appendAuditJson failed', e && e.message ? e.message : e); }
+  } catch (e) { logger.warn('appendAuditJson failed', e && e.message ? e.message : e); }
 }
 
 function logOrder({ timestamp, action, result = null, reason = '', error = null, regime = '', stats = null, signal = null, dry = true }) {
@@ -117,7 +146,7 @@ function logOrder({ timestamp, action, result = null, reason = '', error = null,
     new Date().toISOString(),
     timestamp || '',
     action || '',
-    error ? `ERROR: ${String(error)}` : (dry ? 'DRY' : 'SUCCESS'),
+    error ? `ERROR: ${String(error)}` : (dry ? 'DRY' : 'LIVE'),
     error ? '' : JSON.stringify(result || {}),
     reason || '',
     regime || '',
@@ -141,9 +170,11 @@ function logOrder({ timestamp, action, result = null, reason = '', error = null,
     diagnostics: { lastTrade: diagnostics.lastTrade, cycles: diagnostics.cycles }
   };
   appendAuditJson(audit);
+  // also log a one-line to rotating logger for quick tailing
+  logger.info(`${action} ${dry ? 'DRY' : 'LIVE'} ${reason} ${regime} ${JSON.stringify({ ts: timestamp || Date.now(), pair: PAIR })}`);
 }
 
-// Sanitizers (compact)
+// ---- Signal + backtest helpers ----
 function normalizeMissing(v) {
   if (v === null || v === undefined) return null;
   if (typeof v === 'string') {
@@ -224,13 +255,12 @@ function deriveEnsemble(point) {
   return { label: top, confidence };
 }
 
-// Read latest macro signals
 function safeGetLatestMacroSignals() {
   if (!fs.existsSync(MACRO_SIGNAL_LOG)) return {};
   const lines = fs.readFileSync(MACRO_SIGNAL_LOG, 'utf8').split(/\r?\n/).filter(Boolean);
   const parsed = [];
   for (const line of lines) {
-    try { parsed.push(JSON.parse(line)); } catch (e) { if (DEBUG) logWarn('Malformed macro signal line'); }
+    try { parsed.push(JSON.parse(line)); } catch (e) { if (DEBUG) logger.warn('Malformed macro signal line'); }
   }
   const latestByTf = {};
   for (const tf of TIMEFRAMES) {
@@ -248,33 +278,30 @@ function safeGetLatestMacroSignals() {
   return latestByTf;
 }
 
-// Tolerant backtest stats loader
-function safeGetBacktestStats(tf, strategy = process.env.MACRO_STRATEGY || 'Balanced+', variant = process.env.MACRO_VARIANT || 'PREDICTION') {
+function safeGetBacktestStats(tf, strategy = process.env.MACRO_STRATEGY || 'Balanced+', variant = process.env.MACRO_VARIANT || '') {
   const results = safeJsonRead(BACKTEST_RESULTS_PATH, []);
   if (!Array.isArray(results) || results.length === 0) {
-    if (DEBUG) logWarn('Backtest results missing or empty at', BACKTEST_RESULTS_PATH);
+    if (DEBUG) logger.warn('Backtest results missing or empty at', BACKTEST_RESULTS_PATH);
     return null;
   }
-  const tfResult = results.find(r => r.source && String(r.source).includes(tf) && (!r.variant || r.variant === variant));
-  if (!tfResult) { if (DEBUG) logWarn('No backtest entry for', tf); return null; }
+  const tfResult = results.find(r => r.source && String(r.source).includes(tf) && (!variant || r.variant === variant));
+  if (!tfResult) { if (DEBUG) logger.warn('No backtest entry for', tf); return null; }
   const stratResult = (tfResult.results || []).find(x => x.params && x.params.name === strategy);
-  if (!stratResult) { if (DEBUG) logWarn('Strategy', strategy, 'not found for', tf); return null; }
+  if (!stratResult) { if (DEBUG) logger.warn('Strategy', strategy, 'not found for', tf); return null; }
   return stratResult.stats || null;
 }
-
 function regimeFromStats(stats) {
   if (!stats) return "Unknown";
   if ((stats.totalPNL || 0) > 0 && (stats.winRate || 0) > 0.45) return "Bull";
   if ((stats.totalPNL || 0) < 0 && (stats.winRate || 0) < 0.45) return "Bear";
   return "Flat";
 }
-
 function canTradeNow(timestamp, throttleMs = Number(process.env.MACRO_ORDER_THROTTLE_MS || 12 * 60 * 1000)) {
   const ts = Number(timestamp) || Date.now();
   return !lastTradeAt || (ts - lastTradeAt > throttleMs);
 }
 
-// simulate
+// ---- Simulation helpers ----
 function simulateOrderResult(action, price, amount) {
   return {
     id: `sim-${Date.now()}`,
@@ -296,7 +323,7 @@ function simulatedBalance() {
   return { free, total: { ...free } };
 }
 
-// Diagnostics writer (prevents missing function error)
+// Diagnostics snapshot writer
 function printDiagnostics() {
   try {
     const now = new Date().toISOString();
@@ -311,57 +338,58 @@ function printDiagnostics() {
       ENABLE_LIVE: !!ENABLE_LIVE,
       ts: now
     };
-    console.log(`${LOG_PREFIX} [DIAGNOSTICS]`, snapshot);
+    logger.info('[DIAGNOSTICS] ' + JSON.stringify(snapshot));
     safeJsonWrite(DIAG_PATH, { ...snapshot, writtenAt: now });
   } catch (e) {
-    if (DEBUG) logWarn('printDiagnostics error', e && e.message ? e.message : e);
+    if (DEBUG) logger.warn('printDiagnostics error', e && e.message ? e.message : e);
   }
 }
 
+// ---- Exchange helper (live only) ----
+let ccxtInstance = null;
+async function getExchange() {
+  if (DRY_RUN) return null;
+  if (ccxtInstance) return ccxtInstance;
+  try {
+    const ccxt = require('ccxt');
+    const ExchangeClass = ccxt[EXCHANGE];
+    if (!ExchangeClass) throw new Error(`Exchange '${EXCHANGE}' not found in ccxt`);
+    ccxtInstance = new ExchangeClass({ apiKey: API_KEY, secret: API_SECRET, enableRateLimit: true });
+    if (typeof ccxtInstance.loadMarkets === 'function') await ccxtInstance.loadMarkets();
+    return ccxtInstance;
+  } catch (e) {
+    throw e;
+  }
+}
+
+// ---- Scheduler helper ----
 function scheduleNext(ms, reason = '') {
   try {
-    if (reason) {
-      // Keep a concise, consistent log message — use logInfo for visibility
-      logInfo(`${LOG_PREFIX} [SCHEDULE] next run in ${Math.round(ms/1000)}s. Reason: ${reason}`);
-    } else {
-      logDebug(`${LOG_PREFIX} [SCHEDULE] next run in ${Math.round(ms/1000)}s.`);
-    }
-    // Use setTimeout to schedule main — keep a single short deferral to avoid stacking
+    if (reason) logger.info(`[SCHEDULE] next run in ${Math.round(ms/1000)}s. Reason: ${reason}`);
+    else logger.debug('[SCHEDULE] next run in ' + Math.round(ms/1000) + 's.');
     setTimeout(() => {
-      try {
-        main().catch(err => {
-          diagnostics.lastError = { stage: 'main_scheduled', message: err && err.message ? err.message : String(err) };
-          printDiagnostics();
-          logError('Scheduled main() rejected:', err && err.stack ? err.stack : err);
-          // schedule a retry after an error
-          setTimeout(() => {
-            try { main().catch((e) => { logError('Retry main() failed', e && e.message ? e.message : e); }); } catch (_) {}
-          }, INTERVAL_AFTER_ERROR);
-        });
-      } catch (e) {
-        diagnostics.lastError = { stage: 'scheduleNext_inner', message: e && e.message ? e.message : String(e) };
+      main().catch(err => {
+        diagnostics.lastError = { stage: 'main_scheduled', message: err && err.message ? err.message : String(err) };
         printDiagnostics();
-        logError('scheduleNext invocation error', e && e.stack ? e.stack : e);
-      }
+        logger.error('Scheduled main() rejected:', err && err.stack ? err.stack : err);
+        setTimeout(() => { main().catch(e => logger.error('Retry main() failed', e && e.message ? e.message : e)); }, INTERVAL_AFTER_ERROR);
+      });
     }, Number(ms) || 0);
   } catch (e) {
-    // Defensive: if scheduling fails, log and fall back to a safe retry
     diagnostics.lastError = { stage: 'scheduleNext', message: e && e.message ? e.message : String(e) };
     printDiagnostics();
-    logError('scheduleNext failed', e && e.stack ? e.stack : e);
-    setTimeout(() => {
-      try { main().catch(err => { logError('Fallback main() failed', err && err.message ? err.message : err); }); } catch (_) {}
-    }, INTERVAL_AFTER_ERROR);
+    logger.error('scheduleNext failed', e && e.stack ? e.stack : e);
+    setTimeout(() => { main().catch(err => logger.error('Fallback main() failed', err && err.message ? err.message : err)); }, INTERVAL_AFTER_ERROR);
   }
 }
 
-// ---- Main loop ----
+// ---- Main loop (single clear flow) ----
 async function main() {
   diagnostics.cycles++;
-  if (isRunning) { logWarn('Previous cycle still running, skipping'); return; }
+  if (isRunning) { logger.warn('Previous cycle still running, skipping'); return; }
   isRunning = true;
   try {
-    if (DRY_RUN && DEBUG) logDebug('Running in DRY_RUN mode. SIM_PRICE=', SIM_PRICE);
+    if (DRY_RUN && DEBUG) logger.debug('Running in DRY_RUN mode. SIM_PRICE=', SIM_PRICE);
 
     const latestSignals = safeGetLatestMacroSignals();
     let best = null;
@@ -370,10 +398,10 @@ async function main() {
       const signal = latestSignals[tf];
       const stats = safeGetBacktestStats(tf);
       const regime = regimeFromStats(stats);
-      logDebug('tf=', tf, 'signal=', signal ? `${signal.ensemble_label}` : 'none', 'regime=', regime);
+      logger.debug('tf=', tf, 'label=', signal ? `${signal.ensemble_label}` : 'none', 'regime=', regime);
       if (!stats || !signal) continue;
       if (regime === 'Bull' && String(signal.ensemble_label) === 'strong_bull') {
-        if (!best || (stats.totalPNL || 0) > (best.stats.totalPNL || 0)) best = { tf, stats, signal };
+        if (!best || ((best.stats && (stats.totalPNL || 0)) > (best.stats.totalPNL || 0))) best = { tf, stats, signal };
       }
     }
 
@@ -385,9 +413,9 @@ async function main() {
     }
 
     const { tf: bestTf, stats: bestStats, signal: bestSignal } = best;
-    logDebug('Selected best', bestTf, bestSignal.ensemble_label);
+    logger.debug('Selected', bestTf, bestSignal.ensemble_label);
 
-    // Buy path
+    // BUY path
     if (!positionOpen && String(bestSignal.ensemble_label) === 'strong_bull' && canTradeNow(bestSignal.signal_timestamp || bestSignal.timestamp)) {
       const price = Number(bestSignal.price || SIM_PRICE);
       const balance = simulatedBalance();
@@ -405,12 +433,12 @@ async function main() {
         lastTradeAt = Number(bestSignal.signal_timestamp || bestSignal.timestamp) || Date.now();
         diagnostics.lastTrade = { action: 'BUY', timestamp: lastTradeAt, tf: bestTf, simulated: true };
         logOrder({ timestamp: bestSignal.signal_timestamp || bestSignal.timestamp, action: 'BUY', result, reason: `DRY strong_bull on ${bestTf}`, regime: 'Bull', stats: bestStats, signal: bestSignal, dry: true });
-        logDebug('Simulated BUY', result);
+        logger.debug('Simulated BUY', result);
         scheduleNext(INTERVAL_AFTER_TRADE, 'Simulated BUY executed');
         return;
       }
 
-      // live buy
+      // LIVE buy
       try {
         const ex = await getExchange();
         const res = await ex.createMarketBuyOrder(PAIR, ORDER_AMOUNT);
@@ -428,7 +456,7 @@ async function main() {
       }
     }
 
-    // Sell path
+    // SELL path
     if (positionOpen && ((bestStats && ((bestStats.totalPNL || 0) <= 0 || (bestStats.winRate || 0) < MACRO_MIN_WIN_RATE)) || String(bestSignal.ensemble_label) === 'strong_bear')) {
       const price = Number(bestSignal.price || SIM_PRICE);
       const balance = simulatedBalance();
@@ -445,12 +473,12 @@ async function main() {
         lastTradeAt = Number(bestSignal.signal_timestamp || bestSignal.timestamp) || Date.now();
         diagnostics.lastTrade = { action: 'SELL', timestamp: lastTradeAt, tf: bestTf, simulated: true };
         logOrder({ timestamp: bestSignal.signal_timestamp || bestSignal.timestamp, action: 'SELL', result, reason: `DRY regime negative or bear on ${bestTf}`, regime: regimeFromStats(bestStats), stats: bestStats, signal: bestSignal, dry: true });
-        logDebug('Simulated SELL', result);
+        logger.debug('Simulated SELL', result);
         scheduleNext(INTERVAL_AFTER_TRADE, 'Simulated SELL executed');
         return;
       }
 
-      // live sell
+      // LIVE sell
       try {
         const ex = await getExchange();
         const res = await ex.createMarketSellOrder(PAIR, ORDER_AMOUNT);
@@ -468,7 +496,7 @@ async function main() {
       }
     }
 
-    // Hold: suppress noisy duplicates
+    // Hold: suppress duplicates with cooldown
     const now = Date.now();
     const shouldLogHold = diagnostics._lastLoggedAction !== 'HOLD' || (now - diagnostics._lastHoldLoggedAt) > HOLD_LOG_COOLDOWN_MS;
     if (shouldLogHold) {
@@ -485,45 +513,28 @@ async function main() {
       diagnostics._lastLoggedAction = 'HOLD';
       diagnostics._lastHoldLoggedAt = now;
     } else {
-      logDebug('HOLD suppressed (duplicate) until cooldown expires');
+      logger.debug('HOLD suppressed (duplicate) until cooldown expires');
     }
     scheduleNext(INTERVAL_AFTER_HOLD, `No trade condition met on ${bestTf}`);
   } catch (err) {
     diagnostics.lastError = { stage: 'main', message: err && err.message ? err.message : String(err) };
     printDiagnostics();
-    logError('Uncaught main error', err && err.stack ? err.stack : err);
+    logger.error('Uncaught main error', err && err.stack ? err.stack : err);
     scheduleNext(INTERVAL_AFTER_ERROR, 'Unhandled exception');
   } finally {
     isRunning = false;
   }
 }
 
-// Exchange loader (used only when live)
-let ccxtInstance = null;
-async function getExchange() {
-  if (DRY_RUN) return null;
-  if (ccxtInstance) return ccxtInstance;
-  try {
-    const ccxt = require('ccxt');
-    const ExchangeClass = ccxt[EXCHANGE];
-    if (!ExchangeClass) throw new Error(`Exchange '${EXCHANGE}' not found in ccxt`);
-    ccxtInstance = new ExchangeClass({ apiKey: API_KEY, secret: API_SECRET, enableRateLimit: true });
-    if (typeof ccxtInstance.loadMarkets === 'function') await ccxtInstance.loadMarkets();
-    return ccxtInstance;
-  } catch (e) {
-    throw e;
-  }
-}
-
-// Start
-logInfo('Macrostructure bot starting', { DRY_RUN, FORCE_DRY, ENABLE_LIVE, DEBUG, BACKTEST_RESULTS_PATH });
+// Boot
+logger.info('Macrostructure bot starting', { DRY_RUN, FORCE_DRY, ENABLE_LIVE, DEBUG, BACKTEST_RESULTS_PATH });
 main();
 
 // Graceful handlers
-process.on('SIGINT', () => { logInfo('Exiting (SIGINT)'); process.exit(0); });
-process.on('SIGTERM', () => { logInfo('Exiting (SIGTERM)'); process.exit(0); });
-process.on('uncaughtException', (e) => { diagnostics.lastError = { stage: 'uncaughtException', message: e && e.message ? e.message : String(e) }; printDiagnostics(); logError('uncaughtException', e); process.exit(1); });
-process.on('unhandledRejection', (reason) => { diagnostics.lastError = { stage: 'unhandledRejection', message: reason && reason.message ? reason.message : reason }; printDiagnostics(); logError('unhandledRejection', reason); process.exit(1); });
+process.on('SIGINT', () => { logger.info('Exiting (SIGINT)'); printDiagnostics(); process.exit(0); });
+process.on('SIGTERM', () => { logger.info('Exiting (SIGTERM)'); printDiagnostics(); process.exit(0); });
+process.on('uncaughtException', (e) => { diagnostics.lastError = { stage: 'uncaughtException', message: e && e.message ? e.message : String(e) }; printDiagnostics(); logger.error('uncaughtException', e); process.exit(1); });
+process.on('unhandledRejection', (reason) => { diagnostics.lastError = { stage: 'unhandledRejection', message: reason && reason.message ? reason.message : reason }; printDiagnostics(); logger.error('unhandledRejection', reason); process.exit(1); });
 
-// Export for testing
-module.exports = { main, safeGetLatestMacroSignals, simulateOrderResult, safeGetBacktestStats };
+// Export for interactive testing
+module.exports = { main, safeGetLatestMacroSignals, simulateOrderResult, safeGetBacktestStats, printDiagnostics, logger };
