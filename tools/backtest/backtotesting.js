@@ -2,21 +2,19 @@
 /**
  * tools/backtest/backtotesting.js
  *
- * Enhanced backtesting runner — defensive JSON handling, sanitization, and clearer logging.
+ * Enhanced backtesting runner — defensive JSON handling, sanitization, clearer logging,
+ * and automatic use of trained model metadata from tools/trained/ to improve ensemble decisions.
  *
  * Key improvements:
- * - sanitizePoint(point): defensive normalization of prediction fields and timestamps.
- * - safeReadJSON(file): robust JSON read with lightweight repair attempts for common corruption
- *   (trailing commas, unescaped control chars). Fallbacks and clear error logging.
- * - Skip completely broken files rather than crashing the run.
- * - Dumps sanitized examples / bad points to tools/backtest/bad_examples for inspection.
- * - Verbose mode (BACKTEST_VERBOSE=1) to show sanitization actions.
- * - Keeps existing backtest engine mostly intact but uses the new helpers.
+ * - Loads trained model metadata (tools/trained/*.json) and uses model-level win-rate
+ *   as voting weights when deriving ensemble labels and confidence.
+ * - deriveEnsembleFromPredictions now prefers model-backed predictions and weighted voting.
+ * - computeEnsembleConfidence uses weighted agreement (trained model weights considered).
+ * - Adds --trained-dryrun to list loaded trained models (for debugging).
  *
  * Usage:
  *   BACKTEST_ONCE=1 BACKTEST_VERBOSE=1 node tools/backtest/backtotesting.js
  */
-
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
@@ -28,6 +26,8 @@ const OUTPUT_PATH = path.resolve(__dirname, 'backtest_results.json');
 const CSV_PATH = path.resolve(__dirname, 'backtest_trades.csv');
 const BAD_DIR = path.resolve(__dirname, 'bad_examples'); // dumped dirty points
 if (!fs.existsSync(BAD_DIR)) fs.mkdirSync(BAD_DIR, { recursive: true });
+
+const TRAINED_DIR = path.resolve(__dirname, '../trained'); // load model metadata from here
 
 const FEE_PCT = parseFloat(process.env.BACKTEST_FEE_PCT || "0.0001");
 const SLIPPAGE_PCT = parseFloat(process.env.BACKTEST_SLIPPAGE_PCT || "0.00005");
@@ -93,6 +93,47 @@ function safeReadJSON(fp) {
     console.error('[ERROR] safeReadJSON failed for', fp, err && err.message ? err.message : err);
     return null;
   }
+}
+
+// Load trained model metadata from tools/trained/*.json
+let trainedModels = []; // { name, weight (0-100), aliases: [], meta: {} }
+function loadTrainedModels() {
+  trainedModels = [];
+  if (!fs.existsSync(TRAINED_DIR)) return;
+  try {
+    const list = fs.readdirSync(TRAINED_DIR).filter(f => f.endsWith('.json'));
+    for (const fname of list) {
+      const fp = path.join(TRAINED_DIR, fname);
+      const meta = safeReadJSON(fp);
+      if (!meta) {
+        if (VERBOSE) log(`Skipping unreadable trained metadata: ${fname}`);
+        continue;
+      }
+      const base = path.basename(fname, '.json');
+      // try to infer a weight (win rate / validation score). normalize to 0-100 scale
+      let weight = 50;
+      if (typeof meta.win_rate === 'number') weight = Math.max(1, Math.min(100, Math.round(meta.win_rate * (meta.win_rate > 1 ? 1 : 100) )));
+      else if (typeof meta.validation === 'object' && typeof meta.validation.winRate === 'number') {
+        const wr = meta.validation.winRate;
+        weight = Math.max(1, Math.min(100, Math.round(wr * (wr > 1 ? 1 : 100))));
+      } else if (typeof meta.validation_win_rate === 'number') {
+        weight = Math.max(1, Math.min(100, Math.round(meta.validation_win_rate * (meta.validation_win_rate > 1 ? 1 : 100))));
+      }
+      const aliases = new Set([base]);
+      if (typeof meta.model_name === 'string') aliases.add(meta.model_name);
+      if (Array.isArray(meta.aliases)) meta.aliases.forEach(a=>aliases.add(a));
+      trainedModels.push({ name: base, weight, aliases: Array.from(aliases), meta });
+    }
+  } catch (e) {
+    if (VERBOSE) console.warn('[BACKTEST] loadTrainedModels failed:', e && e.message ? e.message : e);
+  }
+}
+loadTrainedModels();
+
+if (process.argv.includes('--trained-dryrun')) {
+  console.log('Loaded trained models:');
+  for (const m of trainedModels) console.log(` - ${m.name}: weight=${m.weight} aliases=${m.aliases.join(',')}`);
+  // continue running after listing
 }
 
 // discover OHLCV files (predictions & raw)
@@ -230,7 +271,14 @@ function normalizeLabel(raw) {
   return null;
 }
 
+/*
+ * deriveEnsembleFromPredictions:
+ * - uses trainedModels (if any) to prefer predictions produced by known classifiers.
+ * - performs weighted voting: each model contributes a vote weighted by its validation/win rate.
+ * - also falls back to simple majority among prediction_* fields if no trained-model votes found.
+ */
 function deriveEnsembleFromPredictions(point) {
+  // collect candidate raw prediction tokens
   const candidates = [];
   ['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].forEach(k => {
     if (point[k] !== undefined) candidates.push(point[k]);
@@ -240,6 +288,54 @@ function deriveEnsembleFromPredictions(point) {
       candidates.push(point[k]);
     }
   }
+
+  // If we have trainedModels, try weighted voting using model-detected fields
+  if (trainedModels && trainedModels.length) {
+    const votes = {}; // label -> weighted sum
+    let totalWeight = 0;
+
+    for (const m of trainedModels) {
+      // find any matching field in point that corresponds to this model
+      let matchedVal;
+      for (const alias of m.aliases) {
+        // 1) exact field named after model base (eg. trained_ohlcv -> point.trained_ohlcv)
+        if (point[alias] !== undefined) { matchedVal = point[alias]; break; }
+        // 2) prediction_{alias}
+        const predKey = `prediction_${alias}`;
+        if (point[predKey] !== undefined) { matchedVal = point[predKey]; break; }
+        // 3) try other common shapes
+        if (point[`model_${alias}`] !== undefined) { matchedVal = point[`model_${alias}`]; break; }
+      }
+      if (matchedVal !== undefined) {
+        const label = normalizeLabel(matchedVal);
+        if (!label) continue;
+        votes[label] = (votes[label] || 0) + (m.weight || 50);
+        totalWeight += (m.weight || 50);
+        if (VERBOSE) log(`deriveEnsemble: model vote ${m.name} -> ${label} (w=${m.weight})`);
+      }
+    }
+
+    // also include any generic prediction fields (non-model) as low-weight votes
+    for (const v of candidates) {
+      const label = normalizeLabel(v);
+      if (!label) continue;
+      votes[label] = (votes[label] || 0) + 25; // generic low weight
+      totalWeight += 25;
+    }
+
+    if (Object.keys(votes).length > 0 && totalWeight > 0) {
+      const top = Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
+      const topLabel = top[0];
+      // require some minimal consensus to declare strong label; otherwise fallback
+      const topWeight = top[1];
+      if (VERBOSE) log(`deriveEnsemble: weighted votes: ${JSON.stringify(votes)} totalW=${totalWeight}`);
+      // set ensemble_confidence on point for downstream logic
+      point.ensemble_confidence = Math.min(100, Math.round((topWeight / Math.max(1, totalWeight)) * 100));
+      return topLabel;
+    }
+  }
+
+  // fallback (original behavior): majority simple voting
   const labels = candidates.map(c => normalizeLabel(c)).filter(Boolean);
   if (!labels.length) return null;
   const counts = labels.reduce((acc, v) => { acc[v] = (acc[v] || 0) + 1; return acc; }, {});
@@ -249,19 +345,57 @@ function deriveEnsembleFromPredictions(point) {
   return labels[0] || null;
 }
 
+/*
+ * computeEnsembleConfidence(point):
+ * - If point.ensemble_confidence is already set by deriveEnsembleFromPredictions, respect it.
+ * - Otherwise compute a weighted agreement score using trainedModels (if available) and generic predictions.
+ */
 function computeEnsembleConfidence(point) {
   if (typeof point.ensemble_confidence === 'number') return point.ensemble_confidence;
-  const labels = [];
+
+  const votes = {};
+  let totalWeight = 0;
+
+  // trained models votes
+  for (const m of trainedModels) {
+    let matchedVal;
+    for (const alias of m.aliases) {
+      if (point[alias] !== undefined) { matchedVal = point[alias]; break; }
+      const predKey = `prediction_${alias}`;
+      if (point[predKey] !== undefined) { matchedVal = point[predKey]; break; }
+    }
+    if (matchedVal !== undefined) {
+      const label = normalizeLabel(matchedVal);
+      if (!label) continue;
+      votes[label] = (votes[label] || 0) + (m.weight || 50);
+      totalWeight += (m.weight || 50);
+    }
+  }
+
+  // generic predictions with low weight
+  const genericCandidates = [];
   ['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].forEach(k => {
-    if (point[k] !== undefined) labels.push(normalizeLabel(point[k]));
+    if (point[k] !== undefined) genericCandidates.push(point[k]);
   });
-  for (const k of Object.keys(point)) if (/prediction/i.test(k)) labels.push(normalizeLabel(point[k]));
-  const clean = labels.filter(Boolean);
-  if (!clean.length) return 50;
-  if (new Set(clean).size === 1) return 100;
-  if (clean.some(l => typeof l === 'string' && l.startsWith('strong_'))) return 75;
-  return 50;
+  for (const k of Object.keys(point)) {
+    if (/prediction/i.test(k) && !['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].includes(k)) {
+      genericCandidates.push(point[k]);
+    }
+  }
+  for (const v of genericCandidates) {
+    const label = normalizeLabel(v);
+    if (!label) continue;
+    votes[label] = (votes[label] || 0) + 20;
+    totalWeight += 20;
+  }
+
+  if (!totalWeight) return 50;
+  const top = Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
+  if (!top) return 50;
+  const confidence = Math.min(100, Math.round((top[1] / totalWeight) * 100));
+  return confidence;
 }
+
 function computeSignalAge(point, now) {
   let ts = point.signal_timestamp || point.timestamp;
   if (!ts) return 0;
@@ -320,14 +454,37 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
     const point = sanitizePoint(rawPoint, i);
 
     try {
+      // compute a better win_rate estimate using model metadata if available
+      let win_rate = (typeof point.win_rate === 'number') ? point.win_rate : (typeof point.summary?.winRate === 'number' ? point.summary.winRate : 0.5);
+      // augment win_rate by averaging weights from matched trained models (if any)
+      try {
+        const matchedModelWeights = [];
+        for (const m of trainedModels) {
+          for (const alias of m.aliases) {
+            if (point[alias] !== undefined || point[`prediction_${alias}`] !== undefined) {
+              matchedModelWeights.push(m.weight / 100.0); // convert to 0-1
+              break;
+            }
+          }
+        }
+        if (matchedModelWeights.length) {
+          const avgModelWin = matchedModelWeights.reduce((a,b)=>a+b,0) / matchedModelWeights.length;
+          // blend with existing win_rate by giving moderate weight to model's validation (0.6 model, 0.4 point)
+          win_rate = (0.4 * win_rate) + (0.6 * avgModelWin);
+        }
+      } catch (_) {}
+
       const signalLabel = getMappedSignalLabel(point) || 'other';
       const volatility = Number(point.volatility) || 10;
       const close = Number(point.close) || 0;
-      const win_rate = (typeof point.win_rate === 'number') ? point.win_rate : (typeof point.summary?.winRate === 'number' ? point.summary.winRate : 0.5);
+      const winRateUsed = win_rate;
 
       signalCount[signalLabel] = (signalCount[signalLabel] || 0) + 1;
 
+      // compute ensemble confidence using trained models
       const ensembleConfidence = computeEnsembleConfidence(point);
+      point.ensemble_confidence = ensembleConfidence;
+
       const signalAge = computeSignalAge(point, now);
       const regimeAlign = typeof point.regime_align === 'number'
         ? point.regime_align
@@ -337,7 +494,7 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
         try {
           return scoreTrade({
             signalStrength: getSignalScore(signalLabel),
-            modelWinRate: win_rate,
+            modelWinRate: winRateUsed,
             riskReward: params.profit_pct / Math.max(1e-9, params.loss_pct),
             executionQuality: 95,
             volatility,
@@ -370,7 +527,7 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
           quality: tradeQuality.totalScore,
           qualityBreakdown: tradeQuality.breakdown,
           mlStats: {
-            win_rate,
+            win_rate: winRateUsed,
             volatility,
             challenge_model: point.challenge_model,
             ensemble_model: point.ensemble_model,
@@ -380,7 +537,7 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
           }
         };
         tradeQualities.push(tradeQuality.totalScore);
-        log(`[ENTRY][${label}][${i}] ${position.type} @${close} tq:${tradeQuality.totalScore.toFixed(1)}`);
+        log(`[ENTRY][${label}][${i}] ${position.type} @${close} tq:${tradeQuality.totalScore.toFixed(1)} ec:${ensembleConfidence}`);
       }
 
       if (position) {
@@ -410,7 +567,7 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
             try {
               return scoreTrade({
                 signalStrength: getSignalScore(signalLabel),
-                modelWinRate: win_rate,
+                modelWinRate: winRateUsed,
                 riskReward: params.profit_pct / Math.max(1e-9, params.loss_pct),
                 executionQuality: 95,
                 volatility,
@@ -644,7 +801,7 @@ async function runBacktestLoop() {
 }
 
 /* expose functions for unit tests / other modules */
-module.exports = { backtest, paramSets, runOnce, runBacktestLoop };
+module.exports = { backtest, paramSets, runOnce, runBacktestLoop, loadTrainedModels };
 
 if (require.main === module) {
   runBacktestLoop().catch(err => {
