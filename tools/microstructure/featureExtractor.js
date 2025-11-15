@@ -11,6 +11,8 @@
  *   avgProbability/ensemble_confidence, presentTFs, framesWithPrediction.
  * - Caches challenge/model_winner.json reads and exposes a reload helper.
  * - Safer numeric normalization and defensive parsing for missing/invalid fields.
+ * - Sanitizes challenge.recent_win fields (priceChange, candleSize, priceChangePct)
+ *   converting empty strings to numeric values where possible, or null otherwise.
  */
 
 const fs = require('fs');
@@ -28,7 +30,95 @@ function _loadChallengeCache(force = false) {
     const stat = fs.statSync(CHALLENGE_WINNER_PATH);
     if (!force && _challengeCache && stat.mtimeMs === _challengeCacheMTime) return _challengeCache;
     const raw = fs.readFileSync(CHALLENGE_WINNER_PATH, 'utf8');
-    _challengeCache = raw ? JSON.parse(raw) : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    // Local helpers (do not rely on outer toNumberSafe which is declared later)
+    const _isObject = v => v && typeof v === 'object' && !Array.isArray(v);
+    const _toNumLocal = v => {
+      if (v === '' || v === null || v === undefined) return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    // sanitize a single challenge object (ensure recent_win numeric fields are numbers or null,
+    // and compute priceChange, priceChangePct, candleSize when they are empty)
+    const _sanitizeChallengeObject = (obj) => {
+      if (!_isObject(obj)) return;
+      const rw = obj.recent_win;
+      if (!_isObject(rw)) return;
+
+      const open = _toNumLocal(rw.open);
+      const close = _toNumLocal(rw.close);
+      const high = _toNumLocal(rw.high);
+      const low = _toNumLocal(rw.low);
+      const entry = _toNumLocal(rw.entry_price);
+      const next = _toNumLocal(rw.next_price);
+      const volume = _toNumLocal(rw.volume);
+      const volatility = _toNumLocal(rw.volatility);
+
+      // Overwrite raw fields with numeric or null to make downstream consumers safer
+      if (open !== null) rw.open = open;
+      if (close !== null) rw.close = close;
+      if (high !== null) rw.high = high;
+      if (low !== null) rw.low = low;
+      if (entry !== null) rw.entry_price = entry;
+      if (next !== null) rw.next_price = next;
+      if (volume !== null) rw.volume = volume;
+      if (volatility !== null) rw.volatility = volatility;
+
+      // priceChange: prefer next - entry if available, otherwise close - open
+      if (rw.priceChange === '' || rw.priceChange === null || rw.priceChange === undefined) {
+        let pc = null;
+        if (entry !== null && next !== null) pc = next - entry;
+        else if (open !== null && close !== null) pc = close - open;
+        rw.priceChange = pc;
+      } else {
+        rw.priceChange = _toNumLocal(rw.priceChange);
+      }
+
+      // priceChangePct: prefer (next-entry)/entry, otherwise (close-open)/open
+      if (rw.priceChangePct === '' || rw.priceChangePct === null || rw.priceChangePct === undefined) {
+        let pcp = null;
+        if (entry !== null && next !== null && entry !== 0) pcp = (next - entry) / entry;
+        else if (open !== null && close !== null && open !== 0) pcp = (close - open) / open;
+        rw.priceChangePct = pcp;
+      } else {
+        rw.priceChangePct = _toNumLocal(rw.priceChangePct);
+      }
+
+      // candleSize: prefer high - low, otherwise absolute close - open
+      if (rw.candleSize === '' || rw.candleSize === null || rw.candleSize === undefined) {
+        let cs = null;
+        if (high !== null && low !== null) cs = high - low;
+        else if (open !== null && close !== null) cs = Math.abs(close - open);
+        rw.candleSize = cs;
+      } else {
+        rw.candleSize = _toNumLocal(rw.candleSize);
+      }
+    };
+
+    // Recursively sanitize either a single object or a timeframe map { "1m": {...}, "5m": {...} }
+    const _sanitizeAll = (node) => {
+      if (!_isObject(node)) return;
+      // If node looks like a timeframe object (has recent_win), sanitize it
+      if (node.recent_win) {
+        _sanitizeChallengeObject(node);
+        return;
+      }
+      // Otherwise, it might be a map of timeframe => object, sanitize children
+      for (const k of Object.keys(node)) {
+        try {
+          if (_isObject(node[k])) _sanitizeAll(node[k]);
+        } catch (e) {
+          // ignore any malformed entries
+        }
+      }
+    };
+
+    // sanitize parsed data to ensure numeric fields are normalized
+    if (parsed) _sanitizeAll(parsed);
+
+    _challengeCache = parsed;
     _challengeCacheMTime = stat.mtimeMs;
     return _challengeCache;
   } catch (e) {
