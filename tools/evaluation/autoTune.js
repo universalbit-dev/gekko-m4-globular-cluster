@@ -26,7 +26,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const EVAL_DIR = path.resolve(__dirname);
 const FALLBACK_IN = path.join(EVAL_DIR, './evaluate_results.json');
-const IN_PATH = process.env.IN_PATH || path.join(EVAL_DIR, '../evaluate_results_augmented.json');
+const IN_PATH = process.env.IN_PATH || path.join(EVAL_DIR, './evaluate_results_augmented.json');
 const OUT_PATH = process.env.OUT_PATH || path.join(EVAL_DIR, './autoTune_results.json');
 
 const MIN_SAMPLES = parseInt(process.env.MIN_SAMPLES || '5', 10);
