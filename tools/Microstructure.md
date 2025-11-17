@@ -1,84 +1,93 @@
-# tools/microstructure — Microstructure (micro_ccxt_orders.js)
+# tools/microstructure — Microstructure
 
 This document describes the microstructure orchestrator implemented at:
 `tools/microstructure/micro_ccxt_orders.js`.
 
 ```mermaid
 flowchart TD
-  %% Microstructure mermaid (GitHub-friendly)
-  Start["Start\nload .env\nrequire runtime_flags"]
-  Start --> ParseFlags["Parse runtime flags\n(DRY_RUN, FORCE_DRY,\nENABLE_LIVE, IS_LIVE, DEBUG)"]
-  ParseFlags --> LoadState["loadPositionState()\nrestore position/history"]
-  LoadState --> MainLoop["decideAndAct()\n(main cycle)"]
+  %% Simplified, GitHub-mermaid-friendly Microstructure flow
 
-  subgraph INDEX["Index / OHLCV Signal Loading"]
-    IDXLOAD["loadIndexData()\n(require index module)"]
-    OHLCVLOAD["loadLatestSignalsFromOHLCV()\n(fallback files)"]
-    IDXLOAD --> CHOOSEIDX["pick primary TF or first match"]
-    OHLCVLOAD --> CHOOSEOHLCV["pick primary TF or latest"]
+  Start[Start - load env and libs]
+  Flags[Parse runtime flags]
+  Restore[Restore saved position and history]
+  MainLoop[Main loop - decideAndAct]
+
+  LoadIndex[Load index module]
+  LoadOHLCV[Load OHLCV prediction files]
+  PickSignal[Pick and normalize signal]
+  Backtest[Load backtest stats]
+  Throttle[Throttle check]
+  Decide[Decide: open / close / hold]
+
+  CheckOpen[Open check - simulated quote balance]
+  SubmitBuy[Submit BUY order]
+  CheckClose[Close check - base available]
+  SubmitSell[Submit SELL order]
+
+  SubmitOrder[Order submitter - single entry]
+  DuplicateCheck[Duplicate fingerprint check]
+  AllowLive[Live allowed check]
+  Simulate[Simulate order and write audit]
+  LiveExec[Place live order via exchange]
+  Audit[Write audit and legacy log]
+  Update[Update diagnostics and save state]
+  Schedule[Schedule next run]
+
+  HoldPath[HOLD path]
+  HoldLog[Log HOLD or suppress]
+  Throttled[Throttled - schedule next]
+  ErrorFlow[On error - record diagnostics and schedule]
+
+  Signals[Shutdown signals and exception handlers]
+  SaveExit[Save state, print diagnostics, exit]
+
+  %% Main flow
+  Start --> Flags --> Restore --> MainLoop
+
+  MainLoop --> LoadIndex
+  MainLoop --> LoadOHLCV
+  LoadIndex --> PickSignal
+  LoadOHLCV --> PickSignal
+
+  PickSignal --> Backtest --> Throttle
+  Throttle -->|blocked| Throttled
+  Throttle -->|ok| Decide
+
+  Decide -->|open| CheckOpen
+  Decide -->|close| CheckClose
+  Decide -->|hold| HoldPath
+
+  CheckOpen -->|insufficient| Throttled
+  CheckOpen -->|ok| SubmitBuy --> SubmitOrder
+  CheckClose -->|insufficient| Throttled
+  CheckClose -->|ok| SubmitSell --> SubmitOrder
+
+  SubmitOrder --> DuplicateCheck --> AllowLive
+  AllowLive -->|no| Simulate --> Audit --> Update --> Schedule
+  AllowLive -->|yes| LiveExec --> Audit --> Update --> Schedule
+
+  HoldPath --> HoldLog --> Schedule
+
+  MainLoop --> ErrorFlow --> Schedule
+
+  Start --> Signals --> SaveExit
+
+  %% Grouping helpers
+  subgraph HELPERS [Helpers and utilities]
+    PickSignal
+    Backtest
+    Audit
   end
 
-  MainLoop --> IDXLOAD
-  MainLoop --> OHLCVLOAD
-
-  CHOOSEIDX --> FormatSignal["formatSignalForDecision()\nnormalizeIndexEntry()"]
-  CHOOSEOHLCV --> FormatSignal
-
-  FormatSignal --> Stats["derive backtestStats\n(from summary if present)"]
-  Stats --> ThrottleCheck["canThrottle()?"]
-  ThrottleCheck -- blocked --> Throttled["Schedule next\n(reason: throttled)"]
-  ThrottleCheck -- ok --> DecisionLogic["Decision logic\n-> 'open' | 'close' | 'hold'"]
-
-  DecisionLogic --> OpenPath{"decision === open\n&& position.open === false"}
-  DecisionLogic --> ClosePath{"decision === close\n&& position.open === true"}
-  DecisionLogic --> HoldPath{"decision === hold\nor no-op"}
-
-  OpenPath --> BalanceCheck["Simulated balance check\n(required quote >= price*size)"]
-  BalanceCheck -- insufficient --> SkipOpen["log SKIP\nschedule next"]
-  BalanceCheck -- ok --> SubmitBuy["submitOrder('BUY',...)\n(simulated or live)"]
-
-  ClosePath --> BaseCheck["Simulated base check\n(available >= amount)"]
-  BaseCheck -- insufficient --> SkipClose["log SKIP\nschedule next"]
-  BaseCheck -- ok --> SubmitSell["submitOrder('SELL',...)\n(simulated or live)"]
-
-  SubmitBuy --> OnOpen["Update position state\nposition.open=true\nsavePositionState()"]
-  SubmitSell --> OnClose["Update position state\nposition.open=false\nsavePositionState()"]
-  OnOpen --> SchedulePost["scheduleNext(MICRO_INTERVAL_MS,'post-open')"]
-  OnClose --> SchedulePost
-
-  HoldPath --> HoldCooldown["HOLD logging cooldown\n(HOLD_LOG_COOLDOWN_MS)"]
-  HoldCooldown -- log --> LogHold["logOrder(HOLD)\nsave diagnostics"]
-  HoldCooldown -- suppress --> Suppressed["debug suppressed hold"]
-  LogHold --> ScheduleHold["scheduleNext(MICRO_INTERVAL_MS,'hold')"]
-  Suppressed --> ScheduleHold
-
-  %% submitOrder internal branching
-  SubmitBuy --> SUBMIT["submitOrder() implementation"]
-  SubmitSell --> SUBMIT
-  SUBMIT --> CheckFingerprint["duplicate fingerprint check\nskip if duplicate"]
-  CheckFingerprint --> LiveAllowed{"liveAllowed?\n(IS_LIVE && !DRY_RUN && !FORCE_DRY && ENABLE_LIVE)"}
-  LiveAllowed -- false --> Simulate["simulateOrderResult()\nlogOrder(mode: DRY)"]
-  LiveAllowed -- true --> LiveExchange["getExchange()\ncreateMarketBuyOrder/Sell\nlogOrder(mode: LIVE)"]
-  Simulate --> ReturnSubmit
-  LiveExchange --> ReturnSubmit
-  ReturnSubmit --> CommonPost["update diagnostics\nlastTradeAt / history\nsavePositionState()"]
-
-  %% error handling & scheduling
-  MainLoop --> TryCatch["try/catch around main\non error -> diagnostics.lastError\nsavePositionState()\nscheduleNext(MICRO_INTERVAL_MS,'error')"]
-  TryCatch --> ScheduleEnd["end cycle"]
-
-  SchedulePost --> ScheduleEnd
-  ScheduleHold --> ScheduleEnd
-  Throttled --> ScheduleEnd
-  SkipOpen --> ScheduleEnd
-  SkipClose --> ScheduleEnd
-
-  %% graceful shutdown
-  Start --> Signals["process.on SIGINT/SIGTERM\nuncaughtException\nunhandledRejection"]
-  Signals --> SaveAndExit["savePositionState()\nprint diagnostics\nexit"]
-
-  classDef core fill:#f8fafc,stroke:#1f2937,stroke-width:1px;
-  class MainLoop,DecisionLogic,SUBMIT,LiveExchange core;
+  subgraph SUBMIT [Order submitter steps]
+    SubmitOrder
+    DuplicateCheck
+    AllowLive
+    Simulate
+    LiveExec
+    Audit
+    Update
+  end
 ```
 
 - Startup
