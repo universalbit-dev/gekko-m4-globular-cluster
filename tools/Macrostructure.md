@@ -1,67 +1,81 @@
-# Macrostructure (Auto-Tuned Multi-Timeframe)
-
+# Macrostructure
 ```mermaid
 flowchart TD
-  %% GitHub-mermaid-compatible Macrostructure diagram
-  subgraph START["Startup"]
-    A["Start script\nload .env\nrequire libs"]
-    A --> B["Parse runtime flags\nlib/runtime_flags"]
-    B --> C["Load config constants\nTIMEFRAMES, PAIR, INTERVALS, PATHS, SIM defaults"]
+  %% Human-friendly Macrostructure diagram — compact labels, minimal line breaks
+
+  subgraph START[Startup]
+    S1["Start: load .env & libs"]
+    S2["Parse runtime flags"]
+    S3["Load config & paths"]
   end
 
-  subgraph HELPERS["Utilities & Helpers"]
-    H1["safeJsonRead(fp)\n- full JSON\n- JSONL fallback\n- trim to last brace/bracket\n- extract {..} objects"]
-    H2["safeJsonWrite(fp, obj)"]
-    H3["sanitizeSignal(raw)\n& deriveEnsemble(point)"]
-    H4["safeGetLatestMacroSignals()\n(read MACRO_SIGNAL_LOG -> parse -> sanitize -> derive)"]
-    H5["safeGetBacktestStats(tf)\n(safeJsonRead(BACKTEST_RESULTS_PATH))"]
-    H6["simulateOrderResult(action,price,amt)\n& simulatedBalance()"]
-    H7["logOrder / appendOrderLog\n/ appendAuditJson"]
-    H8["printDiagnostics() -> DIAG_PATH"]
-    H9["scheduleNext(ms, reason)\n(setTimeout -> main)"]
+  subgraph HELPERS[Helpers & Utilities]
+    H_read["safeJsonRead (parse / JSONL / trim / extract)"]
+    H_write["safeJsonWrite"]
+    H_sig["sanitizeSignal & deriveEnsemble"]
+    H_signals["safeGetLatestMacroSignals"]
+    H_backtest["safeGetBacktestStats"]
+    H_audit["logOrder / appendAuditJson"]
+    H_diag["printDiagnostics"]
+    H_sched["scheduleNext"]
   end
 
-  C --> MAIN["Main Loop\n(main())"]
-  MAIN --> D["Get latest signals\nsafeGetLatestMacroSignals() -> H4"]
-  MAIN --> E["For each tf in TIMEFRAMES\n- stats = safeGetBacktestStats(tf) -> H5\n- signal = latestSignals[tf]\n- regime = regimeFromStats(stats)"]
-  E --> F{"Regime == 'Bull' &&\nsignal.ensemble_label == 'strong_bull'?"}
-  F -- "yes" --> G["Consider candidate best\nprefer higher stats.totalPNL"]
-  F -- "no" --> I["Skip timeframe"]
-  G --> J{"After loop:\nfound best?"}
-  I --> J
-  J -- "no" --> K["No suitable best\n- diagnostics.lastError = 'regime_select'\n- printDiagnostics() -> H8\n- scheduleNext(INTERVAL_MS,'No positive macro regime') -> H9"]
-  J -- "yes" --> L["Best selected\n(bestTf, bestStats, bestSignal)\nlogInfo DECISION"]
-  L --> M{"IS_LIVE?"}
-  M -- "false" --> N["Not live\n- log debug\n- scheduleNext(INTERVAL_MS,'Dry or not live') -> H9"]
-  M -- "true" --> O["Hand off to order module(s)\n(order placement in separate module)"]
-  O --> P{"Order module:\nFORCE_DRY or DRY_RUN?"}
-  P -- "dry" --> Q["Simulate order\nsimulateOrderResult() -> H6\nlogOrder(mode: DRY) -> H7"]
-  P -- "live" --> R["Execute live order via ccxt\n- handle errors\n- write audit\n- update lastTradeAt/diagnostics\n- logOrder(mode: LIVE) -> H7"]
-  Q --> S["scheduleNext(INTERVAL_AFTER_TRADE or HOLD) -> H9"]
-  R --> S
-  K --> END["End cycle / wait"]
+  subgraph MAIN[Main loop]
+    M["main() — select best TF, decide"]
+    E["For each TF: load signal & stats"]
+    SEL{"Is regime == Bull\nAND ensemble == strong_bull?"}
+    BEST["Select best TF (by totalPNL)"]
+    DEC["Log DECISION"]
+  end
 
-  %% Error handling
-  MAIN --> X["try/catch around main\non exception: set diagnostics.lastError\nprintDiagnostics() -> H8\nscheduleNext(INTERVAL_AFTER_ERROR) -> H9"]
-  X --> END
+  subgraph ORDER[Order handoff]
+    LCHK{"IS_LIVE ?"}
+    DRY["Skip live; log decision; schedule next"]
+    HAND["Hand off to order module"]
+    MOD{"Order module: FORCE_DRY or DRY_RUN?"}
+    SIM["simulateOrderResult -> audit (DRY)"]
+    LIVE["Place live order via ccxt -> audit (LIVE)"]
+    POST["Update diagnostics, lastTradeAt, schedule next"]
+  end
 
-  %% Graceful shutdown handlers
-  START --> SHUTDOWN["process.on SIGINT/SIGTERM\non uncaughtException/unhandledRejection -> printDiagnostics & exit"]
+  subgraph CONTROL[Error & Scheduling]
+    TRY["try/catch around main -> on error set diagnostics"]
+    SCHED["scheduleNext (interval reasons)"]
+    END["End cycle / wait"]
+  end
 
-  %% JSON recovery detail grouping
-  subgraph RECOVERY["JSON recovery detail"]
+  subgraph RECOV[JSON recovery]
     R1["Full JSON parse"]
-    R2["JSONL parse (line-by-line)"]
-    R3["Trim to last '}' or ']' then parse"]
-    R4["Extract balanced '{...}' objects"]
-    H1 --> R1
-    H1 --> R2
-    H1 --> R3
-    H1 --> R4
+    R2["JSONL parse"]
+    R3["Trim to last close brace/bracket"]
+    R4["Extract balanced {..} objects"]
   end
 
-  classDef core fill:#f3f4f6,stroke:#333,stroke-width:1px;
-  class MAIN,E,F,J,L,M,O core;
+  %% flow connections
+  S1 --> S2 --> S3 --> HELPERS
+  HELPERS --> M
+  M --> E --> SEL
+  SEL -- No --> END
+  SEL -- Yes --> BEST --> DEC --> LCHK
+  LCHK -- No --> DRY --> SCHED
+  LCHK -- Yes --> HAND --> MOD
+  MOD -- dry --> SIM --> POST
+  MOD -- live --> LIVE --> POST
+  M --> TRY --> SCHED --> END
+
+  %% helpers connections
+  H_read --- R1
+  H_read --- R2
+  H_read --- R3
+  H_read --- R4
+  H_signals --> M
+  H_backtest --> M
+  H_audit --> POST
+  H_diag --> TRY
+  H_sched --> SCHED
+
+  classDef core fill:#f8fafc,stroke:#1f2937,stroke-width:1px;
+  class M,SEL,BEST,DEC,LCHK,MOD core;
 ```
 
 
