@@ -2,436 +2,554 @@
 /**
  * tools/microstructure/micro_ccxt_orders.js
  *
- * Microstructure:
- * - Uses winston with file rotation to limit log growth.
- * - Respects DRY_RUN / FORCE_DRY / ENABLE_LIVE / FORCE_SUBMIT / PERMISSIVE_SIZING.
- * - Computes safe order size with exchange market limits and permissive sizing option.
- * - Emits JSONL audit and CSV audit rows to tools/logs for offline analysis.
+ * Microstructure trading bot — index-driven, simulation-first
  *
- * Usage:
- *   node tools/microstructure/micro_ccxt_orders.js --once
+ * Enhancements:
+ * - Loads .env early and uses centralized runtime_flags parser for consistent boolean semantics.
+ * - Single submitOrder(action, pair, price, amount, fullSignal) handler that cleanly separates DRY vs LIVE paths and writes structured audit JSONL.
+ * - Improved scheduling (single timer, safer retries) and duplicate-suppression for rapid successive orders.
+ * - Persisted position state and a concise position history array for easier reconciliation.
+ * - Better debug/startup logs that show parsed flags (DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE).
+ * - getExchange() guard to prevent accidental live calls when not in live mode.
  *
- * Environment:
- *   DRY_RUN, FORCE_DRY, ENABLE_LIVE, FORCE_SUBMIT, PERMISSIVE_SIZING
+ * Safety:
+ * - Live orders will not be placed unless flags.IS_LIVE === true (ENABLE_LIVE && !FORCE_DRY && !DRY_RUN).
+ * - Keep FORCE_DRY=1 and DRY_RUN=1 for safe testing.
  */
 
 const fs = require('fs');
 const path = require('path');
-const ccxt = require('ccxt');
-const os = require('os');
+
+// Load .env as early as possible
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-// --------- helpers to pick env keys ---------
-function pickKey(...names) {
-  for (const n of names) {
-    if (process.env[n]) return process.env[n];
-  }
-  return '';
-}
+// Centralized runtime flags (robust parsing)
+const flags = require(path.resolve(__dirname, '../lib/runtime_flags'));
 
-// --------- Configuration ---------
-const CONFIG = {
-  EXCHANGE_NAME: process.env.MICRO_EXCHANGE || process.env.EXCHANGE || 'kraken',
-  API_KEY: pickKey('KEY', 'API_KEY', 'MACRO_KEY', 'MICRO_API_KEY'),
-  API_SECRET: pickKey('SECRET', 'API_SECRET', 'MACRO_SECRET', 'MICRO_API_SECRET'),
-  PAIR: process.env.MICRO_PAIR || 'BTC/EUR',
-  FIXED_ORDER_SIZE: Number(process.env.MICRO_FIXED_ORDER_SIZE || process.env.FIXED_ORDER_SIZE || '0.0001'),
-  DRY_RUN: /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || process.argv.includes('--dry') || process.env.FORCE_DRY === '1')),
-  FORCE_DRY: /^(1|true|yes)$/i.test(String(process.env.FORCE_DRY || '0')),
-  ENABLE_LIVE: /^(1|true|yes)$/i.test(String(process.env.ENABLE_LIVE || '0')),
-  FORCE_SUBMIT: /^(1|true|yes)$/i.test(String(process.env.FORCE_SUBMIT || process.argv.includes('--force'))),
-  PERMISSIVE_SIZING: /^(1|true|yes)$/i.test(String(process.env.PERMISSIVE_SIZING || '0')),
-  ORDER_AUDIT_JSONL: path.resolve(__dirname, '../../tools/logs/micro_ccxt_orders.jsonl'),
-  ORDER_AUDIT_CSV: path.resolve(__dirname, '../../tools/logs/micro_ccxt_orders.csv'),
-  LOG_PATH: path.resolve(__dirname, '../../tools/logs/micro_ccxt_orders.log'),
-  LOG_MAXSIZE: Number(process.env.MICRO_LOG_MAXSIZE || 5 * 1024 * 1024),
-  LOG_MAXFILES: Number(process.env.MICRO_LOG_MAXFILES || 5),
-  ORDER_FILL_TIMEOUT_MS: Number(process.env.MICRO_ORDER_FILL_TIMEOUT_MS || 15000),
-  ORDER_MANAGER_POLL_MS: Number(process.env.MICRO_ORDER_MANAGER_POLL_MS || 5000),
-  DEBUG: /^(1|true|yes)$/i.test(String(process.env.DEBUG || process.argv.includes('--debug')))
-};
+const LOG_PREFIX = '[microstructure]';
+const INDEX_MODULE = path.resolve(__dirname, './index.js'); // micro-structure orchestrator
+const OHLCV_DIR = process.env.OHLCV_DIR || path.resolve(__dirname, '../logs/json/ohlcv');
+const ORDER_LOG_PATH = process.env.MICRO_ORDER_LOG || path.resolve(__dirname, '../logs/micro_ccxt_orders.log');
+const ORDER_AUDIT_JSONL = process.env.MICRO_ORDER_AUDIT || path.resolve(__dirname, '../logs/micro_ccxt_order_audit.jsonl');
+const POSITION_STATE_PATH = path.resolve(__dirname, '../logs/micro_position_state.json');
 
-// Create logs directory
-fs.mkdirSync(path.dirname(CONFIG.ORDER_AUDIT_JSONL), { recursive: true });
+const MICRO_PAIR = (process.env.MICRO_PAIR || process.env.PAIR || 'BTC/EUR').toUpperCase();
+const MICRO_TIMEFRAMES = (process.env.MICRO_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
+const MICRO_PRIMARY_TF = process.env.MICRO_PRIMARY_TF || MICRO_TIMEFRAMES[0];
+const MICRO_ORDER_AMOUNT = Number(process.env.MICRO_ORDER_AMOUNT || process.env.ORDER_AMOUNT || 0.0001);
+const MICRO_INTERVAL_MS = Number(process.env.MICRO_INTERVAL_MS || 300000);
 
-// ---------- Logger (winston) ----------
-let logger;
-try {
-  const winston = require('winston');
-  const { combine, timestamp, printf } = winston.format;
-  const fmt = printf(({ level, message, timestamp }) => `${timestamp} [micro-ccxt] ${level}: ${message}`);
-  const transports = [
-    new winston.transports.File({
-      filename: CONFIG.LOG_PATH,
-      maxsize: CONFIG.LOG_MAXSIZE,
-      maxFiles: CONFIG.LOG_MAXFILES,
-      tailable: true,
-      format: combine(timestamp(), fmt),
-    }),
-    new winston.transports.Console({
-      level: CONFIG.DEBUG ? 'debug' : 'info',
-      format: combine(timestamp(), fmt),
-    })
-  ];
-  logger = winston.createLogger({ level: CONFIG.DEBUG ? 'debug' : 'info', transports });
-} catch (e) {
-  // fallback to console if winston not available
-  logger = {
-    debug: (...a) => CONFIG.DEBUG && console.debug(...a),
-    info:  (...a) => console.info(...a),
-    warn:  (...a) => console.warn(...a),
-    error: (...a) => console.error(...a)
-  };
-}
+const DEBUG = !!flags.DEBUG;
+const DRY_RUN = !!flags.DRY_RUN;
+const FORCE_DRY = !!flags.FORCE_DRY;
+const ENABLE_LIVE = !!flags.ENABLE_LIVE;
+const IS_LIVE = !!flags.IS_LIVE;
 
-// ---------- Audit buffering ----------
-let auditBuffer = [];
-let csvBuffer = [];
-function appendAuditJsonBuffered(r) { auditBuffer.push(r); }
-function appendCsvRowBuffered(row) { csvBuffer.push(row); }
-function flushAuditBuffers() {
-  if (auditBuffer.length) {
-    try {
-      fs.appendFileSync(CONFIG.ORDER_AUDIT_JSONL, auditBuffer.map(x => JSON.stringify(x)).join('\n') + '\n');
-      auditBuffer = [];
-    } catch (e) { logger.error('flushAuditBuffers jsonl failed: ' + (e && e.message)); }
-  }
-  if (csvBuffer.length) {
-    try {
-      if (!fs.existsSync(CONFIG.ORDER_AUDIT_CSV)) {
-        fs.mkdirSync(path.dirname(CONFIG.ORDER_AUDIT_CSV), { recursive: true });
-        fs.appendFileSync(CONFIG.ORDER_AUDIT_CSV, 'iso,action,mode,tf,strategy,entryPrice,exitPrice,amount,estimatedPnlQuote,pctReturn,orderId,reason\n');
-      }
-      fs.appendFileSync(CONFIG.ORDER_AUDIT_CSV, csvBuffer.join('\n') + '\n');
-      csvBuffer = [];
-    } catch (e) { logger.error('flushAuditBuffers csv failed: ' + (e && e.message)); }
-  }
-}
-setInterval(flushAuditBuffers, 3000);
-process.on('exit', () => { flushAuditBuffers(); });
+const ONCE = process.argv.includes('--once');
 
-// ---------- Exchange / CCXT ----------
-let exchange = null;
-async function getExchange() {
-  if (exchange) return exchange;
-  const exClass = ccxt[CONFIG.EXCHANGE_NAME];
-  if (!exClass) {
-    throw new Error(`Exchange ${CONFIG.EXCHANGE_NAME} not found in ccxt`);
-  }
-  exchange = new exClass({
-    apiKey: CONFIG.API_KEY,
-    secret: CONFIG.API_SECRET,
-    enableRateLimit: true,
-    timeout: 30000
-  });
+const SIM_PRICE = Number(process.env.SIM_PRICE || 30000);
+const SIM_BASE_BALANCE = Number(process.env.SIM_BASE_BALANCE || 0.01);
+const SIM_QUOTE_BALANCE = Number(process.env.SIM_QUOTE_BALANCE || 1000);
+
+// internal state
+let running = false;
+let diagnostics = { cycles: 0, lastError: null, lastTrade: null, history: [], _lastLoggedAction: null, _lastHoldLoggedAt: 0 };
+let position = { open: false, side: null, entryPrice: null, amount: 0, openedAt: 0 };
+let lastTradeAt = 0;
+let timerId = null;
+let lastOrderFingerprint = null; // used to avoid immediate duplicate submissions
+
+// ---- helpers ----
+function logDebug(...args) { if (DEBUG) console.log(LOG_PREFIX, '[DEBUG]', ...args); }
+function logInfo(...args) { console.log(LOG_PREFIX, '[INFO]', ...args); }
+function logWarn(...args) { console.warn(LOG_PREFIX, '[WARN]', ...args); }
+function logError(...args) { console.error(LOG_PREFIX, '[ERROR]', ...args); }
+
+function safeJsonRead(fp, fallback = null) {
   try {
-    await exchange.loadMarkets();
-    logger.debug(`Loaded markets: ${Object.keys(exchange.markets || {}).length}`);
+    if (!fp || !fs.existsSync(fp)) return fallback;
+    const txt = fs.readFileSync(fp, 'utf8');
+    if (!txt || !txt.trim()) return fallback;
+    return JSON.parse(txt);
   } catch (e) {
-    logger.warn('loadMarkets failed (non-fatal): ' + (e && e.message));
+    if (DEBUG) logWarn('safeJsonRead parse error', fp, e && e.message ? e.message : e);
+    return fallback;
   }
-  return exchange;
+}
+function safeJsonWrite(fp, obj) {
+  try {
+    fs.mkdirSync(path.dirname(fp), { recursive: true });
+    fs.writeFileSync(fp, JSON.stringify(obj, null, 2));
+  } catch (e) {
+    logError('safeJsonWrite error', fp, e && e.message ? e.message : e);
+  }
 }
 
-// ---------- Sizing logic ----------
-function computeOrderSizeForMarket(market, configuredSize) {
-  let precision = 8;
-  let minAmount = 0;
-  let marketMax = 0;
-  if (market) {
-    const pRaw = (typeof market.precision === 'object' && market.precision !== null) ? market.precision.amount : market.precision;
-    if (typeof pRaw === 'number' && isFinite(pRaw)) precision = Math.max(0, Math.min(8, pRaw));
-    minAmount = Number(market.limits?.amount?.min ?? 0) || 0;
-    marketMax = Number(market.limits?.amount?.max ?? 0) || 0;
+// append legacy tab log line
+function appendOrderLog(parts) {
+  try {
+    fs.mkdirSync(path.dirname(ORDER_LOG_PATH), { recursive: true });
+    fs.appendFileSync(ORDER_LOG_PATH, parts.join('\t') + '\n');
+  } catch (e) {
+    logWarn('appendOrderLog failed', e && e.message ? e.message : e);
   }
-
-  let orderSize = Number(configuredSize || 0);
-  if (!isFinite(orderSize) || orderSize <= 0) {
-    if (minAmount > 0) orderSize = minAmount;
-    else {
-      const fallback = 1 / Math.pow(10, Math.max(2, precision));
-      orderSize = Number(fallback.toFixed(Math.max(0, Math.min(8, precision))));
-    }
+}
+// append structured audit JSONL
+function appendAuditJson(obj) {
+  try {
+    fs.mkdirSync(path.dirname(ORDER_AUDIT_JSONL), { recursive: true });
+    fs.appendFileSync(ORDER_AUDIT_JSONL, JSON.stringify(obj) + '\n');
+  } catch (e) {
+    logWarn('appendAuditJson failed', e && e.message ? e.message : e);
   }
-
-  const cfgMin = Number(process.env.MIN_ALLOWED_ORDER_AMOUNT || process.env.MIN_ORDER_AMOUNT || 0) || 0;
-  const envMax = Number(process.env.MAX_ORDER_AMOUNT || 0) || 0;
-  const cfgMax = envMax > 0 ? envMax : (marketMax > 0 ? marketMax : 0);
-
-  if (cfgMin > 0 && orderSize < cfgMin) orderSize = cfgMin;
-  if (cfgMax > 0 && orderSize > cfgMax) orderSize = cfgMax;
-
-  const factor = Math.pow(10, precision);
-  let intSize = Math.ceil(orderSize * factor);
-  if (intSize <= 0) intSize = 1;
-  const maxInt = cfgMax > 0 ? Math.floor(cfgMax * factor) : Infinity;
-
-  if (cfgMax > 0 && intSize > maxInt) intSize = maxInt;
-
-  if (minAmount > 0) {
-    const minInt = Math.ceil(minAmount * factor);
-    if (intSize < minInt) {
-      if (cfgMax > 0 && minInt > maxInt) {
-        if (CONFIG.PERMISSIVE_SIZING) {
-          logger.debug('PERMISSIVE_SIZING: accepting market min despite cfgMax', { precision, minAmount, cfgMax });
-          intSize = minInt;
-        } else {
-          return { orderSize: 0, precision, minAmount, error: new Error(`cannot satisfy market min ${minAmount} within configured max ${cfgMax}`) };
-        }
-      } else {
-        intSize = minInt;
-      }
-    }
-  }
-
-  if (intSize <= 0) return { orderSize: 0, precision, minAmount, error: new Error('computed orderSize <= 0 after rounding') };
-  const roundedSize = intSize / factor;
-
-  if (cfgMin > 0 && roundedSize < cfgMin) return { orderSize: roundedSize, precision, minAmount, error: new Error(`orderSize ${roundedSize} below configured min ${cfgMin}`) };
-  if (cfgMax > 0 && roundedSize > cfgMax) return { orderSize: roundedSize, precision, minAmount, error: new Error(`orderSize ${roundedSize} above configured max ${cfgMax}`) };
-  if (minAmount > 0 && roundedSize < minAmount) return { orderSize: roundedSize, precision, minAmount, error: new Error(`orderSize ${roundedSize} below exchange min ${minAmount}`) };
-  return { orderSize: roundedSize, precision, minAmount, error: null };
 }
 
-// ---------- Estimate PnL ----------
-function estimatePnl(entryPrice, exitPrice, amount) {
-  const entry = Number(entryPrice || 0);
-  const exit = Number(exitPrice || 0);
-  const amt = Number(amount || 0);
-  if (!isFinite(entry) || !isFinite(exit) || !isFinite(amt)) return { pnl: 0, pct: 0 };
-  const pnl = (exit - entry) * amt;
-  const pct = entry ? ((exit - entry) / entry) * 100 : 0;
-  return { pnl, pct };
-}
+function logOrder({ ts, action, result = null, reason = '', fullSignal = null, dry = true, error = null }) {
+  const parts = [
+    new Date().toISOString(),
+    ts || '',
+    action || '',
+    dry ? 'DRY' : 'LIVE',
+    error ? `ERROR: ${String(error)}` : (result ? JSON.stringify(result) : ''),
+    reason || '',
+    fullSignal ? JSON.stringify({ tf: fullSignal.tf, ensemble_label: fullSignal.ensemble_label, price: fullSignal.price }) : ''
+  ];
+  appendOrderLog(parts);
 
-// ---------- Submit Order (DRY or LIVE) ----------
-/**
- * submitOrder(action, opts)
- * action: 'open' | 'close'
- * opts: { tf, strategy, price, force (bool) }
- */
-async function submitOrder(action, opts = {}) {
-  const tf = opts.tf || 'micro';
-  const strategy = opts.strategy || 'micro';
-  const force = Boolean(opts.force) || CONFIG.FORCE_SUBMIT || false;
-
-  // respect global FORCE_DRY
-  const forceDry = CONFIG.FORCE_DRY;
-  if (forceDry) {
-    logger.info('GLOBAL FORCE_DRY is set -> forcing DRY operation');
-  }
-
-  const canLive = Boolean(CONFIG.ENABLE_LIVE && CONFIG.API_KEY && CONFIG.API_SECRET && !CONFIG.DRY_RUN && !forceDry);
-  logger.debug('canLive eval', { ENABLE_LIVE: CONFIG.ENABLE_LIVE, hasKey: !!CONFIG.API_KEY, hasSecret: !!CONFIG.API_SECRET, DRY_RUN: CONFIG.DRY_RUN, FORCE_DRY: CONFIG.FORCE_DRY, canLive });
-
-  // prepare exchange/ticker/balance
-  let ex = null;
-  try { ex = await getExchange(); } catch (e) { logger.warn('getExchange failed', e && e.message); }
-  let market = ex && ex.markets ? ex.markets[CONFIG.PAIR] : null;
-  let ticker = null;
-  try { if (ex) ticker = await ex.fetchTicker(CONFIG.PAIR); } catch (e) { logger.debug('fetchTicker failed (non-fatal) ' + (e && e.message)); }
-
-  // compute order size
-  const sizing = computeOrderSizeForMarket(market, CONFIG.FIXED_ORDER_SIZE);
-  if (!sizing || sizing.error) {
-    logger.warn('Sizing failed', sizing && sizing.error ? sizing.error.message : 'no sizing');
-    return { error: sizing && sizing.error ? sizing.error : new Error('sizing_failed') };
-  }
-  const prec = Number(sizing.precision || 8);
-  const factor = Math.pow(10, prec);
-  let orderSize = sizing.orderSize || CONFIG.FIXED_ORDER_SIZE || 0;
-  if (!isFinite(orderSize) || orderSize <= 0) orderSize = CONFIG.FIXED_ORDER_SIZE || 0;
-  orderSize = Math.floor(orderSize * factor) / factor;
-  if (!isFinite(orderSize) || orderSize <= 0) {
-    const minInt = sizing.minAmount && sizing.minAmount > 0 ? Math.ceil(Number(sizing.minAmount) * factor) : 1;
-    orderSize = minInt / factor;
-  }
-  if (!isFinite(orderSize) || orderSize <= 0) {
-    const err = new Error(`computed orderSize invalid after rounding: ${orderSize}`);
-    logger.error(err.message);
-    return { error: err };
-  }
-
-  const currentPrice = (ticker && ticker.last) || Number(opts.price || 0) || 0;
-
-  const buildAudit = (res, mode, reason, extra = {}) => {
-    const audit = {
-      iso: new Date().toISOString(),
-      tf, strategy, action, mode, reason, pair: CONFIG.PAIR,
-      price: currentPrice || (opts.price || 0),
-      orderSize, result: res || null,
-      ts: Date.now(), extra
-    };
-    appendAuditJsonBuffered(audit);
-    appendCsvRowBuffered([audit.iso, action.toUpperCase(), mode, tf, strategy, (mode==='DRY' && action==='open') ? audit.price : (extra.entryPrice || ''), (action==='close' ? audit.price : ''), orderSize, extra.estimatedPnlQuote || '', extra.pctReturn || '', (res && res.id) || (res && res.orderId) || '', reason].join(','));
-    return audit;
+  const audit = {
+    iso: new Date().toISOString(),
+    timestamp: ts || Date.now(),
+    pair: MICRO_PAIR,
+    action,
+    mode: dry ? 'DRY' : 'LIVE',
+    reason,
+    signal: fullSignal,
+    result,
+    diagnostics: { lastTrade: diagnostics.lastTrade, cycles: diagnostics.cycles }
   };
+  appendAuditJson(audit);
+}
 
-  // DRY or cannot go live
-  if (!canLive) {
-    const fakeOrder = {
-      id: `sim-${Date.now()}`,
-      timestamp: Date.now(),
-      datetime: new Date().toISOString(),
-      symbol: CONFIG.PAIR,
-      type: 'market',
-      side: action === 'open' ? 'buy' : 'sell',
-      price: currentPrice || Number(opts.price || 0),
-      amount: orderSize,
-      info: { simulated: true },
-      mode: 'DRY'
-    };
+// normalize incoming index signals
+function normalizeIndexEntry(entry) {
+  if (!entry || typeof entry !== 'object') return null;
+  const out = Object.assign({}, entry);
+  if (out.summary && out.summary.win_rate !== undefined) out.summary.winRate = out.summary.win_rate;
+  return out;
+}
 
-    if (action === 'open') {
-      // For micro script we may want to track openings without changing global position state here.
-      logger.info(`[DRY OPEN] ${tf} ${strategy} size=${orderSize} price=${fakeOrder.price} id=${fakeOrder.id}`);
-      // ensure orderManager gets amount
-      try { if (module.exports.orderManager) module.exports.orderManager.trackOrder(Object.assign({}, fakeOrder, { amount: orderSize }), { stopLossPct: Number(process.env.MICRO_STOP_LOSS_PCT || 0.003), takeProfitPct: Number(process.env.MICRO_TAKE_PROFIT_PCT || 0.006) }); } catch (e) { logger.debug('orderManager.trackOrder dry failed: ' + (e && e.message)); }
-      buildAudit(fakeOrder, 'DRY', `simulated open ${tf}:${strategy}`);
-      return { dry: true, result: fakeOrder };
-    } else if (action === 'close') {
-      const entryPrice = opts.entryPrice || 0;
-      const est = estimatePnl(entryPrice, fakeOrder.price, orderSize);
-      logger.info(`[DRY CLOSE] ${tf} ${strategy} size=${orderSize} price=${fakeOrder.price} estPnl=${est.pnl}`);
-      try { if (module.exports.orderManager) {
-        module.exports.orderManager.trackOrder(Object.assign({}, fakeOrder, { amount: orderSize }), { stopLossPct: Number(process.env.MICRO_STOP_LOSS_PCT || 0.003), takeProfitPct: Number(process.env.MICRO_TAKE_PROFIT_PCT || 0.006) });
-        module.exports.orderManager.closeOrder(fakeOrder.id, { exitPrice: fakeOrder.price, reason: 'simulated_close' }).catch(() => {});
-      } } catch (e) { logger.debug('orderManager.close dry failed: ' + (e && e.message)); }
-      buildAudit(fakeOrder, 'DRY', `simulated close ${tf}:${strategy}`, { estimatedPnlQuote: est.pnl, pctReturn: est.pct, entryPrice });
-      return { dry: true, result: fakeOrder, estimatedPnl: est };
-    } else {
-      return { error: new Error('unknown-action') };
+// attempt to load index.js data structure
+function loadIndexData() {
+  try {
+    if (!fs.existsSync(INDEX_MODULE)) return null;
+    delete require.cache[require.resolve(INDEX_MODULE)];
+    const idx = require(INDEX_MODULE);
+    const data = (typeof idx === 'function') ? (() => { try { return idx(); } catch(e) { return idx; } })() : idx;
+    return data || null;
+  } catch (e) {
+    if (DEBUG) logWarn('loadIndexData error', e && e.message ? e.message : e);
+    return null;
+  }
+}
+
+// fallback: load latest signals from OHLCV dir prediction files
+function loadLatestSignalsFromOHLCV(timeframes, dir) {
+  const out = [];
+  for (const tf of timeframes) {
+    const candidates = [
+      path.join(dir, `ohlcv_ccxt_data_${tf}_prediction.json`),
+      path.join(dir, `ohlcv_ccxt_data_prediction_${tf}.json`),
+      path.join(dir, `ohlcv_ccxt_data_prediction.json`),
+      path.join(dir, `ohlcv_ccxt_data_${tf}.json`),
+      path.join(dir, `ohlcv_ccxt_data.json`)
+    ];
+    let arr = null;
+    for (const fp of candidates) {
+      const v = safeJsonRead(fp, null);
+      if (Array.isArray(v) && v.length) { arr = v; break; }
+      if (v && typeof v === 'object' && Array.isArray(v.data) && v.data.length) { arr = v.data; break; }
     }
+    if (Array.isArray(arr) && arr.length) {
+      const raw = arr[arr.length - 1];
+      raw.timeframe = tf;
+      out.push(raw);
+    }
+  }
+  return out;
+}
+
+function formatSignalForDecision(tf, entry) {
+  const sig = {};
+  sig.tf = tf;
+  sig.timestamp = entry.timestamp || entry.signal_timestamp || Date.now();
+  sig.signal = entry.signal || entry.ensemble_label || entry.prediction || null;
+  sig.ensemble_label = entry.ensemble_label || entry.signal || entry.prediction || null;
+  sig.ensemble_confidence = (entry.summary && entry.summary.winRate !== undefined) ? entry.summary.winRate * 100 : (entry.ensemble_confidence || entry.summary && entry.summary.win_rate ? entry.summary.win_rate * 100 : (entry.ensemble_confidence || 50));
+  sig.price = Number(entry.price || entry.close || entry.recent_win && entry.recent_win.close || SIM_PRICE);
+  sig.volatility = (entry.recent_win && entry.recent_win.volatility) || (entry.volatility) || 0;
+  sig.raw = entry;
+  return sig;
+}
+
+function simulatedBalance() {
+  const [base, quote] = MICRO_PAIR.split('/').map(s => s.toUpperCase());
+  const free = {};
+  free[base] = Number(process.env.SIM_BASE_BALANCE || SIM_BASE_BALANCE);
+  free[quote] = Number(process.env.SIM_QUOTE_BALANCE || SIM_QUOTE_BALANCE);
+  return { free, total: { ...free } };
+}
+
+// simulate order result
+function simulateOrderResult(action, price, amount) {
+  return {
+    id: `sim-${Date.now()}`,
+    timestamp: Date.now(),
+    datetime: new Date().toISOString(),
+    symbol: MICRO_PAIR,
+    type: 'market',
+    side: action.toLowerCase(),
+    price,
+    amount,
+    info: { simulated: true }
+  };
+}
+
+// persist/load position state
+function loadPositionState() {
+  try {
+    const st = safeJsonRead(POSITION_STATE_PATH, null);
+    if (st && st.position) {
+      position = st.position;
+      lastTradeAt = st.lastTradeAt || 0;
+      diagnostics.history = st.history || [];
+      logDebug('Restored position state', position);
+    }
+  } catch (e) { /* ignore */ }
+}
+function savePositionState() {
+  try {
+    safeJsonWrite(POSITION_STATE_PATH, { position, lastTradeAt, history: diagnostics.history, ts: Date.now() });
+  } catch (e) { logWarn('savePositionState failed', e && e.message ? e.message : e); }
+}
+
+// Exchange loader (only when live)
+let ccxtInstance = null;
+async function getExchange() {
+  if (!IS_LIVE) throw new Error('Exchange access disabled: not running in live mode (IS_LIVE=false)');
+  if (ccxtInstance) return ccxtInstance;
+  try {
+    const ccxt = require('ccxt');
+    const EXCHANGE = process.env.MICRO_EXCHANGE || process.env.MACRO_EXCHANGE || 'kraken';
+    const API_KEY = process.env.MICRO_KEY || process.env.MACRO_KEY || '';
+    const API_SECRET = process.env.MICRO_SECRET || process.env.MACRO_SECRET || '';
+    const ExchangeClass = ccxt[EXCHANGE];
+    if (!ExchangeClass) throw new Error(`Exchange '${EXCHANGE}' not found in ccxt`);
+    ccxtInstance = new ExchangeClass({ apiKey: API_KEY, secret: API_SECRET, enableRateLimit: true });
+    if (typeof ccxtInstance.loadMarkets === 'function') await ccxtInstance.loadMarkets();
+    return ccxtInstance;
+  } catch (e) {
+    ccxtInstance = null;
+    throw e;
+  }
+}
+
+// single submitter that handles DRY/LIVE and audit logging
+async function submitOrder(action, pair, price, amount, fullSignal = null) {
+  // support legacy call-signature submitOrder(action, price, amount, fullSignal)
+  if (arguments.length === 4 && typeof pair === 'number') {
+    // called as (action, price, amount, fullSignal)
+    fullSignal = amount;
+    amount = price;
+    price = pair;
+    pair = MICRO_PAIR;
+  }
+  pair = (pair || MICRO_PAIR).toUpperCase();
+
+  const fingerprint = `${pair}|${String(action).toUpperCase()}|${Math.round(price)}|${Math.round(amount * 1e8)}`;
+  // avoid immediate duplicate submissions
+  if (lastOrderFingerprint === fingerprint && Date.now() - (lastTradeAt || 0) < 5000) {
+    logWarn('Skipping duplicate order fingerprint', fingerprint);
+    return { status: 'duplicate' };
+  }
+
+  // decide live vs simulated using IS_LIVE (strict) to avoid accidental live orders
+  const liveAllowed = !!IS_LIVE && !DRY_RUN && !FORCE_DRY && !!ENABLE_LIVE;
+
+  if (!liveAllowed) {
+    const res = simulateOrderResult(action, price, amount);
+    diagnostics.lastTrade = { action, id: res.id, timestamp: res.timestamp, simulated: true, pair };
+    diagnostics.history = diagnostics.history || [];
+    diagnostics.history.push({ when: Date.now(), action, pair, price, amount, simulated: true });
+    lastTradeAt = Date.now();
+    lastOrderFingerprint = fingerprint;
+    logOrder({ ts: Date.now(), action, result: res, reason: 'SIMULATED by submitOrder', fullSignal, dry: true });
+    savePositionState();
+    return { status: 'simulated', result: res };
   }
 
   // LIVE path
   try {
-    let res;
-    if (action === 'open') {
-      // quick balance check
-      let balance = null;
-      try { balance = await ex.fetchBalance(); } catch (e) { logger.debug('fetchBalance fail ' + (e && e.message)); }
-      const quoteSym = (CONFIG.PAIR.split('/')[1] || '').toUpperCase();
-      const quoteFree = balance?.free?.[quoteSym] || 0;
-      const required = orderSize * (currentPrice || 0);
-      if (!force && quoteFree < required) {
-        const err = new Error('insufficient-quote');
-        logger.error('insufficient quote', { quoteFree, required });
-        return { error: err };
+    const ex = await getExchange();
+    let result = null;
+    const pairToUse = pair || MICRO_PAIR;
+    if (String(action).toLowerCase() === 'buy') {
+      // ccxt unified: createMarketBuyOrder may not be available on all wrappers; use createOrder fallback
+      if (typeof ex.createMarketBuyOrder === 'function') {
+        result = await ex.createMarketBuyOrder(pairToUse, amount);
+      } else {
+        result = await ex.createOrder(pairToUse, 'market', 'buy', amount, undefined);
       }
-
-      res = await ex.createMarketBuyOrder(CONFIG.PAIR, orderSize);
-      // attempt to poll until filled (within timeout)
-      let filled = false;
-      let finalStatus = res;
-      const start = Date.now();
-      while (!filled && (Date.now() - start) < CONFIG.ORDER_FILL_TIMEOUT_MS) {
-        try {
-          const st = await ex.fetchOrder(res.id);
-          finalStatus = st;
-          const filledAmt = Number(st.filled || 0);
-          const amount = Number(st.amount || orderSize);
-          if (filledAmt >= amount || ['closed','filled'].includes(String(st.status || '').toLowerCase())) {
-            filled = true;
-            break;
-          }
-        } catch (e) {
-          logger.debug('fetchOrder poll error (non-fatal): ' + (e && e.message));
-        }
-        await new Promise(r => setTimeout(r, 500));
-      }
-
-      // record audit and track
-      buildAudit(finalStatus, 'LIVE', `live open ${tf}:${strategy}`);
-      try {
-        if (module.exports.orderManager) {
-          module.exports.orderManager.trackOrder(Object.assign({}, {
-            id: finalStatus.id || `live-${Date.now()}`,
-            symbol: CONFIG.PAIR,
-            side: 'buy',
-            amount: orderSize,
-            price: Number(finalStatus.average || finalStatus.price || currentPrice),
-            timestamp: Date.now(),
-            info: finalStatus,
-            mode: 'LIVE'
-          }), { stopLossPct: Number(process.env.MICRO_STOP_LOSS_PCT || 0.003), takeProfitPct: Number(process.env.MICRO_TAKE_PROFIT_PCT || 0.006) });
-        }
-      } catch (e) { logger.debug('orderManager.trackOrder live failed: ' + (e && e.message)); }
-
-      logger.info(`LIVE OPEN executed id=${finalStatus.id || res.id} price=${finalStatus.average || finalStatus.price || currentPrice}`);
-      return { result: finalStatus || res };
-    } else if (action === 'close') {
-      // try to close by market sell
-      let balance = null;
-      try { balance = await ex.fetchBalance(); } catch (e) { logger.debug('fetchBalance fail ' + (e && e.message)); }
-      const baseSym = (CONFIG.PAIR.split('/')[0] || '').toUpperCase();
-      const baseFree = balance?.free?.[baseSym] || 0;
-      if (!force && baseFree < orderSize) {
-        const err = new Error('insufficient-base');
-        logger.error('insufficient base', { baseFree, orderSize });
-        return { error: err };
-      }
-
-      res = await ex.createMarketSellOrder(CONFIG.PAIR, orderSize);
-      const est = estimatePnl(opts.entryPrice || 0, Number(res.price || res.average || currentPrice), orderSize);
-      buildAudit(res, 'LIVE', `live close ${tf}:${strategy}`, { estimatedPnlQuote: est.pnl, pctReturn: est.pct });
-      try {
-        if (module.exports.orderManager) {
-          module.exports.orderManager.trackOrder(Object.assign({}, {
-            id: res.id || `live-${Date.now()}`,
-            symbol: CONFIG.PAIR,
-            side: 'sell',
-            amount: orderSize,
-            price: Number(res.price || res.average || currentPrice),
-            timestamp: Date.now(),
-            info: res,
-            mode: 'LIVE'
-          }), { stopLossPct: Number(process.env.MICRO_STOP_LOSS_PCT || 0.003), takeProfitPct: Number(process.env.MICRO_TAKE_PROFIT_PCT || 0.006) });
-          // instruct orderManager to close if it has such method
-          try { module.exports.orderManager.closeOrder(res.id || null, { exitPrice: res.price || currentPrice, reason: 'live_close' }).catch(() => {}); } catch (e) {}
-        }
-      } catch (e) { logger.debug('orderManager.trackOrder live-close failed: ' + (e && e.message)); }
-
-      logger.info(`LIVE CLOSE executed id=${res.id} price=${res.price || currentPrice} estPnl=${est.pnl}`);
-      return { result: res, estimatedPnl: est };
     } else {
-      return { error: new Error('unknown-action') };
+      if (typeof ex.createMarketSellOrder === 'function') {
+        result = await ex.createMarketSellOrder(pairToUse, amount);
+      } else {
+        result = await ex.createOrder(pairToUse, 'market', 'sell', amount, undefined);
+      }
     }
-  } catch (err) {
-    logger.error('Live order error: ' + (err && err.message));
-    return { error: err };
+    diagnostics.lastTrade = { action, id: result && result.id ? result.id : null, timestamp: Date.now(), simulated: false, pair: pairToUse };
+    diagnostics.history = diagnostics.history || [];
+    diagnostics.history.push({ when: Date.now(), action, pair: pairToUse, price, amount, simulated: false, orderId: result && result.id ? result.id : null });
+    lastTradeAt = Date.now();
+    lastOrderFingerprint = fingerprint;
+    logOrder({ ts: Date.now(), action, result, reason: 'LIVE executed by submitOrder', fullSignal, dry: false });
+    savePositionState();
+    return { status: 'submitted', result };
+  } catch (e) {
+    diagnostics.lastError = { stage: 'submitOrder_live', message: e && e.message ? e.message : String(e) };
+    logOrder({ ts: Date.now(), action, result: null, reason: 'LIVE submit failed', fullSignal, dry: false, error: e && e.message ? e.message : String(e) });
+    throw e;
   }
 }
 
-// ---------- CLI / Exports ----------
-module.exports = { submitOrder, getExchange, CONFIG, logger, appendAuditJsonBuffered, appendCsvRowBuffered };
-
-// If run as script, support a simple CLI to test open/close in dry/live modes
-if (require.main === module) {
-  (async () => {
-    const args = process.argv.slice(2);
-    const once = args.includes('--once') || args.includes('--test');
-    const doOpen = args.includes('--open');
-    const doClose = args.includes('--close');
-    const force = args.includes('--force') || CONFIG.FORCE_SUBMIT;
-    // default test: create a DRY open then a DRY close
-    try {
-      if (doOpen || (!doOpen && !doClose)) {
-        logger.info('Submitting test OPEN');
-        const r = await submitOrder('open', { tf: 'micro', strategy: 'microtest', force });
-        logger.info('OPEN result: ' + JSON.stringify(r, null, 2));
-      }
-      if (doClose || (!doOpen && !doClose)) {
-        logger.info('Submitting test CLOSE');
-        const r2 = await submitOrder('close', { tf: 'micro', strategy: 'microtest', entryPrice: 0, force });
-        logger.info('CLOSE result: ' + JSON.stringify(r2, null, 2));
-      }
-    } catch (e) {
-      logger.error('Test script failed: ' + (e && e.message));
-    } finally {
-      // ensure audit buffers flushed
-      flushAuditBuffers();
-      if (once) process.exit(0);
-    }
-  })();
+// gating rules
+function shouldOpenPosition(signal, stats) {
+  const lbl = String(signal.ensemble_label || '').toLowerCase();
+  if (lbl.includes('strong_bull') || lbl === 'strong_bull' || String(signal.signal).toLowerCase().includes('buy')) return true;
+  if ((signal.raw && signal.raw.score && Number(signal.raw.score) > 60) || (stats && stats.winRate > 0.45)) return true;
+  return false;
 }
+function shouldClosePosition(signal, stats) {
+  const lbl = String(signal.ensemble_label || '').toLowerCase();
+  if (lbl.includes('strong_bear') || lbl === 'strong_bear' || String(signal.signal).toLowerCase().includes('sell')) return true;
+  if (stats && stats.winRate < 0.35) return true;
+  return false;
+}
+
+function canThrottle() {
+  const throttleMs = Number(process.env.ORDER_THROTTLE_MS || 300000);
+  return !lastTradeAt || (Date.now() - lastTradeAt) > throttleMs;
+}
+
+// ---- core decideAndAct (replaced old implementation) ----
+async function decideAndAct() {
+  diagnostics.cycles++;
+  if (running) {
+    logDebug('Previous cycle still running, skipping');
+    return;
+  }
+  running = true;
+
+  try {
+    // 1) load index or fallback to OHLCV predictions
+    const idx = loadIndexData();
+    let chosenSignal = null;
+    let chosenTf = null;
+    let backtestStats = null;
+
+    // pick from index
+    if (idx) {
+      // pickIndexSignal inline: prefer primary TF, then any tf in MICRO_TIMEFRAMES
+      const tryGet = (key) => {
+        if (Object.prototype.hasOwnProperty.call(idx, key)) return idx[key];
+        for (const k of Object.keys(idx)) if (String(k).toLowerCase() === String(key).toLowerCase()) return idx[k];
+        for (const k of Object.keys(idx)) if (String(k).toLowerCase().includes(String(key).toLowerCase())) return idx[k];
+        return null;
+      };
+      let entry = tryGet(MICRO_PRIMARY_TF);
+      if (!entry) {
+        for (const tf of MICRO_TIMEFRAMES) { entry = tryGet(tf); if (entry) { chosenTf = tf; break; } }
+      } else chosenTf = MICRO_PRIMARY_TF;
+      if (entry) {
+        const formatted = formatSignalForDecision(chosenTf || MICRO_PRIMARY_TF, normalizeIndexEntry(entry));
+        if (formatted) {
+          chosenSignal = formatted;
+        }
+      }
+    }
+
+    // fallback to OHLCV preds
+    if (!chosenSignal) {
+      const preds = loadLatestSignalsFromOHLCV(MICRO_TIMEFRAMES, OHLCV_DIR);
+      if (preds && preds.length) {
+        // prefer primary tf
+        let pick = preds.find(p => String(p.timeframe || p.tf) === String(MICRO_PRIMARY_TF)) || preds[0];
+        const formatted = formatSignalForDecision(pick.timeframe || pick.tf || 'unknown', normalizeIndexEntry(pick));
+        if (formatted) {
+          chosenSignal = formatted;
+          chosenTf = pick.timeframe || pick.tf || 'unknown';
+        }
+      }
+    }
+
+    if (!chosenSignal) {
+      logDebug('No signal available from index or OHLCV files');
+      scheduleNext(MICRO_INTERVAL_MS, 'no signal');
+      running = false;
+      return;
+    }
+
+    logDebug('Decision candidate', { tf: chosenTf, label: chosenSignal.ensemble_label, price: chosenSignal.price });
+
+    // optional lightweight stats from summary
+    if (chosenSignal.raw && chosenSignal.raw.summary) {
+      const s = chosenSignal.raw.summary;
+      backtestStats = {
+        totalPNL: Number(s.totalPNL ?? s.pnl ?? 0),
+        winRate: Number(s.winRate ?? s.win_rate ?? 0),
+        avgTradeQuality: Number(s.avgTradeQuality ?? s.avg_trade_quality ?? 0),
+        totalTrades: Number(s.totalTrades ?? s.numTrades ?? 0)
+      };
+    } else backtestStats = null;
+
+    // throttle
+    if (!canThrottle()) {
+      logDebug('Throttled by lastTradeAt', lastTradeAt);
+      scheduleNext(MICRO_INTERVAL_MS, 'throttled');
+      running = false;
+      return;
+    }
+
+    // compact decision
+    const lbl = String(chosenSignal.ensemble_label || '').toLowerCase();
+    let decision = { type: 'hold', reason: 'no-clear-signal' };
+    if (lbl.includes('strong_bull') || (chosenSignal.raw && String(chosenSignal.raw.recent_win?.winner_label || '').toLowerCase().includes('strong_bull'))) {
+      decision = { type: 'open', reason: 'strong_bull' };
+    } else if (lbl.includes('strong_bear') || (chosenSignal.raw && String(chosenSignal.raw.recent_win?.winner_label || '').toLowerCase().includes('strong_bear'))) {
+      decision = { type: 'close', reason: 'strong_bear' };
+    } else {
+      const score = Number(chosenSignal.raw?.score ?? 0);
+      const winRate = Number(backtestStats?.winRate ?? 0);
+      if (score >= Number(process.env.MIN_SCORE_FOR_OPEN || 60) || winRate >= Number(process.env.MIN_WINRATE_FOR_OPEN || 0.45)) {
+        if (!lbl.includes('bear')) decision = { type: 'open', reason: 'score_or_winrate_pass' };
+      } else if (lbl.includes('bear') || score < (Number(process.env.MIN_SCORE_FOR_OPEN || 60) * 0.4)) {
+        decision = { type: 'close', reason: 'bear_or_low_score' };
+      }
+    }
+
+    // execute
+    const now = Date.now();
+    if (decision.type === 'open' && !position.open) {
+      // simulated balance check
+      const freeQuote = Number(process.env.SIM_QUOTE_BALANCE || SIM_QUOTE_BALANCE);
+      const required = MICRO_ORDER_AMOUNT * chosenSignal.price;
+      if (freeQuote < required) {
+        logInfo('Insufficient simulated quote to open position', { required, freeQuote });
+        logOrder({ ts: chosenSignal.timestamp, action: 'SKIP', reason: 'insufficient simulated quote', fullSignal: chosenSignal, dry: !IS_LIVE });
+        scheduleNext(MICRO_INTERVAL_MS, 'skip-insufficient');
+        running = false;
+        return;
+      }
+
+      const submitRes = await submitOrder('BUY', MICRO_PAIR, chosenSignal.price, MICRO_ORDER_AMOUNT, chosenSignal);
+      if (submitRes && (submitRes.status === 'simulated' || submitRes.status === 'submitted')) {
+        position = { open: true, side: 'long', entryPrice: chosenSignal.price, amount: MICRO_ORDER_AMOUNT, openedAt: now };
+        diagnostics.lastTrade = { action: 'BUY', id: submitRes.result && submitRes.result.id ? submitRes.result.id : null, ts: Date.now(), simulated: !IS_LIVE };
+        logInfo('Position opened', { position });
+      }
+      scheduleNext(MICRO_INTERVAL_MS, 'post-open');
+      running = false;
+      return;
+    }
+
+    if (decision.type === 'close' && position.open) {
+      const available = position.amount || MICRO_ORDER_AMOUNT;
+      if (available <= 0) {
+        logInfo('Insufficient simulated base to close', { available, needed: position.amount || MICRO_ORDER_AMOUNT });
+        logOrder({ ts: chosenSignal.timestamp, action: 'SKIP', reason: 'insufficient simulated base', fullSignal: chosenSignal, dry: !IS_LIVE });
+        scheduleNext(MICRO_INTERVAL_MS, 'skip-insufficient-base');
+        running = false;
+        return;
+      }
+
+      const submitRes = await submitOrder('SELL', MICRO_PAIR, chosenSignal.price, available, chosenSignal);
+      if (submitRes && (submitRes.status === 'simulated' || submitRes.status === 'submitted')) {
+        position = { open: false, side: null, entryPrice: null, amount: 0, openedAt: 0 };
+        diagnostics.lastTrade = { action: 'SELL', id: submitRes.result && submitRes.result.id ? submitRes.result.id : null, ts: Date.now(), simulated: !IS_LIVE };
+        logInfo('Position closed', { position });
+      }
+      scheduleNext(MICRO_INTERVAL_MS, 'post-close');
+      running = false;
+      return;
+    }
+
+    // hold path with cooldown
+    const HOLD_LOG_COOLDOWN_MS = Number(process.env.HOLD_LOG_COOLDOWN_MS || 5 * 60 * 1000);
+    const nowTs = Date.now();
+    diagnostics._lastLoggedAction = diagnostics._lastLoggedAction || null;
+    diagnostics._lastHoldLoggedAt = diagnostics._lastHoldLoggedAt || 0;
+    const shouldLogHold = diagnostics._lastLoggedAction !== 'HOLD' || (nowTs - diagnostics._lastHoldLoggedAt) > HOLD_LOG_COOLDOWN_MS;
+    if (shouldLogHold) {
+      logDebug('HOLD — no conditions met for trade', { reason: decision.reason });
+      logOrder({ ts: chosenSignal.timestamp, action: 'HOLD', reason: decision.reason || 'no-op', fullSignal: chosenSignal, dry: !IS_LIVE });
+      diagnostics._lastLoggedAction = 'HOLD';
+      diagnostics._lastHoldLoggedAt = nowTs;
+    } else {
+      logDebug('HOLD suppressed (duplicate) until cooldown expires');
+    }
+    scheduleNext(MICRO_INTERVAL_MS, 'hold');
+    running = false;
+    return;
+
+  } catch (err) {
+    diagnostics.lastError = { stage: 'decideAndAct', message: err && err.message ? err.message : String(err) };
+    logError('Main loop error', err && err.stack ? err.stack : err);
+    scheduleNext(MICRO_INTERVAL_MS, 'error');
+    running = false;
+  }
+}
+
+// scheduling with single timer guard
+function scheduleNext(ms, reason) {
+  try {
+    if (timerId) clearTimeout(timerId);
+    logDebug('Scheduling next run in', ms, 'ms. Reason:', reason);
+    timerId = setTimeout(() => {
+      timerId = null;
+      decideAndAct();
+    }, Number(ms) || MICRO_INTERVAL_MS);
+  } catch (e) {
+    logWarn('scheduleNext failed', e && e.message ? e.message : e);
+    // best-effort fallback
+    setTimeout(() => decideAndAct(), MICRO_INTERVAL_MS);
+  }
+}
+
+// startup
+loadPositionState();
+logInfo('micro_ccxt_orders (index-driven) starting', {
+  MICRO_PAIR, MICRO_PRIMARY_TF, DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE, DEBUG
+});
+
+// show parsed flags explicitly once
+logDebug('Parsed flags', { DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE });
+
+decideAndAct();
+if (!ONCE) {
+  // use interval as watchdog to ensure periodic running even if scheduleNext fails
+  setInterval(() => { if (!running) decideAndAct(); }, MICRO_INTERVAL_MS).unref();
+}
+
+// graceful shutdown
+process.on('SIGINT', () => { savePositionState(); logInfo('exiting (SIGINT)'); process.exit(0); });
+process.on('SIGTERM', () => { savePositionState(); logInfo('exiting (SIGTERM)'); process.exit(0); });
+process.on('uncaughtException', (err) => { diagnostics.lastError = { stage: 'uncaughtException', message: err && err.message ? err.message : String(err) }; logError('uncaughtException', err); savePositionState(); process.exit(1); });
+process.on('unhandledRejection', (r) => { diagnostics.lastError = { stage: 'unhandledRejection', message: r && r.message ? r.message : r }; logError('unhandledRejection', r); savePositionState(); process.exit(1); });
+
+// export for testing
+module.exports = {
+  decideAndAct,
+  submitOrder,
+  loadPositionState,
+  savePositionState,
+  formatSignalForDecision
+};
