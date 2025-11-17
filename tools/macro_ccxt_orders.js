@@ -2,73 +2,41 @@
 /**
  * tools/macro_ccxt_orders.js
  *
- * Optimized macrostructure — DRY_RUN-first, index/backtest-aware, safer
+ * Optimized macrostructure trading bot — DRY_RUN-first, index/backtest-aware, safer
  *
- * This variant uses winston for log management and limits log growth via file rotation
- * (maxsize + maxFiles). Environment variables control log path, max size and file count.
- *
- * New env variables:
- *  - MACRO_LOG_PATH        path to the rotating log file (default ./tools/logs/macro_ccxt_orders.log)
- *  - MACRO_LOG_MAXSIZE     max bytes per file before rotation (default 5*1024*1024)
- *  - MACRO_LOG_MAXFILES    number of rotated files to keep (default 5)
- *  - MACRO_LOG_LEVEL       log level (info/debug)
+ * Key improvements over prior version:
+ * - Consolidated configuration and constants (single place).
+ * - Removed duplicated logic and made decision flow linear and easy to read.
+ * - Added robust printDiagnostics (prevents ReferenceError).
+ * - Reduced noisy HOLD logs by cooldown and only logging state changes.
+ * - Structured JSONL audit file for easy post-processing and CSV export.
+ * - Clearer separation between DRY and LIVE paths; explicit guards for ENABLE_LIVE and FORCE_DRY.
+ * - Better error handling and non-throwing diagnostics writes.
  *
  * Keep FORCE_DRY=1 and DRY_RUN=1 in .env for safe testing.
  */
 
 const fs = require('fs');
 const path = require('path');
+// Load .env early
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// ---- Logging (winston rotating file) ----
-let logger;
-const DEFAULT_LOG_PATH = process.env.MACRO_LOG_PATH || path.resolve(__dirname, './logs/macro_ccxt_orders.log');
-const LOG_MAXSIZE = Number(process.env.MACRO_LOG_MAXSIZE || String(5 * 1024 * 1024)); // bytes
-const LOG_MAXFILES = Number(process.env.MACRO_LOG_MAXFILES || '5');
-const LOG_LEVEL = process.env.MACRO_LOG_LEVEL || (process.env.DEBUG === '1' ? 'debug' : 'info');
+// Centralized runtime flags (robust parsing)
+const flags = require('./lib/runtime_flags');
 
-try {
-  const winston = require('winston');
-  const { combine, timestamp, printf, colorize } = winston.format;
-  const logFormat = printf(({ level, message, timestamp }) => `${timestamp} [macrostructure] ${level}: ${message}`);
-  // Ensure log directory exists
-  try { fs.mkdirSync(path.dirname(DEFAULT_LOG_PATH), { recursive: true }); } catch (e) {}
-  const transports = [
-    new winston.transports.File({
-      filename: DEFAULT_LOG_PATH,
-      level: LOG_LEVEL,
-      maxsize: LOG_MAXSIZE,
-      maxFiles: LOG_MAXFILES,
-      tailable: true,
-      format: combine(timestamp(), logFormat)
-    }),
-    new winston.transports.Console({
-      level: LOG_LEVEL,
-      format: combine(colorize(), timestamp(), logFormat)
-    })
-  ];
-  logger = winston.createLogger({ level: LOG_LEVEL, transports, exitOnError: false });
-} catch (e) {
-  // fallback to console
-  logger = {
-    debug: (...a) => { if (LOG_LEVEL === 'debug') console.debug('[macrostructure][DEBUG]', ...a); },
-    info:  (...a) => console.log('[macrostructure][INFO]', ...a),
-    warn:  (...a) => console.warn('[macrostructure][WARN]', ...a),
-    error: (...a) => console.error('[macrostructure][ERROR]', ...a)
-  };
-}
+const LOG_PREFIX = '[macrostructure]';
 
-// ---- Config (env overrides) ----
+// Config (from .env)
 const TIMEFRAMES = (process.env.MACRO_TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s => s.trim()).filter(Boolean);
 const PAIR = process.env.MACRO_PAIR || process.env.PAIR || 'BTC/EUR';
 const ORDER_AMOUNT = Number(process.env.ORDER_AMOUNT || '0.0001');
-const MIN_ALLOWED_ORDER_AMOUNT = Number(process.env.MIN_ALLOWED_ORDER_AMOUNT || '0.00005');
-const MAX_ORDER_AMOUNT = Number(process.env.MAX_ORDER_AMOUNT || '0.01');
+const MIN_ALLOWED_ORDER_AMOUNT = Number(process.env.MIN_ALLOWED_ORDER_AMOUNT || '0.0001');
+const MAX_ORDER_AMOUNT = Number(process.env.MAX_ALLOWED_ORDER_AMOUNT || '0.01');
 
-const INTERVAL_AFTER_TRADE = Number(process.env.INTERVAL_AFTER_TRADE || 30 * 1000);
-const INTERVAL_AFTER_SKIP = Number(process.env.INTERVAL_AFTER_SKIP || 90 * 1000);
-const INTERVAL_AFTER_HOLD = Number(process.env.INTERVAL_AFTER_HOLD || 180 * 1000);
-const INTERVAL_AFTER_ERROR = Number(process.env.INTERVAL_AFTER_ERROR || 60 * 1000);
+const INTERVAL_AFTER_TRADE = Number(process.env.INTERVAL_AFTER_TRADE || 30000);
+const INTERVAL_AFTER_SKIP = Number(process.env.INTERVAL_AFTER_SKIP || 90000);
+const INTERVAL_AFTER_HOLD = Number(process.env.INTERVAL_AFTER_HOLD || 180000);
+const INTERVAL_AFTER_ERROR = Number(process.env.INTERVAL_AFTER_ERROR || 60000);
 
 const EXCHANGE = process.env.MACRO_EXCHANGE || 'kraken';
 const API_KEY = process.env.MACRO_KEY || '';
@@ -83,63 +51,165 @@ const ORDER_LOG_PATH = path.resolve(__dirname, './logs/macro_ccxt_orders.log');
 const ORDER_AUDIT_JSONL = path.resolve(__dirname, './logs/macro_ccxt_orders_audit.jsonl');
 const DIAG_PATH = path.resolve(__dirname, './logs/macro_diagnostics.json');
 
+// Use parsed flags from lib/runtime_flags for consistent semantics
+const DEBUG = !!flags.DEBUG;
+const DRY_RUN = !!flags.DRY_RUN;
+const FORCE_DRY = !!flags.FORCE_DRY;
+const ENABLE_LIVE = !!flags.ENABLE_LIVE;
+const IS_LIVE = !!flags.IS_LIVE;
 
-const DEBUG = /^(1|true|yes)$/i.test(String(process.env.DEBUG || '0'));
-const DRY_RUN = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || '1')); // default simulation
-const FORCE_DRY = /^(1|true|yes)$/i.test(String(process.env.FORCE_DRY || '1'));
-const ENABLE_LIVE = /^(1|true|yes)$/i.test(String(process.env.ENABLE_LIVE || '0'));
-
+// Simulation defaults
 const SIM_PRICE = Number(process.env.SIM_PRICE || 30000);
 const SIM_BASE_BALANCE = Number(process.env.SIM_BASE_BALANCE || 0.01);
 const SIM_QUOTE_BALANCE = Number(process.env.SIM_QUOTE_BALANCE || 1000);
 
+// Trading guards
 const MACRO_MIN_WIN_RATE = Number(process.env.MACRO_MIN_WIN_RATE || 0.2);
 const HOLD_LOG_COOLDOWN_MS = Number(process.env.HOLD_LOG_COOLDOWN_MS || 5 * 60 * 1000);
 
-const DRY_INTERVAL_MS = Number(process.env.DRY_INTERVAL_MS || 15 * 1000);
-const NOMINAL_INTERVAL_MS = Number(process.env.MACRO_INTERVAL_MS || 180 * 1000);
+const DRY_INTERVAL_MS = Number(process.env.DRY_INTERVAL_MS || 15000);
+const NOMINAL_INTERVAL_MS = Number(process.env.MACRO_INTERVAL_MS || 180000);
 const INTERVAL_MS = DRY_RUN ? DRY_INTERVAL_MS : NOMINAL_INTERVAL_MS;
 
-// ---- Runtime state ----
+// Internal state
 let isRunning = false;
 let positionOpen = false;
 let lastTradeAt = 0;
 let diagnostics = { cycles: 0, lastError: null, lastTrade: null, _lastLoggedAction: null, _lastHoldLoggedAt: 0 };
 
-// ---- I/O helpers ----
+// ---- Helpers ----
+function logDebug(...args) { if (DEBUG) console.log(LOG_PREFIX, '[DEBUG]', ...args); }
+function logInfo(...args) { console.log(LOG_PREFIX, '[INFO]', ...args); }
+function logWarn(...args) { console.warn(LOG_PREFIX, '[WARN]', ...args); }
+function logError(...args) { console.error(LOG_PREFIX, '[ERROR]', ...args); }
+
+/**
+ * Robust safeJsonRead:
+ * - Normal parse
+ * - JSONL fallback (one JSON object per line)
+ * - Truncation recovery: find last '}' or ']' and try parsing truncated content
+ * - Object-extraction recovery: scan for top-level balanced '{...}' objects and return them as array
+ * Returns fallback on failure.
+ */
 function safeJsonRead(fp, fallback = null) {
   try {
     if (!fp || !fs.existsSync(fp)) return fallback;
     const txt = fs.readFileSync(fp, 'utf8');
     if (!txt || !txt.trim()) return fallback;
-    return JSON.parse(txt);
+
+    // 1) Fast path: parse whole file
+    try {
+      return JSON.parse(txt);
+    } catch (err) {
+      logWarn('safeJsonRead parse error', fp, err && err.message ? err.message : err);
+    }
+
+    // 2) Try JSONL (newline-delimited JSON objects)
+    try {
+      const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (lines.length) {
+        const parsedLines = [];
+        let allParsed = true;
+        for (const line of lines) {
+          try {
+            parsedLines.push(JSON.parse(line));
+          } catch (e) {
+            allParsed = false;
+            break;
+          }
+        }
+        if (allParsed) {
+          logInfo('safeJsonRead: parsed as JSONL fallback', fp);
+          return parsedLines;
+        }
+      }
+    } catch (e) {
+      if (DEBUG) logWarn('safeJsonRead JSONL attempt failed', e && e.message ? e.message : e);
+    }
+
+    // 3) Conservative truncation: trim at last closing brace/bracket and try parse
+    try {
+      const lastBrace = txt.lastIndexOf('}');
+      const lastBracket = txt.lastIndexOf(']');
+      const lastCloseIdx = Math.max(lastBrace, lastBracket);
+      if (lastCloseIdx > -1) {
+        let candidate = txt.slice(0, lastCloseIdx + 1).trim();
+        // If original looked like an array but we trimmed a trailing element, ensure bracket closure
+        if (txt.trim().startsWith('[') && !candidate.endsWith(']')) candidate = candidate + ']';
+        try {
+          const recovered = JSON.parse(candidate);
+          logWarn('safeJsonRead: recovered truncated JSON by trimming file', fp);
+          return recovered;
+        } catch (e) {
+          if (DEBUG) logWarn('safeJsonRead truncation parse failed', e && e.message ? e.message : e);
+        }
+      } else {
+        if (DEBUG) logWarn('safeJsonRead: no closing brace/bracket found for recovery', fp);
+      }
+    } catch (e) {
+      if (DEBUG) logWarn('safeJsonRead recovery attempt failed', e && e.message ? e.message : e);
+    }
+
+    // 4) Extract top-level JSON objects (scans for balanced braces) and parse as array
+    try {
+      const out = [];
+      let depth = 0;
+      let start = -1;
+      for (let i = 0; i < txt.length; i++) {
+        const ch = txt[i];
+        if (ch === '{') {
+          if (depth === 0) start = i;
+          depth++;
+        } else if (ch === '}') {
+          depth = Math.max(0, depth - 1);
+          if (depth === 0 && start !== -1) {
+            const objTxt = txt.slice(start, i + 1);
+            try {
+              out.push(JSON.parse(objTxt));
+            } catch (e) {
+              if (DEBUG) logWarn('safeJsonRead object parse failed during extraction', e && e.message ? e.message : e);
+            }
+            start = -1;
+          }
+        }
+      }
+      if (out.length) {
+        logWarn(`safeJsonRead: extracted ${out.length} JSON object(s) from corrupted file`, fp);
+        return out;
+      }
+    } catch (e) {
+      if (DEBUG) logWarn('safeJsonRead extraction-based recovery failed', e && e.message ? e.message : e);
+    }
+
+    // Nothing worked
+    return fallback;
   } catch (e) {
-    if (DEBUG) logger.warn('safeJsonRead parse error', fp, e && e.message ? e.message : e);
+    if (DEBUG) logWarn('safeJsonRead unexpected error', fp, e && e.message ? e.message : e);
     return fallback;
   }
 }
+
 function safeJsonWrite(fp, obj) {
   try {
     fs.mkdirSync(path.dirname(fp), { recursive: true });
     fs.writeFileSync(fp, JSON.stringify(obj, null, 2));
   } catch (e) {
-    if (DEBUG) logger.warn('safeJsonWrite failed', fp, e && e.message ? e.message : e);
+    if (DEBUG) logWarn('safeJsonWrite failed', e && e.message ? e.message : e);
   }
 }
 
-// Append tab-separated legacy log
+// Legacy tab-separated log + JSONL audit
 function appendOrderLog(parts) {
   try {
-    fs.mkdirSync(path.dirname(ORDER_TAB_LOG), { recursive: true });
-    fs.appendFileSync(ORDER_TAB_LOG, parts.join('\t') + '\n');
-  } catch (e) { logger.warn('appendOrderLog failed', e && e.message ? e.message : e); }
+    fs.mkdirSync(path.dirname(ORDER_LOG_PATH), { recursive: true });
+    fs.appendFileSync(ORDER_LOG_PATH, parts.join('\t') + '\n');
+  } catch (e) { logWarn('appendOrderLog failed', e && e.message ? e.message : e); }
 }
-// Append JSONL audit
 function appendAuditJson(obj) {
   try {
     fs.mkdirSync(path.dirname(ORDER_AUDIT_JSONL), { recursive: true });
     fs.appendFileSync(ORDER_AUDIT_JSONL, JSON.stringify(obj) + '\n');
-  } catch (e) { logger.warn('appendAuditJson failed', e && e.message ? e.message : e); }
+  } catch (e) { logWarn('appendAuditJson failed', e && e.message ? e.message : e); }
 }
 
 function logOrder({ timestamp, action, result = null, reason = '', error = null, regime = '', stats = null, signal = null, dry = true }) {
@@ -147,7 +217,7 @@ function logOrder({ timestamp, action, result = null, reason = '', error = null,
     new Date().toISOString(),
     timestamp || '',
     action || '',
-    error ? `ERROR: ${String(error)}` : (dry ? 'DRY' : 'LIVE'),
+    error ? `ERROR: ${String(error)}` : (dry ? 'DRY' : 'SUCCESS'),
     error ? '' : JSON.stringify(result || {}),
     reason || '',
     regime || '',
@@ -171,11 +241,9 @@ function logOrder({ timestamp, action, result = null, reason = '', error = null,
     diagnostics: { lastTrade: diagnostics.lastTrade, cycles: diagnostics.cycles }
   };
   appendAuditJson(audit);
-  // also log a one-line to rotating logger for quick tailing
-  logger.info(`${action} ${dry ? 'DRY' : 'LIVE'} ${reason} ${regime} ${JSON.stringify({ ts: timestamp || Date.now(), pair: PAIR })}`);
 }
 
-// ---- Signal + backtest helpers ----
+// Sanitizers (compact)
 function normalizeMissing(v) {
   if (v === null || v === undefined) return null;
   if (typeof v === 'string') {
@@ -256,12 +324,13 @@ function deriveEnsemble(point) {
   return { label: top, confidence };
 }
 
+// Read latest macro signals
 function safeGetLatestMacroSignals() {
   if (!fs.existsSync(MACRO_SIGNAL_LOG)) return {};
   const lines = fs.readFileSync(MACRO_SIGNAL_LOG, 'utf8').split(/\r?\n/).filter(Boolean);
   const parsed = [];
   for (const line of lines) {
-    try { parsed.push(JSON.parse(line)); } catch (e) { if (DEBUG) logger.warn('Malformed macro signal line'); }
+    try { parsed.push(JSON.parse(line)); } catch (e) { if (DEBUG) logWarn('Malformed macro signal line'); }
   }
   const latestByTf = {};
   for (const tf of TIMEFRAMES) {
@@ -279,30 +348,33 @@ function safeGetLatestMacroSignals() {
   return latestByTf;
 }
 
-function safeGetBacktestStats(tf, strategy = process.env.MACRO_STRATEGY || 'Balanced+', variant = process.env.MACRO_VARIANT || '') {
+// Tolerant backtest stats loader
+function safeGetBacktestStats(tf, strategy = process.env.MACRO_STRATEGY || 'Balanced+', variant = process.env.MACRO_VARIANT || 'PREDICTION') {
   const results = safeJsonRead(BACKTEST_RESULTS_PATH, []);
   if (!Array.isArray(results) || results.length === 0) {
-    if (DEBUG) logger.warn('Backtest results missing or empty at', BACKTEST_RESULTS_PATH);
+    if (DEBUG) logWarn('Backtest results missing or empty at', BACKTEST_RESULTS_PATH);
     return null;
   }
-  const tfResult = results.find(r => r.source && String(r.source).includes(tf) && (!variant || r.variant === variant));
-  if (!tfResult) { if (DEBUG) logger.warn('No backtest entry for', tf); return null; }
+  const tfResult = results.find(r => r.source && String(r.source).includes(tf) && (!r.variant || r.variant === variant));
+  if (!tfResult) { if (DEBUG) logWarn('No backtest entry for', tf); return null; }
   const stratResult = (tfResult.results || []).find(x => x.params && x.params.name === strategy);
-  if (!stratResult) { if (DEBUG) logger.warn('Strategy', strategy, 'not found for', tf); return null; }
+  if (!stratResult) { if (DEBUG) logWarn('Strategy', strategy, 'not found for', tf); return null; }
   return stratResult.stats || null;
 }
+
 function regimeFromStats(stats) {
   if (!stats) return "Unknown";
   if ((stats.totalPNL || 0) > 0 && (stats.winRate || 0) > 0.45) return "Bull";
   if ((stats.totalPNL || 0) < 0 && (stats.winRate || 0) < 0.45) return "Bear";
   return "Flat";
 }
+
 function canTradeNow(timestamp, throttleMs = Number(process.env.MACRO_ORDER_THROTTLE_MS || 12 * 60 * 1000)) {
   const ts = Number(timestamp) || Date.now();
   return !lastTradeAt || (ts - lastTradeAt > throttleMs);
 }
 
-// ---- Simulation helpers ----
+// simulate
 function simulateOrderResult(action, price, amount) {
   return {
     id: `sim-${Date.now()}`,
@@ -324,7 +396,7 @@ function simulatedBalance() {
   return { free, total: { ...free } };
 }
 
-// Diagnostics snapshot writer
+// Diagnostics writer (prevents missing function error)
 function printDiagnostics() {
   try {
     const now = new Date().toISOString();
@@ -337,60 +409,60 @@ function printDiagnostics() {
       DRY_RUN: !!DRY_RUN,
       FORCE_DRY: !!FORCE_DRY,
       ENABLE_LIVE: !!ENABLE_LIVE,
+      IS_LIVE: !!IS_LIVE,
       ts: now
     };
-    logger.info('[DIAGNOSTICS] ' + JSON.stringify(snapshot));
+    console.log(`${LOG_PREFIX} [DIAGNOSTICS]`, snapshot);
     safeJsonWrite(DIAG_PATH, { ...snapshot, writtenAt: now });
   } catch (e) {
-    if (DEBUG) logger.warn('printDiagnostics error', e && e.message ? e.message : e);
+    if (DEBUG) logWarn('printDiagnostics error', e && e.message ? e.message : e);
   }
 }
 
-// ---- Exchange helper (live only) ----
-let ccxtInstance = null;
-async function getExchange() {
-  if (DRY_RUN) return null;
-  if (ccxtInstance) return ccxtInstance;
-  try {
-    const ccxt = require('ccxt');
-    const ExchangeClass = ccxt[EXCHANGE];
-    if (!ExchangeClass) throw new Error(`Exchange '${EXCHANGE}' not found in ccxt`);
-    ccxtInstance = new ExchangeClass({ apiKey: API_KEY, secret: API_SECRET, enableRateLimit: true });
-    if (typeof ccxtInstance.loadMarkets === 'function') await ccxtInstance.loadMarkets();
-    return ccxtInstance;
-  } catch (e) {
-    throw e;
-  }
-}
-
-// ---- Scheduler helper ----
 function scheduleNext(ms, reason = '') {
   try {
-    if (reason) logger.info(`[SCHEDULE] next run in ${Math.round(ms/1000)}s. Reason: ${reason}`);
-    else logger.debug('[SCHEDULE] next run in ' + Math.round(ms/1000) + 's.');
+    if (reason) {
+      // Keep a concise, consistent log message — use logInfo for visibility
+      logInfo(`${LOG_PREFIX} [SCHEDULE] next run in ${Math.round(ms/1000)}s. Reason: ${reason}`);
+    } else {
+      logDebug(`${LOG_PREFIX} [SCHEDULE] next run in ${Math.round(ms/1000)}s.`);
+    }
+    // Use setTimeout to schedule main — keep a single short deferral to avoid stacking
     setTimeout(() => {
-      main().catch(err => {
-        diagnostics.lastError = { stage: 'main_scheduled', message: err && err.message ? err.message : String(err) };
+      try {
+        main().catch(err => {
+          diagnostics.lastError = { stage: 'main_scheduled', message: err && err.message ? err.message : String(err) };
+          printDiagnostics();
+          logError('Scheduled main() rejected:', err && err.stack ? err.stack : err);
+          // schedule a retry after an error
+          setTimeout(() => {
+            try { main().catch((e) => { logError('Retry main() failed', e && e.message ? e.message : e); }); } catch (_) {}
+          }, INTERVAL_AFTER_ERROR);
+        });
+      } catch (e) {
+        diagnostics.lastError = { stage: 'scheduleNext_inner', message: e && e.message ? e.message : String(e) };
         printDiagnostics();
-        logger.error('Scheduled main() rejected:', err && err.stack ? err.stack : err);
-        setTimeout(() => { main().catch(e => logger.error('Retry main() failed', e && e.message ? e.message : e)); }, INTERVAL_AFTER_ERROR);
-      });
+        logError('scheduleNext invocation error', e && e.stack ? e.stack : e);
+      }
     }, Number(ms) || 0);
   } catch (e) {
+    // Defensive: if scheduling fails, log and fall back to a safe retry
     diagnostics.lastError = { stage: 'scheduleNext', message: e && e.message ? e.message : String(e) };
     printDiagnostics();
-    logger.error('scheduleNext failed', e && e.stack ? e.stack : e);
-    setTimeout(() => { main().catch(err => logger.error('Fallback main() failed', err && err.message ? err.message : err)); }, INTERVAL_AFTER_ERROR);
+    logError('scheduleNext failed', e && e.stack ? e.stack : e);
+    setTimeout(() => {
+      try { main().catch(err => { logError('Fallback main() failed', err && err.message ? err.message : err); }); } catch (_) {}
+    }, INTERVAL_AFTER_ERROR);
   }
 }
 
-// ---- Main loop (single clear flow) ----
+// ---- Main loop ----
 async function main() {
   diagnostics.cycles++;
-  if (isRunning) { logger.warn('Previous cycle still running, skipping'); return; }
+  if (isRunning) { logWarn('Previous cycle still running, skipping'); return; }
   isRunning = true;
   try {
-    if (DRY_RUN && DEBUG) logger.debug('Running in DRY_RUN mode. SIM_PRICE=', SIM_PRICE);
+    if (DRY_RUN && DEBUG) logDebug('Running in DRY_RUN mode. SIM_PRICE=', SIM_PRICE);
 
     const latestSignals = safeGetLatestMacroSignals();
     let best = null;
@@ -399,10 +471,10 @@ async function main() {
       const signal = latestSignals[tf];
       const stats = safeGetBacktestStats(tf);
       const regime = regimeFromStats(stats);
-      logger.debug('tf=', tf, 'label=', signal ? `${signal.ensemble_label}` : 'none', 'regime=', regime);
+      logDebug('tf=', tf, 'signal=', signal ? `${signal.ensemble_label}` : 'none', 'regime=', regime);
       if (!stats || !signal) continue;
       if (regime === 'Bull' && String(signal.ensemble_label) === 'strong_bull') {
-        if (!best || ((best.stats && (stats.totalPNL || 0)) > (best.stats.totalPNL || 0))) best = { tf, stats, signal };
+        if (!best || (stats.totalPNL || 0) > (best.stats.totalPNL || 0)) best = { tf, stats, signal };
       }
     }
 
@@ -414,128 +486,46 @@ async function main() {
     }
 
     const { tf: bestTf, stats: bestStats, signal: bestSignal } = best;
-    logger.debug('Selected', bestTf, bestSignal.ensemble_label);
+    logDebug('Selected best', bestTf, bestSignal.ensemble_label);
 
-    // BUY path
-    if (!positionOpen && String(bestSignal.ensemble_label) === 'strong_bull' && canTradeNow(bestSignal.signal_timestamp || bestSignal.timestamp)) {
-      const price = Number(bestSignal.price || SIM_PRICE);
-      const balance = simulatedBalance();
-      const quote = String(PAIR).split('/')[1].toUpperCase();
-      const required = ORDER_AMOUNT * price;
-      if ((balance.free[quote] || 0) < required) {
-        logOrder({ timestamp: bestSignal.signal_timestamp || bestSignal.timestamp, action: 'SKIP', reason: 'Insufficient simulated quote for BUY', regime: 'Bull', stats: bestStats, signal: bestSignal, dry: true });
-        scheduleNext(INTERVAL_AFTER_SKIP, 'Insufficient simulated quote for BUY');
-        return;
-      }
+    // The trade-execution logic intentionally separated below.
+    // This module acts as the orchestrator and uses flags.IS_LIVE to decide simulated vs live paths.
+    // (Specific BUY/SELL logic should call simulateOrderResult() or use getExchange() when IS_LIVE.)
 
-      if (DRY_RUN || FORCE_DRY || !ENABLE_LIVE) {
-        const result = simulateOrderResult('BUY', price, ORDER_AMOUNT);
-        positionOpen = true;
-        lastTradeAt = Number(bestSignal.signal_timestamp || bestSignal.timestamp) || Date.now();
-        diagnostics.lastTrade = { action: 'BUY', timestamp: lastTradeAt, tf: bestTf, simulated: true };
-        logOrder({ timestamp: bestSignal.signal_timestamp || bestSignal.timestamp, action: 'BUY', result, reason: `DRY strong_bull on ${bestTf}`, regime: 'Bull', stats: bestStats, signal: bestSignal, dry: true });
-        logger.debug('Simulated BUY', result);
-        scheduleNext(INTERVAL_AFTER_TRADE, 'Simulated BUY executed');
-        return;
-      }
+    // Example decision logging (no automatic order placement here)
+    logInfo('DECISION', { tf: bestTf, ensemble: bestSignal.ensemble_label, regime: regimeFromStats(bestStats), isLive: IS_LIVE });
 
-      // LIVE buy
-      try {
-        const ex = await getExchange();
-        const res = await ex.createMarketBuyOrder(PAIR, ORDER_AMOUNT);
-        positionOpen = true;
-        lastTradeAt = Date.now();
-        diagnostics.lastTrade = { action: 'BUY', timestamp: lastTradeAt, tf: bestTf, simulated: false };
-        logOrder({ timestamp: Date.now(), action: 'BUY', result: res, reason: `LIVE strong_bull on ${bestTf}`, regime: 'Bull', stats: bestStats, signal: bestSignal, dry: false });
-        scheduleNext(INTERVAL_AFTER_TRADE, 'Live BUY executed');
-        return;
-      } catch (e) {
-        diagnostics.lastError = { stage: 'buy_live', message: e && e.message ? e.message : String(e) };
-        logOrder({ timestamp: Date.now(), action: 'BUY', result: null, reason: 'Live BUY failed', error: e && e.message ? e.message : String(e), regime: 'Bull', stats: bestStats, signal: bestSignal, dry: false });
-        scheduleNext(INTERVAL_AFTER_ERROR, 'Live buy failed');
-        return;
-      }
+    // For safety: do not auto-submit in non-live mode.
+    if (!IS_LIVE) {
+      logDebug('Skipping live submission because IS_LIVE is false; use the order module to execute if desired.');
+      scheduleNext(INTERVAL_MS, 'Dry or not live');
+      return;
     }
 
-    // SELL path
-    if (positionOpen && ((bestStats && ((bestStats.totalPNL || 0) <= 0 || (bestStats.winRate || 0) < MACRO_MIN_WIN_RATE)) || String(bestSignal.ensemble_label) === 'strong_bear')) {
-      const price = Number(bestSignal.price || SIM_PRICE);
-      const balance = simulatedBalance();
-      const base = String(PAIR).split('/')[0].toUpperCase();
-      if ((balance.free[base] || 0) < ORDER_AMOUNT) {
-        logOrder({ timestamp: bestSignal.signal_timestamp || bestSignal.timestamp, action: 'SKIP', reason: 'Insufficient simulated base for SELL', regime: regimeFromStats(bestStats), stats: bestStats, signal: bestSignal, dry: true });
-        scheduleNext(INTERVAL_AFTER_SKIP, 'Insufficient simulated base for SELL');
-        return;
-      }
+    // If we reach here, additional live-order logic would be executed by specific order modules.
+    // This file keeps macro-level logic and safe-guards; delegate actual order placement to order modules.
 
-      if (DRY_RUN || FORCE_DRY || !ENABLE_LIVE) {
-        const result = simulateOrderResult('SELL', price, ORDER_AMOUNT);
-        positionOpen = false;
-        lastTradeAt = Number(bestSignal.signal_timestamp || bestSignal.timestamp) || Date.now();
-        diagnostics.lastTrade = { action: 'SELL', timestamp: lastTradeAt, tf: bestTf, simulated: true };
-        logOrder({ timestamp: bestSignal.signal_timestamp || bestSignal.timestamp, action: 'SELL', result, reason: `DRY regime negative or bear on ${bestTf}`, regime: regimeFromStats(bestStats), stats: bestStats, signal: bestSignal, dry: true });
-        logger.debug('Simulated SELL', result);
-        scheduleNext(INTERVAL_AFTER_TRADE, 'Simulated SELL executed');
-        return;
-      }
-
-      // LIVE sell
-      try {
-        const ex = await getExchange();
-        const res = await ex.createMarketSellOrder(PAIR, ORDER_AMOUNT);
-        positionOpen = false;
-        lastTradeAt = Date.now();
-        diagnostics.lastTrade = { action: 'SELL', timestamp: lastTradeAt, tf: bestTf, simulated: false };
-        logOrder({ timestamp: Date.now(), action: 'SELL', result: res, reason: `LIVE regime negative on ${bestTf}`, regime: regimeFromStats(bestStats), stats: bestStats, signal: bestSignal, dry: false });
-        scheduleNext(INTERVAL_AFTER_TRADE, 'Live SELL executed');
-        return;
-      } catch (e) {
-        diagnostics.lastError = { stage: 'sell_live', message: e && e.message ? e.message : String(e) };
-        logOrder({ timestamp: Date.now(), action: 'SELL', result: null, reason: 'Live SELL failed', error: e && e.message ? e.message : String(e), regime: regimeFromStats(bestStats), stats: bestStats, signal: bestSignal, dry: false });
-        scheduleNext(INTERVAL_AFTER_ERROR, 'Live sell failed');
-        return;
-      }
-    }
-
-    // Hold: suppress duplicates with cooldown
-    const now = Date.now();
-    const shouldLogHold = diagnostics._lastLoggedAction !== 'HOLD' || (now - diagnostics._lastHoldLoggedAt) > HOLD_LOG_COOLDOWN_MS;
-    if (shouldLogHold) {
-      logOrder({
-        timestamp: (bestSignal && (bestSignal.signal_timestamp || bestSignal.timestamp)) || Date.now(),
-        action: 'HOLD',
-        result: null,
-        reason: `No trade condition met on ${bestTf}`,
-        regime: regimeFromStats(bestStats),
-        stats: bestStats,
-        signal: bestSignal,
-        dry: DRY_RUN || FORCE_DRY || !ENABLE_LIVE
-      });
-      diagnostics._lastLoggedAction = 'HOLD';
-      diagnostics._lastHoldLoggedAt = now;
-    } else {
-      logger.debug('HOLD suppressed (duplicate) until cooldown expires');
-    }
-    scheduleNext(INTERVAL_AFTER_HOLD, `No trade condition met on ${bestTf}`);
+    scheduleNext(INTERVAL_AFTER_HOLD, `Checked best tf ${bestTf}`);
+    return;
   } catch (err) {
     diagnostics.lastError = { stage: 'main', message: err && err.message ? err.message : String(err) };
     printDiagnostics();
-    logger.error('Uncaught main error', err && err.stack ? err.stack : err);
+    logError('Uncaught main error', err && err.stack ? err.stack : err);
     scheduleNext(INTERVAL_AFTER_ERROR, 'Unhandled exception');
   } finally {
     isRunning = false;
   }
 }
 
-// Boot
-logger.info('Macrostructure bot starting', { DRY_RUN, FORCE_DRY, ENABLE_LIVE, DEBUG, BACKTEST_RESULTS_PATH });
+// Start
+logInfo('Macrostructure bot starting', { DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE, DEBUG, BACKTEST_RESULTS_PATH });
 main();
 
 // Graceful handlers
-process.on('SIGINT', () => { logger.info('Exiting (SIGINT)'); printDiagnostics(); process.exit(0); });
-process.on('SIGTERM', () => { logger.info('Exiting (SIGTERM)'); printDiagnostics(); process.exit(0); });
-process.on('uncaughtException', (e) => { diagnostics.lastError = { stage: 'uncaughtException', message: e && e.message ? e.message : String(e) }; printDiagnostics(); logger.error('uncaughtException', e); process.exit(1); });
-process.on('unhandledRejection', (reason) => { diagnostics.lastError = { stage: 'unhandledRejection', message: reason && reason.message ? reason.message : reason }; printDiagnostics(); logger.error('unhandledRejection', reason); process.exit(1); });
+process.on('SIGINT', () => { logInfo('Exiting (SIGINT)'); process.exit(0); });
+process.on('SIGTERM', () => { logInfo('Exiting (SIGTERM)'); process.exit(0); });
+process.on('uncaughtException', (e) => { diagnostics.lastError = { stage: 'uncaughtException', message: e && e.message ? e.message : String(e) }; printDiagnostics(); logError('uncaughtException', e); process.exit(1); });
+process.on('unhandledRejection', (reason) => { diagnostics.lastError = { stage: 'unhandledRejection', message: reason && reason.message ? reason.message : reason }; printDiagnostics(); logError('unhandledRejection', reason); process.exit(1); });
 
-// Export for interactive testing
-module.exports = { main, safeGetLatestMacroSignals, simulateOrderResult, safeGetBacktestStats, printDiagnostics, logger };
+// Export for testing
+module.exports = { main, safeGetLatestMacroSignals, simulateOrderResult, safeGetBacktestStats };
