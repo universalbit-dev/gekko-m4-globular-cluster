@@ -79,9 +79,10 @@ const BACKTEST_RESULTS_PATH = process.env.MACRO_BACKTEST_JSON_PATH
   : path.resolve(__dirname, './backtest/backtest_results.json');
 
 const MACRO_SIGNAL_LOG = path.resolve(__dirname, './logs/macro_signal.log');
-const ORDER_TAB_LOG = path.resolve(__dirname, './logs/ccxt_order.log');
-const ORDER_AUDIT_JSONL = path.resolve(__dirname, './logs/ccxt_order_audit.jsonl');
+const ORDER_LOG_PATH = path.resolve(__dirname, './logs/macro_ccxt_orders.log');
+const ORDER_AUDIT_JSONL = path.resolve(__dirname, './logs/macro_ccxt_orders_audit.jsonl');
 const DIAG_PATH = path.resolve(__dirname, './logs/macro_diagnostics.json');
+
 
 const DEBUG = /^(1|true|yes)$/i.test(String(process.env.DEBUG || '0'));
 const DRY_RUN = /^(1|true|yes)$/i.test(String(process.env.DRY_RUN || '1')); // default simulation
