@@ -1,296 +1,150 @@
-# tools/microstructure — Microstructure trading bot (micro_ccxt_orders.js)
+# tools/microstructure — Microstructure (micro_ccxt_orders.js)
 
-This document describes the updated microstructure trading bot implemented at
-tools/microstructure/micro_ccxt_orders.js. It explains inputs, outputs, environment
-variables, behavior changes in the recent rewrite, and how to run/manage the bot
-safely in development and production.
+This document describes the microstructure orchestrator implemented at:
+`tools/microstructure/micro_ccxt_orders.js`.
 
-Last updated: 2025-10-27
-
-## Architecture
 ```mermaid
 flowchart TD
-  %% Microstructure Trading Bot — cleaned Mermaid diagram (no styles)
-  subgraph Inputs["Inputs / Data Sources"]
-    OHLCV["Per-TF prediction JSONs\ntools/logs/json/ohlcv/*.json"]
-    AUTOTUNE["Auto-tune results\ntools/evaluation/autoTune_results.json"]
-    BACKTEST["Backtest results\ntools/backtest/backtest_results.json"]
-    ENV["Environment (.env)\nMICRO_*, KEY/SECRET, DRY_RUN, DEBUG"]
+  %% Microstructure mermaid (GitHub-friendly)
+  Start["Start\nload .env\nrequire runtime_flags"]
+  Start --> ParseFlags["Parse runtime flags\n(DRY_RUN, FORCE_DRY,\nENABLE_LIVE, IS_LIVE, DEBUG)"]
+  ParseFlags --> LoadState["loadPositionState()\nrestore position/history"]
+  LoadState --> MainLoop["decideAndAct()\n(main cycle)"]
+
+  subgraph INDEX["Index / OHLCV Signal Loading"]
+    IDXLOAD["loadIndexData()\n(require index module)"]
+    OHLCVLOAD["loadLatestSignalsFromOHLCV()\n(fallback files)"]
+    IDXLOAD --> CHOOSEIDX["pick primary TF or first match"]
+    OHLCVLOAD --> CHOOSEOHLCV["pick primary TF or latest"]
   end
 
-  subgraph Pre["Pre-processing & Validation"]
-    Loader["loadLatestSignals()"]
-    Sanitizer["sanitizeSignal()\n-> ensemble_label, ensemble_confidence"]
-    Validator["validate_predictions.js\n(optional CI/cron)"]
-    Aggregator["aggregator.js\n(windowing & OHLCV aggregates)"]
-  end
+  MainLoop --> IDXLOAD
+  MainLoop --> OHLCVLOAD
 
-  subgraph Analysis["Analysis & Gating"]
-    AutoTuneUse["getIndicatorParams() (autoTune cache)"]
-    BacktestChk["getLatestBacktestStats()\n(regime check)"]
-    TradeQuality["scoreTrade() -> tradeQuality.totalScore"]
-    BalanceFetch["fetchTickerAndBalance()\n(DRY safe)"]
-  end
+  CHOOSEIDX --> FormatSignal["formatSignalForDecision()\nnormalizeIndexEntry()"]
+  CHOOSEOHLCV --> FormatSignal
 
-  subgraph Exec["Decisioning & Execution"]
-    Decide["Entry/Exit Logic\npre-trade gates\nmulti-TF preference"]
-    Simulate["simulateOrderResult() (DRY_RUN)"]
-    Exchange["ccxt Exchange\ncreateMarketBuyOrder / Sell"]
-    OrderLog["logOrder() -> tools/logs/micro_ccxt_orders.log"]
-    State["State: positionOpen, entryPrice, lastTradeTimestamp"]
-    Scheduler["scheduleNext() / INTERVAL_*"]
-    Diagnostics["diagnostics + error handlers"]
-  end
+  FormatSignal --> Stats["derive backtestStats\n(from summary if present)"]
+  Stats --> ThrottleCheck["canThrottle()?"]
+  ThrottleCheck -- blocked --> Throttled["Schedule next\n(reason: throttled)"]
+  ThrottleCheck -- ok --> DecisionLogic["Decision logic\n-> 'open' | 'close' | 'hold'"]
 
-  subgraph Outputs["Outputs / Artifacts"]
-    OUT_LOG["tools/logs/micro_ccxt_orders.log"]
-    OUT_SIGNAL["tools/logs/ccxt_signal.log"]
-    OUT_AGG["tools/logs/json/ohlcv/aggregated_<TF>.json"]
-    STDOUT["Console diagnostics / DEBUG logs"]
-  end
+  DecisionLogic --> OpenPath{"decision === open\n&& position.open === false"}
+  DecisionLogic --> ClosePath{"decision === close\n&& position.open === true"}
+  DecisionLogic --> HoldPath{"decision === hold\nor no-op"}
 
-  %% Data flow
-  OHLCV --> Loader
-  Loader --> Sanitizer
-  Sanitizer --> Aggregator
-  Validator --> Sanitizer
-  AUTOTUNE --> AutoTuneUse
-  BACKTEST --> BacktestChk
-  Sanitizer --> TradeQuality
-  AutoTuneUse --> TradeQuality
-  BacktestChk --> TradeQuality
-  TradeQuality --> Decide
-  BalanceFetch --> Decide
-  ENV -->|config & toggles| Decide
-  Decide -->|entry/exit| Simulate
-  Decide -->|entry/exit| Exchange
-  Simulate --> OrderLog
-  Exchange --> OrderLog
-  OrderLog --> OUT_LOG
-  Decide --> State
-  State --> Scheduler
-  Diagnostics --> STDOUT
-  OrderLog --> Diagnostics
-  Aggregator --> OUT_AGG
-  Sanitizer --> OUT_SIGNAL
-  OUT_SIGNAL --> Outputs
+  OpenPath --> BalanceCheck["Simulated balance check\n(required quote >= price*size)"]
+  BalanceCheck -- insufficient --> SkipOpen["log SKIP\nschedule next"]
+  BalanceCheck -- ok --> SubmitBuy["submitOrder('BUY',...)\n(simulated or live)"]
 
-  %% Useful links (renderers that support 'click' will make these nodes clickable)
-  click AUTOTUNE "https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/main/tools/evaluation/autoTune_results.json" "Auto-tune results"
-  click BACKTEST "https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/main/tools/backtest/backtest_results.json" "Backtest results"
-  click OHLCV "https://github.com/universalbit-dev/gekko-m4-globular-cluster/tree/main/tools/logs/json/ohlcv" "OHLCV prediction JSONs"
+  ClosePath --> BaseCheck["Simulated base check\n(available >= amount)"]
+  BaseCheck -- insufficient --> SkipClose["log SKIP\nschedule next"]
+  BaseCheck -- ok --> SubmitSell["submitOrder('SELL',...)\n(simulated or live)"]
+
+  SubmitBuy --> OnOpen["Update position state\nposition.open=true\nsavePositionState()"]
+  SubmitSell --> OnClose["Update position state\nposition.open=false\nsavePositionState()"]
+  OnOpen --> SchedulePost["scheduleNext(MICRO_INTERVAL_MS,'post-open')"]
+  OnClose --> SchedulePost
+
+  HoldPath --> HoldCooldown["HOLD logging cooldown\n(HOLD_LOG_COOLDOWN_MS)"]
+  HoldCooldown -- log --> LogHold["logOrder(HOLD)\nsave diagnostics"]
+  HoldCooldown -- suppress --> Suppressed["debug suppressed hold"]
+  LogHold --> ScheduleHold["scheduleNext(MICRO_INTERVAL_MS,'hold')"]
+  Suppressed --> ScheduleHold
+
+  %% submitOrder internal branching
+  SubmitBuy --> SUBMIT["submitOrder() implementation"]
+  SubmitSell --> SUBMIT
+  SUBMIT --> CheckFingerprint["duplicate fingerprint check\nskip if duplicate"]
+  CheckFingerprint --> LiveAllowed{"liveAllowed?\n(IS_LIVE && !DRY_RUN && !FORCE_DRY && ENABLE_LIVE)"}
+  LiveAllowed -- false --> Simulate["simulateOrderResult()\nlogOrder(mode: DRY)"]
+  LiveAllowed -- true --> LiveExchange["getExchange()\ncreateMarketBuyOrder/Sell\nlogOrder(mode: LIVE)"]
+  Simulate --> ReturnSubmit
+  LiveExchange --> ReturnSubmit
+  ReturnSubmit --> CommonPost["update diagnostics\nlastTradeAt / history\nsavePositionState()"]
+
+  %% error handling & scheduling
+  MainLoop --> TryCatch["try/catch around main\non error -> diagnostics.lastError\nsavePositionState()\nscheduleNext(MICRO_INTERVAL_MS,'error')"]
+  TryCatch --> ScheduleEnd["end cycle"]
+
+  SchedulePost --> ScheduleEnd
+  ScheduleHold --> ScheduleEnd
+  Throttled --> ScheduleEnd
+  SkipOpen --> ScheduleEnd
+  SkipClose --> ScheduleEnd
+
+  %% graceful shutdown
+  Start --> Signals["process.on SIGINT/SIGTERM\nuncaughtException\nunhandledRejection"]
+  Signals --> SaveAndExit["savePositionState()\nprint diagnostics\nexit"]
+
+  classDef core fill:#f8fafc,stroke:#1f2937,stroke-width:1px;
+  class MainLoop,DecisionLogic,SUBMIT,LiveExchange core;
 ```
 
----
+- Startup
+  - Loads .env early and parses runtime flags using `tools/lib/runtime_flags`.
+  - Restores persisted position and diagnostics from `tools/logs/micro_position_state.json`.
 
-## Summary — what changed
+- Signal input
+  - Primary source: `loadIndexData()` (the index module under `tools/microstructure/index.js`).
+  - Fallback: prediction JSON files in `OHLCV_DIR`.
+  - `formatSignalForDecision()` normalizes the picked entry for decision logic.
 
-The micro bot (micro_ccxt_orders.js) has been rewritten and hardened:
+- Decisioning
+  - `decideAndAct()` performs throttling, simple gating (score/winRate/ensemble labels), then selects open/close/hold.
+  - `shouldOpenPosition` / `shouldClosePosition` helpers are represented by the decision logic in the code.
 
-- Consistent, idempotent `.env` load and sensible env overrides.
-- Auto-tune cache support (tools/evaluation/autoTune_results.json) with auto-reload.
-- Reads per-TF prediction JSONs from `tools/logs/json/ohlcv/ohlcv_ccxt_data_<TF>_prediction.json`.
-- Signal sanitization and ensemble derivation (ensemble_label + ensemble_confidence).
-- Pre-trade validation using backtest stats (tools/backtest/backtest_results.json).
-- TradeQuality scoring (tradeQualityScore.js) used to gate entries.
-- DRY_RUN mode with full simulated order lifecycle (simulateOrderResult) and simulated balances.
-- Atomic order logging and diagnostics (tools/logs/micro_ccxt_orders.log by default).
-- Configurable scheduling and throttling (MICRO_INTERVAL / INTERVAL_AFTER_*).
-- Clear diagnostics, error handling and safe retries.
-- Support for multiple TFs and a primary TF preference.
+- Order submission
+  - `submitOrder()` is a single entry point that:
+    - Prevents immediate duplicate submissions via a fingerprint.
+    - Uses strict `IS_LIVE` + `ENABLE_LIVE` + `!DRY_RUN` + `!FORCE_DRY` checks to permit live exchange access.
+    - When live is disallowed, uses `simulateOrderResult()` and writes audit JSONL and legacy log lines.
+    - When live is allowed, obtains ccxt exchange with `getExchange()` and places market orders, handling both `createMarketBuyOrder`/`createOrder` fallbacks.
+    - Updates diagnostics, persists position state and history.
 
-If you used the previous micro bot, read the "Compatibility & migration" notes below.
+- Persistence and scheduling
+  - Position state and small history are saved to `tools/logs/micro_position_state.json`.
+  - Scheduling uses a single timer (`scheduleNext`) and also a fallback `setInterval` watchdog.
+  - Errors capture diagnostics and persist state before exit.
 
----
+- Safety
+  - Live orders are explicitly gated; defaults favor simulation.
+  - Diagnostic history and audit logs facilitate reconciliation.
 
-## Location and main files
+## File locations & key env variables
 
-- Main bot: tools/microstructure/micro_ccxt_orders.js
-- Utilities:
-  - tools/microstructure/aggregator.js (aggregation of per-TF predictions)
-  - tools/microstructure/featureExtractor.js
-  - tools/microstructure/microSignalLogger.js
-  - tools/microstructure/trainer_tf.js (training helpers)
-- Inputs:
-  - Per-TF predictions: tools/logs/json/ohlcv/ohlcv_ccxt_data_<TF>_prediction.json
-  - Auto-tune results: tools/evaluation/autoTune_results.json
-  - Backtest results: tools/backtest/backtest_results.json (override with BACKTEST_JSON_PATH)
-- Outputs / logs:
-  - Human-readable order log: tools/logs/micro_ccxt_orders.log (ORDER_LOG_PATH)
-  - Diagnostics printed to stdout/stderr
+- Main script: `tools/microstructure/micro_ccxt_orders.js`
+- Index module (preferred source): `tools/microstructure/index.js`
+- OHLCV fallback directory: `TOOLS_OHLCV_DIR` (env `OHLCV_DIR`, default `tools/logs/json/ohlcv`)
+- Position state: `tools/logs/micro_position_state.json`
+- Logs:
+  - Legacy tab log: `tools/logs/micro_ccxt_orders.log`
+  - Audit JSONL: `tools/logs/micro_ccxt_order_audit.jsonl`
+- Important env flags:
+  - DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE, DEBUG
+  - MICRO_PAIR, MICRO_TIMEFRAMES, MICRO_PRIMARY_TF
+  - MICRO_ORDER_AMOUNT, MICRO_INTERVAL_MS
+  - SIM_PRICE, SIM_BASE_BALANCE, SIM_QUOTE_BALANCE
+  - ORDER_THROTTLE_MS, HOLD_LOG_COOLDOWN_MS
 
-Repository paths referenced by default (changeable via env):
-- OHLCV_DIR => tools/logs/json/ohlcv
-- AUTO_TUNE_PATH => tools/evaluation/autoTune_results.json
-- BACKTEST_JSON_PATH => tools/backtest/backtest_results.json
-- ORDER_LOG_PATH => tools/logs/micro_ccxt_orders.log
+## Example quickstart
 
----
-
-## High-level behavior
-
-1. Load latest per-TF prediction lines (sanitized) and prefer the configured `MICRO_PRIMARY_TF`.
-2. Load auto-tune params and backtest stats for the primary TF & strategy.
-3. Compute a pre-trade trade-quality score using `tradeQualityScore.js`.
-4. Enforce regime and quality gates (backtest PnL, winRate, tradeQuality threshold).
-5. If trade decision is made:
-   - Check available balance (or use simulated balance in DRY_RUN).
-   - Place a market order (or simulate it in DRY_RUN).
-   - Log the result and update internal state (positionOpen, entryPrice, lastTradeTimestamp).
-6. If position is open, evaluate exit conditions (market signals, regime, stop-loss/take-profit logic).
-7. Schedule next run based on outcome (INTERVAL_AFTER_TRADE / _SKIP / _ERROR or MICRO_INTERVAL).
-
----
-
-## Configuration: environment variables
-
-All environment variables may be set in `.env` or the host environment. Reasonable defaults are provided.
-
-- GENERAL
-  - ENV_PATH — (optional) path to .env file used by the loader
-  - DRY_RUN — "1"/"true" to simulate; default "0"
-  - DEBUG — "1"/"true" for verbose logging; default "0"
-
-- Bot identity & scheduling
-  - MICRO_TIMEFRAMES — comma list, e.g. `1m,5m,15m,1h` (default)
-  - MICRO_PRIMARY_TF — e.g. `1m` (preferred TF for decisioning)
-  - MICRO_INTERVAL_MS or MICRO_INTERVAL — polling interval when no action; default 300000 (5m)
-  - INTERVAL_AFTER_TRADE — ms to wait after a trade; default 30000
-  - INTERVAL_AFTER_SKIP — ms to wait after a skip; default 60000
-  - INTERVAL_AFTER_ERROR — ms to wait after an error; default 60000
-
-- Trading / exchange
-  - MICRO_PAIR or PAIR — e.g. `BTC/EUR` (default)
-  - MICRO_EXCHANGE or EXCHANGE — ccxt exchange id (default `kraken`)
-  - MICRO_ORDER_AMOUNT or ORDER_AMOUNT — per-trade size (default `0.001`)
-  - KEY / SECRET — API credentials (used only when DRY_RUN not set)
-  - MICRO_ORDER_LOG / ORDER_LOG_PATH — path to order log (default: tools/logs/micro_ccxt_orders.log)
-
-- Data/paths
-  - OHLCV_DIR — directory for per-TF prediction JSONs (default: tools/logs/json/ohlcv)
-  - AUTO_TUNE_PATH — path to autoTune_results.json (default: tools/evaluation/autoTune_results.json)
-  - BACKTEST_JSON_PATH — path to backtest results (default: tools/backtest/backtest_results.json)
-
-- Simulation tuning (used only when DRY_RUN=1)
-  - SIM_PRICE — simulated market price (default 30000)
-  - SIM_BASE_BALANCE — simulated base asset free balance (default 0.01)
-  - SIM_QUOTE_BALANCE — simulated quote asset free balance (default 1000)
-
-- Strategy & scoring
-  - MICRO_STRATEGY — strategy name used to lookup backtest results (default `Balanced+`)
-  - MICRO_VARIANT — variant name used to lookup backtest results (default `PREDICTION`)
-  - MICRO_METRIC — metric used by auto-tune lookup (default `abs`)
-
----
-
-## Order gating & trade quality
-
-- The bot uses `tools/tradeQualityScore.js` to compute a trade quality object that includes:
-  - totalScore — composite score (0–100)
-  - breakdown — per-factor components
-
-- Default gating rules (tunable):
-  - Reject trades if backtestStats.totalPNL <= 0 or backtestStats.winRate < 0.5
-  - Reject trades if tradeQuality.totalScore < 65
-
-Those thresholds are coded as defaults but can be changed in code or wrapped by an external policy before calling the bot.
-
----
-
-## Logs and diagnostics
-
-- Order entries are appended to ORDER_LOG_PATH as tab-separated lines with:
-  - timestamp, signal timestamp, model, prediction, label, action, status/result, reason, fullSignal, indicatorParams, tradeQualityScore, tradeQualityBreakdown, backtestStats, diagnostics
-- Diagnostics are kept in-memory and printed on errors or at scheduled intervals (max history kept).
-- The script registers `uncaughtException` and `unhandledRejection` handlers to persist last error state.
-
----
-
-## Running the bot
-
-From the repository root (example):
-
-- One-off run (single cycle, not scheduled):
-  NODE_ENV=development MICRO_PRIMARY_TF=1m DRY_RUN=1 node tools/microstructure/micro_ccxt_orders.js
-
-- Run continuously using Node (the script internally schedules next calls):
-  DRY_RUN=1 NODE_ENV=production node tools/microstructure/micro_ccxt_orders.js
-
-- Run under PM2 (recommended for long-running):
-  Create a small ecosystem file or:
-  PM2:
-    pm2 start tools/microstructure/micro_ccxt_orders.js --name microbot --interpreter node --node-args=""
-
-- Run as a systemd service:
-  - Create a unit that runs `node /path/to/repo/tools/microstructure/micro_ccxt_orders.js` with desired env vars.
-
----
-
-## Input / Output examples
-
-- Input (example last element of `ohlcv_ccxt_data_1m_prediction.json`):
-```json
-{
-  "timestamp": 1761417960000,
-  "open": 12345.6,
-  "high": 12350.0,
-  "low": 12340.0,
-  "close": 12348.2,
-  "volume": 1.23,
-  "prediction_convnet": "bull",
-  "prediction_tf": null,
-  "ensemble_label": "bull",
-  "ensemble_confidence": 87,
-  "timeframe": "1m",
-  "logged_at": "2025-10-25T18:49:34.244Z",
-  "signal_timestamp": 1761417960000
-}
+- Dry-run single cycle:
+```
+DRY_RUN=1 node tools/microstructure/micro_ccxt_orders.js --once
 ```
 
-- Output (sample order log line — tab delimited columns in ORDER_LOG_PATH):
+- Continuous dry-run:
 ```
-2025-10-27T20:31:43.000Z	1761417960000	trained_ccxt_ohlcv_1m_...	bull	...	BUY	SUCCESS	{"id":"sim-..."}	"DRY strong_bull"	... <full JSON>
+DRY_RUN=1 node tools/microstructure/micro_ccxt_orders.js
 ```
 
----
+## Notes, troubleshooting and extension points
 
-## Safety & best practices
-
-- Always run with `DRY_RUN=1` while you test configuration and live data consumption.
-- Use API keys with limited permissions or testnet keys when moving to live.
-- Use `BACKTEST_JSON_PATH` to point to a recent backtest summary; missing backtest stats will block trading.
-- Keep `AUTO_TUNE_PATH` up-to-date if you rely on tuned indicator parameters.
-- Consider running the validator (tools/logs/json/ohlcv/validate_predictions.js) regularly (cron or pm2) to ensure prediction files are healthy.
+- If `loadIndexData()` fails or index module is not present, the fallback to OHLCV files will be used.
+- The submitter fingerprints use rounded price and scaled amount — change fingerprint scheme if you need finer duplicate control.
+- Consider adding a persisted last-run marker to avoid reprocessing identical index entries after restart.
+- The code already centralizes live checks; to extend to margin/futures, modify `getExchange()` and `submitOrder()` with care.
+- Unit-testable functions exported: `decideAndAct`, `submitOrder`, `loadPositionState`, `savePositionState`, `formatSignalForDecision`.
 
 ---
-
-## Compatibility & migration notes
-
-- If you had a previous micro bot implementation:
-  - Prediction input filenames remain compatible (per-TF `_prediction.json` files).
-  - The logging format is extended (more JSON fields appended as columns). If consuming old logs, update downstream parsers.
-  - The new bot enforces backtest checks and trade quality gating; you may see more SKIP entries until backtests/auto-tune files exist.
-
----
-
-## Troubleshooting
-
-- No signals found: verify `OHLCV_DIR` and per-TF `_prediction.json` files exist and contain arrays.
-- Model/backtest missing: confirm `tools/backtest/backtest_results.json` contains entries for the TF and strategy name.
-- Exchange init failures: ensure `MICRO_EXCHANGE` is a valid ccxt exchange id and your `KEY`/`SECRET` are correct (or run DRY_RUN).
-- Order failures: check exchange account permissions and minimum order sizes; the bot clamps order sizes but exchange rules vary.
-
----
-
-## Next steps & enhancements you may want
-
-- Add a small CLI `--once` flag to exit after one cycle (useful for cron).
-- Add a persistent state file for position/last trade across restarts.
-- Add Slack/Discord webhook alerts for failures or notable trades.
-- Add unit tests for `sanitizeSignal()` and `tradeQualityScore` edge cases.
-
----
-
-## Contact / maintainers
-
-Maintained by @universalbit-dev. For changes to bot behavior, modify `tools/microstructure/micro_ccxt_orders.js` and update this README with any new env variables or outputs.
