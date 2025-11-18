@@ -15,10 +15,16 @@
  *   node tools/evaluation/autoTune.js --dry-run --list-indicators
  *
  * Environment:
- *   IN_PATH (default evaluate_results_augmented.json)
- *   OUT_PATH (default autoTune_results.json)
+ *   IN_PATH (default evaluate_results_augmented.json inside this script dir)
+ *   OUT_PATH (default autoTune_results.json inside this script dir)
  *   MIN_SAMPLES (default 5)
  *   GENERATE_PERMUTATIONS (default 0)  -- if 1, generate simple parameter permutations
+ *
+ * Notes:
+ * - If IN_PATH or OUT_PATH are provided via environment variables and are relative
+ *   paths, they are now resolved relative to this script's directory (tools/evaluation).
+ *   Absolute paths are left as-is. This avoids files being read/written relative to
+ *   the process working directory.
  */
 const fs = require('fs');
 const path = require('path');
@@ -26,8 +32,22 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const EVAL_DIR = path.resolve(__dirname);
 const FALLBACK_IN = path.join(EVAL_DIR, './evaluate_results.json');
-const IN_PATH = process.env.IN_PATH || path.join(EVAL_DIR, './evaluate_results_augmented.json');
-const OUT_PATH = process.env.OUT_PATH || path.join(EVAL_DIR, './autoTune_results.json');
+
+// Resolve environment paths so relative env paths are anchored to EVAL_DIR
+function resolveEnvPath(envValue, fallback) {
+  if (envValue && typeof envValue === 'string' && envValue.length) {
+    // If envValue is absolute, return normalized absolute path.
+    // If relative, resolve it relative to EVAL_DIR so we don't depend on cwd.
+    return path.isAbsolute(envValue) ? path.resolve(envValue) : path.resolve(EVAL_DIR, envValue);
+  }
+  return fallback;
+}
+
+const DEFAULT_IN = path.join(EVAL_DIR, './evaluate_results_augmented.json');
+const DEFAULT_OUT = path.join(EVAL_DIR, './autoTune_results.json');
+
+const IN_PATH = resolveEnvPath(process.env.IN_PATH, DEFAULT_IN);
+const OUT_PATH = resolveEnvPath(process.env.OUT_PATH, DEFAULT_OUT);
 
 const MIN_SAMPLES = parseInt(process.env.MIN_SAMPLES || '5', 10);
 const GENERATE_PERMUTATIONS = process.env.GENERATE_PERMUTATIONS === '1';
@@ -38,13 +58,42 @@ const LIST_IND = args.includes('--list-indicators');
 const VERBOSE = args.includes('--verbose');
 
 function log(...a) { if (VERBOSE) console.log('[AUTOTUNE]', ...a); }
-function safeReadJSON(fp) { try { if (!fs.existsSync(fp)) return null; return JSON.parse(fs.readFileSync(fp, 'utf8')); } catch (e) { console.warn('[AUTOTUNE] read failed', fp, e && e.message ? e.message : e); return null; } }
-function safeWriteJSON(fp, obj) { try { fs.writeFileSync(fp, JSON.stringify(obj, null, 2), 'utf8'); return true; } catch (e) { console.error('[AUTOTUNE] write failed', fp, e && e.message ? e.message : e); return false; } }
+
+function safeReadJSON(fp) {
+  try {
+    if (!fs.existsSync(fp)) return null;
+    const raw = fs.readFileSync(fp, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn('[AUTOTUNE] read failed', fp, e && e.message ? e.message : e);
+    return null;
+  }
+}
+
+function safeWriteJSON(fp, obj) {
+  try {
+    // ensure directory exists
+    const dir = path.dirname(fp);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(fp, JSON.stringify(obj, null, 2), 'utf8');
+    return true;
+  } catch (e) {
+    console.error('[AUTOTUNE] write failed', fp, e && e.message ? e.message : e);
+    return false;
+  }
+}
 
 let records = safeReadJSON(IN_PATH);
 if (!records) {
+  // fallback read (FALLBACK_IN is already absolute to EVAL_DIR)
   records = safeReadJSON(FALLBACK_IN) || [];
   if (records && records.length) log(`[AUTOTUNE] Using fallback input ${FALLBACK_IN}`);
+  else {
+    // if IN_PATH was provided via env and doesn't exist, log helpful message
+    if (process.env.IN_PATH) {
+      console.warn(`[AUTOTUNE] Environment IN_PATH resolved to ${IN_PATH} but no file was found; also tried fallback ${FALLBACK_IN}`);
+    }
+  }
 }
 
 if (!Array.isArray(records) || records.length === 0) {
