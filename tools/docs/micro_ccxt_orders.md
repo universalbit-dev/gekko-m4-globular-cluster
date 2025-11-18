@@ -357,8 +357,7 @@ Use these exports to write automated tests that exercise decision logic and subm
 ## References
 
 - CCXT: https://github.com/ccxt/ccxt
-- Kraken API docs: https://docs.kraken.com
-- Microstructure trading (general): https://www.investopedia.com/terms/m/microstructure.asp
+- Microstructure (general): https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/tools/Microstructure.md
 
 ---
 
