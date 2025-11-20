@@ -10,11 +10,17 @@
  * - Improved scheduling (single timer, safer retries) and duplicate-suppression for rapid successive orders.
  * - Persisted position state and a concise position history array for easier reconciliation.
  * - Better debug/startup logs that show parsed flags (DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE).
- * - getExchange() guard to prevent accidental live calls when not in live mode.
  *
  * Safety:
  * - Live orders will not be placed unless flags.IS_LIVE === true (ENABLE_LIVE && !FORCE_DRY && !DRY_RUN).
  * - Keep FORCE_DRY=1 and DRY_RUN=1 for safe testing.
+ *
+ * Additional enhancements in this version:
+ * - Consistent fee parsing and startup sanity checks for MICRO_FEE_RATE / MICRO_FEE_IS_PERCENT.
+ * - Simulated orders include a computed `fee` field and a stable simulated `id`.
+ * - Diagnostics.history now persists per-trade `price` and `fee` for accurate FIFO P&L computation.
+ * - Live fills are recorded using best-effort extraction of fill price and fee from ccxt results (defensive).
+ * - Diagnostics.history is trimmed to a configurable max length before persisting.
  */
 
 const fs = require('fs');
@@ -25,6 +31,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 // Centralized runtime flags (robust parsing)
 const flags = require(path.resolve(__dirname, '../lib/runtime_flags'));
+
+const { computePositionAndPnl } = require(path.resolve(__dirname, './micro_pnl'));
 
 const LOG_PREFIX = '[microstructure]';
 const INDEX_MODULE = path.resolve(__dirname, './index.js'); // micro-structure orchestrator
@@ -50,6 +58,12 @@ const ONCE = process.argv.includes('--once');
 const SIM_PRICE = Number(process.env.SIM_PRICE || 30000);
 const SIM_BASE_BALANCE = Number(process.env.SIM_BASE_BALANCE || 0.01);
 const SIM_QUOTE_BALANCE = Number(process.env.SIM_QUOTE_BALANCE || 1000);
+
+// Fee configuration and validation
+const FEE_RAW = (process.env.MICRO_FEE_RATE ?? process.env.FEE_RATE ?? '0.001');
+const FEE_RATE = Number(FEE_RAW);
+const FEE_IS_PERCENT = (process.env.MICRO_FEE_IS_PERCENT ?? process.env.FEE_IS_PERCENT ?? '1') === '0' ? false : true;
+const MAX_HISTORY = Number(process.env.MICRO_HISTORY_MAX || 2000);
 
 // internal state
 let running = false;
@@ -134,7 +148,16 @@ function logOrder({ ts, action, result = null, reason = '', fullSignal = null, d
 function normalizeIndexEntry(entry) {
   if (!entry || typeof entry !== 'object') return null;
   const out = Object.assign({}, entry);
+  // Make sure summary object exists before trying to map
+  if (!out.summary && (out.win_rate !== undefined || out.winRate !== undefined || out.summary === undefined)) {
+    out.summary = out.summary || {};
+  }
   if (out.summary && out.summary.win_rate !== undefined) out.summary.winRate = out.summary.win_rate;
+  // also accept top-level win_rate -> summary.winRate if present
+  if (out.win_rate !== undefined && (!out.summary || out.summary.winRate === undefined)) {
+    out.summary = out.summary || {};
+    out.summary.winRate = out.win_rate;
+  }
   return out;
 }
 
@@ -179,15 +202,41 @@ function loadLatestSignalsFromOHLCV(timeframes, dir) {
 }
 
 function formatSignalForDecision(tf, entry) {
+  // Defensive: allow null/undefined entry
   const sig = {};
   sig.tf = tf;
-  sig.timestamp = entry.timestamp || entry.signal_timestamp || Date.now();
-  sig.signal = entry.signal || entry.ensemble_label || entry.prediction || null;
-  sig.ensemble_label = entry.ensemble_label || entry.signal || entry.prediction || null;
-  sig.ensemble_confidence = (entry.summary && entry.summary.winRate !== undefined) ? entry.summary.winRate * 100 : (entry.ensemble_confidence || entry.summary && entry.summary.win_rate ? entry.summary.win_rate * 100 : (entry.ensemble_confidence || 50));
-  sig.price = Number(entry.price || entry.close || entry.recent_win && entry.recent_win.close || SIM_PRICE);
-  sig.volatility = (entry.recent_win && entry.recent_win.volatility) || (entry.volatility) || 0;
-  sig.raw = entry;
+  const e = entry || {};
+  sig.timestamp = e.timestamp || e.signal_timestamp || Date.now();
+
+  // signal/label extraction - tolerate multiple naming conventions
+  sig.signal = e.signal ?? e.ensemble_label ?? e.prediction ?? null;
+  sig.ensemble_label = e.ensemble_label ?? e.signal ?? e.prediction ?? null;
+
+  // ensemble_confidence: prefer normalized summary.winRate, then summary.win_rate, then ensemble_confidence field, fallbacks to 0
+  let ensembleConfidence = null;
+  if (e.summary && typeof e.summary === 'object') {
+    const s = e.summary;
+    const wr = (s.winRate !== undefined && s.winRate !== null) ? s.winRate : (s.win_rate !== undefined && s.win_rate !== null ? s.win_rate : (s.winrate !== undefined ? s.winrate : null));
+    if (wr !== null) ensembleConfidence = Number(wr) * 100;
+  }
+  if (ensembleConfidence === null) {
+    // try top-level ensemble_confidence or confidence (already percentage or 0-1)
+    const top = e.ensemble_confidence ?? e.confidence ?? e.ensembleConfidence ?? null;
+    if (top !== null && top !== undefined) {
+      const n = Number(top);
+      // if value looks like 0..1 convert to percent; if already >1 assume percent
+      ensembleConfidence = (n > 0 && n <= 1) ? n * 100 : n;
+    }
+  }
+  sig.ensemble_confidence = Number.isFinite(ensembleConfidence) ? ensembleConfidence : 0;
+
+  // price extraction robustly
+  sig.price = Number(e.price || e.close || (e.recent_win && e.recent_win.close) || SIM_PRICE);
+
+  // volatility fallback
+  sig.volatility = Number((e.recent_win && e.recent_win.volatility) ?? e.volatility ?? 0);
+
+  sig.raw = e;
   return sig;
 }
 
@@ -199,17 +248,27 @@ function simulatedBalance() {
   return { free, total: { ...free } };
 }
 
-// simulate order result
+// Replace the existing simulateOrderResult with this version (adds 'fee' field and stable id)
 function simulateOrderResult(action, price, amount) {
+  const feeRate = Number.isFinite(FEE_RATE) ? FEE_RATE : 0.001;
+  const feeIsPercent = !!FEE_IS_PERCENT;
+  let fee = 0;
+  if (feeIsPercent && price && amount) {
+    fee = feeRate * price * amount; // fee in quote currency
+  } else if (!feeIsPercent && typeof feeRate === 'number') {
+    fee = feeRate; // absolute fee fallback
+  }
+  const now = Date.now();
   return {
-    id: `sim-${Date.now()}`,
-    timestamp: Date.now(),
-    datetime: new Date().toISOString(),
+    id: `sim-${now}-${Math.floor(Math.random() * 100000)}`,
+    timestamp: now,
+    datetime: new Date(now).toISOString(),
     symbol: MICRO_PAIR,
     type: 'market',
     side: action.toLowerCase(),
     price,
     amount,
+    fee,              // added: quote-currency fee estimate
     info: { simulated: true }
   };
 }
@@ -228,6 +287,10 @@ function loadPositionState() {
 }
 function savePositionState() {
   try {
+    // Trim diagnostics.history to last MAX_HISTORY entries to avoid uncontrolled growth
+    if (Array.isArray(diagnostics.history) && diagnostics.history.length > MAX_HISTORY) {
+      diagnostics.history = diagnostics.history.slice(-MAX_HISTORY);
+    }
     safeJsonWrite(POSITION_STATE_PATH, { position, lastTradeAt, history: diagnostics.history, ts: Date.now() });
   } catch (e) { logWarn('savePositionState failed', e && e.message ? e.message : e); }
 }
@@ -251,6 +314,50 @@ async function getExchange() {
     ccxtInstance = null;
     throw e;
   }
+}
+
+// defensive helpers to extract price/fee from exchange result
+function extractFillPrice(result, fallbackPrice) {
+  if (!result) return fallbackPrice;
+  // ccxt unified fields to check (in order of preference)
+  if (result.average) return Number(result.average);
+  if (result.filled && result.filled > 0 && result.cost && result.filled) return Number(result.cost) / Number(result.filled);
+  if (result.price) return Number(result.price);
+  if (result.info) {
+    // vendor-specific: check common fields
+    const info = result.info;
+    if (info.executed_price) return Number(info.executed_price);
+    if (info.avg) return Number(info.avg);
+    if (info.avgPrice) return Number(info.avgPrice);
+    if (info.fillPrice) return Number(info.fillPrice);
+  }
+  return fallbackPrice;
+}
+function extractFee(result) {
+  if (!result) return null;
+  if (result.fee) {
+    // ccxt might provide fee object or numeric
+    if (typeof result.fee === 'object' && result.fee.cost !== undefined) return Number(result.fee.cost);
+    if (typeof result.fee === 'number') return Number(result.fee);
+  }
+  if (result.info) {
+    const info = result.info;
+    if (info.fee) {
+      if (typeof info.fee === 'object' && info.fee.cost !== undefined) return Number(info.fee.cost);
+      if (typeof info.fee === 'number') return Number(info.fee);
+      if (typeof info.fee === 'string' && !isNaN(Number(info.fee))) return Number(info.fee);
+    }
+    // some exchanges return fees array or fills with fees
+    if (Array.isArray(info.fills) && info.fills.length) {
+      let acc = 0;
+      for (const f of info.fills) {
+        if (f.fee && f.fee.cost) acc += Number(f.fee.cost);
+        else if (f.fee) acc += Number(f.fee);
+      }
+      if (acc > 0) return acc;
+    }
+  }
+  return null;
 }
 
 // single submitter that handles DRY/LIVE and audit logging
@@ -279,7 +386,17 @@ async function submitOrder(action, pair, price, amount, fullSignal = null) {
     const res = simulateOrderResult(action, price, amount);
     diagnostics.lastTrade = { action, id: res.id, timestamp: res.timestamp, simulated: true, pair };
     diagnostics.history = diagnostics.history || [];
-    diagnostics.history.push({ when: Date.now(), action, pair, price, amount, simulated: true });
+    // Persist explicit price/fee/orderId so P&L math is accurate
+    diagnostics.history.push({
+      when: Date.now(),
+      action,
+      pair,
+      price: res.price,
+      amount: res.amount,
+      simulated: true,
+      orderId: res.id,
+      fee: res.fee !== undefined ? res.fee : null
+    });
     lastTradeAt = Date.now();
     lastOrderFingerprint = fingerprint;
     logOrder({ ts: Date.now(), action, result: res, reason: 'SIMULATED by submitOrder', fullSignal, dry: true });
@@ -306,9 +423,22 @@ async function submitOrder(action, pair, price, amount, fullSignal = null) {
         result = await ex.createOrder(pairToUse, 'market', 'sell', amount, undefined);
       }
     }
+
+    // Record best-effort fill price and fee
+    const fillPrice = extractFillPrice(result, price);
+    const fillFee = extractFee(result);
     diagnostics.lastTrade = { action, id: result && result.id ? result.id : null, timestamp: Date.now(), simulated: false, pair: pairToUse };
     diagnostics.history = diagnostics.history || [];
-    diagnostics.history.push({ when: Date.now(), action, pair: pairToUse, price, amount, simulated: false, orderId: result && result.id ? result.id : null });
+    diagnostics.history.push({
+      when: Date.now(),
+      action,
+      pair: pairToUse,
+      price: fillPrice !== undefined && fillPrice !== null ? fillPrice : price,
+      amount,
+      simulated: false,
+      orderId: result && result.id ? result.id : null,
+      fee: fillFee !== null ? fillFee : undefined
+    });
     lastTradeAt = Date.now();
     lastOrderFingerprint = fingerprint;
     logOrder({ ts: Date.now(), action, result, reason: 'LIVE executed by submitOrder', fullSignal, dry: false });
@@ -450,6 +580,17 @@ async function decideAndAct() {
         return;
       }
 
+      // PnL preview before BUY (informational)
+      try {
+        const feeRate = Number.isFinite(FEE_RATE) ? FEE_RATE : 0.001;
+        const baseSnapshot = computePositionAndPnl(diagnostics.history || [], chosenSignal.price, { feeRate });
+        const hypotTrades = (diagnostics.history || []).concat([{ when: Date.now(), action: 'BUY', price: chosenSignal.price, amount: MICRO_ORDER_AMOUNT, fee: (FEE_IS_PERCENT ? feeRate * chosenSignal.price * MICRO_ORDER_AMOUNT : feeRate) }]);
+        const afterBuy = computePositionAndPnl(hypotTrades, chosenSignal.price, { feeRate });
+        logInfo('PNL preview before BUY', { before: baseSnapshot, afterBuy });
+      } catch (e) {
+        logWarn('PNL preview failed', e && e.message ? e.message : e);
+      }
+
       const submitRes = await submitOrder('BUY', MICRO_PAIR, chosenSignal.price, MICRO_ORDER_AMOUNT, chosenSignal);
       if (submitRes && (submitRes.status === 'simulated' || submitRes.status === 'submitted')) {
         position = { open: true, side: 'long', entryPrice: chosenSignal.price, amount: MICRO_ORDER_AMOUNT, openedAt: now };
@@ -469,6 +610,17 @@ async function decideAndAct() {
         scheduleNext(MICRO_INTERVAL_MS, 'skip-insufficient-base');
         running = false;
         return;
+      }
+
+      // PnL preview before SELL (realization preview)
+      try {
+        const feeRate = Number.isFinite(FEE_RATE) ? FEE_RATE : 0.001;
+        const baseSnapshot = computePositionAndPnl(diagnostics.history || [], chosenSignal.price, { feeRate });
+        const hypotTrades = (diagnostics.history || []).concat([{ when: Date.now(), action: 'SELL', price: chosenSignal.price, amount: available, fee: (FEE_IS_PERCENT ? feeRate * chosenSignal.price * available : feeRate) }]);
+        const afterSell = computePositionAndPnl(hypotTrades, chosenSignal.price, { feeRate });
+        logInfo('PNL preview before SELL', { before: baseSnapshot, afterSell });
+      } catch (e) {
+        logWarn('PNL preview failed', e && e.message ? e.message : e);
       }
 
       const submitRes = await submitOrder('SELL', MICRO_PAIR, chosenSignal.price, available, chosenSignal);
@@ -526,6 +678,15 @@ function scheduleNext(ms, reason) {
 
 // startup
 loadPositionState();
+
+// Fee-rate sanity logging
+if (Number.isFinite(FEE_RATE)) {
+  logInfo('Using fee rate', { MICRO_FEE_RATE: FEE_RAW, interpreted_as: FEE_RATE, percent_mode: FEE_IS_PERCENT });
+  if (FEE_IS_PERCENT && FEE_RATE > 0.01) logWarn('MICRO_FEE_RATE is > 1% — ensure this is intended and expressed as decimal fraction (e.g. 0.001 for 0.1%)');
+} else {
+  logWarn('MICRO_FEE_RATE not parseable, defaulting to 0.001 (0.1%)');
+}
+
 logInfo('micro_ccxt_orders (index-driven) starting', {
   MICRO_PAIR, MICRO_PRIMARY_TF, DRY_RUN, FORCE_DRY, ENABLE_LIVE, IS_LIVE, DEBUG
 });

@@ -130,14 +130,69 @@ function _loadChallengeCache(force = false) {
 }
 
 function loadChallengeModelResults(timeframe = '15m', opts = { reload: false }) {
+  // This loader returns a normalized, defensive structure so callers never receive undefined shapes.
   const cache = _loadChallengeCache(Boolean(opts.reload));
-  if (!cache) return {};
-  // model_winner.json may be either a single object (winner) or a map by timeframe
-  // Accept both shapes: { timeframe: {...} } or { timeframe: '15m', ... }.
-  if (cache[timeframe]) return cache[timeframe];
-  // If file describes a single winner, check fields
-  if (cache.timeframe && String(cache.timeframe) === String(timeframe)) return cache;
-  return {};
+  if (!cache) {
+    return {
+      summary: { active_model: 'no_winner', win_rate: 0, dominant_periods: [] },
+      recent_win: {}
+    };
+  }
+
+  // Accept both shapes: map by timeframe or single-object for a timeframe
+  let obj = null;
+  if (cache[timeframe]) obj = cache[timeframe];
+  else if (cache.timeframe && String(cache.timeframe) === String(timeframe)) obj = cache;
+  else {
+    return {
+      summary: { active_model: 'no_winner', win_rate: 0, dominant_periods: [] },
+      recent_win: {}
+    };
+  }
+
+  // Local helpers (avoid reliance on the later exported helpers)
+  const _isObject = v => v && typeof v === 'object' && !Array.isArray(v);
+  const _toNum = v => {
+    if (v === '' || v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const normalized = {};
+  // Ensure we always have a summary object
+  if (_isObject(obj.summary)) {
+    normalized.summary = Object.assign({}, obj.summary);
+  } else {
+    normalized.summary = {
+      active_model: obj.active_model || 'no_winner',
+      win_rate: (obj.win_rate !== undefined && obj.win_rate !== null) ? Number(obj.win_rate) : 0,
+      dominant_periods: Array.isArray(obj.dominant_periods) ? obj.dominant_periods.slice() : []
+    };
+  }
+
+  // Normalize dominant_periods to always be an array of enriched objects
+  const rawDps = Array.isArray(normalized.summary.dominant_periods) ? normalized.summary.dominant_periods : (Array.isArray(obj.dominant_periods) ? obj.dominant_periods : []);
+  normalized.summary.dominant_periods = rawDps.map(p => {
+    if (!p || typeof p !== 'object') return { start_ts: null, end_ts: null, start_ts_ms: null, end_ts_ms: null, start_iso: null, end_iso: null, length: null };
+    const startRaw = (p.start_ts ?? p.start_ts_ms ?? p.start ?? p.start_ms) ?? null;
+    const endRaw = (p.end_ts ?? p.end_ts_ms ?? p.end ?? p.end_ms) ?? null;
+    const startMs = startRaw !== null ? _toNum(startRaw) : null;
+    const endMs = endRaw !== null ? _toNum(endRaw) : null;
+    return {
+      start_ts: startRaw,
+      end_ts: endRaw,
+      start_ts_ms: startMs,
+      end_ts_ms: endMs,
+      start_iso: (startMs !== null) ? new Date(startMs).toISOString() : null,
+      end_iso: (endMs !== null) ? new Date(endMs).toISOString() : null,
+      length: (p.length ?? p.len ?? null)
+    };
+  });
+
+  // recent_win: ensure object
+  normalized.recent_win = _isObject(obj.recent_win) ? obj.recent_win : (obj.recent_win || {});
+
+  return normalized;
 }
 
 /**

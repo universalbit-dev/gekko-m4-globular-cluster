@@ -3,11 +3,11 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'
 const fs = require('fs');
 
 // Config: target aggregation timeframe for microstructure (e.g.,'1m' '5m', '15m', '1h')
-const OHLCV_CANDLE_SIZE = process.env.MICRO_OHLCV_CANDLE_SIZE || '1m';
+const OHLCV_CANDLE_SIZE = process.env.MICRO_OHLCV_CANDLE_SIZE || '1m,5m';
 const PAIR = process.env.PAIR || 'BTC/EUR';
 const OHLCV_JSON_DIR = path.resolve(__dirname, '../logs/json/ohlcv');
 
-// Parses interval string like '1m', '5m', '1h' to milliseconds
+// Parses interval string like '1m', '5m', '15m', '1h' to milliseconds
 function parseInterval(intervalStr) {
   if (!intervalStr) throw new Error('Missing interval string');
   if (intervalStr.endsWith('m')) return parseInt(intervalStr, 10) * 60 * 1000;

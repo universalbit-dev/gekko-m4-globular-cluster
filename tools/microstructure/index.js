@@ -17,7 +17,7 @@ const microSignalLogger = require('./microSignalLogger');
 const { getAggregatedPredictionCandles } = require('./microOHLCV');
 
 const PAIR = process.env.PAIR || 'BTC/EUR';
-const TIMEFRAMES = (process.env.INDEX_OHLCV_CANDLE_SIZE || '1m,5m,15m,1h')
+const TIMEFRAMES = (process.env.INDEX_OHLCV_CANDLE_SIZE || '1m,5m')
     .split(',')
     .map(tf => tf.trim());
 const MICRO_INTERVAL_MS = parseInt(process.env.MICRO_INTERVAL_MS, 10) || 60000;
