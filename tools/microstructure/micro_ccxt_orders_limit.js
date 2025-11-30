@@ -1,5 +1,5 @@
 /**
- * micro_ccxt_orders.js — enhanced with structured candidate logging
+ * micro_ccxt_orders_limit.js — enhanced with structured candidate logging
  *
  * New behavior:
  * - Emits a structured "[ORDER-CANDIDATE]" log line and writes candidate JSONL for any candidate decision
