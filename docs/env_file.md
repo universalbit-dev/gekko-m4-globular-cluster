@@ -1,5 +1,7 @@
 # 📦 Environment Variable Reference (`.env`)
 
+For the full Environment Configuration Reference, see: [Environment Configuration Reference](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/Environment.md)
+
 ## 🌱 What Is a `.env` File?
 
 A `.env` file manages your configuration — like API keys, exchange names, time intervals, and model settings — outside your code. This keeps sensitive info safe and lets you switch environments (development, testing, production) easily.
