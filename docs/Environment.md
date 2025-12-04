@@ -342,9 +342,8 @@ Notes about duplicate blocks:
 ---
 
 ## Developer notes: where variables are used and how to locate usage
-
-- Typical places to look in the codebase:
-  - Config loader module (e.g., `config.js`, `env.js`): this file will map process.env values to typed config objects.
+  - Typical places to look in the codebase:
+  - Config loader module (e.g., `config.js`, `env.js`): the project commonly uses the dotenv package to load .env files into process.env; the config loader should parse those string values and map them into typed config objects (numbers, booleans, arrays) and perform appropriate validation and defaults.
   - Exchange wrappers / CCXT integration (e.g., directories named `exchange`, `ccxt`, or `tools/ccxt`).
   - Trainers and model scripts: directories like `train`, `tools/microstructure`, `trained_ohlcv`.
   - Backtest and challenge components: look for names like `challenge`, `backtest`, `evaluate`, `autotune`.
