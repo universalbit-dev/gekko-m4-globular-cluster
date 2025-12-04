@@ -1,6 +1,6 @@
 # 📦 Environment Variable Reference (`.env`)
 
-For the full Environment Configuration Reference, see: [Environment Configuration Reference](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/Environment.md)
+Reference: [Environment Configuration](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/Environment.md)
 
 ## 🌱 What Is a `.env` File?
 
