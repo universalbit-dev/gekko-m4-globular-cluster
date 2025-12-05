@@ -17,17 +17,21 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'
 const path = require('path');
 const fs = require('fs');
 
-// Parse interval string (e.g., "1m", "5m", "1h", "1d") to milliseconds.
+// Parse interval string (e.g., "1s", "1m", "5m", "1h", "1d") to milliseconds.
 // Throws on unsupported format.
 function parseInterval(intervalStr) {
   if (!intervalStr || typeof intervalStr !== 'string') throw new Error('Missing interval string');
   const s = intervalStr.trim();
   const num = parseInt(s, 10);
-  if (s.endsWith('m')) return num * 60 * 1000;
-  if (s.endsWith('h')) return num * 60 * 60 * 1000;
-  if (s.endsWith('d')) return num * 24 * 60 * 60 * 1000;
-  if (s.endsWith('w')) return num * 7 * 24 * 60 * 60 * 1000;
-  if (s.endsWith('M')) return num * 30 * 24 * 60 * 60 * 1000;
+  if (Number.isNaN(num)) throw new Error('Invalid interval number: ' + intervalStr);
+
+  const unit = s[s.length - 1].toLowerCase();
+  if (unit === 's') return num * 1000;
+  if (unit === 'm') return num * 60 * 1000;
+  if (unit === 'h') return num * 60 * 60 * 1000;
+  if (unit === 'd') return num * 24 * 60 * 60 * 1000;
+  if (unit === 'w') return num * 7 * 24 * 60 * 60 * 1000;
+  if (unit === 'M') return num * 30 * 24 * 60 * 60 * 1000; // months (approx)
   throw new Error('Unsupported interval format: ' + intervalStr);
 }
 
@@ -43,7 +47,7 @@ const FRAMES = parseFramesList(OHLCV_CANDLE_SIZE);
 const DEFAULT_TARGET_FRAME = FRAMES[0] || '5m';
 let AGG_WINDOW_MS;
 try {
-  AGG_WINDOW_MS = parseInterval(DEFAULT_TARGET_FRAME);
+  AGG_WINDOW_MS = parseInterval(String(DEFAULT_TARGET_FRAME));
 } catch (e) {
   AGG_WINDOW_MS = parseInterval('5m');
 }
@@ -83,6 +87,7 @@ function aggregateCandles(candles) {
   const labelExists = arr.some(c => c[7] !== undefined);
   const labels = labelExists ? arr.map(c => c[7]) : undefined;
 
+  // For backward compatibility we keep the old fields, but add minimal metadata where possible
   return {
     timestamp,
     open,
@@ -96,12 +101,39 @@ function aggregateCandles(candles) {
   };
 }
 
+// Internal dedupe helper: if multiple aggregated bars share same timestamp and agg_method,
+// keep the one with highest coverage, then highest length, then the first one.
+function _dedupeAggregates(aggs) {
+  if (!Array.isArray(aggs) || aggs.length === 0) return aggs;
+  const map = Object.create(null);
+  for (const a of aggs) {
+    const key = `${a.timestamp}:${a.agg_method || 'default'}`;
+    const prev = map[key];
+    if (!prev) {
+      map[key] = a;
+      continue;
+    }
+    // prefer higher coverage
+    if ((a.coverage || 0) > (prev.coverage || 0)) {
+      map[key] = a;
+      continue;
+    }
+    // prefer longer length
+    if ((a.length || 0) > (prev.length || 0)) {
+      map[key] = a;
+      continue;
+    }
+    // otherwise keep prev (which preserves first-seen behavior)
+  }
+  return Object.keys(map).map(k => map[k]).sort((x, y) => Number(x.timestamp) - Number(y.timestamp));
+}
+
 // Aggregate many base candles into aligned target timeframe buckets.
 // - candles: array of objects (must include .timestamp in ms) sorted or unsorted.
 // - targetFrame: string like '5m' or ms number. default: DEFAULT_TARGET_FRAME
 // - baseFrame: string like '1m' or ms number. default: '1m'
 // - options:
-//     { allowPartial: true|false, minCandlesRatio: 0..1, aggMethod: 'avg'|'median'|'vote'|'weighted' }
+//     { allowPartial: true|false, minCandlesRatio: 0..1, aggMethod: 'avg'|'median'|'vote'|'weighted', fillGaps: true|false }
 function aggregateToTarget(candles, targetFrame = DEFAULT_TARGET_FRAME, baseFrame = process.env.MICRO_OHLCV_BASE_FRAME || '1m', options = {}) {
   if (!Array.isArray(candles) || candles.length === 0) return [];
 
@@ -109,9 +141,23 @@ function aggregateToTarget(candles, targetFrame = DEFAULT_TARGET_FRAME, baseFram
   const targetMs = typeof targetFrame === 'number' ? targetFrame : parseInterval(String(targetFrame));
   const baseMs = typeof baseFrame === 'number' ? baseFrame : parseInterval(String(baseFrame));
 
-  const allowPartial = options.allowPartial ?? (process.env.MICRO_OHLCV_ALLOW_PARTIAL === 'true' || true);
-  const minCandlesRatio = typeof options.minCandlesRatio === 'number' ? options.minCandlesRatio : Number(process.env.MICRO_OHLCV_MIN_CANDLES_RATIO ?? 0.66);
+  // FIXED: previous implementation always set allowPartial true because of `|| true`.
+  // Respect explicit option first, then environment, then fallback to true for backward compatibility.
+  const allowPartial = (typeof options.allowPartial === 'boolean')
+    ? options.allowPartial
+    : (typeof process.env.MICRO_OHLCV_ALLOW_PARTIAL !== 'undefined'
+      ? (process.env.MICRO_OHLCV_ALLOW_PARTIAL === 'true')
+      : true);
+
+  let minCandlesRatio = (typeof options.minCandlesRatio === 'number')
+    ? options.minCandlesRatio
+    : Number(process.env.MICRO_OHLCV_MIN_CANDLES_RATIO ?? 0.66);
+  // clamp
+  if (!Number.isFinite(minCandlesRatio) || minCandlesRatio < 0) minCandlesRatio = 0;
+  if (minCandlesRatio > 1) minCandlesRatio = 1;
+
   const aggMethod = options.aggMethod || process.env.MICRO_OHLCV_AGG_METHOD || 'weighted';
+  const fillGaps = options.fillGaps ?? (process.env.MICRO_OHLCV_FILL_GAPS === 'true' ? true : false);
 
   // ensure sorted ascending by timestamp
   const sorted = candles.slice().sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
@@ -124,14 +170,33 @@ function aggregateToTarget(candles, targetFrame = DEFAULT_TARGET_FRAME, baseFram
 
   for (const c of sorted) {
     const ts = Number(c.timestamp);
+    // If the candle belongs to a later canonical bucket, flush current bucket(s).
     if (ts >= bucketStart + targetMs) {
       if (bucket.length) {
         const agg = _aggregateBucket(bucket, bucketStart, expectedCount, aggMethod);
         if (_shouldKeep(agg, allowPartial, minCandlesRatio)) aggregated.push(agg);
+        bucket = [];
+      } else if (fillGaps) {
+        // optional: create explicit empty bucket with zero coverage
+        const empty = {
+          timestamp: bucketStart,
+          open: null,
+          high: null,
+          low: null,
+          close: null,
+          volume: 0,
+          length: 0,
+          expected: Math.max(1, expectedCount),
+          coverage: 0,
+          confidence: 0,
+          prediction: null,
+          labels: undefined,
+          agg_method: aggMethod
+        };
+        aggregated.push(empty);
       }
-      // advance bucketStart to the candle's canonical bucket
+      // advance bucketStart to the candle's canonical bucket (handles gaps)
       bucketStart = Math.floor(ts / targetMs) * targetMs;
-      bucket = [];
     }
     bucket.push(c);
   }
@@ -142,7 +207,10 @@ function aggregateToTarget(candles, targetFrame = DEFAULT_TARGET_FRAME, baseFram
     if (_shouldKeep(agg, allowPartial, minCandlesRatio)) aggregated.push(agg);
   }
 
-  return aggregated;
+  // Deduplicate possible repeated timestamps (some upstream callers may compute same target multiple times).
+  const deduped = _dedupeAggregates(aggregated);
+
+  return deduped;
 }
 
 // internal helper to decide whether to keep aggregated bucket
@@ -264,5 +332,5 @@ module.exports = {
   AGG_WINDOW_MS,
   DEFAULT_TARGET_FRAME,
   aggregateCandles,    // single-bucket aggregator (backwards-compatible)
-  aggregateToTarget   // aligned multi-bucket aggregator with metadata
+  aggregateToTarget   // aligned multi-bucket aggregator with metadata (deduped)
 };
