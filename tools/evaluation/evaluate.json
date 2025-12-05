@@ -1,5 +1,5 @@
 {
-  "dataPath": "../logs/json/ohlcv/ohlcv_ccxt_data.json",
+  "dataPath": "../logs/json/ohlcv",
   "outputPath": "./evaluate_results.json",
   "tests": [
     {
