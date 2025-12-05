@@ -7,19 +7,6 @@ module.exports = {
       exec_mode: 'cluster'
     },
     {
-      name: 'explorer-clean',
-      script: './explorer.js',
-      args: 'clean',
-      instances: 1,
-      exec_mode: 'fork',
-      autorestart: false,
-      watch: false,
-      cron_restart: '0 0 */2 * *',
-      env: {
-        NODE_ENV: 'production'
-      }
-    },
-    {
       name: 'challenge',
       script: 'challenge/challenge_analysis.js',
       instances: 1,
