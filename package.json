@@ -4,7 +4,7 @@
   "description": "NGC 6121",
   "main": "gekko.js",
   "type": "git",
-  "contributor": "universalbit-dev <+393774788289>",
+  "contributor": "universalbit-dev",
   "author": "Mike van Rossum <mike@mvr.me>",
   "license": "MIT",
   "dependencies": {
