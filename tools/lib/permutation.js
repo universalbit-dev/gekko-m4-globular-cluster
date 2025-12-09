@@ -338,7 +338,23 @@ function scorePlans(plans, ctx = {}) {
     if (expectedProfit < 1e-6) score -= 2;
 
     // small randomization to break ties but controllable (we use crypto small value)
-    const rand = (crypto.randomBytes(2).readUInt16BE(0) % 1000) / 1000000;
+    // Avoid biased results from modulo on random bytes (CodeQL): use crypto.randomInt() when available,
+    // otherwise fall back to rejection-sampling to produce an unbiased 0..999 integer.
+    let rand = 0;
+    if (typeof crypto.randomInt === 'function') {
+      // uniform integer in [0, 1000)
+      rand = crypto.randomInt(0, 1000) / 1000000;
+    } else {
+      // rejection sampling fallback to avoid modulo bias
+      const RANGE = 1000;
+      const MAX = 0x10000; // 65536
+      const limit = MAX - (MAX % RANGE); // largest multiple of RANGE < MAX
+      let n;
+      do {
+        n = crypto.randomBytes(2).readUInt16BE(0);
+      } while (n >= limit);
+      rand = (n % RANGE) / 1000000;
+    }
     score += rand;
 
     results.push(Object.assign({}, p, { score }));
