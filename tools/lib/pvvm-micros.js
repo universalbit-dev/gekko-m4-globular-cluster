@@ -8,6 +8,8 @@
 // - spread_body: score proportional to candle body (close - open) relative to price (percent scaled).
 // - volume_pulse: confidence boost when volume exceeds baseline (meta.avgVolumeBaseline or env).
 // - trend_ema_simple: looks for slope/label hints in raw payload and returns trend signal.
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const pvvm = require('./pvvm');
 const { DEBUG = false } = require('./runtime_flags');

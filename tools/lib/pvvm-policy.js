@@ -21,6 +21,8 @@
 //  const policy = require('./pvvm-policy');
 //  decision = policy.applyPvvmPolicy(decision, pvvmResult);
 //
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const PVVM_POLICY_MODE = (process.env.PVVM_POLICY_MODE || process.env.PVVM_MODE || 'log').toLowerCase();
 const PVVM_OVERRIDE_CONF = Number(process.env.PVVM_OVERRIDE_CONF ?? process.env.PVVM_OVERRIDE_CONF ?? 0.9);

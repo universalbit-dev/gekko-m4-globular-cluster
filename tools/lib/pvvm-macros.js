@@ -1,6 +1,8 @@
 // tools/lib/pvvm-macros.js
 // Example macro: daily loss circuit breaker. If day's loss exceeds threshold, return override hold.
 
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const pvvm = require('./pvvm');
 const { DEBUG = false } = require('./runtime_flags');
 

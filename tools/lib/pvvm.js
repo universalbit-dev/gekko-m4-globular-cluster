@@ -4,7 +4,8 @@
 // - Lightweight, defensive, safe to require even if not used
 // - Exposes registerMicro, unregisterMicro, registerMacro, unregisterMacro, evaluate, list, setOptions
 //
-
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const { DEBUG: DEBUG_FLAG = false } = require('./runtime_flags');
 
 // local debug helper
