@@ -1,4 +1,3 @@
-// tools/lib/pvvm-micros-atr.js
 // PVVM micro: ATR-based magnitude micro that reads recent OHLCV and computes z-score of ATR/body.
 // - Exports as { micros: { atr_magnitude: fn } } so loaders that expect a micros object can consume it.
 // - Safe: returns null if ATR implementation or OHLCV data is missing or insufficient.
@@ -26,7 +25,7 @@ function _clamp(v, a = -1, b = 1) { return Math.max(a, Math.min(b, Number(v) || 
 let ATR = null;
 try {
   // try to load ATR indicator from common repo locations
-  const candidate = path.resolve(__dirname, '../../m4/tools/evaluation/indicator/ATR.js');
+  const candidate = path.resolve(__dirname, '../evaluation/indicator/ATR.js');
   if (fs.existsSync(candidate)) ATR = require(candidate);
 } catch (e) {
   if (DEBUG) _log('ATR require failed', e && e.message ? e.message : e);
@@ -94,6 +93,14 @@ function loadOhlcvRowsForTf(tf) {
   return null;
 }
 
+// helper: return first non-null/undefined value
+function firstDefined(...vals) {
+  for (const v of vals) {
+    if (v !== undefined && v !== null) return v;
+  }
+  return undefined;
+}
+
 // Micro implementation
 async function atr_magnitude({ candle, meta }) {
   try {
@@ -138,8 +145,26 @@ async function atr_magnitude({ candle, meta }) {
     const z = std > 0 ? ((lastATR - mean) / std) : 0;
 
     // body from candle (prefer raw fields)
-    const open = Number((candle && candle.raw && (candle.raw.open ?? candle.raw.o)) ?? (candle && (candle.open ?? candle.o)) ?? NaN);
-    const close = Number((candle && candle.raw && (candle.raw.close ?? candle.raw.c)) ?? (candle && (candle.close ?? candle.c)) ?? candle && candle.price ?? NaN);
+    // Use a safe helper to avoid mixing ?? and && in a single expression which can cause parse issues.
+    const openVal = firstDefined(
+      candle && candle.raw && candle.raw.open,
+      candle && candle.raw && candle.raw.o,
+      candle && candle.open,
+      candle && candle.o,
+      candle && candle[0]
+    );
+    const closeVal = firstDefined(
+      candle && candle.raw && candle.raw.close,
+      candle && candle.raw && candle.raw.c,
+      candle && candle.close,
+      candle && candle.c,
+      candle && candle.price,
+      candle && candle[3]
+    );
+
+    const open = Number(openVal ?? NaN);
+    const close = Number(closeVal ?? NaN);
+
     if (!Number.isFinite(open) || !Number.isFinite(close)) {
       if (DEBUG) _log('candle open/close missing for atr_magnitude');
       return null;
