@@ -4,7 +4,7 @@
 # - Requires Node.js v20+
 # - Ensures build toolchain is installed
 # - Ensures node-gyp is available (installs globally if missing)
-# - Installs npm deps, links local tools if present
+# - Installs npm deps
 # - Reinstalls PM2 and starts simulator config
 #
 # Exit codes:
@@ -65,24 +65,20 @@ if command -v node-gyp &>/dev/null; then
   echo "node-gyp found in PATH."
 else
   echo "node-gyp not found in PATH. Checking if node-gyp is installed globally via npm..."
-  # Check if node-gyp is present in global npm list
   if npm list -g --depth=0 node-gyp >/dev/null 2>&1 || npm ls -g --depth=0 node-gyp >/dev/null 2>&1; then
     BIN_DIR=$(npm bin -g 2>/dev/null || true)
     if [ -n "$BIN_DIR" ] && [ -x "$BIN_DIR/node-gyp" ]; then
       echo "node-gyp is installed globally but its bin directory ($BIN_DIR) may not be in your PATH."
       echo "Add it to your PATH for the current session (example):"
       echo "  export PATH=\"$BIN_DIR:\$PATH\""
-      echo "Or add the same line to your shell profile (e.g. ~/.bashrc or ~/.profile)."
     else
       echo "node-gyp appears installed globally but npm bin couldn't be determined or node-gyp executable wasn't found."
       echo "Ensure the npm global bin directory is on your PATH."
     fi
   else
     echo "node-gyp is not installed globally. Attempting to install node-gyp globally now..."
-    # Try to install globally. We attempt without sudo first.
     if npm install -g node-gyp; then
       echo "node-gyp installed successfully (npm global)."
-      # Ensure it's now available
       if command -v node-gyp &>/dev/null; then
         echo "node-gyp is now available in PATH."
       else
@@ -118,19 +114,7 @@ if ! npm install; then
 fi
 echo ">> npm dependencies installed."
 
-# Link local tools module if present
-if [ -d "tools" ]; then
-  echo ""
-  echo ">> Linking local tools/ module (npm link tools)..."
-  if npm link tools; then
-    echo ">> Linked tools successfully."
-  else
-    echo "Warning: 'npm link tools' failed. Ensure tools/ is a valid npm package (has package.json)."
-  fi
-else
-  echo ""
-  echo ">> Skipping npm link tools: 'tools' directory not found."
-fi
+# Skip npm link tools logic
 
 # Fix vulnerabilities with npm audit fix (best-effort)
 echo ""
