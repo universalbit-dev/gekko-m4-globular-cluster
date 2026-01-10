@@ -11,7 +11,7 @@
  * Notes:
  * - Overwrites output prediction CSV on each run to avoid file size growth.
  * - Appends only signal transitions (state changes) to exchangesimulator_signal.log.
- * - Deduplicates signal log by timestamp.
+ * - Robustly skips empty/corrupt model json files instead of crashing.
  */
 const path = require('path');
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
@@ -61,13 +61,45 @@ function loadAllModels(modelDir) {
     console.warn('No trained model directory found. Skipping prediction step.');
     return [];
   }
+
   const modelFiles = fs.readdirSync(modelDir).filter(file => file.endsWith('.json'));
-  return modelFiles.map(file => {
-    const modelJson = JSON.parse(fs.readFileSync(path.join(modelDir, file), 'utf8'));
-    const net = new ConvNet.Net();
-    net.fromJSON(modelJson);
-    return { net, filename: file };
-  });
+  if (modelFiles.length === 0) {
+    console.warn('No .json model files found in', modelDir);
+    return [];
+  }
+
+  const models = [];
+  for (const file of modelFiles) {
+    const fullPath = path.join(modelDir, file);
+    let raw;
+    try {
+      raw = fs.readFileSync(fullPath, 'utf8').trim();
+      if (!raw) {
+        console.warn(`Skipping empty model file: ${file}`);
+        continue;
+      }
+    } catch (readErr) {
+      console.error(`Failed to read model file ${file}:`, readErr.message);
+      continue;
+    }
+
+    try {
+      const modelJson = JSON.parse(raw);
+      const net = new ConvNet.Net();
+      // net.fromJSON may throw if JSON isn't a valid model; catch that too
+      net.fromJSON(modelJson);
+      models.push({ net, filename: file });
+      console.log(`Loaded model: ${file}`);
+    } catch (parseErr) {
+      console.error(`Failed to parse/load model ${file}: ${parseErr.message}. Skipping this file.`);
+      continue;
+    }
+  }
+
+  if (models.length === 0) {
+    console.warn('No valid models loaded from', modelDir);
+  }
+  return models;
 }
 
 function predictAll(candles, net) {
@@ -162,7 +194,7 @@ function runRecognition() {
         console.log(`[${new Date().toISOString()}] Prediction CSV generated for model: ${filename}`);
       }
     } else {
-      console.log('Prediction CSV not generated because no trained models were found.');
+      console.log('Prediction CSV not generated because no trained models were found or none could be loaded.');
     }
   } catch (err) {
     console.error('Recognition error:', err.stack || err.message);
