@@ -29,3 +29,6 @@ tools/explorer.js
 **/plugin/
 **/tools/
 **/strategies/
+
+# dotenv environment variables file
+.env
