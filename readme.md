@@ -81,7 +81,14 @@ cd gekko-m4-globular-cluster
 ```
 ---
 
+**Secure the configuration file**
+```bash
+sudo chmod 600 .env
+```
+---
+
 ##### Quickly install all dependencies and start the node ecosystem using PM2!
+
 **Give Permission to Execute the Script**  
    Open your terminal in the project root and run:  
    ```bash
