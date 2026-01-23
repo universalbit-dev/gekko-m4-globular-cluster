@@ -1,28 +1,50 @@
 name: Node.js CI
-permissions:
-  contents: read
+
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Use Node.js 20 LTS
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Clean install dependencies
+        run: npm ci
 
-      - name: Fix Vulnerabilities in root
-        run: npm audit fix
+      - name: Audit dependencies
+        run: |
+          npm audit --production
+          # If you want pipeline to fail ONLY on critical vulnerabilities, 
+          # comment out the above and uncomment below:
+          # npm audit --production --audit-level=critical
+
+      # Optionally run tests if you have them
+      # - name: Run tests
+      #   run: npm test
 
       - name: Run ngc6121.sh Simulator Script
         run: |
