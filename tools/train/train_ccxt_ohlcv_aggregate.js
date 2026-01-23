@@ -11,7 +11,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const fs = require('fs');
-const tf = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs');
 
 const TRAIN_INTERVAL_MS = parseInt(process.env.TRAIN_INTERVAL_MS, 10) || 3600000; // default 1h
 const filePath = path.resolve(__dirname, '../logs/json/ohlcv/ohlcv_ccxt_data.json');
