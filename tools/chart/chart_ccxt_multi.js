@@ -9,7 +9,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const tf = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs');
 const convnetjs = require('../../core/convnet.js');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
