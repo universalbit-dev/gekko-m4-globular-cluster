@@ -28,7 +28,7 @@ The **Gekko M4 Globular Cluster** repository is a feature-rich implementation de
 - **Custom Advice Handling**: Collect and process trading advice from each strategy dynamically.
 - **Robust Base**: Built on top of Gekko's `tradingAdvisor` plugin for enhanced modularity.
 - **Scalable Architecture**: Easily extendable to incorporate additional strategies and configurations.
-
+- **[ Explore Bitcoin-specific blockchain nodes](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)**.
 ---
 
 ## 📚 Project Documentation Overview
@@ -142,7 +142,6 @@ For details on implementing advanced charting for this project, refer to the ded
 * #### **[MiCA Regulation & This Project](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/MiCA_regulation_and_this_project.md)** - How MiCA Relates to This Project.
     
 * #### **[Project Resources](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/resources/readme.md)** - Additional resources related to this project.
-* ##### **[NET Node](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain/bitcoin)** - Explore Bitcoin-specific blockchain nodes.
 * #### **[TulipIndicators](https://tulipindicators.org/)** - Technical analysis indicators for financial data.
 * #### **[Blockchain Mining](https://github.com/universalbit-dev/universalbit-dev/tree/main/blockchain)** - Resources on blockchain and mining.
 
