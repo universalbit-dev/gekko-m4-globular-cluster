@@ -45,14 +45,40 @@ module.exports = {
   
     var db = new sqlite3.Database(fullPath);
 
-    db.run('PRAGMA synchronous = ' + syncMode, function(err) {
-    if (err) console.error('PRAGMA synchronous error:', err);
-    });
-    db.run('PRAGMA journal_mode = ' + journalMode, function(err) {
-    if (err) console.error('PRAGMA journal_mode error:', err);
+    // Configure busy timeout immediately so subsequent statements wait for locks.
+    try {
+      if (typeof db.configure === 'function') {
+        db.configure('busyTimeout', 10000);
+      } else {
+        // Fallback: set via PRAGMA if configure() is not available.
+        db.run("PRAGMA busy_timeout = 10000", function(err) {
+          if (err) console.warn('PRAGMA busy_timeout failed:', err);
+        });
+      }
+    } catch (e) {
+      console.warn('Could not set busy timeout via configure/pragmas', e);
+    }
+
+    // Helper to run PRAGMA statements with limited retries on SQLITE_BUSY.
+    function runPragmaWithRetry(sql, cb, attempt = 1) {
+      db.run(sql, function(err) {
+        if (err && err.code === 'SQLITE_BUSY' && attempt < 6) {
+          // exponential backoff: 200ms, 400ms, 800ms...
+          var backoff = 200 * Math.pow(2, attempt - 1);
+          setTimeout(() => runPragmaWithRetry(sql, cb, attempt + 1), backoff);
+          return;
+        }
+        if (err) console.error(sql + ' error:', err);
+        if (typeof cb === 'function') cb(err);
+      });
+    }
+
+    // Serialize PRAGMA execution so ordering is consistent.
+    db.serialize(() => {
+      runPragmaWithRetry('PRAGMA synchronous = ' + syncMode);
+      runPragmaWithRetry('PRAGMA journal_mode = ' + journalMode);
     });
 
-    db.configure('busyTimeout', 10000);
     return db;
   }
 };
