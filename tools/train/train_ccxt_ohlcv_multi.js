@@ -18,7 +18,24 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const fs = require('fs');
-const tf = require('@tensorflow/tfjs');
+
+let tf;
+try {
+  // Prefer the node bindings (registers filesystem save handlers and uses native accel)
+  tf = require('@tensorflow/tfjs-node');
+  console.log('[TRAIN] using @tensorflow/tfjs-node backend');
+  try {
+    if (tf && tf.setBackend) {
+      tf.setBackend && tf.setBackend('tensorflow');
+      // don't await here, but ensure ready is requested
+      tf.ready().catch(() => {});
+    }
+  } catch (_) {}
+} catch (e) {
+  // Fallback to pure JS if node bindings unavailable (model.save to file:// will fail)
+  console.warn('[TRAIN] @tensorflow/tfjs-node not available, falling back to @tensorflow/tfjs. file:// saves will fail.');
+  tf = require('@tensorflow/tfjs');
+}
 
 // Try to load label helper (fallback to same-file require)
 let labelCandles = null;
@@ -147,13 +164,20 @@ async function trainPlattCalibrator(probArray, labelBinary, epochs = 200, batchS
     const bias = await ws[1].array();
     const a = Number(kernel[0][0]);
     const b = Number(bias[0]);
-    X.dispose(); y.dispose(); ws.forEach(t => t.dispose()); model.dispose(); tf.engine().disposeVariables();
+    X.dispose(); y.dispose(); ws.forEach(t => t.dispose()); model.dispose(); try { tf.engine().disposeVariables(); } catch (_) {}
     return { a, b };
   } catch (e) {
     console.warn('[PLATT] failed', e && e.message ? e.message : e);
     try { X.dispose(); y.dispose(); model.dispose(); } catch (_) {}
     return null;
   }
+}
+
+function disposeMaybeTensor(x) {
+  try {
+    if (Array.isArray(x)) x.forEach(t => t && typeof t.dispose === 'function' && t.dispose());
+    else if (x && typeof x.dispose === 'function') x.dispose();
+  } catch (_) {}
 }
 
 // === Training per timeframe ===
@@ -202,10 +226,10 @@ async function trainForTimeframe(tfName) {
       for (let i = 0; i < valCountTotal; i++) valIndices.add(allIdx[i]);
     }
 
-    // build train/val arrays
-    const Xtrain = [], Ytrain = [], Xval = [], Yval = [], labeledVal = [];
+    // build train/val arrays; keep source indices for correct mapping
+    const Xtrain = [], Ytrain = [], Xval = [], Yval = [], valSource = [];
     for (let i = 0; i < N; i++) {
-      if (valIndices.has(i)) { Xval.push(Xall[i]); Yval.push(Yall[i]); labeledVal.push(labeled[i]); }
+      if (valIndices.has(i)) { Xval.push(Xall[i]); Yval.push(Yall[i]); valSource.push(i); }
       else { Xtrain.push(Xall[i]); Ytrain.push(Yall[i]); }
     }
 
@@ -252,16 +276,18 @@ async function trainForTimeframe(tfName) {
       if (classWeight) fitOpts.classWeight = classWeight;
       await model.fit(xTrainT, yTrainT, fitOpts);
 
-      // evaluate val loss
-      const evalRes = await model.evaluate(xValT, yValT, { batchSize: Math.min(256, Xval.length), verbose: 0 });
-      // evalRes may be a Tensor or an array of Tensors [loss, acc]
+      // evaluate val loss (explicitly dispose eval tensors)
       let valLoss = Number.POSITIVE_INFINITY;
       try {
+        const evalRes = await model.evaluate(xValT, yValT, { batchSize: Math.min(256, Xval.length), verbose: 0 });
+        // evalRes may be a Tensor or an array of Tensors [loss, acc]
         if (Array.isArray(evalRes)) {
           const t = evalRes[0];
           valLoss = t.dataSync ? Number(t.dataSync()[0]) : Number(t);
+          disposeMaybeTensor(evalRes);
         } else {
           valLoss = evalRes.dataSync ? Number(evalRes.dataSync()[0]) : Number(evalRes);
+          disposeMaybeTensor(evalRes);
         }
       } catch (e) {
         console.warn('[TRAIN] could not parse eval result', e && e.message ? e.message : e);
@@ -273,10 +299,14 @@ async function trainForTimeframe(tfName) {
         bestValLoss = valLoss;
         patienceCounter = 0;
         try {
+          ensureDirExists(bestModelDir);
           await model.save(`file://${bestModelDir}`);
           console.log(`[TRAIN][${tfName}] Saved improved model to ${bestModelDir} (val_loss=${bestValLoss.toFixed(6)})`);
         } catch (e) {
           console.warn(`[TRAIN][${tfName}] saving best model failed:`, e && e.message ? e.message : e);
+          if (!tf || !tf.io || !tf.io.getSaveHandlers) {
+            console.warn('[TRAIN] save handler not found — likely @tensorflow/tfjs-node is not installed.');
+          }
         }
       } else {
         patienceCounter++;
@@ -290,23 +320,36 @@ async function trainForTimeframe(tfName) {
 
     // final save (best model already saved if improved)
     try {
-      const savePath = `file://${MODEL_DIR}/trained_ccxt_ohlcv_tf_${tfName}_${stamp}`;
+      const savePathDir = path.join(MODEL_DIR, `trained_ccxt_ohlcv_tf_${tfName}_${stamp}`);
+      ensureDirExists(savePathDir);
+      const savePath = `file://${savePathDir}`;
       await model.save(savePath);
       console.log(`[TRAIN][${tfName}] Final model saved to ${savePath}`);
     } catch (e) {
       console.warn(`[TRAIN][${tfName}] final model.save failed:`, e && e.message ? e.message : e);
+      if (!tf || !tf.io || !tf.io.getSaveHandlers) {
+        console.warn('[TRAIN] save handler not found — likely @tensorflow/tfjs-node is not installed.');
+      }
     }
 
     // validation preds export (optional)
-    const preds = model.predict(xValT);
-    const predArr = await preds.array();
+    let predArr = [];
+    try {
+      const preds = model.predict(xValT);
+      predArr = await (Array.isArray(preds) ? Promise.resolve([]) : preds.array());
+      disposeMaybeTensor(preds);
+    } catch (e) {
+      console.warn('[TRAIN] predict failed:', e && e.message ? e.message : e);
+    }
+
     if (EXPORT_VAL_PREDICTIONS) {
-      const valExport = labeledVal.map((row, i) => ({
-        timestamp: row.timestamp ?? null,
-        features_raw: rawFeatures[i],
-        true_label: row.label,
+      const valExport = valSource.map((srcIdx, i) => ({
+        original_index: srcIdx,
+        timestamp: labeled[srcIdx] ? labeled[srcIdx].timestamp ?? null : null,
+        features_raw: rawFeatures[srcIdx],
+        true_label: labeled[srcIdx] ? labeled[srcIdx].label : null,
         true_onehot: Yval[i],
-        pred_proba: predArr[i]
+        pred_proba: predArr[i] || null
       }));
       const valFp = path.join(MODEL_DIR, `validation_preds_${tfName}_${stamp}.json`);
       saveJSON(valFp, valExport);
@@ -341,9 +384,9 @@ async function trainForTimeframe(tfName) {
     }
 
     // cleanup tensors
-    xTrainT.dispose(); yTrainT.dispose(); xValT.dispose(); yValT.dispose(); preds.dispose();
-    model.dispose(); tf.engine().disposeVariables();
-
+    try { xTrainT.dispose(); yTrainT.dispose(); xValT.dispose(); yValT.dispose(); } catch (_) {}
+    try { model.dispose(); } catch (_) {}
+    try { tf.engine().disposeVariables(); } catch (_) {}
   } catch (err) {
     console.error(`[TRAIN][${tfName}] error:`, err && err.stack ? err.stack : err && err.message ? err.message : err);
   }
