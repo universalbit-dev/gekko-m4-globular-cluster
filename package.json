@@ -76,6 +76,6 @@
     "doc": "docs"
   },
   "scripts": {
-    "postinstall": "npm rebuild tulind --build-from-source || true && npm link exchange && mkdir -p node_modules/tulind/lib/binding/Release/node-v$(node -p \"process.versions.modules\")-linux-x64 && cp -f node_modules/tulind/build/Release/tulind.node node_modules/tulind/lib/binding/Release/node-v$(node -p \"process.versions.modules\")-linux-x64/tulind.node || true"
+    "postinstall": "node scripts/postinstall-tulind.js || true"
   }
 }
