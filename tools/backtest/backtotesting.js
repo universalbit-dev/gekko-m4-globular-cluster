@@ -2,18 +2,18 @@
 /**
  * tools/backtest/backtotesting.js
  *
- * Enhanced backtesting runner — defensive JSON handling, sanitization, clearer logging,
- * and automatic use of trained model metadata from tools/trained/ to improve ensemble decisions.
+ * Optimized for the exact files present in tools/logs/json/ohlcv:
+ *  - ohlcv_ccxt_data_1m.json
+ *  - ohlcv_ccxt_data_1m_prediction.json
+ *  - ohlcv_ccxt_data_5m.json
+ *  - ohlcv_ccxt_data_5m_prediction.json
+ *  - ohlcv_ccxt_data_15m.json
+ *  - ohlcv_ccxt_data_15m_prediction.json
+ *  - ohlcv_ccxt_data_1h.json
+ *  - ohlcv_ccxt_data_1h_prediction.json
  *
- * Key improvements:
- * - Loads trained model metadata (tools/trained/*.json) and uses model-level win-rate
- *   as voting weights when deriving ensemble labels and confidence.
- * - deriveEnsembleFromPredictions now prefers model-backed predictions and weighted voting.
- * - computeEnsembleConfidence uses weighted agreement (trained model weights considered).
- * - Adds --trained-dryrun to list loaded trained models (for debugging).
- *
- * Usage:
- *   BACKTEST_ONCE=1 BACKTEST_VERBOSE=1 node tools/backtest/backtotesting.js
+ * This version purposely narrows discovery and handling to only those timeframes
+ * and plain .json files to reduce overhead and avoid unexpected filenames.
  */
 const fs = require('fs');
 const path = require('path');
@@ -32,11 +32,16 @@ const TRAINED_DIR = path.resolve(__dirname, '../trained'); // load model metadat
 const FEE_PCT = parseFloat(process.env.BACKTEST_FEE_PCT || "0.0001");
 const SLIPPAGE_PCT = parseFloat(process.env.BACKTEST_SLIPPAGE_PCT || "0.00005");
 const VERBOSE = process.env.BACKTEST_VERBOSE === "1" || /--verbose/.test(process.argv.join(' '));
-const TIMEFRAMES = (process.env.TIMEFRAMES || '1m,5m,15m,1h').split(',').map(s=>s.trim()).filter(Boolean);
+// Fixed TIMEFRAMES for this repository's inputs (ignore TIMEFRAMES env)
+const TIMEFRAMES = ['1m', '5m', '15m', '1h'];
 const BACKTEST_INTERVAL_MS = parseInt(process.env.BACKTEST_INTERVAL_MS || "10000", 10);
 const BACKTEST_ONCE = !!(process.env.BACKTEST_ONCE === "1" || process.env.BACKTEST_ONCE === "true");
 const MAX_LOOKBACK = parseInt(process.env.BACKTEST_MAX_LOOKBACK || '0', 10); // 0 means full
 const SAVE_GZIP = !!(process.env.SAVE_GZIP === "1" || process.env.SAVE_GZIP === "true");
+
+// diagnostics limit: don't create endless sanitized dumps
+const MAX_SANITIZE_DUMPS = parseInt(process.env.MAX_SANITIZE_DUMPS || '5', 10);
+let _sanitizeDumpCounter = 0;
 
 const paramSets = [
   { profit_pct: 0.005, loss_pct: 0.002, trade_quality: 50, min_hold: 8, name: "Conservative+" },
@@ -47,13 +52,7 @@ const paramSets = [
 function log(...args) { if (VERBOSE) console.log('[BACKTEST]', ...args); }
 
 /*
- * Robust JSON reader:
- * - Attempts JSON.parse first.
- * - On parse error tries light repairs:
- *   - strip unprintable control characters,
- *   - remove trailing commas in objects/arrays,
- *   - fix common unescaped newlines inside values by replacing with space.
- * - If still fails, returns null and logs an informative error (caller should skip file).
+ * Robust JSON reader with lightweight repair attempts.
  */
 function safeReadJSON(fp) {
   try {
@@ -65,17 +64,12 @@ function safeReadJSON(fp) {
     } catch (e) {
       // attempt simple repairs
       let text = raw;
-      // remove ASCII control chars except \n,\r,\t
-      text = text.replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '');
-      // replace unescaped newlines inside strings (approx): convert sequences of backslash-newline to space
+      text = text.replace(/[^\x09\x0A\x0D\x20-\x7E]/g, ''); // remove control chars except \n,\r,\t
       text = text.replace(/\\\r?\n/g, ' ');
-      // remove trailing commas before } or ]
       text = text.replace(/,\s*(}|])/g, '$1');
-      // attempt to close partially truncated JSON by appending a bracket if it looks like missing final bracket
       try {
         return JSON.parse(text);
       } catch (e2) {
-        // last resort: try to extract the largest JSON array/object inside the file
         const m = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/m);
         if (m && m[1]) {
           try {
@@ -95,7 +89,7 @@ function safeReadJSON(fp) {
   }
 }
 
-// Load trained model metadata from tools/trained/*.json
+// Load trained model metadata (normalize aliases to lower-case for robust matching)
 let trainedModels = []; // { name, weight (0-100), aliases: [], meta: {} }
 function loadTrainedModels() {
   trainedModels = [];
@@ -110,18 +104,18 @@ function loadTrainedModels() {
         continue;
       }
       const base = path.basename(fname, '.json');
-      // try to infer a weight (win rate / validation score). normalize to 0-100 scale
+      // infer weight (0-100)
       let weight = 50;
-      if (typeof meta.win_rate === 'number') weight = Math.max(1, Math.min(100, Math.round(meta.win_rate * (meta.win_rate > 1 ? 1 : 100) )));
-      else if (typeof meta.validation === 'object' && typeof meta.validation.winRate === 'number') {
-        const wr = meta.validation.winRate;
-        weight = Math.max(1, Math.min(100, Math.round(wr * (wr > 1 ? 1 : 100))));
-      } else if (typeof meta.validation_win_rate === 'number') {
-        weight = Math.max(1, Math.min(100, Math.round(meta.validation_win_rate * (meta.validation_win_rate > 1 ? 1 : 100))));
+      const maybeWin = (typeof meta.win_rate === 'number') ? meta.win_rate
+        : (meta.validation && typeof meta.validation.winRate === 'number' ? meta.validation.winRate
+          : (typeof meta.validation_win_rate === 'number' ? meta.validation_win_rate : null));
+      if (typeof maybeWin === 'number') {
+        const w = maybeWin <= 1 ? Math.round(maybeWin * 100) : Math.round(maybeWin);
+        weight = Math.max(1, Math.min(100, w));
       }
-      const aliases = new Set([base]);
-      if (typeof meta.model_name === 'string') aliases.add(meta.model_name);
-      if (Array.isArray(meta.aliases)) meta.aliases.forEach(a=>aliases.add(a));
+      const aliases = new Set([base.toLowerCase()]);
+      if (typeof meta.model_name === 'string') aliases.add(meta.model_name.toLowerCase());
+      if (Array.isArray(meta.aliases)) meta.aliases.forEach(a => { if (a) aliases.add(String(a).toLowerCase()); });
       trainedModels.push({ name: base, weight, aliases: Array.from(aliases), meta });
     }
   } catch (e) {
@@ -137,21 +131,32 @@ if (process.argv.includes('--trained-dryrun')) {
 }
 
 // discover OHLCV files (predictions & raw)
+// Optimized for the exact, plain .json filenames present in this repo's DATA_DIR.
 function discoverExchangeDataFiles() {
   if (!fs.existsSync(DATA_DIR)) return {};
-  const files = fs.readdirSync(DATA_DIR)
-    .filter(f => typeof f === 'string' && f.startsWith('ohlcv_ccxt_data') && f.endsWith('.json'));
+  const files = fs.readdirSync(DATA_DIR).filter(f => typeof f === 'string');
+  const fileSet = new Set(files);
+
   const found = {};
   for (const tf of TIMEFRAMES) {
-    found[tf] = {};
     const pred = `ohlcv_ccxt_data_${tf}_prediction.json`;
     const raw = `ohlcv_ccxt_data_${tf}.json`;
-    if (files.includes(pred)) found[tf].prediction = pred;
-    if (files.includes(raw)) found[tf].raw = raw;
+    const hasPred = fileSet.has(pred);
+    const hasRaw = fileSet.has(raw);
+    if (hasPred || hasRaw) {
+      found[tf] = {};
+      if (hasPred) found[tf].prediction = pred;
+      if (hasRaw) found[tf].raw = raw;
+    }
   }
-  if (files.includes('ohlcv_ccxt_data.json')) found['multi'] = { aggregate: 'ohlcv_ccxt_data.json' };
+
+  // Keep supporting the aggregate file if present (not expected, but harmless)
+  const agg = 'ohlcv_ccxt_data.json';
+  if (fileSet.has(agg)) found.multi = { aggregate: agg };
+
   return found;
 }
+
 function extractTimeframesFromAggregate(data) {
   if (!data || typeof data !== 'object') return {};
   return Object.fromEntries(
@@ -181,8 +186,7 @@ function sanitizePoint(rawPoint, index = 0) {
       const low = key.toLowerCase();
       let target = 'prediction';
       if (/convnet/i.test(low)) target = 'prediction_convnet';
-      else if (/tf/i.test(low)) target = 'prediction_tf';
-      // preserve existing canonical if present
+      else if (/\btf\b/i.test(low) || /tensorflow/i.test(low)) target = 'prediction_tf';
       if (p[target] === undefined) {
         p[target] = rawPoint[key];
         changed = true;
@@ -225,11 +229,12 @@ function sanitizePoint(rawPoint, index = 0) {
     }
   });
 
-  if (changed) {
+  if (changed && _sanitizeDumpCounter < MAX_SANITIZE_DUMPS) {
     // sample dump for inspection (avoid flooding)
     try {
       const fname = path.join(BAD_DIR, `sanitized_${Date.now()}_${index}.json`);
       fs.writeFileSync(fname, JSON.stringify({ original: rawPoint, sanitized: p }, null, 2));
+      _sanitizeDumpCounter++;
       if (VERBOSE) log(`sanitizePoint: dumped sample to ${fname}`);
     } catch (e) { /* ignore */ }
   }
@@ -272,71 +277,89 @@ function normalizeLabel(raw) {
 }
 
 /*
+ * Utility: collect prediction-like values from a point once to avoid repeated scans.
+ * Returns:
+ *  - values: array of values (for generic voting)
+ *  - keyMap: Map of lowerKey -> originalValue (for model alias matching)
+ */
+function collectPredictionValues(point) {
+  const values = [];
+  const keyMap = new Map();
+  for (const k of Object.keys(point)) {
+    if (/prediction/i.test(k) || /model_/i.test(k)) {
+      const v = point[k];
+      if (v !== undefined && v !== null) {
+        values.push(v);
+        keyMap.set(k.toLowerCase(), v);
+      }
+    } else {
+      // also capture fields that match trained model aliases (they might not include 'prediction' in key)
+      keyMap.set(k.toLowerCase(), point[k]);
+    }
+  }
+  return { values, keyMap };
+}
+
+/*
  * deriveEnsembleFromPredictions:
  * - uses trainedModels (if any) to prefer predictions produced by known classifiers.
  * - performs weighted voting: each model contributes a vote weighted by its validation/win rate.
- * - also falls back to simple majority among prediction_* fields if no trained-model votes found.
+ * - falls back to simple majority among prediction_* fields if no trained-model votes found.
  */
 function deriveEnsembleFromPredictions(point) {
-  // collect candidate raw prediction tokens
-  const candidates = [];
-  ['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].forEach(k => {
-    if (point[k] !== undefined) candidates.push(point[k]);
-  });
-  for (const k of Object.keys(point)) {
-    if (/prediction/i.test(k) && !['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].includes(k)) {
-      candidates.push(point[k]);
-    }
-  }
+  const { values, keyMap } = collectPredictionValues(point);
 
-  // If we have trainedModels, try weighted voting using model-detected fields
   if (trainedModels && trainedModels.length) {
-    const votes = {}; // label -> weighted sum
+    const votes = new Map(); // label -> weighted sum
     let totalWeight = 0;
 
     for (const m of trainedModels) {
-      // find any matching field in point that corresponds to this model
       let matchedVal;
       for (const alias of m.aliases) {
-        // 1) exact field named after model base (eg. trained_ohlcv -> point.trained_ohlcv)
-        if (point[alias] !== undefined) { matchedVal = point[alias]; break; }
-        // 2) prediction_{alias}
+        // try lower-case forms on point keys
+        if (keyMap.has(alias)) { matchedVal = keyMap.get(alias); break; }
         const predKey = `prediction_${alias}`;
-        if (point[predKey] !== undefined) { matchedVal = point[predKey]; break; }
-        // 3) try other common shapes
-        if (point[`model_${alias}`] !== undefined) { matchedVal = point[`model_${alias}`]; break; }
+        if (keyMap.has(predKey)) { matchedVal = keyMap.get(predKey); break; }
+        const modelKey = `model_${alias}`;
+        if (keyMap.has(modelKey)) { matchedVal = keyMap.get(modelKey); break; }
       }
       if (matchedVal !== undefined) {
         const label = normalizeLabel(matchedVal);
         if (!label) continue;
-        votes[label] = (votes[label] || 0) + (m.weight || 50);
+        const cur = votes.get(label) || 0;
+        votes.set(label, cur + (m.weight || 50));
         totalWeight += (m.weight || 50);
         if (VERBOSE) log(`deriveEnsemble: model vote ${m.name} -> ${label} (w=${m.weight})`);
       }
     }
 
     // also include any generic prediction fields (non-model) as low-weight votes
-    for (const v of candidates) {
+    for (const v of values) {
       const label = normalizeLabel(v);
       if (!label) continue;
-      votes[label] = (votes[label] || 0) + 25; // generic low weight
+      const cur = votes.get(label) || 0;
+      votes.set(label, cur + 25);
       totalWeight += 25;
     }
 
-    if (Object.keys(votes).length > 0 && totalWeight > 0) {
-      const top = Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
-      const topLabel = top[0];
-      // require some minimal consensus to declare strong label; otherwise fallback
-      const topWeight = top[1];
-      if (VERBOSE) log(`deriveEnsemble: weighted votes: ${JSON.stringify(votes)} totalW=${totalWeight}`);
-      // set ensemble_confidence on point for downstream logic
+    if (votes.size > 0 && totalWeight > 0) {
+      // find top label
+      let topLabel = null, topWeight = -1;
+      for (const [lbl, w] of votes.entries()) {
+        if (w > topWeight) { topWeight = w; topLabel = lbl; }
+      }
+      if (VERBOSE) {
+        const obj = {};
+        for (const [k,v] of votes.entries()) obj[k]=v;
+        log(`deriveEnsemble: weighted votes: ${JSON.stringify(obj)} totalW=${totalWeight}`);
+      }
       point.ensemble_confidence = Math.min(100, Math.round((topWeight / Math.max(1, totalWeight)) * 100));
       return topLabel;
     }
   }
 
   // fallback (original behavior): majority simple voting
-  const labels = candidates.map(c => normalizeLabel(c)).filter(Boolean);
+  const labels = values.map(c => normalizeLabel(c)).filter(Boolean);
   if (!labels.length) return null;
   const counts = labels.reduce((acc, v) => { acc[v] = (acc[v] || 0) + 1; return acc; }, {});
   const top = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
@@ -347,53 +370,48 @@ function deriveEnsembleFromPredictions(point) {
 
 /*
  * computeEnsembleConfidence(point):
- * - If point.ensemble_confidence is already set by deriveEnsembleFromPredictions, respect it.
- * - Otherwise compute a weighted agreement score using trainedModels (if available) and generic predictions.
+ * - respects point.ensemble_confidence if already set
+ * - otherwise compute a weighted agreement score using trainedModels (if available) and generic predictions.
  */
 function computeEnsembleConfidence(point) {
   if (typeof point.ensemble_confidence === 'number') return point.ensemble_confidence;
 
-  const votes = {};
+  const { values, keyMap } = collectPredictionValues(point);
+  const votes = new Map();
   let totalWeight = 0;
 
-  // trained models votes
   for (const m of trainedModels) {
     let matchedVal;
     for (const alias of m.aliases) {
-      if (point[alias] !== undefined) { matchedVal = point[alias]; break; }
+      if (keyMap.has(alias)) { matchedVal = keyMap.get(alias); break; }
       const predKey = `prediction_${alias}`;
-      if (point[predKey] !== undefined) { matchedVal = point[predKey]; break; }
+      if (keyMap.has(predKey)) { matchedVal = keyMap.get(predKey); break; }
     }
     if (matchedVal !== undefined) {
       const label = normalizeLabel(matchedVal);
       if (!label) continue;
-      votes[label] = (votes[label] || 0) + (m.weight || 50);
+      const cur = votes.get(label) || 0;
+      votes.set(label, cur + (m.weight || 50));
       totalWeight += (m.weight || 50);
     }
   }
 
-  // generic predictions with low weight
-  const genericCandidates = [];
-  ['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].forEach(k => {
-    if (point[k] !== undefined) genericCandidates.push(point[k]);
-  });
-  for (const k of Object.keys(point)) {
-    if (/prediction/i.test(k) && !['prediction_convnet','prediction_convnet_raw','prediction_tf','prediction_tf_raw','prediction'].includes(k)) {
-      genericCandidates.push(point[k]);
-    }
-  }
-  for (const v of genericCandidates) {
+  for (const v of values) {
     const label = normalizeLabel(v);
     if (!label) continue;
-    votes[label] = (votes[label] || 0) + 20;
+    const cur = votes.get(label) || 0;
+    votes.set(label, cur + 20);
     totalWeight += 20;
   }
 
   if (!totalWeight) return 50;
-  const top = Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
-  if (!top) return 50;
-  const confidence = Math.min(100, Math.round((top[1] / totalWeight) * 100));
-  return confidence;
+  // pick top
+  let topLabel = null, topWeight = -1;
+  for (const [lbl, w] of votes.entries()) {
+    if (w > topWeight) { topWeight = w; topLabel = lbl; }
+  }
+  if (!topLabel) return 50;
+  return Math.min(100, Math.round((topWeight / totalWeight) * 100));
 }
 
 function computeSignalAge(point, now) {
@@ -459,9 +477,10 @@ function backtest(data, params, label = '', regimeAlignFn = null) {
       // augment win_rate by averaging weights from matched trained models (if any)
       try {
         const matchedModelWeights = [];
+        const lowerKeys = new Set(Object.keys(point).map(k => k.toLowerCase()));
         for (const m of trainedModels) {
           for (const alias of m.aliases) {
-            if (point[alias] !== undefined || point[`prediction_${alias}`] !== undefined) {
+            if (lowerKeys.has(alias) || lowerKeys.has(`prediction_${alias}`)) {
               matchedModelWeights.push(m.weight / 100.0); // convert to 0-1
               break;
             }
@@ -718,20 +737,6 @@ function printSummaryAndPick(r, idx) {
 async function runOnce() {
   const allResults = [];
   const files = discoverExchangeDataFiles();
-
-  if (files.multi && files.multi.aggregate) {
-    const aggFile = path.join(DATA_DIR, files.multi.aggregate);
-    const data = safeReadJSON(aggFile) || {};
-    const tfs = extractTimeframesFromAggregate(data);
-    for (const tf of TIMEFRAMES) {
-      const arr = tfs[tf];
-      if (!Array.isArray(arr) || arr.length === 0) continue;
-      const results = paramSets.map(params => backtest(arr, params, `aggregate:${tf}`));
-      allResults.push({ source: `aggregate:${tf}`, variant: 'AGGREGATE', results });
-      console.log(`=== [aggregate:${tf}: AGGREGATE] ===`);
-      results.forEach((r, idx) => printSummaryAndPick(r, idx));
-    }
-  }
 
   for (const tf of TIMEFRAMES) {
     if (!files[tf]) continue;
