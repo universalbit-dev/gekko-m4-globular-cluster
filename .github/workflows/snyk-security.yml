@@ -1,0 +1,53 @@
+name: Snyk Security Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+    environment: snyk
+    
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies in workers
+        working-directory: ./workers
+        run: npm install
+      
+      - name: Run Snyk test
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=medium
+      
+      - name: Install Snyk CLI
+        if: github.event_name == 'push'
+        run: npm install -g snyk
+      
+      - name: Authenticate Snyk
+        if: github.event_name == 'push'
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+      
+      - name: Monitor project
+        if: github.event_name == 'push'
+        run: snyk monitor --all-projects || true
