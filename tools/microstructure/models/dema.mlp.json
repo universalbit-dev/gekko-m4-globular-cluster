@@ -1,0 +1,24 @@
+{
+  "type": "mlp",
+  "description": "Simple example MLP for DEMA strategy. Inputs: momentum, priceChange, dema, sma, prediction, persisted. Output is a single score (treated as logit if MICRO_MODEL_PROB_AS_LOGIT=true). This is a starter/test model (not trained).",
+  "inputOrder": ["momentum", "priceChange", "dema", "sma", "prediction", "persisted"],
+  "layers": [
+    {
+      "weights": [
+        [0.20, -0.10, 0.05, 0.05, 0.15, 0.00],
+        [-0.15, 0.25, 0.10, -0.05, 0.05, 0.00],
+        [0.05, -0.05, 0.50, -0.40, 0.10, 0.00],
+        [0.10, 0.05, -0.20, 0.20, -0.10, 0.00]
+      ],
+      "biases": [0.0, 0.0, 0.0, 0.0],
+      "activation": "relu"
+    },
+    {
+      "weights": [
+        [1.00, -1.20, 0.80, -0.40]
+      ],
+      "biases": [0.0],
+      "activation": "linear"
+    }
+  ]
+}
