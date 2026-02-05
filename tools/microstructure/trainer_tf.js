@@ -206,21 +206,28 @@ function evalJsonMlp(model, inputArray) {
 }
 
 /**
+ *
  * Try loading model if configured. This will attempt to load JSON models synchronously
  * and TFJS models asynchronously if tfjs-node is available.
+ * Accepts optional pathOverride to load a specific model file.
  * Returns a Promise which resolves with a status object.
+ *
  */
-async function loadModelIfEnabled() {
-  if (!MODEL_ENABLE) {
+ 
+async function loadModelIfEnabled(pathOverride) {
+  if (!MODEL_ENABLE && !pathOverride) {
     _modelLoaded = false;
     return { ok: false, reason: 'disabled' };
   }
-  if (!MODEL_PATH) {
+
+  // determine model path to use
+  const modelPathToUse = pathOverride ? String(pathOverride) : (MODEL_PATH || null);
+  if (!modelPathToUse) {
     _modelLoaded = false;
     return { ok: false, reason: 'missing_path' };
   }
 
-  const resolved = path.resolve(MODEL_PATH);
+  const resolved = path.resolve(modelPathToUse);
   if (MODEL_TYPE === 'json') {
     try {
       const raw = fs.readFileSync(resolved, 'utf8');
@@ -230,22 +237,21 @@ async function loadModelIfEnabled() {
         _jsonModel = parsed;
         _modelLoaded = true;
         console.info('[trainer_tf] Loaded JSON-MLP model from', resolved);
-        return { ok: true, type: 'json' };
+        return { ok: true, type: 'json', path: resolved };
       } else {
         _jsonModel = null;
         _modelLoaded = false;
-        return { ok: false, reason: 'invalid_json_model' };
+        return { ok: false, reason: 'invalid_json_model', path: resolved };
       }
     } catch (e) {
       console.warn('[trainer_tf] Failed to load JSON model:', resolved, e && e.message);
       _jsonModel = null;
       _modelLoaded = false;
-      return { ok: false, reason: 'json_load_error', error: e && e.message };
+      return { ok: false, reason: 'json_load_error', error: e && e.message, path: resolved };
     }
   } else if (MODEL_TYPE === 'tfjs') {
-    // try to require tfjs-node lazily
+    // unchanged tfjs branch: try to lazy-require tfjs and load model at resolved
     try {
-      // prefer @tensorflow/tfjs-node if available
       _tf = require('@tensorflow/tfjs-node');
     } catch (e1) {
       try {
@@ -260,15 +266,11 @@ async function loadModelIfEnabled() {
     }
 
     try {
-      // Try to load as a layers model (file://). tf.loadLayersModel accepts 'file://.../model.json' for node.
       let model;
       if (fs.statSync(resolved).isDirectory()) {
-        // maybe a saved model (saved_model) for node: tf.node.loadSavedModel exists in tfjs-node
         if (_tf && typeof _tf.node === 'object' && typeof _tf.node.loadSavedModel === 'function') {
           model = _tf.node.loadSavedModel(resolved);
-          // loadSavedModel returns a model-like object for tfjs-node
         } else {
-          // try to locate model.json inside the directory
           const possible = path.join(resolved, 'model.json');
           if (fs.existsSync(possible)) {
             model = await _tf.loadLayersModel('file://' + possible);
@@ -277,26 +279,24 @@ async function loadModelIfEnabled() {
           }
         }
       } else {
-        // file is likely model.json or a URL path
         if (resolved.endsWith('model.json')) {
           model = await _tf.loadLayersModel('file://' + resolved);
         } else {
-          // try as a single file (not typical)
           model = await _tf.loadLayersModel('file://' + resolved);
         }
       }
       _tfModel = model;
       _modelLoaded = true;
       console.info('[trainer_tf] Loaded TFJS model from', resolved);
-      return { ok: true, type: 'tfjs' };
+      return { ok: true, type: 'tfjs', path: resolved };
     } catch (e) {
       console.warn('[trainer_tf] Failed to load TFJS model from', resolved, e && e.message);
       _tfModel = null;
       _modelLoaded = false;
-      return { ok: false, reason: 'tfjs_load_error', error: e && e.message };
+      return { ok: false, reason: 'tfjs_load_error', error: e && e.message, path: resolved };
     }
   } else {
-    return { ok: false, reason: 'unsupported_model_type' };
+    return { ok: false, reason: 'unsupported_model_type', type: MODEL_TYPE };
   }
 }
 
