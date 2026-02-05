@@ -28,26 +28,26 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Install dependencies in workers
-        working-directory: ./workers
+      - name: Install dependencies
         run: npm install
       
       - name: Run Snyk test
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@0.4.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects --severity-threshold=medium
+          args: --all-projects --severity-threshold=medium --sarif-file-output=snyk.sarif
       
-      - name: Install Snyk CLI
-        if: github.event_name == 'push'
-        run: npm install -g snyk
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: snyk.sarif
       
-      - name: Authenticate Snyk
+      - name: Monitor project in Snyk
         if: github.event_name == 'push'
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-      
-      - name: Monitor project
-        if: github.event_name == 'push'
-        run: snyk monitor --all-projects || true
+        run: |
+          npm install -g snyk
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk monitor --all-projects
