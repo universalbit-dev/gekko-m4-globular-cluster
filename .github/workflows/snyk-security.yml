@@ -38,13 +38,17 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=medium --sarif-file-output=snyk.sarif
-          # Only scans root package.json (which includes exchange as dependency)
+          command: test
       
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: snyk.sarif
+      
+      - name: Install Snyk CLI
+        if: github.event_name == 'push'
+        run: npm install -g snyk
       
       - name: Monitor project in Snyk
         if: github.event_name == 'push'
