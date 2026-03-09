@@ -75,10 +75,12 @@
   "directories": {
     "doc": "docs"
   },
-
-   "overrides": {
+  "overrides": {
     "minimatch": "^10.2.2",
-    "tar": "^7.5.9"
+    "tar": "^7.5.9",
+    "uuid": "^9.0.1",
+    "@tootallnate/once": "^3.0.1",
+    "http-proxy-agent": "^7.0.0"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall-tulind.js || true && node scripts/postinstall-tfjs-node.js || true"
