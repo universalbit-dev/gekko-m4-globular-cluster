@@ -10,7 +10,7 @@
   "dependencies": {
     "@tensorflow/tfjs": "^4.22.0",
     "async": "^3.2.5",
-    "axios": "1.13.5",
+    "axios": "^1.15.0",
     "bluebird": "^3.7.2",
     "ccxt": "^4.3.88",
     "chess.js": "^1.4.0",
@@ -26,7 +26,7 @@
     "gekko-broker": "file:exchange",
     "humanize-duration": "^3.31.0",
     "lodash": "^4.18.1",
-    "mathjs": "^12.4.0",
+    "mathjs": "^15.2.0",
     "moment": "^2.29.4",
     "nanospinner": "^1.1.0",
     "node-noop": "^1.0.0",
