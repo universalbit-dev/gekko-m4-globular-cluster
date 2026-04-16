@@ -1068,54 +1068,64 @@ DQNAgent.prototype = {
 
     return a;
   },
-  learn: function(r1) {
-    // perform an update on Q function
-    if(!(this.r0 == null) && this.alpha > 0) {
+  // ADD GUARDS: Defensive version
 
-      // learn from this tuple to get a sense of how "surprising" it is to the agent
-      var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1, this.a1);
-      this.tderror = tderror; // a measure of surprise
+learn: function(r1) {
+  // Only learn if we have a valid transition (s0, a0, r0, s1, a1)
+  if(!(this.r0 == null) && this.alpha > 0) {
+    // GUARD: s0/s1/a0 must be set
+    if (this.s0 == null || this.s1 == null || this.a0 == null || typeof this.a0 !== 'number') {
+      this.r0 = r1;
+      return;
+    }
 
-      // decide if we should keep this experience in the replay
+    var tderror = this.learnFromTuple(this.s0, this.a0, this.r0, this.s1, this.a1);
+    this.tderror = tderror;
+
+    // Only add to replay if all states/actions are valid Mat/numbers
+    if (this.s0 && this.s1 && this.a0 != null && typeof this.a0 === 'number') {
       if(this.t % this.experience_add_every === 0) {
         this.exp[this.expi] = [this.s0, this.a0, this.r0, this.s1, this.a1];
         this.expi += 1;
-        if(this.expi > this.experience_size) { this.expi = 0; } // roll over when we run out
-      }
-      this.t += 1;
-
-      // sample some additional experience from replay memory and learn from it
-      for(var k=0;k<this.learning_steps_per_iteration;k++) {
-        var ri = randi(0, this.exp.length); // todo: priority sweeps?
-        var e = this.exp[ri];
-        this.learnFromTuple(e[0], e[1], e[2], e[3], e[4])
+        if(this.expi > this.experience_size) { this.expi = 0; }
       }
     }
-    this.r0 = r1; // store for next update
-  },
-  learnFromTuple: function(s0, a0, r0, s1, a1) {
-    // want: Q(s,a) = r + gamma * max_a' Q(s',a')
+    this.t += 1;
 
-    // compute the target Q value
-    var tmat = this.forwardQ(this.net, s1, false);
-    var qmax = r0 + this.gamma * tmat.w[R.maxi(tmat.w)];
-
-    // now predict
-    var pred = this.forwardQ(this.net, s0, true);
-
-    var tderror = pred.w[a0] - qmax;
-    var clamp = this.tderror_clamp;
-    if(Math.abs(tderror) > clamp) {  // huber loss to robustify
-      if(tderror > clamp) tderror = clamp;
-      if(tderror < -clamp) tderror = -clamp;
+    // Replay safety: only run learnFromTuple for valid memory entries
+    for(var k=0; k < this.learning_steps_per_iteration; k++) {
+      var ri = randi(0, this.exp.length);
+      var e = this.exp[ri];
+      if (e && e[0] && e[3] && e[1] != null && typeof e[1] === 'number') {
+        this.learnFromTuple(e[0], e[1], e[2], e[3], e[4]);
+      }
     }
-    pred.dw[a0] = tderror;
-    this.lastG.backward(); // compute gradients on net params
-
-    // update net
-    R.updateNet(this.net, this.alpha);
-    return tderror;
   }
+  this.r0 = r1;
+},
+
+learnFromTuple: function(s0, a0, r0, s1, a1) {
+  // GUARD: states and actions must be valid objects/numbers
+  if (!s0 || !s1 || a0 == null || typeof a0 !== 'number' || !Number.isFinite(r0)) {
+    return 0;
+  }
+  // Now safe to forward
+  var tmat = this.forwardQ(this.net, s1, false);
+  var qmax = r0 + this.gamma * tmat.w[R.maxi(tmat.w)];
+
+  var pred = this.forwardQ(this.net, s0, true);
+
+  var tderror = pred.w[a0] - qmax;
+  var clamp = this.tderror_clamp;
+  if (Math.abs(tderror) > clamp) {
+    if (tderror > clamp) tderror = clamp;
+    if (tderror < -clamp) tderror = -clamp;
+  }
+  pred.dw[a0] = tderror;
+  this.lastG.backward();
+  R.updateNet(this.net, this.alpha);
+  return tderror;
+}
 }
 
 // buggy implementation, doesnt work...
@@ -1520,7 +1530,7 @@ DeterministPG.prototype = {
     }
     this.r0 = r1; // store for next update
   },
-}
+},
 
 // exports
 global.DPAgent = DPAgent;
@@ -1530,3 +1540,15 @@ global.DQNAgent = DQNAgent;
 //global.RecurrentReinforceAgent = RecurrentReinforceAgent;
 //global.DeterministPG = DeterministPG;
 })(RL);
+// Node.js export block
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    DPAgent: RL.DPAgent,
+    TDAgent: RL.TDAgent,
+    DQNAgent: RL.DQNAgent,
+    // You can add more agents here as you develop
+    // SimpleReinforceAgent: RL.SimpleReinforceAgent,
+    // RecurrentReinforceAgent: RL.RecurrentReinforceAgent,
+    // DeterministPG: RL.DeterministPG,
+  };
+}
