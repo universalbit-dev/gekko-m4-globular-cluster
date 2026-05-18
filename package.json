@@ -44,8 +44,7 @@
     "underscore": "^1.13.7",
     "util": "^0.12.5",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0",
-    "ws": "^8.18.0"
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "optionalDependencies": {
     "@tensorflow/tfjs-node": "^4.22.0"
@@ -77,7 +76,8 @@
     "tar": "^7.5.9",
     "uuid": "^9.0.1",
     "@tootallnate/once": "^3.0.1",
-    "http-proxy-agent": "^7.0.0"
+    "http-proxy-agent": "^7.0.0",
+    "ws": "^8.18.0"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall-tulind.js || true && node scripts/postinstall-tfjs-node.js || true"
