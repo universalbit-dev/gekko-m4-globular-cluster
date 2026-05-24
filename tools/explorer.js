@@ -48,6 +48,7 @@ const MAX_FILE_ENTRIES = parseInt(process.env.MAX_OHLCV_FILE_ENTRIES   || '50000
 const FETCH_INTERVAL   = parseInt(process.env.EXPLORER_INTERVAL_MS     || '120000', 10);
 const MULTI_FILE       = path.join(DATA_DIR, 'ohlcv_ccxt_data.json');
 
+// FIX 4 — PAIR fallback chain, fail fast with clear message
 const PAIR = process.env.PAIR || process.env.MACRO_PAIR || process.env.SYMBOL || null;
 if (!PAIR) {
   console.error('[explorer] FATAL: PAIR / MACRO_PAIR / SYMBOL env var is required. Set it in .env');
@@ -130,6 +131,14 @@ function safeLoadJsonArray(fp) {
     const raw = fs.readFileSync(fp, 'utf8');
     if (!raw?.trim()) return [];
 
+    // ── Prediction files: parse directly, never back up ──────────────────
+    // Prediction JSONs are written by chart scripts and contain extra fields
+    // (ensemble_label, PVVM, etc.) — they are always valid JSON arrays.
+    // Backing them up to BAD_DIR would flood the directory with .bak files.
+    if (path.basename(fp).includes('_prediction')) {
+      try { return JSON.parse(raw); } catch (_) { return []; }
+    }
+
     // Fast path: valid JSON array
     try { return JSON.parse(raw); } catch (_) {}
 
@@ -156,7 +165,7 @@ function safeLoadJsonArray(fp) {
     const m = cleaned.match(/(\{[\s\S]*\}|\[[\s\S]*\])/m);
     if (m?.[1]) { try { return JSON.parse(m[1]); } catch (_) {} }
 
-    // Backup corrupt file
+    // Backup corrupt file — only for real OHLCV source files
     const bak = path.join(BAD_DIR, `${path.basename(fp)}.corrupt.${Date.now()}.bak`);
     try { fs.writeFileSync(bak, raw, 'utf8'); warn(`Backed up corrupt file → ${bak}`); } catch (_) {}
     return [];
@@ -164,6 +173,7 @@ function safeLoadJsonArray(fp) {
   } catch (e) { warn('safeLoadJsonArray error:', e?.message); return []; }
 }
 
+// FIX 1 — `tmp` declared with `let` before try{} so catch can reference it
 function atomicWriteJson(fp, arr) {
   let tmp;
   try {
@@ -213,7 +223,8 @@ function writeBadRow(tf, raw, reason) {
   } catch (_) {}
 }
 
-// ─── Main fetch/update ───────────────────
+// ─── Main fetch/update ────────────────────────────���────────────────────────
+// FIX 5 — exchange instance reused across TFs (one loadMarkets() per cycle)
 let _exchange = null;
 
 async function getExchange() {
@@ -235,12 +246,15 @@ async function fetchAndUpdateOHLCV() {
   if (!exchange) return;
 
   // Load multi once at start of cycle
-  let multi      = safeLoadJsonArray(MULTI_FILE);
+  let multi = safeLoadJsonArray(MULTI_FILE);
+  multi = Array.isArray(multi) ? multi : [];
   let multiDirty = false;
 
+  // FIX 2 — sequential loop, not Promise.all, avoids concurrent `multi` mutation
   for (const tf of TIMEFRAMES) {
     const tfFile = path.join(DATA_DIR, `ohlcv_ccxt_data_${tf}.json`);
-    let   tfArr  = safeLoadJsonArray(tfFile);
+    let tfArr = safeLoadJsonArray(tfFile);
+    tfArr = Array.isArray(tfArr) ? tfArr : [];
 
     // Latest known timestamp per TF (check both multi and per-TF file)
     const lastTs = Math.max(
@@ -276,7 +290,6 @@ async function fetchAndUpdateOHLCV() {
       } else {
         debug(`[${tf}] no new rows`);
       }
-
     } catch (e) {
       if (e instanceof ccxt.NetworkError || e instanceof ccxt.ExchangeNotAvailable)
         warn(`[${tf}] network error (retry next cycle): ${e.message}`);
@@ -289,6 +302,7 @@ async function fetchAndUpdateOHLCV() {
     }
   }
 
+  // FIX 6 — write multi once, after all TFs, not once per TF
   if (multiDirty) {
     multi = trimToMax(dedup(multi));
     atomicWriteJson(MULTI_FILE, multi);
@@ -297,29 +311,58 @@ async function fetchAndUpdateOHLCV() {
 }
 
 // ─── Clean mode ────────────────────────────────────────────────────────────
-if (process.argv[2] === 'clean') {
+function cleanOhlcvFiles() {
   const files = fs.readdirSync(DATA_DIR)
     .filter(f => /^ohlcv_ccxt_data.*\.json$/.test(f) && !f.includes('.tmp.'))
     .map(f => path.join(DATA_DIR, f));
 
-  if (!files.length) { info('No OHLCV files to clean.'); process.exit(0); }
-  for (const fp of files) {
-    try { atomicWriteJson(fp, []); info(`Cleaned: ${path.relative(DATA_DIR, fp)}`); }
-    catch (e) { loge(`Clean failed: ${fp}`, e?.message); }
+  if (!files.length) {
+    info('No OHLCV files to clean.');
+    return 0;
   }
-  info('All OHLCV files reset to [].'); process.exit(0);
+
+  let cleaned = 0;
+  for (const fp of files) {
+    try {
+      atomicWriteJson(fp, []);
+      info(`Cleaned: ${path.relative(DATA_DIR, fp)}`);
+      cleaned++;
+    } catch (e) {
+      loge(`Clean failed: ${fp}`, e?.message);
+    }
+  }
+  info(`All OHLCV files reset to []. Total files cleaned: ${cleaned}`);
+  return cleaned;
+}
+
+// CLI mode
+if (process.argv[2] === 'clean') {
+  cleanOhlcvFiles();
+  process.exit(0);
+}
+
+// AUTO CLEAN INTERVAL — default: every 24 hours
+const AUTO_CLEAN_INTERVAL_MS = parseInt(process.env.AUTO_CLEAN_INTERVAL_MS || 24 * 60 * 60 * 1000, 10);
+
+if (AUTO_CLEAN_INTERVAL_MS > 0) {
+  setInterval(() => {
+    info('[AUTO-CLEAN] Automatic OHLCV file clean started.');
+    cleanOhlcvFiles();
+  }, AUTO_CLEAN_INTERVAL_MS);
 }
 
 // ─── Run loop ──────────────────────────────────────────────────────────────
 info(`Starting explorer — exchange=${EXCHANGE_NAME} pair=${PAIR} TFs=${TIMEFRAMES.join(',')} interval=${FETCH_INTERVAL}ms`);
 
 // Initial run immediately, then on interval
+// FIX 7 — no .unref() on setInterval — keeps Node alive in PM2 fork mode
 fetchAndUpdateOHLCV().catch(e => loge('Initial fetch failed:', e?.message ?? e));
 const _timer = setInterval(
   () => fetchAndUpdateOHLCV().catch(e => loge('Scheduled fetch failed:', e?.message ?? e)),
   FETCH_INTERVAL
 );
 
+// FIX 8 — clean shutdown on SIGINT/SIGTERM
 function shutdown(sig) {
   info(`${sig} received — shutting down`);
   clearInterval(_timer);
