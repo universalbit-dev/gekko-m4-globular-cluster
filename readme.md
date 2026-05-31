@@ -8,8 +8,7 @@ Help us grow and continue innovating!
 
 
 ##### thinking sustainable personal finance
-<img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/ai_snail.png" width="auto"></img>   
-
+<img src="https://github.com/universalbit-dev/gekko-m4/blob/master/images/snail.png?raw=true" alt="Snail" width="100"/>
 # Gekko M4 Globular Cluster
 **Feature-Rich [M4 NGC 6121]**
 
