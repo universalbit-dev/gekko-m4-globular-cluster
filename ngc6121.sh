@@ -1,89 +1,132 @@
 #!/bin/bash
-#
-# NGC6121 Setup Script - Gekko M4 Cluster
-# - Node.js v20+
-# - Debian/Ubuntu: Installs build-essential & python3 if missing
-# - Ensures node-gyp & pm2 are globally available
-# - Installs npm project dependencies
-# - Launches PM2 processes if simulator config exists
 set -euo pipefail
 
+# Color helpers
+RED='\033[0;31m'
+GRN='\033[0;32m'
+YEL='\033[0;33m'
+CYN='\033[0;36m'
+NC='\033[0m' # reset
+
 banner() {
-  echo "============================================"
+  echo -e "${CYN}============================================"
   printf "   NGC6121 Setup Script - Gekko M4 Cluster  \n"
-  echo "============================================"
+  echo -e "============================================${NC}"
 }
 
-install_deps_if_needed() {
+req_summary() {
+  echo -e "${GRN}Requirements: nodejs (v20+), npm, g++, make, python3, curl, git, build-essential${NC}"
+}
+
+check_user_write() {
+  if [ ! -w . ]; then
+    echo -e "${RED}ERROR:${NC} Current user cannot write to this directory (${PWD})!"
+    echo "Fix this (e.g. sudo chown -R \$USER:\$USER .), then re-run."
+    exit 10
+  fi
+}
+
+check_or_install_deps() {
   local missing=()
-  for dep in g++ make python3; do
-    if ! command -v $dep &>/dev/null; then
+  for dep in curl git g++ make python3; do
+    if ! command -v $dep >/dev/null 2>&1; then
       missing+=($dep)
     fi
   done
   if ((${#missing[@]})); then
-    echo -e "\e[31mError!\e[0m Missing system packages: ${missing[*]}"
+    echo -e "${YEL}Missing system packages: ${missing[*]}${NC}"
     read -p "Attempt to install using sudo apt? [Y/n]: " yn
     case $yn in
-      [Nn]*) echo "Aborting. Please install required packages and re-run."; exit 2;;
+      [Nn]*) echo -e "${RED}Aborting. Please install required packages manually.${NC}"; exit 12;;
       *)
-        echo "Installing: sudo apt update && sudo apt install -y build-essential python3"
         sudo apt update
-        sudo apt install -y build-essential python3
+        sudo apt install -y curl git build-essential python3
       ;;
     esac
   fi
 }
 
-ensure_global_package() {
-  local pkg="$1"
-  if ! command -v "$pkg" &>/dev/null; then
-    echo ">> Installing $pkg globally..."
-    if npm install -g "$pkg"; then
-      export PATH="$(npm bin -g):$PATH"
-      echo ">> $pkg ready."
+check_node_npm() {
+  if ! command -v node >/dev/null; then
+    echo -e "${RED}ERROR:${NC} Node.js not found. Install Node.js v20+."
+    exit 9
+  fi
+  if ! command -v npm >/dev/null; then
+    echo -e "${RED}ERROR:${NC} npm not found. Install Node.js/npm."
+    exit 9
+  fi
+  required_node_major=20
+  node_ver="$(node -v | sed -E 's/v([0-9]+).*/\1/')"
+  if [[ -z "$node_ver" ]] || (( node_ver < required_node_major )); then
+    echo -e "${RED}ERROR:${NC} Node.js v20+ required. Detected: $(node -v)"
+    exit 8
+  fi
+  echo -e "${GRN}>> Node.js check passed: $(node -v)${NC}"
+}
+
+ensure_global_npm() {
+  for pkg in node-gyp pm2; do
+    if ! command -v $pkg >/dev/null 2>&1; then
+      echo -e "${YEL}$pkg not found. Installing globally...${NC}"
+      if npm install -g $pkg; then
+        export PATH="$(npm bin -g):$PATH"
+        echo -e "${GRN}>> $pkg installed globally.${NC}"
+      else
+        echo -e "${RED}ERROR:${NC} Failed to install $pkg globally. Try: sudo npm install -g $pkg"
+        exit 11
+      fi
     else
-      echo "ERROR: Failed to install $pkg globally. Try: sudo npm install -g $pkg"
-      return 1
+      echo -e "${GRN}>> $pkg found in PATH.${NC}"
     fi
+  done
+}
+
+ensure_tulind_dependency() {
+  if ! grep -q '"tulind"' package.json 2>/dev/null; then
+    echo -e "${YEL}tulind not found in dependencies. Adding to package.json...${NC}"
+    npm install tulind --save
   else
-    echo ">> $pkg found in PATH."
+    echo -e "${GRN}>> tulind is listed in dependencies.${NC}"
   fi
 }
 
 run_npm_install() {
-  echo ">> Installing Node.js dependencies (npm install)..."
-  if ! npm install; then
-    echo "ERROR: 'npm install' failed. Check error output above."
-    exit 3
+  echo -e "${CYN}>> Installing Node.js dependencies (npm install)...${NC}"
+  npm install
+}
+
+rebuild_tulind() {
+  echo -e "${CYN}>> Rebuilding tulind native module...${NC}"
+  npm rebuild tulind --build-from-source
+  # Test module load
+  if node -e "require('tulind'); console.log('tulind loaded OK')" 2>/dev/null ; then
+    echo -e "${GRN}>> tulind native module successfully built and loaded.${NC}"
+  else
+    echo -e "${RED}ERROR:${NC} tulind did not load after rebuild. See logs above."
+    exit 14
   fi
-  echo ">> npm dependencies installed."
 }
 
 fix_npm_security() {
-  echo ">> Running npm audit fix (best-effort)..."
-  npm audit fix >/dev/null && echo ">> npm audit fix completed." || echo ">> npm audit fix completed with issues (non-fatal)."
+  echo -e "${CYN}>> Running npm audit fix ...${NC}"
+  npm audit fix >/dev/null && echo -e "${GRN}>> npm audit fix completed.${NC}" || echo -e "${YEL}>> npm audit fix completed with issues (non-fatal).${NC}"
 }
 
 manage_pm2() {
-  echo ">> (Re)Installing PM2 globally for Node.js v${current_node_major} (best-effort)..."
+  echo -e "${CYN}>> (Re)Installing PM2 globally (best-effort)...${NC}"
   npm uninstall -g pm2 2>/dev/null || true
-  if npm install -g pm2; then
-    export PATH="$(npm bin -g):$PATH"
-    echo ">> pm2 installed globally."
-  else
-    echo "Warning: pm2 global install failed. Try: sudo npm install -g pm2"
-  fi
+  npm install -g pm2
+  export PATH="$(npm bin -g):$PATH"
+  echo -e "${GRN}>> pm2 installed globally.${NC}"
 }
 
 pm2_start_if_configured() {
-  echo ">> Starting ecosystem with PM2 if simulator.config.js exists..."
-  if [ -f simulator.config.js ] && command -v pm2 &>/dev/null; then
+  if [ -f simulator.config.js ] && command -v pm2 >/dev/null 2>&1; then
     pm2 start simulator.config.js --name ngc6121 || {
-      echo "Warning: pm2 start failed. Try: pm2 start simulator.config.js"
+      echo -e "${YEL}Warning: pm2 start failed. Try: pm2 start simulator.config.js${NC}"
     }
   else
-    echo "simulator.config.js not found or pm2 unavailable — skipping pm2 start."
+    echo -e "${YEL}simulator.config.js not found or pm2 unavailable — skipping pm2 start.${NC}"
   fi
 }
 
@@ -99,54 +142,38 @@ show_pm2_list() {
 }
 
 wait_and_restart_pm2() {
-  echo ">> Waiting 5 minutes (300s) before restarting PM2 processes..."
+  echo -e "${CYN}>> Waiting 5 minutes (300s) before restarting PM2 processes...${NC}"
   sleep 300
   if command -v pm2 &>/dev/null; then
-    echo ">> Restarting all PM2 processes now."
-    pm2 restart all || echo "Warning: pm2 restart all failed."
+    echo -e "${CYN}>> Restarting all PM2 processes now.${NC}"
+    pm2 restart all || echo -e "${YEL}Warning: pm2 restart all failed.${NC}"
   else
-    echo "Skipping pm2 restart: pm2 not found."
+    echo -e "${YEL}Skipping pm2 restart: pm2 not found.${NC}"
   fi
 }
 
 final_summary() {
-  echo "============================================"
+  echo -e "${CYN}============================================"
   echo " Files are kept in sync across the cluster. "
-  echo "============================================"
-  echo ">> Script completed. Exiting."
+  echo -e "============================================${NC}"
+  echo -e "${GRN}>> Script completed. Exiting.${NC}"
 }
 
 # --- MAIN SCRIPT LOGIC ---
 banner
-install_deps_if_needed
-
-if ! command -v node &>/dev/null; then
-  echo "ERROR: Node.js is not installed. Install Node.js v20+ and retry."
-  exit 1
-fi
-
-required_node_major=20
-current_node_major=$(node -v | sed -E 's/v([0-9]+).*/\1/')
-if [[ -z "$current_node_major" ]] || (( current_node_major < required_node_major )); then
-  echo "ERROR: Node.js v${required_node_major}+ required. You have: $(node -v)"
-  exit 1
-fi
-echo ">> Node.js check passed: $(node -v)"
-
-ensure_global_package node-gyp || exit 2
-
+req_summary
+check_user_write
+check_or_install_deps
+check_node_npm
+ensure_global_npm
+ensure_tulind_dependency
 run_npm_install
-
+rebuild_tulind
 fix_npm_security
-
 manage_pm2
-
 pm2_start_if_configured
-
 show_pm2_list
-
 wait_and_restart_pm2
-
 final_summary
 
 exit 0
