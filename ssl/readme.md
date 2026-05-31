@@ -1,3 +1,4 @@
+![Project Status: Development Stopped](https://img.shields.io/badge/status-development%20stopped-red)
 ## 🚀 Quick HTTPS Setup for Grafana (Advanced Charting)
 
 To make advanced charting with Grafana easy in Gekko M4 Globular Cluster, this repo includes:
