@@ -11,7 +11,6 @@ Help us grow and continue innovating!
 <img src="https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/images/ai_snail.png" width="auto"></img>   
 
 # Gekko M4 Globular Cluster
-
 **Feature-Rich [M4 NGC 6121]**
 
 ---
@@ -41,11 +40,11 @@ The **Gekko M4 Globular Cluster** repository is a feature-rich implementation de
   For configuring dynamic exchange simulators and using live public data, **please read [`docs/env_file.md`](./docs/env_file.md)** carefully.
 
 ---
+![Node.js 22+](https://img.shields.io/badge/node.js-22%2B-brightgreen?logo=node.js&logoColor=white)
+
 ## Requirements
-
 Before setting up the project, make sure your environment meets the following requirements:
-
-- **Node.js 20**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
+- **Node.js 22**: Installed using [nvm](https://github.com/nvm-sh/nvm)  
 - **Packages**: Required build tools for native module compilation:
    ```bash
    sudo apt update
@@ -58,16 +57,16 @@ Before setting up the project, make sure your environment meets the following re
 ##### Install Node.js Using [`nvm`](https://github.com/nvm-sh/nvm)
 To manage and install Node.js, use `nvm` (Node Version Manager):
 
-* Install Node.js version `20`:
+* Install Node.js version `22`:
    ```bash
-   nvm install 20
-   nvm use 20
+   nvm install 22
+   nvm use 22
    ```
 * **Verify your version:**
    ```bash
    node -v
    ```
-   Should print something like `v20.x.x`
+   Should print something like `v22.x.x`
 ---
  
 
