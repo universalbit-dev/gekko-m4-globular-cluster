@@ -1,3 +1,4 @@
+![Project Status: Development Stopped](https://img.shields.io/badge/status-development%20stopped-red)
 ### Gekko-M4-Globular-Cluster [NGC 6121]
 #### Log Management **Grafana Advanced Charting**
 
