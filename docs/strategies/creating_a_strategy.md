@@ -155,10 +155,11 @@ config.my_strategy = {
   longConditionMet: true,
   shortConditionMet: false
 };
-
 ```
+> 🔗 **Configuration Reference:** [`docs/strategies/configuration_reference.md`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/docs/strategies/configuration_reference.md).
 
----
+> 🔗 **Configuration Simulator:** [`env/simulator/trade_inverter_simulator.js`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/env/simulator/trade_inverter_simulator.js).
+
 
 ## 🧰 Strategy Tools & Logging Utilities
 
