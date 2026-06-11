@@ -1,201 +1,196 @@
 # 🚀 Creating a Strategy for Gekko M4
 
-Strategies are the core of Gekko's trading bot. They analyze the market and make trading decisions based on technical analysis indicators. Each strategy operates on a single market and exchange.
-
-> **New to strategies?**  
-> Check out this [Intro Video: How to Create Gekko Strategies](https://www.youtube.com/watch?v=6-74ZhrG0BE)
+Strategies are the core of the Gekko M4 engine. They analyze live market candles and generate trading decisions (`advice`). Each strategy operates on a single market and exchange instance.
 
 ---
 
-## 📦 What is a Strategy?
+## 📦 Core Architecture
 
-A strategy is a JavaScript module that receives live market data (candles: OHLC, volume, weighted price) and decides whether to buy, sell, or hold.
+A strategy is a decoupled JavaScript module that consumes an event stream of market candles (OHLCV, weighted price) and pushes operational commands to downstream tracking engines.
 
-- Gekko comes with [built-in strategies](./introduction.md).
-- You can also write your own strategies in JavaScript!
-
----
-
-## 📝 Strategy Boilerplate
-
-Here’s a simple template for a custom strategy:
+### The Strategy Boilerplate (`my_strategy.js`)
 
 ```js
-// Let's create our own strategy!
-var strat = {};
+'use strict';
 
-// Initialize your strategy (setup indicators, state, etc.)
-strat.init = function() {
-  // your code here
-}
+const log = require('../core/log.js');
 
-// Called on every new candle
-strat.update = function(candle) {
-  // your code here
-}
+const strategy = {
+  // 1. Lifecycle Setup: Called once when execution boots
+  init: function() {
+    this.requiredHistory = this.settings.warmupPeriod || 14;
+    
+    // Core parameters are exposed directly under this.settings
+    log.debug(`Strategy initialized with period: ${this.settings.customPeriod}`);
+  },
 
-// For debugging/logging
-strat.log = function() {
-  // your code here
-}
+  // 2. Continuous Input Pipeline: Triggers sequentially on every new block bar
+  update: function(candle) {
+    // Used to cache data arrays or track secondary calculations
+  },
 
-// Check if you should trigger a trade
-strat.check = function(candle) {
-  // your code here
-}
+  // 3. Evaluation Gate: Triggers on every block bar AFTER warmup history is filled
+  check: function(candle) {
+    log.debug(`Evaluating tick for price: ${candle.close}`);
 
-// Optional: called after a backtest completes
-strat.end = function() {
-  // your code here
-}
-
-module.exports = strat;
-```
-
----
-
-## 🔄 Strategy Lifecycle
-
-Here’s how Gekko calls each function:
-
-1. **On start:** `init`
-2. **For each new candle:**
-   - `update`
-   - (After warmup) `log` (if enabled)
-   - (After warmup) `check`
-
----
-
-## 🛠️ Function Details
-
-### `init`
-- Called once when your strategy starts.
-- Initialize your indicators and state here.
-
-### `update(candle)`
-- Called for every new candle.
-- Use this to update calculations or state.
-
-### `log`
-- Called for each candle when debugging is enabled.
-- Use for printing logs (not shown in UI mode).
-
-### `check(candle)`
-- Called for each candle (after warmup).
-- Make trading decisions here!
-- To give advice:
-  ```js
-  this.advice({
-    direction: 'long', // or 'short'
-    trigger: {
-      type: 'trailingStop',
-      trailPercentage: 5
-      // or trailValue: 100
+    // Core execution rule example
+    if (this.settings.longConditionMet) {
+      this.advice({
+        direction: 'long',
+        trigger: {
+          type: 'trailingStop',
+          trailPercentage: 5
+        }
+      });
+    } else if (this.settings.shortConditionMet) {
+      this.advice({ direction: 'short' });
     }
-  });
-  ```
-  *The `trigger` is optional. Use it to set trailing stops, etc.*
+  },
 
-### `end`
-- Called only after a backtest completes (not in live mode).
+  // 4. Debug Interface: Optional diagnostic loop hook
+  log: function() {
+    // Custom PM2/Winston console formatters
+  },
 
----
-
-## 🕒 Candle Variables
-
-You’ll get a `candle` object in `update` and `check`. Available properties:
-
-- `candle.close` — Closing price
-- `candle.high` — Highest price
-- `candle.low` — Lowest price
-- `candle.volume` — Volume in this candle
-- `candle.trades` — Number of trades
-
----
-
-## ⚡ Tips & Best Practices
-
-- Set your strategy in config:  
-  `config.tradingAdvisor.strategy = 'custom'`
-- Each candle’s time interval is set by `config.tradingAdvisor.candleSize`
-- Match `config.tradingAdvisor.historySize` to your `requiredHistory` property for proper warmup
-- Use `candle.start` (a moment.js object) for timestamps—don’t rely on system time
-
----
-
-## 🧰 Strategy Tools
-
-### Indicators
-
-Gekko supports:
-- Native indicators
-- [TA-lib](http://ta-lib.org/) indicators
-- Tulip indicators
-
-**How to add an indicator:**
-
-```js
-// In init()
-this.addIndicator('myRSI', 'RSI', { interval: 14 });
-this.addTalibIndicator('myMACD', 'macd', { optInFastPeriod: 10, optInSlowPeriod: 21, optInSignalPeriod: 9 });
-this.addTulipIndicator('mySMA', 'sma', { period: 10 });
-```
-
-**Access indicator results:**
-```js
-var rsi = this.indicators.myRSI.result;
-```
-
-- See [TA-lib indicators](./talib_indicators.md)
-- See [Tulip indicators](./tulip_indicators.md)
-
----
-
-### Custom Strategy Parameters
-
-You can set custom parameters in your config:
-
-```js
-// config.js
-config.custom = {
-  my_custom_setting: 10,
+  // 5. System Teardown: Triggers cleanly upon backtest completion sequences
+  end: function() {
+    log.info('Backtest cycle terminated. Dumping historical balance allocations.');
+  }
 };
+
+module.exports = strategy;
+
 ```
 
-Access in your strategy:
+---
+
+## 🔄 Lifecycle Execution Sequence
+
+The Gekko runtime calls the strategy functions in a strict sequential loop matching the data-feed frequency.
+
+```text
+       [ SYSTEM BOOT ]
+              │
+              ▼
+        ┌───────────┐
+        │  init()   │  ◄── Triggers exactly once at launch
+        └───────────┘
+              │
+              ▼
+   ┌──► [ NEW CANDLE RECEIVED ]
+   │          │
+   │          ▼
+   │    ┌───────────┐
+   │    │ update()  │  ◄── Computes rolling state arrays
+   │    └───────────┘
+   │          │
+   │          ▼
+   │   Is Warmup History Size Met?
+   │       ├── NO  ──► Skip execution, fetch next candle loop
+   │       └── YES ──► Continue
+   │          │
+   │          ▼
+   │    ┌───────────┐
+   │    │  log()    │  ◄── Diagnostic outputs (if debugging is enabled)
+   │    └───────────┘
+   │          │
+   │          ▼
+   │    ┌───────────┐
+   │    │  check()  │  ◄── Evaluates conditions & issues .advice()
+   │    └───────────┘
+   │          │
+   └──────────┴─────── Loop repeats for duration of session
+              │
+       [ STREAM END ] (Backtests Only)
+              │
+              ▼
+        ┌───────────┐
+        │   end()   │  ◄── Finalizes logs and dumps summary stats
+        └───────────┘
+
+```
+
+---
+
+## 🕒 Live Market Input Schema (`candle`)
+
+The `update(candle)` and `check(candle)` gates receive a structured historical metric data block representing the latest compiled execution interval:
+
+```text
+{
+  "start": Object,      // Moment.js date token. Always use for timestamps (do not use system time)
+  "open": 84.35,        // Opening price of the asset within the candle boundary
+  "high": 85.95,        // Highest execution target recorded during the interval
+  "low": 82.10,         // Lowest execution target recorded during the interval
+  "close": 84.12,       // Final closing price before the next sequence block
+  "volume": 1254.81,    // Cumulative asset transactional volume
+  "trades": 412         // Discrete transaction execution counter count
+}
+
+```
+
+---
+
+## ⚡ Deployment & Configuration Specifications
+
+To activate your strategy inside your environment manager (`ecosystem.config.js` or configuration parameters), map the system attributes to your exact file layout.
+
+### Configuration Properties Blueprint (`config.js`)
+
 ```js
-log.debug(this.settings.my_custom_setting); // Logs 10
+// 1. Advisor Pipeline Setup
+config.tradingAdvisor = {
+  enabled: true,
+  method: 'my_strategy',    // Must match your exact filename: my_strategy.js
+  candleSize: 60,           // Length of each candle block in minutes
+  historySize: 14           // Warmup history length matching your strategy needs
+};
+
+// 2. Custom Strategy Variable Injection Matrix
+// The configuration object name MUST explicitly match the strategy 'method' string above
+config.my_strategy = {
+  warmupPeriod: 14,
+  customPeriod: 10,
+  longConditionMet: true,
+  shortConditionMet: false
+};
+
 ```
-> The config section name must match your strategy’s filename!
 
 ---
 
-### Using External Libraries
+## 🧰 Strategy Tools & Logging Utilities
 
-You can use libraries like [underscore](https://www.npmjs.com/package/underscore),[lodash](http://lodash.com/) and [async](https://caolan.github.io/async/):
+### 1. Environmental Balance Configuration Access
+
+Any variables specified inside your custom configuration object are instantly injected into the runtime space and can be referenced anywhere within your strategy via `this.settings`:
 
 ```js
-var _ = require('underscore');
-var async = require('async');
+var evaluationLength = this.settings.customPeriod;
+
 ```
 
----
+### 2. External Utility Ingestion
 
-### Logging
-
-For debug logs, use Gekko's logger:
+Strategies are vanilla Node.js execution files; standard dependency hooks can be declared safely at the top of your scripts to pull common array-manipulation utilities:
 
 ```js
-var log = require('../core/log.js');
-log.debug('hello world');
+const _ = require('lodash');
+const async = require('async');
+
 ```
-> ℹ️ **Note:** For standardized logging in your strategies, you can also use the built-in Winston library provided in this repository. See the implementation in [strategies/logger.js](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/logger.js) for details. Winston offers advanced logging features, consistent log levels, and flexible output options, making it a robust alternative to Gekko's basic logger.
 
----
+### 3. Production Logging System
 
-## 🤝 Need Help?
+For high-performance, standardized production logs that integrate with background runners like PM2, require the core logging wrapper. Alternatively, you can use the built-in Winston logging architecture located at `strategies/logger.js`.
 
-- Check out the built-in strategies for inspiration.
-- Questions? [Create an issue](https://github.com/universalbit-dev/gekko-m4-globular-cluster/issues).
+```js
+const log = require('../core/log.js');
 
----
+// Available severity execution outputs
+log.debug('Analyzing marginal cross bounds...');
+log.info('System connection verification active.');
+log.warn('Liquidity thresholds dipping below safety limits.');
+log.error('API execution exception caught cleanly.');
+
+```
