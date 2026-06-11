@@ -61,6 +61,7 @@ const strategy = {
 module.exports = strategy;
 
 ```
+> 🔗 **Source File:** View the latest updates directly in the repository at [`strategies/INVERTER.js`](https://github.com/universalbit-dev/gekko-m4-globular-cluster/blob/master/strategies/INVERTER.js).
 
 ---
 
