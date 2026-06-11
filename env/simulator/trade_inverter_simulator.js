@@ -57,4 +57,3 @@ config.performanceAnalyzer = {enabled: true,riskFreeReturn: 5};
 config['I understand that Gekko only automates MY OWN trading strategies'] = true;
 
 module.exports = config;
-*/
