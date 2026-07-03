@@ -25,7 +25,7 @@
     "fs-extra": "^11.2.0",
     "gekko-broker": "file:exchange",
     "humanize-duration": "^3.31.0",
-    "lodash": "^4.18.1",
+    "lodash": "^4.17.21",
     "mathjs": "^15.2.0",
     "moment": "^2.29.4",
     "nanospinner": "^1.1.0",
@@ -77,7 +77,9 @@
     "uuid": "^9.0.1",
     "@tootallnate/once": "^3.0.1",
     "http-proxy-agent": "^7.0.0",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "brace-expansion": "^2.0.2",
+    "form-data": "^4.0.4"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall-tulind.js || true && node scripts/postinstall-tfjs-node.js || true"
