@@ -1,3 +1,4 @@
+[![Snyk Security Scan](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/snyk-security.yml/badge.svg)](https://github.com/universalbit-dev/gekko-m4-globular-cluster/actions/workflows/snyk-security.yml)
 ---
 
 ## 📢 Support the UniversalBit Project
