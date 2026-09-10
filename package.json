@@ -46,9 +46,6 @@
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
-  "optionalDependencies": {
-    "@tensorflow/tfjs-node": "^4.22.0"
-  },
   "engines": {
     "node": ">=20"
   },
@@ -80,7 +77,7 @@
     "ws": "^8.18.0",
     "brace-expansion": "^2.0.2",
     "form-data": "^4.0.4",
-    "adm-zip": "^0.6.0",
+    "adm-zip": "0.6.0",
     "undici": "^6.21.3",
     "ip-address": "^10.0.1"
   },
