@@ -80,7 +80,9 @@
     "ws": "^8.18.0",
     "brace-expansion": "^2.0.2",
     "form-data": "^4.0.4",
-    "adm-zip": "^0.6.0"
+    "adm-zip": "^0.6.0",
+    "undici": "^6.21.3",
+    "ip-address": "^10.0.1"
   },
   "scripts": {
     "postinstall": "node scripts/postinstall-tulind.js || true && node scripts/postinstall-tfjs-node.js || true"
