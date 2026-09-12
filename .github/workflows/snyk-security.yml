@@ -13,24 +13,25 @@ jobs:
   snyk-scan:
     runs-on: ubuntu-latest
     environment: snyk
-    
+
     permissions:
       contents: read
       security-events: write
       actions: read
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      
+        uses: actions/checkout@v4 # optionally pin to exact patch/SHA
+
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # optionally pin to exact patch/SHA
         with:
           node-version: '22'
-      
+          cache: npm
+
       - name: Install dependencies
-        run: npm install
-      
+        run: npm ci
+
       - name: Run Snyk test
         uses: snyk/actions/node@0.4.0
         continue-on-error: true
@@ -39,17 +40,17 @@ jobs:
         with:
           args: --severity-threshold=medium --sarif-file-output=snyk.sarif
           command: test
-      
+
       - name: Upload SARIF to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v3 # optionally pin to exact patch/SHA
         if: always()
         with:
           sarif_file: snyk.sarif
-      
+
       - name: Install Snyk CLI
         if: github.event_name == 'push'
         run: npm install -g snyk
-      
+
       - name: Monitor project in Snyk
         if: github.event_name == 'push'
         run: snyk monitor
